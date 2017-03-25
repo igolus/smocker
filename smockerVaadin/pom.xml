@@ -4,11 +4,13 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.jenetics</groupId>
-	<artifactId>smockerVaadin</artifactId>
+	<artifactId>smocker</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>Smocker web app using vaadin for wildfly</name>
 	<properties>
+		<maven.compiler.source>1.8</maven.compiler.source>
+	    <maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<vaadin.version>7.7.7</vaadin.version>
 		<vaadin.plugin.version>7.7.7</vaadin.plugin.version>
@@ -86,6 +88,12 @@
 			<groupId>com.vaadin</groupId>
 			<artifactId>vaadin-server</artifactId>
 		</dependency>
+
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-spring</artifactId>
+            <version>1.0.0</version>
+        </dependency>
 
 		<dependency>
 			<groupId>com.vaadin</groupId>
@@ -216,7 +224,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>${artifactId}</finalName>
+	<!-- 	<finalName>${artifactId}</finalName> -->
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -248,6 +256,7 @@
 					<fork>true</fork>
 					<meminitial>1024m</meminitial>
 					<maxmem>2024m</maxmem>
+					<!-- <webappDirectory>webappDirectory</webappDirectory> -->
 				</configuration>
 
 				<executions>

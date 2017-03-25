@@ -7,9 +7,9 @@
 	version="2.0">
 
 	<persistence-unit  name="smockerLocalData"  transaction-type="JTA">
+	    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
 		<jta-data-source>java:jboss/datasources/smockerDS</jta-data-source>
 <!-- 	<persistence-unit name="smockerLocalData" transaction-type="RESOURCE_LOCAL"> -->
-		<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
 		<class>com.vaadin.demo.jpaaddressbook.domain.Person</class>
 		<class>com.vaadin.demo.jpaaddressbook.domain.Department</class>
 		<class>com.jenetics.smocker.model.Connection</class>

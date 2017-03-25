@@ -1,10 +1,12 @@
 package com.jenetics.smocker.ui;
 
 import com.jenetics.smocker.ui.util.AnnotationScanner;
+import com.vaadin.annotations.Theme;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.UI;
 
+@Theme("smocker")
 public class SmockerUI extends UI {
 
 	public static final String PERSISTENCE_UNIT = "smockerLocalData";
@@ -16,16 +18,7 @@ public class SmockerUI extends UI {
 	protected void init(VaadinRequest request) {
 		
 		
-		getPage().setTitle("Navigation Example");
-
-        // Create a navigator to control the views
-        navigator = new Navigator(this, this);
-
-        // Create and register the views
-        //navigator.addView("", new StartView());
-        navigator.addView("", new StartView(navigator));
-        navigator.addView(MAINVIEW, new SmockerMainView());
-        
+		getPage().setTitle("Smocker");
 		setContent(new SmockerMainView());
 		
 		try {

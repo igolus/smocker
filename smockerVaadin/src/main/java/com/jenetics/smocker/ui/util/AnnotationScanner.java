@@ -10,11 +10,13 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
 import com.jenetics.smocker.annotation.ContentView;
 
 public class AnnotationScanner {
-	private static HashMap<String, RefreshableView> viewMap = null;
+	
+	
+	private static HashMap<String, ViewAndIconContainer> viewMap = null;
 
-	public static HashMap<String, RefreshableView> getViewMap() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+	public static HashMap<String, ViewAndIconContainer> getViewMap() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
 		if (viewMap == null) {
-			
+			viewMap = new HashMap<>();
 			ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
 			provider.addIncludeFilter(new AnnotationTypeFilter(ContentView.class));
 			
@@ -27,11 +29,11 @@ public class AnnotationScanner {
 					for (Annotation annotation : annotations) {
 						if (annotation instanceof ContentView) {
 							ContentView contentView = (ContentView) annotation;
-							viewMap = new HashMap<>();
-							viewMap.put(contentView.viewName(), (RefreshableView) view);
+							viewMap.put(contentView.viewName(), new ViewAndIconContainer((RefreshableView)view, contentView.icon()));
 						}
 					}
 				}
+				//TODO manage errors
 	        }
 	    }
 	

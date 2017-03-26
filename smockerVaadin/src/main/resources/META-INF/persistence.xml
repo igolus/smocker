@@ -17,7 +17,7 @@
 		
 		<properties>
 <!-- 			<property name="eclipselink.logging.level" value="ERROR" /> -->
-			<property name="eclipselink.ddl-generation" value="create-tables" />
+			<property name="eclipselink.ddl-generation" value="create-or-extend-tables" />
 			<property name="eclipselink.target-database" value="org.eclipse.persistence.platform.database.H2Platform"/>
   		</properties>
 	</persistence-unit>

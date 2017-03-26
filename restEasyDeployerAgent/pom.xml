@@ -1,17 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
-
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.jenetics</groupId>
-	<artifactId>smocker</artifactId>
-	<version>1.0-SNAPSHOT</version>
-	<packaging>war</packaging>
-	<name>Smocker web app using vaadin for wildfly</name>
+	<artifactId>restEasyDeployerAgent</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
 	<properties>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<vaadin.version>7.7.7</vaadin.version>
 		<vaadin.plugin.version>7.7.7</vaadin.plugin.version>
@@ -29,8 +23,6 @@
 		<maven-plugin.version>3.0.0</maven-plugin.version>
 		<guava.version>13.0-rc1</guava.version>
 		<javassist.version>3.21.0-GA</javassist.version>
-		<version.jboss.bom.wfk>2.7.0-redhat-1</version.jboss.bom.wfk>
-		<scannotation.version>1.0.3</scannotation.version>
 	</properties>
 
 	<repositories>
@@ -67,24 +59,12 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-			<dependency>
-				<groupId>org.jboss.bom.wfk</groupId>
-				<artifactId>jboss-javaee-6.0-with-tools</artifactId>
-				<version>${version.jboss.bom.wfk}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-
 		</dependencies>
 
 
 	</dependencyManagement>
 
 	<dependencies>
-
-		<!-- <dependency> <groupId>org.springframework</groupId> <artifactId>spring-context</artifactId> 
-			<version>4.2.0.RELEASE</version> <scope>provided</scope> </dependency> -->
-
 		<dependency>
 			<groupId>org.vaadin.addons</groupId>
 			<artifactId>aceeditor</artifactId>
@@ -94,17 +74,6 @@
 			<groupId>com.vaadin</groupId>
 			<artifactId>vaadin-server</artifactId>
 		</dependency>
-
-		<!-- <dependency> <groupId>com.vaadin</groupId> <artifactId>vaadin-spring</artifactId> 
-			<version>1.0.0</version> <scope>system</scope> <systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/vaadin-spring-1.0.0.jar</systemPath> 
-			</dependency> -->
-
-		<dependency>
-			<groupId>org.vaadin.spring.extensions</groupId>
-			<artifactId>vaadin-spring-ext-core</artifactId>
-			<version>2.0.0.RELEASE</version>
-		</dependency>
-
 		<dependency>
 			<groupId>com.vaadin</groupId>
 			<artifactId>vaadin-push</artifactId>
@@ -117,21 +86,6 @@
 			<groupId>com.vaadin</groupId>
 			<artifactId>vaadin-themes</artifactId>
 		</dependency>
-
-		<dependency>
-			<groupId>com.vaadin</groupId>
-			<artifactId>vaadin-push</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.vaadin.addons</groupId>
-			<artifactId>refresher</artifactId>
-			<version>1.2.3.7</version>
-		</dependency>
-
-		<!-- <dependency> <groupId>com.vaadin.addon</groupId> <artifactId>jpacontainer</artifactId> 
-			<version>4.0.0</version> </dependency> -->
-
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
@@ -191,12 +145,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.jboss.spec.javax.ejb</groupId>
-			<artifactId>jboss-ejb-api_3.1_spec</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
 			<groupId>javax.inject</groupId>
 			<artifactId>javax.inject</artifactId>
 		</dependency>
@@ -213,119 +161,40 @@
 			<version>${guava.version}</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.reflections</groupId>
-			<artifactId>reflections</artifactId>
-			<version>0.9.9-RC1</version>
-		</dependency>
-
-
 		<!-- https://mvnrepository.com/artifact/org.javassist/javassist -->
 		<dependency>
 			<groupId>org.javassist</groupId>
 			<artifactId>javassist</artifactId>
 			<version>${javassist.version}</version>
 		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/javax.transaction/jta -->
-		<dependency>
-			<groupId>javax.transaction</groupId>
-			<artifactId>jta</artifactId>
-			<version>1.1</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/javax.transaction/javax.transaction-api -->
-		<dependency>
-			<groupId>javax.transaction</groupId>
-			<artifactId>javax.transaction-api</artifactId>
-			<version>1.2</version>
-			<scope>provided</scope>
-		</dependency>
-
-
+		
 		<!-- https://mvnrepository.com/artifact/org.springframework/spring-context -->
+		<dependency>
+		    <groupId>org.springframework</groupId>
+		    <artifactId>spring-context</artifactId>
+		    <version>3.0.2.RELEASE</version>
+		</dependency>
+		
 
-
-
+		<build>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>3.0.2</version>
+					<configuration>
+						<archive>
+							<index>true</index>
+							<manifest>
+								<addClasspath>true</addClasspath>
+							</manifest>
+							<manifestEntries>
+								<Premain-Class>com.jenetics.resEasyAgent.Agent</Premain-Class>
+							</manifestEntries>
+						</archive>
+					</configuration>
+				</plugin>
+			</plugins>
+		</build>
 	</dependencies>
-
-	<build>
-		<!-- <finalName>${artifactId}</finalName> -->
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<version>3.0.0</version>
-				<configuration>
-					<failOnMissingWebXml>false</failOnMissingWebXml>
-					<!-- Exclude an unnecessary file generated by the GWT compiler. -->
-					<packagingExcludes>WEB-INF/classes/VAADIN/widgetsets/WEB-INF/**</packagingExcludes>
-					<webResources>
-						<resource>
-							<directory>icons</directory>
-							<includes>
-								<include>**/*.png</include>
-							</includes>
-							<targetPath>WEB-INF/classes/icons</targetPath>
-						</resource>
-					</webResources>
-
-
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>com.vaadin</groupId>
-				<artifactId>vaadin-maven-plugin</artifactId>
-				<version>${vaadin.plugin.version}</version>
-				<configuration>
-					<fork>true</fork>
-					<meminitial>1024m</meminitial>
-					<maxmem>2024m</maxmem>
-					<!-- <webappDirectory>webappDirectory</webappDirectory> -->
-				</configuration>
-
-				<executions>
-					<execution>
-						<goals>
-							<goal>update-theme</goal>
-							<goal>update-widgetset</goal>
-							<goal>compile</goal>
-							<!-- Comment out compile-theme goal to use on-the-fly theme compilation -->
-							<goal>compile-theme</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-clean-plugin</artifactId>
-				<version>${maven-plugin.version}</version>
-				<!-- Clean up also any pre-compiled themes -->
-				<configuration>
-					<filesets>
-						<fileset>
-							<directory>src/main/webapp/VAADIN/themes</directory>
-							<includes>
-								<include>**/styles.css</include>
-								<include>**/styles.scss.cache</include>
-							</includes>
-						</fileset>
-					</filesets>
-				</configuration>
-			</plugin>
-
-
-			<plugin>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-maven-plugin</artifactId>
-				<version>${jetty.plugin.version}</version>
-				<configuration>
-					<scanIntervalSeconds>2</scanIntervalSeconds>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
 </project>

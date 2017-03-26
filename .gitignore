@@ -40,3 +40,6 @@ local.properties
 #vaadin
 .tern-project
 .recommenders
+
+#cache
+*cache.js*

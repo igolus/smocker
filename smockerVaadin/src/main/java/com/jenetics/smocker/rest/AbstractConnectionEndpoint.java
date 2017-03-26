@@ -1,6 +1,7 @@
 package com.jenetics.smocker.rest;
 
 import java.io.Serializable;
+import java.util.HashMap;
 
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
@@ -17,6 +18,8 @@ import com.jenetics.smocker.dao.IDaoManager;
 import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.ui.SmockerUI;
+import com.jenetics.smocker.ui.util.AnnotationScanner;
+import com.jenetics.smocker.ui.util.ViewAndIconContainer;
 
 public abstract class AbstractConnectionEndpoint<T extends EntityWithId> {
 	
@@ -44,9 +47,22 @@ public abstract class AbstractConnectionEndpoint<T extends EntityWithId> {
 		
 		connectionEventSrc.fire(entity);
 		daoManager.create(entity);
+		
+		HashMap<String, ViewAndIconContainer> viewMap = null;
+		try {
+			viewMap = AnnotationScanner.getViewMap();
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if (viewMap.get("Connections") != null) {
+			viewMap.get("Connections").getRefreshableView().refresh();
+		}
+		
 		return Response.created(
 				UriBuilder.fromResource(ConnectionEndpoint.class).path(String.valueOf(entity.getId())).build())
 				.build();
+		
 	}
 
 }

@@ -32,6 +32,18 @@ public class SmockerMainView extends VerticalSplitPanel implements View {
 	private Table connectionTable;
 	private Navigator navigator;
 	
+	
+	public Navigator getNavigator() {
+		return navigator;
+	}
+
+	private static SmockerMainView instance = null;
+	
+	
+	public static SmockerMainView getInstance() {
+		return instance;
+	}
+
 	public SmockerMainView() {
 		super();
 		
@@ -62,7 +74,8 @@ public class SmockerMainView extends VerticalSplitPanel implements View {
 		//manageNavigator(mainArea);
 		
 		setSizeFull();
-		//setLocked(true);
+		setLocked(true);
+		instance = this;
 		
 	}
 
@@ -100,15 +113,18 @@ public class SmockerMainView extends VerticalSplitPanel implements View {
 
 	private ComponentContainer buildNavigation(ComponentContainer target) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
 	
-		VerticalLayout verticalLayout = new VerticalLayout();
-        setFirstComponent(verticalLayout);
-        verticalLayout.addStyleName("mainBackGround");
-        verticalLayout.setSizeFull();
+		VerticalLayout parentLayout = new VerticalLayout();
+		
+		VerticalLayout navigationLayout = new VerticalLayout();
+		navigationLayout.setImmediate(true);
+        setFirstComponent(navigationLayout);
+        navigationLayout.addStyleName("mainBackGround");
+        //navigationLayout.setSizeFull();
 		
         ViewDisplay viewDisplay = new Navigator.ComponentContainerViewDisplay(target);
-		navigator = new Navigator(UI.getCurrent(), viewDisplay);
+		navigator = new Navigator(SmockerUI.getInstance(), viewDisplay);
         
-        HashMap<String, ViewAndIconContainer> viewMap = AnnotationScanner.getViewMap();
+        HashMap<String, ViewAndIconContainer> viewMap = SmockerUI.getInstance().getViewMap();
         for ( Map.Entry<String, ViewAndIconContainer> entry : viewMap.entrySet() ) {
             String viewName = entry.getKey();
             ViewAndIconContainer viewAndIconContainer = entry.getValue();
@@ -123,10 +139,14 @@ public class SmockerMainView extends VerticalSplitPanel implements View {
 				}
             });
             button.addStyleName("button-with-right-alligned-icon");
-            button.setWidth(verticalLayout.getWidth(), verticalLayout.getWidthUnits());
-            verticalLayout.addComponent(button);
+            button.setWidth(navigationLayout.getWidth(), navigationLayout.getWidthUnits());
+            navigationLayout.addComponent(button);
         }
-		return verticalLayout;
+        
+        parentLayout.setSizeFull();
+        parentLayout.addComponent(navigationLayout);
+        
+        return parentLayout;
 	}
 
 	@Override

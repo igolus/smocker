@@ -14,7 +14,10 @@ public class EventManager {
 
 	public void newConnection(@Observes Connection conn) {
 		
-		SmockerUI.getInstance().newConnection(CONNECTIONS);
+		if (SmockerUI.getInstance().getSession() != null) {
+			SmockerUI.getInstance().newConnection(CONNECTIONS);
+		}
+		
 //		try {
 //			HashMap<String, ViewAndIconContainer> viewMap = AnnotationScanner.getViewMap();
 //			if (viewMap.get(CONNECTIONS) != null) {

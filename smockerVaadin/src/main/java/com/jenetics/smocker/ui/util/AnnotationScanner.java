@@ -32,7 +32,8 @@ public class AnnotationScanner {
 					for (Annotation annotation : annotations) {
 						if (annotation instanceof ContentView) {
 							ContentView contentView = (ContentView) annotation;
-							viewMap.put(contentView.viewName(), new ViewAndIconContainer((RefreshableView)view, contentView.icon()));
+							viewMap.put(contentView.viewName(), new ViewAndIconContainer((RefreshableView)view, contentView.icon(), 
+									contentView.sortingOrder(), contentView.homeView()));
 						}
 					}
 				}

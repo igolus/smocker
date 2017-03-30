@@ -12,7 +12,7 @@ import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.VerticalLayout;
 
 @ViewScope
-@ContentView (viewName = "", icon = "icons/home-icon.png")
+@ContentView (sortingOrder=0, homeView=true, viewName = "home", icon = "icons/home-icon.png")
 public class DefaultView extends VerticalLayout implements RefreshableView {
 
 	/**

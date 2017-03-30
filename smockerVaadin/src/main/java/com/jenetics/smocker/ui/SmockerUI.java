@@ -3,6 +3,9 @@ package com.jenetics.smocker.ui;
 import java.util.HashMap;
 
 import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+
+import org.jboss.logging.Logger;
 
 import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.ui.util.AnnotationScanner;
@@ -20,6 +23,11 @@ import com.vaadin.ui.UI;
 @Theme("smocker")
 public class SmockerUI extends UI {
 
+	private static final int SLEEP_TIME = 100;
+
+	@Inject
+	private Logger logger;
+	
 	public static final String PERSISTENCE_UNIT = "smockerLocalData";
 	
 	Navigator navigator;
@@ -47,16 +55,9 @@ public class SmockerUI extends UI {
 		
 		try {
 			viewMap = AnnotationScanner.getViewMap();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e ) {
+			logger.error("Unable to get the view map", e);
+		} 
 		
 		mainContent = new SmockerMainView();
 		setContent(mainContent);
@@ -69,11 +70,11 @@ public class SmockerUI extends UI {
 	    public void run() {
 	    	
 	    	try {
-				Thread.sleep(100);
+				Thread.sleep(SLEEP_TIME);
 				viewMap.get(viewName).getRefreshableView().refresh();
 				//content.refresh();
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				logger.error("Unable to get the view map", e);
 			}
 	    }
 	});

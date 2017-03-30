@@ -25,7 +25,6 @@ public class SmockerSocketOutputStream extends BaseSmockerSocketHandler {
 	}
 
 	public SmockerSocketOutputStreamData getSmockerOutputStreamData() {
-		// TODO Auto-generated method stub
 		return smockerSocketOutputStreamData;
 	}
 

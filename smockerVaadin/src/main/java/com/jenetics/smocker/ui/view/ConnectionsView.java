@@ -14,7 +14,7 @@ import com.vaadin.ui.VerticalLayout;
 
 @Push
 @ViewScope
-@ContentView(viewName = "Connections", icon = "icons/Places-network-server-database-icon.png")
+@ContentView(sortingOrder=1, viewName = "Connections", icon = "icons/Places-network-server-database-icon.png")
 public class ConnectionsView extends VerticalLayout implements RefreshableView {
 
 	/**

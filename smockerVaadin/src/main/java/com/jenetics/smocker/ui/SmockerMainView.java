@@ -1,10 +1,17 @@
 package com.jenetics.smocker.ui;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.jboss.logging.Logger;
 
 import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.ui.util.AnnotationScanner;
+import com.jenetics.smocker.ui.util.ButtonWithOrderId;
 import com.jenetics.smocker.ui.util.ViewAndIconContainer;
 import com.vaadin.addon.jpacontainer.JPAContainer;
 import com.vaadin.navigator.Navigator;
@@ -27,6 +34,9 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
 
 public class SmockerMainView extends VerticalSplitPanel implements View {
+	
+	@Inject 
+	private Logger logger;
 	
 	JPAContainer<Connection> connections = null;
 	private Table connectionTable;
@@ -53,16 +63,9 @@ public class SmockerMainView extends VerticalSplitPanel implements View {
 		down.setSecondComponent(mainArea);
 		try {
 			down.setFirstComponent(buildNavigation(mainArea));
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+			logger.error("Unable to build navigation area", e);
+		} 
 		down.setSplitPosition(300, Unit.PIXELS);
 		down.setSizeFull();
 		
@@ -70,8 +73,6 @@ public class SmockerMainView extends VerticalSplitPanel implements View {
 		setFirstComponent(buildTopBar());
 		setSplitPosition(60, Unit.PIXELS);
 		
-		// Create a navigator to control the views
-		//manageNavigator(mainArea);
 		
 		setSizeFull();
 		setLocked(true);
@@ -89,20 +90,6 @@ public class SmockerMainView extends VerticalSplitPanel implements View {
 		
 	}
 
-//	private void manageNavigator(ComponentContainer target) {
-//		ViewDisplay viewDisplay = new Navigator.ComponentContainerViewDisplay(target);
-//		navigator = new Navigator(UI.getCurrent(), viewDisplay);
-//        navigator.addView("home", new StartView(navigator));
-//        navigator.addView("Connection", new ConnectionsView());
-//		
-//		
-//		connections = JPAContainerFactory.make(Connection.class,
-//	            SmockerUI.PERSISTENCE_UNIT);
-//		//buildMainArea();
-//		
-//		navigator.navigateTo("home");
-//	}
-
 	private ComponentContainer buildMainArea() {
 		
 		VerticalLayout verticalLayout = new VerticalLayout();
@@ -119,29 +106,45 @@ public class SmockerMainView extends VerticalSplitPanel implements View {
 		navigationLayout.setImmediate(true);
         setFirstComponent(navigationLayout);
         navigationLayout.addStyleName("mainBackGround");
-        //navigationLayout.setSizeFull();
 		
         ViewDisplay viewDisplay = new Navigator.ComponentContainerViewDisplay(target);
 		navigator = new Navigator(SmockerUI.getInstance(), viewDisplay);
         
+		ArrayList<ButtonWithOrderId> buttons = new ArrayList<>();
+		
         HashMap<String, ViewAndIconContainer> viewMap = SmockerUI.getInstance().getViewMap();
         for ( Map.Entry<String, ViewAndIconContainer> entry : viewMap.entrySet() ) {
             String viewName = entry.getKey();
             ViewAndIconContainer viewAndIconContainer = entry.getValue();
             
-            navigator.addView(viewName, viewAndIconContainer.getRefreshableView());
-            Button button = new Button(viewName);
-            button.setIcon(new ThemeResource(viewAndIconContainer.getIcon()));
-            button.addClickListener(new ClickListener() {
+            navigator.addView(viewAndIconContainer.isHomeView() ? "" : viewName, viewAndIconContainer.getRefreshableView());
+            
+            ButtonWithOrderId buttonWithIcon = new ButtonWithOrderId(viewAndIconContainer.getOrder(), viewName, viewAndIconContainer.isHomeView());
+            buttonWithIcon.setIcon(new ThemeResource(viewAndIconContainer.getIcon()));
+            buttonWithIcon.addStyleName("button-with-right-alligned-icon");
+            buttonWithIcon.setWidth(navigationLayout.getWidth(), navigationLayout.getWidthUnits());
+			
+			buttonWithIcon.addClickListener(new ClickListener() {
 				@Override
 				public void buttonClick(ClickEvent event) {
-		            navigator.navigateTo(viewName);
+		            if (((ButtonWithOrderId)event.getButton()).isHomeView()) {
+		            	navigator.navigateTo("");
+		            }
+		            else {
+		            	navigator.navigateTo(viewName);
+		            }
 				}
             });
-            button.addStyleName("button-with-right-alligned-icon");
-            button.setWidth(navigationLayout.getWidth(), navigationLayout.getWidthUnits());
-            navigationLayout.addComponent(button);
+			
+			buttons.add(buttonWithIcon);
         }
+        
+        buttons.sort((a, b) -> a.getSortingOrder() - b.getSortingOrder());
+        
+        for (ButtonWithOrderId buttonWithOrderId : buttons) {
+        	navigationLayout.addComponent(buttonWithOrderId);
+		}
+        
         
         parentLayout.setSizeFull();
         parentLayout.addComponent(navigationLayout);

@@ -1,22 +1,19 @@
 package com.jenetics.smocker.ui;
 
 import java.util.HashMap;
+import java.util.Map;
 
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 import org.jboss.logging.Logger;
 
-import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.ui.util.AnnotationScanner;
+import com.jenetics.smocker.ui.util.TreeWithIcon;
 import com.jenetics.smocker.ui.util.ViewAndIconContainer;
-import com.jenetics.smocker.ui.view.ConnectionsView;
 import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
-import com.vaadin.event.UIEvents;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.UI;
 
 @Push
@@ -42,8 +39,9 @@ public class SmockerUI extends UI {
 	private SmockerMainView mainContent = null;
 	
 	private HashMap<String, ViewAndIconContainer> viewMap; 
+	private Map<String, TreeWithIcon> treeMap; 
 
-	public HashMap<String, ViewAndIconContainer> getViewMap() {
+	public Map<String, ViewAndIconContainer> getViewMap() {
 		return viewMap;
 	}
 
@@ -53,32 +51,35 @@ public class SmockerUI extends UI {
 		instance = this;
 		getPage().setTitle("Smocker");
 		
-		try {
-			viewMap = AnnotationScanner.getViewMap();
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e ) {
-			logger.error("Unable to get the view map", e);
-		} 
+//		try {
+//			treeMap = AnnotationScanner.getTreeMap();
+//		} catch (InstantiationException | IllegalAccessException e ) {
+//			logger.error("Unable to get the view map", e);
+//		} 
 		
 		mainContent = new SmockerMainView();
 		setContent(mainContent);
 	}
 	
 	
-	public void newConnection(String viewName) {
+	public void refreshView(String viewName) {
 	access(new Runnable() {
 	    @Override
 	    public void run() {
-	    	
 	    	try {
 				Thread.sleep(SLEEP_TIME);
 				viewMap.get(viewName).getRefreshableView().refresh();
-				//content.refresh();
 			} catch (InterruptedException e) {
 				logger.error("Unable to get the view map", e);
 			}
 	    }
 	});
 }
+
+
+	public Map<String, TreeWithIcon> getTreeMap(Navigator navigator) throws InstantiationException, IllegalAccessException {
+		return AnnotationScanner.getTreeMap(navigator);
+	}
 	
 
 

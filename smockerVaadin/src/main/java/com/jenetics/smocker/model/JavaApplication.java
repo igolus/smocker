@@ -7,13 +7,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Column;
 import javax.persistence.Version;
-import com.jenetics.smocker.model.Communication;
+import com.jenetics.smocker.model.Connection;
 import java.util.Set;
 import java.util.HashSet;
 import javax.persistence.OneToMany;
 
 @Entity
-public class Connection implements EntityWithId {
+public class JavaApplication implements EntityWithId {
 
 	private static final long serialVersionUID = 1L;
 	@Id
@@ -24,14 +24,11 @@ public class Connection implements EntityWithId {
 	@Column(name = "version")
 	private int version;
 
-	@Column(nullable = false)
-	private String host;
-
-	@Column(nullable = false)
-	private Integer port;
+	@Column(length = 1024)
+	private String classQualifiedName;
 
 	@OneToMany
-	private Set<Communication> Communications = new HashSet<Communication>();
+	private Set<Connection> Connections = new HashSet<Connection>();
 
 	public Long getId() {
 		return this.id;
@@ -54,10 +51,10 @@ public class Connection implements EntityWithId {
 		if (this == obj) {
 			return true;
 		}
-		if (!(obj instanceof Connection)) {
+		if (!(obj instanceof JavaApplication)) {
 			return false;
 		}
-		Connection other = (Connection) obj;
+		JavaApplication other = (JavaApplication) obj;
 		if (id != null) {
 			if (!id.equals(other.id)) {
 				return false;
@@ -74,20 +71,14 @@ public class Connection implements EntityWithId {
 		return result;
 	}
 
-	public String getHost() {
-		return host;
+
+
+	public String getClassQualifiedName() {
+		return classQualifiedName;
 	}
 
-	public void setHost(String host) {
-		this.host = host;
-	}
-
-	public Integer getPort() {
-		return port;
-	}
-
-	public void setPort(Integer port) {
-		this.port = port;
+	public void setClassQualifiedName(String classQualifiedName) {
+		this.classQualifiedName = classQualifiedName;
 	}
 
 	@Override
@@ -96,18 +87,17 @@ public class Connection implements EntityWithId {
 		if (id != null)
 			result += "id: " + id;
 		result += ", version: " + version;
-		if (host != null && !host.trim().isEmpty())
-			result += ", host: " + host;
-		if (port != null)
-			result += ", port: " + port;
+		if (classQualifiedName != null && !classQualifiedName.trim().isEmpty())
+			result += ", ClassName: " + classQualifiedName;
 		return result;
 	}
 
-	public Set<Communication> getCommunications() {
-		return this.Communications;
+	public Set<Connection> getConnections() {
+		return this.Connections;
 	}
 
-	public void setCommunications(final Set<Communication> Communications) {
-		this.Communications = Communications;
+	public void setConnections(final Set<Connection> Connections) {
+		this.Connections = Connections;
 	}
+	
 }

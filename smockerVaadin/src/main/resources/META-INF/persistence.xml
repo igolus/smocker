@@ -13,11 +13,12 @@
 		<class>com.vaadin.demo.jpaaddressbook.domain.Person</class>
 		<class>com.vaadin.demo.jpaaddressbook.domain.Department</class>
 		<class>com.jenetics.smocker.model.Connection</class>
-		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<class>com.jenetics.smocker.model.JavaApplication</class>
+		<class>com.jenetics.smocker.model.Communication</class>
+		<exclude-unlisted-classes>false</exclude-unlisted-classes>
 		
 		<properties>
-<!-- 			<property name="eclipselink.logging.level" value="ERROR" /> -->
-			<property name="eclipselink.ddl-generation" value="create-or-extend-tables" />
+			<property name="eclipselink.ddl-generation" value="drop-and-create-tables" />
 			<property name="eclipselink.target-database" value="org.eclipse.persistence.platform.database.H2Platform"/>
   		</properties>
 	</persistence-unit>

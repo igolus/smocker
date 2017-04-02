@@ -1,7 +1,7 @@
-@import "../valo/valo";
+@import "../reindeer/reindeer.scss";
 
 .smocker {
-   @include valo;
+   @include reindeer;
 }
 
 .backColorGrey
@@ -23,6 +23,23 @@
 {
    background-color:#558C89;
 }
+
+v-accordion-item-open {
+ background-color: rgb(219,219,219);
+}
+
+.v-accordion-item-caption{
+    height: 25px;
+    line-height: 16px;
+}
+
+v-tabsheet-tabitemcell-smocker{
+     .v-captiontext {
+       font-weight: bold;
+       color: red;
+       font-size: 40px
+     }
+   }
 
 .i-button-nobackground {
   background: none;

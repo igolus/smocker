@@ -7,31 +7,21 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Column;
 import javax.persistence.Version;
-import com.jenetics.smocker.model.Communication;
-import java.util.Set;
-import java.util.HashSet;
-import javax.persistence.OneToMany;
 
 @Entity
-public class Connection implements EntityWithId {
+public class Communication implements EntityWithId {
 
 	private static final long serialVersionUID = 1L;
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "id", updatable = false, nullable = false)
 	private Long id;
 	@Version
 	@Column(name = "version")
 	private int version;
 
-	@Column(nullable = false)
-	private String host;
-
-	@Column(nullable = false)
-	private Integer port;
-
-	@OneToMany
-	private Set<Communication> Communications = new HashSet<Communication>();
+	@Column
+	private String Reqest;
 
 	public Long getId() {
 		return this.id;
@@ -54,10 +44,13 @@ public class Connection implements EntityWithId {
 		if (this == obj) {
 			return true;
 		}
-		if (!(obj instanceof Connection)) {
+		if (!super.equals(obj)) {
 			return false;
 		}
-		Connection other = (Connection) obj;
+		if (!(obj instanceof Communication)) {
+			return false;
+		}
+		Communication other = (Communication) obj;
 		if (id != null) {
 			if (!id.equals(other.id)) {
 				return false;
@@ -69,25 +62,17 @@ public class Connection implements EntityWithId {
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
+		int result = super.hashCode();
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		return result;
 	}
 
-	public String getHost() {
-		return host;
+	public String getReqest() {
+		return Reqest;
 	}
 
-	public void setHost(String host) {
-		this.host = host;
-	}
-
-	public Integer getPort() {
-		return port;
-	}
-
-	public void setPort(Integer port) {
-		this.port = port;
+	public void setReqest(String Reqest) {
+		this.Reqest = Reqest;
 	}
 
 	@Override
@@ -96,18 +81,8 @@ public class Connection implements EntityWithId {
 		if (id != null)
 			result += "id: " + id;
 		result += ", version: " + version;
-		if (host != null && !host.trim().isEmpty())
-			result += ", host: " + host;
-		if (port != null)
-			result += ", port: " + port;
+		if (Reqest != null && !Reqest.trim().isEmpty())
+			result += ", Reqest: " + Reqest;
 		return result;
-	}
-
-	public Set<Communication> getCommunications() {
-		return this.Communications;
-	}
-
-	public void setCommunications(final Set<Communication> Communications) {
-		this.Communications = Communications;
 	}
 }

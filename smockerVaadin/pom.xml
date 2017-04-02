@@ -51,6 +51,19 @@
 
 	<dependencyManagement>
 		<dependencies>
+			
+<!-- 			<dependency>
+				<groupId>org.vaadin</groupId>
+				<artifactId>easyapp</artifactId>
+				<version>0.0.1-SNAPSHOT</version>
+			</dependency> -->
+			
+			<dependency>
+			   <groupId>org.vaadin.addons</groupId>
+			   <artifactId>vaadin-sliderpanel</artifactId>
+			   <version>2.0.0</version>
+			</dependency>
+			
 			<!-- VAADIN -->
 			<dependency>
 				<groupId>com.vaadin</groupId>
@@ -75,6 +88,21 @@
 				<scope>import</scope>
 			</dependency>
 
+			<dependency>
+				<groupId>org.jboss.bom</groupId>
+				<artifactId>jboss-javaee-6.0-with-hibernate</artifactId>
+				<version>1.0.1.Final</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.bom</groupId>
+				<artifactId>jboss-javaee-6.0-with-hibernate</artifactId>
+				<version>1.0.1.Final</version>
+				<type>pom</type>
+				<scope>import</scope>
+				<optional>false</optional>
+			</dependency>
 		</dependencies>
 
 
@@ -246,6 +274,67 @@
 
 		<!-- https://mvnrepository.com/artifact/org.springframework/spring-context -->
 
+
+
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>xml-apis</artifactId>
+					<groupId>xml-apis</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-search</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>xml-apis</artifactId>
+					<groupId>xml-apis</groupId>
+				</exclusion>
+			</exclusions>
+			<optional>false</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
+			<scope>provided</scope>
+			<optional>false</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<scope>provided</scope>
+			<optional>false</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-search</artifactId>
+			<optional>false</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.vaadin.teemu</groupId>
+			<artifactId>switch</artifactId>
+			<version>3.0.0</version>
+		</dependency>
 
 
 	</dependencies>

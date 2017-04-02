@@ -5,28 +5,26 @@ import java.util.HashMap;
 import javax.enterprise.event.Observes;
 
 import com.jenetics.smocker.model.Connection;
+import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.vaadin.ui.UI;
 
 public class EventManager {
 	
-	private static final String CONNECTIONS = "Connections";
+	public static final String CONNECTIONS = "Connections";
+	public static final String JAVA_APPLICATIONS = "Java Applications";
 
 	public void newConnection(@Observes Connection conn) {
-		
-		if (SmockerUI.getInstance().getSession() != null) {
-			SmockerUI.getInstance().newConnection(CONNECTIONS);
+		refreshView(CONNECTIONS);
+	}
+	
+   public void newJavaApplication(@Observes JavaApplication application) {
+		refreshView(JAVA_APPLICATIONS);
+	}
+
+	private void refreshView(String viewName) {
+		if (SmockerUI.getInstance() != null && SmockerUI.getInstance().getSession() != null) {
+			SmockerUI.getInstance().refreshView(viewName);
 		}
-		
-//		try {
-//			HashMap<String, ViewAndIconContainer> viewMap = AnnotationScanner.getViewMap();
-//			if (viewMap.get(CONNECTIONS) != null) {
-//				viewMap.get(CONNECTIONS).getRefreshableView().refresh();
-//			}
-//			//UI.getCurrent().markAsDirty();
-//		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 	}
 }

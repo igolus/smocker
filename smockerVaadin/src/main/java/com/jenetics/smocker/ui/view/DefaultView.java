@@ -1,18 +1,13 @@
 package com.jenetics.smocker.ui.view;
 
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
-
 import com.jenetics.smocker.annotation.ContentView;
 import com.jenetics.smocker.ui.util.RefreshableView;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.VerticalLayout;
 
 @ViewScope
-@ContentView (sortingOrder=0, homeView=true, viewName = "home", icon = "icons/home-icon.png")
+@ContentView (sortingOrder=0, homeView=true, viewName = "Dashboard", icon = "icons/home-icon.png" , accordeonParent="Home")
 public class DefaultView extends VerticalLayout implements RefreshableView {
 
 	/**

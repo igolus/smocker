@@ -28,7 +28,7 @@ public class JavaApplication implements EntityWithId {
 	@Column(length = 1024)
 	private String classQualifiedName;
 
-	@OneToMany(cascade=CascadeType.PERSIST) 
+	@OneToMany(cascade=CascadeType.PERSIST, mappedBy="javaApplication") 
 	private Set<Connection> Connections = new HashSet<Connection>();
 
 	public Long getId() {

@@ -61,7 +61,6 @@ public class AnnotationScanner {
 						tree.addItemClickListener(new ItemClickListener() {
 							@Override
 							public void itemClick(ItemClickEvent event) {
-								System.out.println(event);
 								navigator.navigateTo(event.getItemId().toString());
 							}
 						});
@@ -114,8 +113,6 @@ public class AnnotationScanner {
 								tree.getTree().setChildrenAllowed(contentView.componentParent(), true);
 								tree.getTree().setChildrenAllowed(contentView.viewName(), false);
 								tree.getTree().setParent(contentView.viewName(), contentView.componentParent());
-								//tree.getTree().setParent(contentView.viewName(), contentView.componentParent());
-								//tree.getTree().setChildrenAllowed(contentView.componentParent(), true);
 							}
 						}
 					}

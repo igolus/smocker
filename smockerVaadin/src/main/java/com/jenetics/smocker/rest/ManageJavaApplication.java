@@ -35,7 +35,10 @@ public class ManageJavaApplication {
 	private EntityManager em;
 	
 	@Inject
-	protected Event<JavaApplication> entityEventSrc;
+	protected Event<JavaApplication> javaApplicationEventSrc;
+	
+	@Inject
+	protected Event<Connection> connectionEventSrc;
 	
 	@Inject @Dao
 	protected IDaoManager<JavaApplication> daoManager;
@@ -47,10 +50,11 @@ public class ManageJavaApplication {
 		if (target == null) {
 			return Response.status(Status.NOT_FOUND).build();
 		}
+		conn.setJavaApplication(target);
 		target.getConnections().add(conn);
 		daoManager.update(target);
 		//notify the creation
-		entityEventSrc.fire(target);
+		connectionEventSrc.fire(conn);
 		return Response.status(Status.OK).build();
 	}
 	
@@ -70,7 +74,7 @@ public class ManageJavaApplication {
 		target.getConnections().remove(targetConn);
 		daoManager.update(target.getId(), target);
 		//notify the creation
-		entityEventSrc.fire(target);
+		javaApplicationEventSrc.fire(target);
 		return Response.status(Status.OK).build();
 	}
 	

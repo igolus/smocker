@@ -3,6 +3,7 @@ package com.jenetics.smocker.model;
 import javax.persistence.Entity;
 import java.io.Serializable;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Column;
@@ -11,6 +12,7 @@ import com.jenetics.smocker.model.Communication;
 import java.util.Set;
 import java.util.HashSet;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 @Entity
 public class Connection implements EntityWithId {
@@ -29,9 +31,21 @@ public class Connection implements EntityWithId {
 
 	@Column(nullable = false)
 	private Integer port;
-
+	
 	@OneToMany
 	private Set<Communication> Communications = new HashSet<Communication>();
+	
+	@JoinColumn(nullable = false)
+	@OneToOne
+	private JavaApplication javaApplication;
+	
+	public JavaApplication getJavaApplication() {
+		return javaApplication;
+	}
+
+	public void setJavaApplication(JavaApplication javaApplication) {
+		this.javaApplication = javaApplication;
+	}
 
 	public Long getId() {
 		return this.id;

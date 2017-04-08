@@ -6,11 +6,14 @@ import java.lang.reflect.ParameterizedType;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Named;
+import javax.persistence.EntityManager;
+import javax.persistence.Persistence;
 
 import org.jboss.logging.Logger;
 
 import com.jenetics.smocker.dao.DaoManager;
 import com.jenetics.smocker.dao.IDaoManager;
+import com.jenetics.smocker.ui.SmockerUI;
 
 public class InjectorProducer {  
    /** 
@@ -28,7 +31,8 @@ public class InjectorProducer {
     	final ParameterizedType parameterizedType = (ParameterizedType) injectionPoint.getType();
         final Class<T> genericTypeClass = 
             (Class<T>) parameterizedType.getActualTypeArguments()[0];
-    	return new DaoManager<T>(genericTypeClass);  
+        EntityManager em = Persistence.createEntityManagerFactory(SmockerUI.PERSISTENCE_UNIT).createEntityManager();
+        return new DaoManager<T>(genericTypeClass, em);  
     }  
     
 }  

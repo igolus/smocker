@@ -2,6 +2,7 @@ package com.jenetics.smocker.ui.view;
 
 import com.jenetics.smocker.annotation.ContentView;
 import com.jenetics.smocker.model.Connection;
+import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.util.EventManager;
 import com.jenetics.smocker.ui.util.RefreshableView;
@@ -60,7 +61,7 @@ public class ConnectionsView extends VerticalLayout implements RefreshableView {
 	}
 
 	@Override
-	public void refresh() {
+	public void refresh(EntityWithId entityWithId) {
 		connections.refresh();
 	}
 }

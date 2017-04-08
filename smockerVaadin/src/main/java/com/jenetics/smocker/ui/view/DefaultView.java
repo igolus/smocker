@@ -1,6 +1,7 @@
 package com.jenetics.smocker.ui.view;
 
 import com.jenetics.smocker.annotation.ContentView;
+import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.ui.util.RefreshableView;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.spring.annotation.ViewScope;
@@ -22,7 +23,7 @@ public class DefaultView extends VerticalLayout implements RefreshableView {
 	}
 
 	@Override
-	public void refresh() {
+	public void refresh(EntityWithId item) {
 		// TODO Auto-generated method stub
 		
 	}

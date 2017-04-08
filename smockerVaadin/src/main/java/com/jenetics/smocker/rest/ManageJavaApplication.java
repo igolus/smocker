@@ -18,7 +18,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import com.jenetics.smocker.dao.DaoManager;
 import com.jenetics.smocker.dao.IDaoManager;
+import com.jenetics.smocker.injector.Dao;
 import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.ui.SmockerUI;
@@ -34,8 +36,8 @@ public class ManageJavaApplication {
 	
 	@Inject
 	protected Event<JavaApplication> entityEventSrc;
-
-	@Inject
+	
+	@Inject @Dao
 	protected IDaoManager<JavaApplication> daoManager;
 	
 	@PUT
@@ -46,6 +48,7 @@ public class ManageJavaApplication {
 			return Response.status(Status.NOT_FOUND).build();
 		}
 		target.getConnections().add(conn);
+		daoManager.update(target);
 		//notify the creation
 		entityEventSrc.fire(target);
 		return Response.status(Status.OK).build();
@@ -70,6 +73,7 @@ public class ManageJavaApplication {
 		entityEventSrc.fire(target);
 		return Response.status(Status.OK).build();
 	}
+	
 	
 	
 

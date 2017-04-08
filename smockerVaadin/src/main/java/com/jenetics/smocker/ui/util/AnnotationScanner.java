@@ -10,19 +10,42 @@ import org.reflections.Reflections;
 import com.jenetics.smocker.annotation.ContentView;
 import com.jenetics.smocker.annotation.RootView;
 import com.vaadin.event.ItemClickEvent;
-import com.vaadin.ui.Tree;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Tree.ExpandEvent;
-import com.vaadin.ui.Tree.ExpandListener;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
+import com.vaadin.ui.Tree;
 
 public class AnnotationScanner {
 
-	public static Map<String, TreeWithIcon> getTreeMap(Navigator navigator)
+	public AnnotationScanner(Navigator navigator) throws InstantiationException, IllegalAccessException {
+		super();
+		init(navigator);
+	}
+	
+	private AnnotationScanner() {
+		// TODO Auto-generated constructor stub
+	}
+	
+	private Map<String, TreeWithIcon> treeMap = new HashMap();
+	private Map<String, View> viewMap = new HashMap();
+	
+	
+
+	public Map<String, TreeWithIcon> getTreeMap() {
+		return treeMap;
+	}
+
+
+
+	public Map<String, View> getViewMap() {
+		return viewMap;
+	}
+
+
+
+	public void init(Navigator navigator)
 			throws InstantiationException, IllegalAccessException {
-		Map<String, TreeWithIcon> treeMap = new HashMap<>();
+		
 		Reflections reflections = new Reflections("com.jenetics.smocker.ui.view");
 
 		Set<Class<?>> annotatedRootView = reflections.getTypesAnnotatedWith(RootView.class);
@@ -67,6 +90,7 @@ public class AnnotationScanner {
 						if (tree != null) {
 							tree.getTree().addItem(contentView.viewName());
 							tree.getTree().setChildrenAllowed(contentView.viewName(), false);
+							viewMap.put(contentView.viewName(), (View) view);
 						}
 					}
 				}
@@ -98,8 +122,6 @@ public class AnnotationScanner {
 				}
 			}
 		}
-		
-		return treeMap;
 	}
 
 }

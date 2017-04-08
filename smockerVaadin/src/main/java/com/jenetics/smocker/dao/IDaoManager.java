@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 
 public interface IDaoManager<T extends Serializable> {
 
@@ -13,12 +14,14 @@ public interface IDaoManager<T extends Serializable> {
 	
 	void setEm(EntityManager em);
 
-	EntityManager getEm();
-
 	List<T> listAll(Integer startPosition, Integer maxResult);
+	
+	List<T> listAll();
 
 	void update(Long id, T entity);
 
 	void deleteById(Long id);
+
+	T update(T entity);
 
 }

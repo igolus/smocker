@@ -5,6 +5,7 @@ import java.io.Serializable;
 import javax.persistence.Id;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Version;
 import com.jenetics.smocker.model.Connection;
@@ -27,7 +28,7 @@ public class JavaApplication implements EntityWithId {
 	@Column(length = 1024)
 	private String classQualifiedName;
 
-	@OneToMany
+	@OneToMany(cascade=CascadeType.PERSIST) 
 	private Set<Connection> Connections = new HashSet<Connection>();
 
 	public Long getId() {

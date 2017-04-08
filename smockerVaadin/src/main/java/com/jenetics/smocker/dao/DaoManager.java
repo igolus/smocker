@@ -13,22 +13,18 @@ public class DaoManager<T extends Serializable> implements IDaoManager<T> {
 	
 	Class<T> typeParameterClass = null;
 
-    public DaoManager(Class<T> typeParameterClass) {
+    public DaoManager(Class<T> typeParameterClass, EntityManager em) {
         this.typeParameterClass = typeParameterClass;
+        this.em = em;
     }
     
-    public DaoManager() {
+    private DaoManager() {
 		super();
 	}
 
 
-
 	private EntityManager em;
 	
-	@Override
-	public EntityManager getEm() {
-		return em;
-	}
 
 	@Override
 	public void setEm(EntityManager em) {
@@ -49,12 +45,27 @@ public class DaoManager<T extends Serializable> implements IDaoManager<T> {
 		entityTransaction.commit();
 		return entity;
 	}
+	
+	@Override
+	public T update(T entity) {
+		// TODO Auto-generated method stub
+		EntityTransaction entityTransaction = em.getTransaction();
+        entityTransaction.begin();
+		em.persist(entity);
+		entityTransaction.commit();
+		return entity;
+	}
 
 	@Override
 	public List<T> listAll(Integer startPosition, Integer maxResult) {
 		String entityName = typeParameterClass.getSimpleName();
 		Query query = em.createQuery("SELECT e FROM " + entityName + " e");
 	    return query.getResultList();
+	}
+	
+	@Override
+	public List<T> listAll() {
+		return listAll(0, -1);
 	}
 
 	@Override
@@ -65,9 +76,9 @@ public class DaoManager<T extends Serializable> implements IDaoManager<T> {
 
 	@Override
 	public void deleteById(Long id) {
-		// TODO Auto-generated method stub
+	   // TODO Auto-generated method stub
 	}
-	
+
 	
 	
 }

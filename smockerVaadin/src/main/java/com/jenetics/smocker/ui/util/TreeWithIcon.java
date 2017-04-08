@@ -1,11 +1,13 @@
 package com.jenetics.smocker.ui.util;
 
+import com.vaadin.navigator.View;
 import com.vaadin.ui.Tree;
 
 public class TreeWithIcon {
 	private Tree tree;
 	private String icon;
 	private boolean fontAwesome;
+	private View view;
 	public TreeWithIcon(Tree tree, String icon, boolean fontAwesome) {
 		super();
 		this.tree = tree;
@@ -21,7 +23,11 @@ public class TreeWithIcon {
 	public boolean isFontAwesome() {
 		return fontAwesome;
 	}
-	
-	
+	public View getView() {
+		return view;
+	}
+	public void setView(View view) {
+		this.view = view;
+	}
 	
 }

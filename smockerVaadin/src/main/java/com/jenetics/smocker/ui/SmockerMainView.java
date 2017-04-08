@@ -58,6 +58,8 @@ public class SmockerMainView extends VerticalSplitPanel implements View {
 	private Navigator navigator;
 
 	private Accordion accordion;
+
+	private VerticalLayout navigationLayout;
 	
 	
 	public Navigator getNavigator() {
@@ -119,7 +121,7 @@ public class SmockerMainView extends VerticalSplitPanel implements View {
 	
 		VerticalLayout parentLayout = new VerticalLayout();
 		
-		VerticalLayout navigationLayout = new VerticalLayout();
+		navigationLayout = new VerticalLayout();
 		navigationLayout.setImmediate(true);
         setFirstComponent(navigationLayout);
         navigationLayout.addStyleName("mainBackGround");
@@ -127,9 +129,15 @@ public class SmockerMainView extends VerticalSplitPanel implements View {
         
         ViewDisplay viewDisplay = new Navigator.ComponentContainerViewDisplay(target);
 		navigator = new Navigator(SmockerUI.getInstance(), viewDisplay);
-            
-		
-        Map<String, TreeWithIcon> treeByAccordeonItem = SmockerUI.getInstance().getTreeMap(navigator);
+        
+        parentLayout.setSizeFull();
+        parentLayout.addComponent(navigationLayout);
+        
+        return parentLayout;
+	}
+
+	public void buildAccordion() {
+		Map<String, TreeWithIcon> treeByAccordeonItem = SmockerUI.getInstance().getTreeMap(navigator);
 		accordion = new Accordion();
 		treeByAccordeonItem.forEach((name, treeWithIcon)-> {
 			Resource icon = null;
@@ -156,11 +164,6 @@ public class SmockerMainView extends VerticalSplitPanel implements View {
         
         accordion.setSizeFull();
         navigationLayout.addComponent(accordion);
-        
-        parentLayout.setSizeFull();
-        parentLayout.addComponent(navigationLayout);
-        
-        return parentLayout;
 	}
 
 	@Override

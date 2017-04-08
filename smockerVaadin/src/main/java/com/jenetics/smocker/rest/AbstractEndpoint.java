@@ -20,6 +20,7 @@ import javax.ws.rs.core.UriBuilder;
 import org.jboss.logging.Logger;
 
 import com.jenetics.smocker.dao.IDaoManager;
+import com.jenetics.smocker.injector.Dao;
 import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.ui.SmockerUI;
 
@@ -29,24 +30,16 @@ public abstract class AbstractEndpoint<T extends EntityWithId> {
 	Logger logger;
 
 	@PersistenceContext(unitName = SmockerUI.PERSISTENCE_UNIT)
-	private EntityManager em;
+	protected EntityManager em;
 
 	@Inject
 	protected Event<T> entityEventSrc;
-
-	@Inject
+	
+	@Inject @Dao
 	protected IDaoManager<T> daoManager;
-
-	void init() {
-		if (daoManager.getEm() == null) {
-			daoManager.setEm(this.em);
-		}
-	}
 
 	@POST
 	public Response create(final T entity) {
-		init();
-
 		daoManager.create(entity);
 		//notify the creation
 		entityEventSrc.fire(entity);
@@ -69,15 +62,12 @@ public abstract class AbstractEndpoint<T extends EntityWithId> {
 
 	@GET
 	public List<T> listAll(@QueryParam("start") final Integer startPosition, @QueryParam("max") final Integer maxResult) {
-		//TODO: retrieve the connections 
-
 		return daoManager.listAll(startPosition, maxResult);
 	}
 
 	@PUT
 	@Path("/{id:[0-9][0-9]*}")
 	public Response update(@PathParam("id") Long id, final T entity) {
-		//TODO: process the given connection 
 		daoManager.update(id, entity);
 		return Response.ok(entity).build();
 	}
@@ -85,7 +75,6 @@ public abstract class AbstractEndpoint<T extends EntityWithId> {
 	@DELETE
 	@Path("/{id:[0-9][0-9]*}")
 	public Response deleteById(@PathParam("id") final Long id) {
-		//TODO: process the connection matching by the given id 
 		daoManager.deleteById(id);
 		return Response.noContent().build();
 	}

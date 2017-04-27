@@ -1,0 +1,86 @@
+@import "../reindeer/reindeer.scss";
+
+.smocker {
+   @include reindeer;
+}
+
+.backColorGrey
+{
+   background-color:#ACCDEE;
+}
+
+.topBannerBackGround
+{
+   background-color:#74AFAD;
+}
+
+.mainBackGround
+{
+   background-color:#ECECEA;
+}
+
+.menuBackGround
+{
+   background-color:#558C89;
+}
+
+v-accordion-item-open {
+ background-color: rgb(219,219,219);
+}
+
+.v-accordion-item-caption{
+    height: 25px;
+    line-height: 16px;
+}
+
+v-tabsheet-tabitemcell-smocker{
+     .v-captiontext {
+       font-weight: bold;
+       color: red;
+       font-size: 40px
+     }
+   }
+
+.i-button-nobackground {
+  background: none;
+  border:none;
+}
+
+
+.toolbar .v-button {
+      display: block;
+      width: 65px;
+      height: 55px;
+      background: transparent;
+      border: none;
+      text-align: center;
+}
+ 
+.toolbar .v-button img {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      margin-bottom: 5px;
+}
+
+.toolbar .v-button span {
+      font-size: x-small;
+      text-shadow: #fafafa 1px 1px 0;
+}
+
+.button-with-right-alligned-icon {
+  [class*="wrap"] {
+    display: inline-block;
+  }
+
+  .v-icon {
+    float: right;
+    $padding-width: ceil($v-unit-size/2.4);
+    margin-left: $padding-width + ceil($padding-width/-5);
+
+    + span:not(:empty) {
+      margin-left: 0;
+    }
+  }
+}
+

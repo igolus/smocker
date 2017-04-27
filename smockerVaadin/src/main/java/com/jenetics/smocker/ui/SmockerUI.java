@@ -1,31 +1,34 @@
 package com.jenetics.smocker.ui;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import org.jboss.logging.Logger;
+import org.vaadin.easyapp.EasyAppBuilder;
+import org.vaadin.easyapp.EasyAppMainView;
 import org.vaadin.easyapp.util.MessageBuilder;
 
 import com.jenetics.smocker.model.EntityWithId;
-import com.jenetics.smocker.ui.util.AnnotationScanner;
 import com.jenetics.smocker.ui.util.RefreshableView;
-import com.jenetics.smocker.ui.util.TreeWithIcon;
-import com.jenetics.smocker.ui.util.ViewAndIconContainer;
 import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
 import com.vaadin.navigator.Navigator;
+import com.vaadin.server.FontAwesome;
+import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.ui.Image;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.BaseTheme;
 
 @Push
 @Theme("smocker")
 public class SmockerUI extends UI {
 
-	private static final int SLEEP_TIME = 100;
+	private static final int SLEEP_TIME = 200;
 
 	@PersistenceContext(unitName = SmockerUI.PERSISTENCE_UNIT)
 	private EntityManager em;
@@ -49,30 +52,44 @@ public class SmockerUI extends UI {
 		return instance;
 	}
 
-	private SmockerMainView mainContent = null;
 
-	private HashMap<String, ViewAndIconContainer> viewMap; 
-	private Map<String, TreeWithIcon> treeMap;
-
-	private AnnotationScanner scanner; 
-
-	public Map<String, ViewAndIconContainer> getViewMap() {
-		return viewMap;
-	}
+	private EasyAppMainView easyAppMainView; 
 
 
 	@Override
 	protected void init(VaadinRequest request) {
-		instance = this;
-		getPage().setTitle("Smocker");
-		mainContent = new SmockerMainView();
-		setContent(mainContent);
-		try {
-			scanner = new AnnotationScanner(mainContent.getNavigator());
-		} catch (InstantiationException | IllegalAccessException e) {
-			logger.error(MessageBuilder.getEasyAppMessage("Unable to get the view map"), e);
-		}
-		mainContent.buildAccordion();
+		
+		final VerticalLayout layout = new VerticalLayout();
+        layout.setSizeFull();
+        
+        
+        Image image = new Image(null, new ThemeResource("icons/smocker_small.png"));
+//		image.setWidth(50, Unit.PIXELS);
+//		image.setHeight(50, Unit.PIXELS);
+		
+		easyAppMainView = new EasyAppBuilder(Collections.singletonList("com.jenetics.smocker.ui.view"))
+        	.withTopBarIcon(image)
+        	.withTopBarStyle("topBannerBackGround")
+        	.withSearchCapabilities( (searchValue) -> search(searchValue) , FontAwesome.SEARCH)
+        	.withBreadcrumb()
+        	.withBreadcrumbStyle("breadcrumbStyle")
+        	.withButtonLinkStyleInBreadCrumb(BaseTheme.BUTTON_LINK)
+        	//.withLoginPopupLoginStyle("propupStyle")
+        	.build();
+	
+		
+		layout.addComponents(easyAppMainView);
+        
+		easyAppMainView.getTopBar().setStyleName("topBannerBackGround");
+        
+        setContent(layout);
+        instance = this;
+	}
+
+
+	private Object search(String searchValue) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 
@@ -82,17 +99,15 @@ public class SmockerUI extends UI {
 			public void run() {
 				try {
 					Thread.sleep(SLEEP_TIME);
-					((RefreshableView)scanner.getViewMap().get(viewName)).refresh(entityWithId);
+					if (RefreshableView.class.isAssignableFrom(easyAppMainView.getNavigator().getCurrentView().getClass()))
+					{
+						((RefreshableView)easyAppMainView.getNavigator().getCurrentView()).refresh(entityWithId);
+					}
 				} catch (InterruptedException e) {
 					logger.error(MessageBuilder.getEasyAppMessage("Unable to get the view map"), e);
 				}
 			}
 		});
-	}
-
-
-	public Map<String, TreeWithIcon> getTreeMap(Navigator navigator) {
-		return scanner.getTreeMap();
 	}
 
 }

@@ -25,10 +25,7 @@ import com.vaadin.server.Page;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.shared.Position;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.Table;
 import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -62,29 +59,7 @@ public class JavaApplicationsView extends VerticalLayout implements RefreshableV
 		treetable.addContainerProperty("Adress", String.class, "");
 		treetable.addContainerProperty("Port", String.class, "");
 		treetable.addContainerProperty("ConnectionType", String.class, "");
-		
-		
-		treetable.addGeneratedColumn("Watch", new Table.ColumnGenerator() {
-            public Component generateCell(Table source, Object itemId,
-                    Object columnId) {
-                //Item item = connectionTable.getItem(itemId);
-                Button button = new Button("Test");
-                button.setIcon(FontAwesome.GLOBE);
-                return button;
-            }
-        });
-		
 		treetable.setSizeFull();
-		
-		treetable.setCellStyleGenerator(new Table.CellStyleGenerator() {
-			@Override
-			public String getStyle(Table source, Object itemId, Object propertyId) {
-				// TODO Auto-generated method stub
-				System.out.println(treetable.getItem(itemId) ); 
-				return null;
-			}
-		});
-		
 		fillTreeTable();
 		addComponent(treetable);
 		setSizeFull();
@@ -180,6 +155,5 @@ public class JavaApplicationsView extends VerticalLayout implements RefreshableV
 		treetable.setEnabled(true);
 		
 		jpaJavaApplication.refreshItem(entityWithId.getId());
-		updateTree(entityWithId);
 	}
 }

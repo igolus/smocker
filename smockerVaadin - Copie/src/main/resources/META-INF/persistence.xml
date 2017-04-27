@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+		http://java.sun.com/xml/ns/persistence 
+		http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+	version="2.0">
+
+	<persistence-unit  name="smockerLocalData"  transaction-type="JTA">
+	    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+		<jta-data-source>java:jboss/datasources/smockerDS</jta-data-source>
+<!-- 	<persistence-unit name="smockerLocalData" transaction-type="RESOURCE_LOCAL"> -->
+		<class>com.vaadin.demo.jpaaddressbook.domain.Person</class>
+		<class>com.vaadin.demo.jpaaddressbook.domain.Department</class>
+		<class>com.jenetics.smocker.model.Connection</class>
+		<class>com.jenetics.smocker.model.JavaApplication</class>
+		<class>com.jenetics.smocker.model.Communication</class>
+		<exclude-unlisted-classes>false</exclude-unlisted-classes>
+		
+		<properties>
+			<property name="eclipselink.ddl-generation" value="drop-and-create-tables" />
+			<property name="eclipselink.target-database" value="org.eclipse.persistence.platform.database.H2Platform"/>
+  		</properties>
+	</persistence-unit>
+
+</persistence>

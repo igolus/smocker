@@ -102,7 +102,11 @@
 	</dependencyManagement>
 
 	<dependencies>
-
+		<dependency>
+			<groupId>org.vaadin</groupId>
+			<artifactId>easyApp</artifactId>
+			<version>1.0-beta</version>
+		</dependency>
 		<!-- <dependency> <groupId>org.springframework</groupId> <artifactId>spring-context</artifactId> 
 			<version>4.2.0.RELEASE</version> <scope>provided</scope> </dependency> -->
 
@@ -118,14 +122,14 @@
 			<artifactId>aceeditor</artifactId>
 			<version>${aceeditor.version}</version>
 		</dependency>
-		
+
 		<dependency>
-   <groupId>org.vaadin.addons</groupId>
-   <artifactId>stackpanel</artifactId>
-   <version>2.0.0</version>
-</dependency>
-		
-		
+			<groupId>org.vaadin.addons</groupId>
+			<artifactId>stackpanel</artifactId>
+			<version>2.0.0</version>
+		</dependency>
+
+
 		<dependency>
 			<groupId>com.vaadin</groupId>
 			<artifactId>vaadin-server</artifactId>
@@ -139,12 +143,6 @@
 			<groupId>org.vaadin.spring.extensions</groupId>
 			<artifactId>vaadin-spring-ext-core</artifactId>
 			<version>2.0.0.RELEASE</version>
-		</dependency>
-		
-	    <dependency>
-			<groupId>org.vaadin</groupId>
-			<artifactId>easyapp</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>

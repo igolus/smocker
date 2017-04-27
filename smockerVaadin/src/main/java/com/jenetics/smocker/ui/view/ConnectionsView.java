@@ -1,6 +1,7 @@
 package com.jenetics.smocker.ui.view;
 
-import com.jenetics.smocker.annotation.ContentView;
+import org.vaadin.easyapp.util.annotations.ContentView;
+
 import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.ui.SmockerUI;
@@ -20,7 +21,7 @@ import com.vaadin.ui.VerticalLayout;
 
 @Push
 @ViewScope
-@ContentView(sortingOrder=1, viewName = "Connections", icon = "icons/Places-network-server-database-icon.png", accordeonParent=EventManager.CONNECTIONS, componentParent="Java Applications")
+@ContentView(sortingOrder=2, viewName = "Connections", icon = "icons/Places-network-server-database-icon.png", rootViewParent=ConnectionsRoot.class)
 public class ConnectionsView extends VerticalLayout implements RefreshableView {
 
 	/**

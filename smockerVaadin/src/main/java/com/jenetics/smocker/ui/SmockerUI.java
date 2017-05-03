@@ -4,6 +4,7 @@ import java.util.Collections;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.Persistence;
 import javax.persistence.PersistenceContext;
 
 import org.jboss.logging.Logger;
@@ -30,8 +31,8 @@ public class SmockerUI extends UI {
 
 	private static final int SLEEP_TIME = 200;
 
-	@PersistenceContext(unitName = SmockerUI.PERSISTENCE_UNIT)
-	private EntityManager em;
+	//@PersistenceContext(unitName = SmockerUI.PERSISTENCE_UNIT)
+	private static EntityManager em;
 
 	@Inject
 	private Logger logger;
@@ -43,7 +44,10 @@ public class SmockerUI extends UI {
 
 	private static SmockerUI instance = null;
 
-	public EntityManager getEm() {
+	public static EntityManager getEm() {
+		if (em == null) {
+			em = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT).createEntityManager();
+		}
 		return em;
 	}
 

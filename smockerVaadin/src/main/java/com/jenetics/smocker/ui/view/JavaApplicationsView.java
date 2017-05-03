@@ -3,17 +3,25 @@ package com.jenetics.smocker.ui.view;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 
 import org.jboss.logging.Logger;
 import org.vaadin.easyapp.util.annotations.ContentView;
 
+import com.jenetics.smocker.dao.DaoManager;
+import com.jenetics.smocker.dao.IDaoManager;
+import com.jenetics.smocker.injector.BundleUI;
+import com.jenetics.smocker.injector.Dao;
 import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.ui.SmockerUI;
+import com.jenetics.smocker.ui.util.ButtonWithId;
 import com.jenetics.smocker.ui.util.EventManager;
 import com.jenetics.smocker.ui.util.RefreshableView;
 import com.vaadin.addon.jpacontainer.JPAContainer;
@@ -32,12 +40,30 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 
 @Push
 @ViewScope
 @ContentView(sortingOrder=1, viewName = "Java Applications", icon = "icons/Java-icon.png", homeView=true, rootViewParent=ConnectionsRoot.class)
 public class JavaApplicationsView extends VerticalLayout implements RefreshableView {
 
+
+	private static final int PORT_ARRAY_LOC = 2;
+
+	//@Inject
+	//private static ResourceBundle bundle;
+	private static ResourceBundle bundle = ResourceBundle.getBundle("BundleUI");
+
+	private static final String CONNECTION_TYPE = bundle.getString("ConnectionType");
+
+	private static final String PORT = bundle.getString("Port");
+
+	private static final String ADRESS = bundle.getString("Adress");
+
+	private static final String APPLICATION = bundle.getString("Application");
+
+	protected IDaoManager<Connection> daoManagerConnection = null;
 
 	@Inject
 	private Logger logger;
@@ -54,37 +80,57 @@ public class JavaApplicationsView extends VerticalLayout implements RefreshableV
 	 */
 	private static final long serialVersionUID = 1L;
 	public JavaApplicationsView() {
-		jpaJavaApplication = JPAContainerFactory.make(JavaApplication.class, SmockerUI.PERSISTENCE_UNIT);
+
+		jpaJavaApplication = JPAContainerFactory.make(JavaApplication.class, SmockerUI.getEm());
+		daoManagerConnection = new DaoManager<Connection>(Connection.class, SmockerUI.getEm()) ;
+
 		setMargin(true);
 		treetable = new TreeTable();
 		treetable.setSelectable(true);
-		treetable.addContainerProperty("Application", String.class, "");
-		treetable.addContainerProperty("Adress", String.class, "");
-		treetable.addContainerProperty("Port", String.class, "");
-		treetable.addContainerProperty("ConnectionType", String.class, "");
-		
-		
+		treetable.addContainerProperty(APPLICATION, String.class, "");
+		treetable.addContainerProperty(ADRESS, String.class, "");
+		treetable.addContainerProperty(PORT, String.class, "");
+		treetable.addContainerProperty(CONNECTION_TYPE, String.class, "");
+
+
 		treetable.addGeneratedColumn("Watch", new Table.ColumnGenerator() {
-            public Component generateCell(Table source, Object itemId,
-                    Object columnId) {
-                //Item item = connectionTable.getItem(itemId);
-                Button button = new Button("Test");
-                button.setIcon(FontAwesome.GLOBE);
-                return button;
-            }
-        });
-		
-		treetable.setSizeFull();
-		
-		treetable.setCellStyleGenerator(new Table.CellStyleGenerator() {
-			@Override
-			public String getStyle(Table source, Object itemId, Object propertyId) {
-				// TODO Auto-generated method stub
-				System.out.println(treetable.getItem(itemId) ); 
+			public Component generateCell(Table source, Object itemId,  Object columnId) {
+				if (!treetable.getItem(itemId).getItemProperty(ADRESS).getValue().toString().isEmpty() &&
+						!treetable.getItem(itemId).getItemProperty(PORT).getValue().toString().isEmpty()) {
+					String UiId = treetable.getItem(itemId).getItemProperty(ADRESS).getValue().toString() + 
+							treetable.getItem(itemId).getItemProperty(PORT).getValue().toString();
+					Button button = buttonByUiId.get(UiId);
+					
+					if (button != null && button.getListeners(ClickEvent.class).isEmpty()) {
+						button.addClickListener(new ClickListener() {
+							@Override
+							public void buttonClick(ClickEvent event) {
+								ButtonWithId<Connection> buttonWithId = (ButtonWithId<Connection>)event.getSource();
+								if (buttonWithId.getEntity().getWatched() == null || !buttonWithId.getEntity().getWatched()) {
+									buttonWithId.setCaption(bundle.getString("UnWatch_Button"));
+									buttonWithId.getEntity().setWatched(true);
+									daoManagerConnection.update(buttonWithId.getEntity());
+								}
+								else {
+									buttonWithId.setCaption(bundle.getString("Watch_Button"));
+									buttonWithId.getEntity().setWatched(false);
+									daoManagerConnection.update(buttonWithId.getEntity());
+								}
+							}
+						});
+					} 
+					else {
+						return button;
+					}
+					return button;
+				}
 				return null;
 			}
 		});
-		
+
+		treetable.setSizeFull();
+
+
 		fillTreeTable();
 		addComponent(treetable);
 		setSizeFull();
@@ -112,6 +158,7 @@ public class JavaApplicationsView extends VerticalLayout implements RefreshableV
 	}
 
 	private Map<Object ,Object > applicationItemById = new HashMap<>();
+	private Map<String ,ButtonWithId> buttonByUiId = new HashMap<>();
 
 	/**
 	 * Update the tree add new items (JavaConnection or Connection) 
@@ -135,16 +182,40 @@ public class JavaApplicationsView extends VerticalLayout implements RefreshableV
 
 		Object javaApplicationTreeItem = applicationItemById.get(conn.getJavaApplication().getId());
 		if (javaApplicationTreeItem != null) {
+			
+			String buttonString = null;
+			if (conn.getWatched() == null || conn.getWatched()) {
+				buttonString = bundle.getString("Watch_Button");
+			}
+			else {
+				buttonString = bundle.getString("UnWatch_Button");
+			}
+			
+			ButtonWithId<Connection> buttonWithId = new ButtonWithId<Connection>(conn.getHost() + conn.getPort().toString(), conn);
+			buttonWithId.setCaption(buttonString);
+			buttonWithId.setIcon(FontAwesome.GLOBE);
+			buttonByUiId.put(buttonWithId.getUiId(), buttonWithId);
+			
 			Object[] itemConnection = new Object[] { conn.getJavaApplication().getClassQualifiedName(),  conn.getHost(), conn.getPort().toString(), ""};
 			Object connectionTreeItem = treetable.addItem(itemConnection, null);
 			treetable.setChildrenAllowed(javaApplicationTreeItem, true);
 			treetable.setParent(connectionTreeItem, javaApplicationTreeItem);
 			treetable.setChildrenAllowed(connectionTreeItem, false);
+
+			
+			//Button WatchUnWatchButton = new Button(bundle.getString(buttonString));
+			
 		}
 		else {
 			logger.warn("Unable to find javaApplicationTreeItem");
 		}
 	}
+
+	//
+	//	private boolean alreadyExists(Connection connection) {
+	//		// TODO Auto-generated method stub
+	//		return connection.getJavaApplication().getConnections().contains(o);
+	//	}
 
 
 	private Object buildJavaApplicationTreeItem(JavaApplication javaApplication) {
@@ -176,9 +247,9 @@ public class JavaApplicationsView extends VerticalLayout implements RefreshableV
 
 		// Show it in the page
 		notif.show(Page.getCurrent());
-		
+
 		treetable.setEnabled(true);
-		
+
 		jpaJavaApplication.refreshItem(entityWithId.getId());
 		updateTree(entityWithId);
 	}

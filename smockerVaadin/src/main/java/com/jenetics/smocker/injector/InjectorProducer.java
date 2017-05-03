@@ -2,6 +2,7 @@ package com.jenetics.smocker.injector;
 
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
+import java.util.ResourceBundle;
 
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -34,5 +35,11 @@ public class InjectorProducer {
         EntityManager em = Persistence.createEntityManagerFactory(SmockerUI.PERSISTENCE_UNIT).createEntityManager();
         return new DaoManager<T>(genericTypeClass, em);  
     }  
+    
+    @Produces @Named @BundleUI
+    public ResourceBundle produceResourceBundle(InjectionPoint injectionPoint) {  
+    	return ResourceBundle.getBundle("BundleUI");
+    }  
+    
     
 }  

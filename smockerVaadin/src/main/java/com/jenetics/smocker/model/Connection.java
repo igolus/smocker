@@ -31,14 +31,17 @@ public class Connection implements EntityWithId {
 
 	@Column(nullable = false)
 	private Integer port;
-	
+
 	@OneToMany
 	private Set<Communication> Communications = new HashSet<Communication>();
-	
+
 	@JoinColumn(nullable = false)
 	@OneToOne
 	private JavaApplication javaApplication;
-	
+
+	@Column
+	private Boolean watched;
+
 	public JavaApplication getJavaApplication() {
 		return javaApplication;
 	}
@@ -104,6 +107,22 @@ public class Connection implements EntityWithId {
 		this.port = port;
 	}
 
+	public Set<Communication> getCommunications() {
+		return this.Communications;
+	}
+
+	public void setCommunications(final Set<Communication> Communications) {
+		this.Communications = Communications;
+	}
+
+	public Boolean getWatched() {
+		return watched;
+	}
+
+	public void setWatched(Boolean watched) {
+		this.watched = watched;
+	}
+
 	@Override
 	public String toString() {
 		String result = getClass().getSimpleName() + " ";
@@ -114,14 +133,12 @@ public class Connection implements EntityWithId {
 			result += ", host: " + host;
 		if (port != null)
 			result += ", port: " + port;
+		if (Communications != null)
+			result += ", Communications: " + Communications;
+		if (javaApplication != null)
+			result += ", javaApplication: " + javaApplication;
+		if (watched != null)
+			result += ", watched: " + watched;
 		return result;
-	}
-
-	public Set<Communication> getCommunications() {
-		return this.Communications;
-	}
-
-	public void setCommunications(final Set<Communication> Communications) {
-		this.Communications = Communications;
 	}
 }

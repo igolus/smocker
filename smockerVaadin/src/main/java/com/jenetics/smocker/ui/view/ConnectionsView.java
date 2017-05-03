@@ -42,11 +42,11 @@ public class ConnectionsView extends VerticalLayout implements RefreshableView {
             public Component generateCell(Table source, Object itemId,
                     Object columnId) {
                 //Item item = connectionTable.getItem(itemId);
-                Button button = new Button("Test");
+                System.out.println(itemId);
+            	Button button = new Button("Test");
                 button.setIcon(FontAwesome.GLOBE);
                 return button;
             }
-
         });
 		setSizeFull();
 		addComponent(connectionTable);

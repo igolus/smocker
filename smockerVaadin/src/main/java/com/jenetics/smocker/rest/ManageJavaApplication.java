@@ -50,6 +50,11 @@ public class ManageJavaApplication {
 		if (target == null) {
 			return Response.status(Status.NOT_FOUND).build();
 		}
+		for (Connection connIte : target.getConnections()) {
+			if (connIte.getHost().equals(conn.getHost()) && connIte.getPort().equals(conn.getPort())) {
+				return Response.status(Status.CONFLICT).build();
+			}
+		}
 		conn.setJavaApplication(target);
 		target.getConnections().add(conn);
 		daoManager.update(target);

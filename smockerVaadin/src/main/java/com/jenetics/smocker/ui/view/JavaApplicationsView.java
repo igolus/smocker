@@ -24,6 +24,7 @@ import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.util.ButtonWithId;
 import com.jenetics.smocker.ui.util.EventManager;
 import com.jenetics.smocker.ui.util.RefreshableView;
+import com.jenetics.smocker.ui.util.VerticalSplitWithButton;
 import com.vaadin.addon.jpacontainer.JPAContainer;
 import com.vaadin.addon.jpacontainer.JPAContainerFactory;
 import com.vaadin.annotations.Push;
@@ -33,6 +34,7 @@ import com.vaadin.server.Page;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.shared.Position;
 import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Notification;
@@ -46,7 +48,7 @@ import com.vaadin.ui.Button.ClickListener;
 @Push
 @ViewScope
 @ContentView(sortingOrder=1, viewName = "Java Applications", icon = "icons/Java-icon.png", homeView=true, rootViewParent=ConnectionsRoot.class)
-public class JavaApplicationsView extends VerticalLayout implements RefreshableView {
+public class JavaApplicationsView extends VerticalSplitWithButton implements RefreshableView {
 
 
 	private static final int PORT_ARRAY_LOC = 2;
@@ -80,11 +82,13 @@ public class JavaApplicationsView extends VerticalLayout implements RefreshableV
 	 */
 	private static final long serialVersionUID = 1L;
 	public JavaApplicationsView() {
-
+		super();
+		VerticalLayout mainLayout = new VerticalLayout();
+		
 		jpaJavaApplication = JPAContainerFactory.make(JavaApplication.class, SmockerUI.getEm());
 		daoManagerConnection = new DaoManager<Connection>(Connection.class, SmockerUI.getEm()) ;
 
-		setMargin(true);
+		mainLayout.setMargin(true);
 		treetable = new TreeTable();
 		treetable.setSelectable(true);
 		treetable.addContainerProperty(APPLICATION, String.class, "");
@@ -128,11 +132,27 @@ public class JavaApplicationsView extends VerticalLayout implements RefreshableV
 			}
 		});
 
-		treetable.setSizeFull();
-
 
 		fillTreeTable();
-		addComponent(treetable);
+		treetable.setSizeFull();
+		mainLayout.addComponent(treetable);
+		
+		
+		
+		
+		Button cleanAllButton = new Button(bundle.getString("CleanAll_Button"));
+		addComponent(cleanAllButton);
+		//setComponentAlignment(cleanAllButton, Alignment.TOP_RIGHT);
+		cleanAllButton.addClickListener(new ClickListener() {
+			
+			@Override
+			public void buttonClick(ClickEvent event) {
+				daoManagerConnection.deleteAll();
+			}
+		});
+		
+		addButton(cleanAllButton);	
+		setSecondComponent(treetable);
 		setSizeFull();
 	}
 
@@ -252,5 +272,12 @@ public class JavaApplicationsView extends VerticalLayout implements RefreshableV
 
 		jpaJavaApplication.refreshItem(entityWithId.getId());
 		updateTree(entityWithId);
+	}
+
+
+	@Override
+	public ClickListener getClickListener(String key) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

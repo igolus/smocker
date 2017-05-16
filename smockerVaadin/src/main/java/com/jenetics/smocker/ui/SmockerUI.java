@@ -1,6 +1,7 @@
 package com.jenetics.smocker.ui;
 
 import java.util.Collections;
+import java.util.ResourceBundle;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -29,6 +30,8 @@ import com.vaadin.ui.themes.BaseTheme;
 @Theme("smocker")
 public class SmockerUI extends UI {
 
+	private static ResourceBundle bundle = ResourceBundle.getBundle("BundleUI");
+	
 	private static final int SLEEP_TIME = 200;
 
 	//@PersistenceContext(unitName = SmockerUI.PERSISTENCE_UNIT)
@@ -68,8 +71,6 @@ public class SmockerUI extends UI {
         
         
         Image image = new Image(null, new ThemeResource("icons/smocker_small.png"));
-//		image.setWidth(50, Unit.PIXELS);
-//		image.setHeight(50, Unit.PIXELS);
 		
 		easyAppMainView = new EasyAppBuilder(Collections.singletonList("com.jenetics.smocker.ui.view"))
         	.withTopBarIcon(image)
@@ -78,9 +79,13 @@ public class SmockerUI extends UI {
         	.withBreadcrumb()
         	.withBreadcrumbStyle("breadcrumbStyle")
         	.withButtonLinkStyleInBreadCrumb(BaseTheme.BUTTON_LINK)
+        	.withToolBar()
         	//.withLoginPopupLoginStyle("propupStyle")
         	.build();
-	
+		
+		easyAppMainView.setSplitPosition(100);
+		
+		manageButtons();
 		
 		layout.addComponents(easyAppMainView);
         
@@ -88,6 +93,14 @@ public class SmockerUI extends UI {
         
         setContent(layout);
         instance = this;
+	}
+
+	public enum EnumButton {
+		CLEAN_ALL
+	}
+	
+	private void manageButtons() {
+		easyAppMainView.getToolBar().addButton(bundle.getString("CleanAll"), bundle.getString("CleanAllToolTip"), FontAwesome.REMOVE, EnumButton.CLEAN_ALL.toString());
 	}
 
 

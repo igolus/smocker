@@ -7847,6 +7847,11 @@ v-accordion-item-open {
 	line-height: 16px;
 }
 
+.spacey-button {
+	margin-left: 20px;
+	margin-bottom: auto;
+}
+
 v-tabsheet-tabitemcell-smocker .v-captiontext {
 	font-weight: bold;
 	color: red;
@@ -7877,6 +7882,10 @@ v-tabsheet-tabitemcell-smocker .v-captiontext {
 .toolbar .v-button span {
 	font-size: x-small;
 	text-shadow: #fafafa 1px 1px 0;
+}
+
+.v-splitpanel-hsplitter-mainramhsplitpanel, .v-splitpanel-hsplitter-mainramhsplitpanel div {
+	width: 0px;
 }
 
 .button-with-right-alligned-icon [class*="wrap"] {

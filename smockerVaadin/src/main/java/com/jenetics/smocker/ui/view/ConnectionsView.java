@@ -15,6 +15,7 @@ import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
@@ -64,5 +65,11 @@ public class ConnectionsView extends VerticalLayout implements RefreshableView {
 	@Override
 	public void refresh(EntityWithId entityWithId) {
 		connections.refresh();
+	}
+
+	@Override
+	public ClickListener getClickListener(String key) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

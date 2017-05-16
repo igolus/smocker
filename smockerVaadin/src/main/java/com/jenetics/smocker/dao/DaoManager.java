@@ -79,6 +79,16 @@ public class DaoManager<T extends Serializable> implements IDaoManager<T> {
 	   // TODO Auto-generated method stub
 	}
 
+	@Override
+	public void deleteAll() {
+		String entityName = typeParameterClass.getSimpleName();
+		Query query = em.createQuery("DELETE FROM " + entityName + " e");	
+		EntityTransaction entityTransaction = em.getTransaction();
+		entityTransaction.begin();
+		query.executeUpdate();
+		entityTransaction.commit();
+	}
+
 	
 	
 }

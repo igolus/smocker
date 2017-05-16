@@ -1,5 +1,7 @@
 package com.jenetics.smocker.ui.util;
 
+import org.vaadin.easyapp.util.VisitableView;
+
 import com.jenetics.smocker.model.EntityWithId;
 import com.vaadin.navigator.View;
 
@@ -8,7 +10,7 @@ import com.vaadin.navigator.View;
  * @author igolus
  *
  */
-public interface RefreshableView extends View {
+public interface RefreshableView extends VisitableView {
 
 	void refresh(EntityWithId entityWithId);
 

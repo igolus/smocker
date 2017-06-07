@@ -7884,8 +7884,20 @@ v-tabsheet-tabitemcell-smocker .v-captiontext {
 	text-shadow: #fafafa 1px 1px 0;
 }
 
-.v-splitpanel-hsplitter-mainramhsplitpanel, .v-splitpanel-hsplitter-mainramhsplitpanel div {
+.v-splitpanel-hsplitter-invisiblesplitterh, .v-splitpanel-hsplitter-invisiblesplitterh div {
 	width: 0px;
+}
+
+.v-splitpanel-hsplitter-invisiblesplitter, .v-splitpanel-hsplitter-invisiblesplitter div {
+	width: 0px;
+}
+
+.v-splitpanel-vsplitter-invisiblesplitterv, .v-splitpanel-vsplitter-invisiblesplitterv div {
+	height: 0px;
+}
+
+.invisiblesplitterv2 .v-splitpanel-vsplitter {
+	height: 6px;
 }
 
 .button-with-right-alligned-icon [class*="wrap"] {

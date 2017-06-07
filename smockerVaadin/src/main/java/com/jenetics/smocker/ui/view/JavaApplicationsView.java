@@ -21,6 +21,7 @@ import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.ui.SmockerUI;
+import com.jenetics.smocker.ui.SmockerUI.EnumButton;
 import com.jenetics.smocker.ui.util.ButtonWithId;
 import com.jenetics.smocker.ui.util.EventManager;
 import com.jenetics.smocker.ui.util.RefreshableView;
@@ -37,6 +38,7 @@ import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TreeTable;
@@ -48,7 +50,7 @@ import com.vaadin.ui.Button.ClickListener;
 @Push
 @ViewScope
 @ContentView(sortingOrder=1, viewName = "Java Applications", icon = "icons/Java-icon.png", homeView=true, rootViewParent=ConnectionsRoot.class)
-public class JavaApplicationsView extends VerticalSplitWithButton implements RefreshableView {
+public class JavaApplicationsView extends VerticalLayout implements RefreshableView {
 
 
 	private static final int PORT_ARRAY_LOC = 2;
@@ -66,6 +68,7 @@ public class JavaApplicationsView extends VerticalSplitWithButton implements Ref
 	private static final String APPLICATION = bundle.getString("Application");
 
 	protected IDaoManager<Connection> daoManagerConnection = null;
+	protected IDaoManager<JavaApplication> daoManagerJavaApplication = null;
 
 	@Inject
 	private Logger logger;
@@ -87,6 +90,7 @@ public class JavaApplicationsView extends VerticalSplitWithButton implements Ref
 		
 		jpaJavaApplication = JPAContainerFactory.make(JavaApplication.class, SmockerUI.getEm());
 		daoManagerConnection = new DaoManager<Connection>(Connection.class, SmockerUI.getEm()) ;
+		daoManagerJavaApplication = new DaoManager<JavaApplication>(JavaApplication.class, SmockerUI.getEm()) ;
 
 		mainLayout.setMargin(true);
 		treetable = new TreeTable();
@@ -123,9 +127,6 @@ public class JavaApplicationsView extends VerticalSplitWithButton implements Ref
 							}
 						});
 					} 
-					else {
-						return button;
-					}
 					return button;
 				}
 				return null;
@@ -135,30 +136,17 @@ public class JavaApplicationsView extends VerticalSplitWithButton implements Ref
 
 		fillTreeTable();
 		treetable.setSizeFull();
-		mainLayout.addComponent(treetable);
-		
-		
-		
-		
-		Button cleanAllButton = new Button(bundle.getString("CleanAll_Button"));
-		addComponent(cleanAllButton);
-		//setComponentAlignment(cleanAllButton, Alignment.TOP_RIGHT);
-		cleanAllButton.addClickListener(new ClickListener() {
-			
-			@Override
-			public void buttonClick(ClickEvent event) {
-				daoManagerConnection.deleteAll();
-			}
-		});
-		
-		addButton(cleanAllButton);	
-		setSecondComponent(treetable);
+		addComponent(treetable);
 		setSizeFull();
 	}
 
 	private Object rootTreeItem = null;
 
 	private void fillTreeTable() {
+		//treetable.clear();
+		treetable.removeAllItems();
+		jpaJavaApplication = JPAContainerFactory.make(JavaApplication.class, SmockerUI.getEm());
+		//treetable.getContainerDataSource().removeAllItems();
 		Collection<Object> itemIds = jpaJavaApplication.getItemIds();
 
 		Object[] root = new Object[] { "all", "", "", "" };
@@ -221,21 +209,11 @@ public class JavaApplicationsView extends VerticalSplitWithButton implements Ref
 			treetable.setChildrenAllowed(javaApplicationTreeItem, true);
 			treetable.setParent(connectionTreeItem, javaApplicationTreeItem);
 			treetable.setChildrenAllowed(connectionTreeItem, false);
-
-			
-			//Button WatchUnWatchButton = new Button(bundle.getString(buttonString));
-			
 		}
 		else {
 			logger.warn("Unable to find javaApplicationTreeItem");
 		}
 	}
-
-	//
-	//	private boolean alreadyExists(Connection connection) {
-	//		// TODO Auto-generated method stub
-	//		return connection.getJavaApplication().getConnections().contains(o);
-	//	}
 
 
 	private Object buildJavaApplicationTreeItem(JavaApplication javaApplication) {
@@ -278,6 +256,16 @@ public class JavaApplicationsView extends VerticalSplitWithButton implements Ref
 	@Override
 	public ClickListener getClickListener(String key) {
 		// TODO Auto-generated method stub
+		if (key.equals(EnumButton.CLEAN_ALL.toString())) {
+			return new ClickListener() {
+				@Override
+				public void buttonClick(ClickEvent event) {
+					daoManagerJavaApplication.deleteAll();
+					fillTreeTable();
+				}
+			};
+		}
 		return null;
+		
 	}
 }

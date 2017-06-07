@@ -8,6 +8,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Column;
 import javax.persistence.Version;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jenetics.smocker.model.Communication;
 import java.util.Set;
 import java.util.HashSet;
@@ -36,7 +38,7 @@ public class Connection implements EntityWithId {
 	private Set<Communication> Communications = new HashSet<Communication>();
 
 	@JoinColumn(nullable = false)
-	@OneToOne
+	@OneToOne @JsonIgnore 
 	private JavaApplication javaApplication;
 
 	@Column

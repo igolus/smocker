@@ -15,9 +15,9 @@ public class VerticalSplitWithButton extends VerticalSplitPanel{
 		super();
 		buttonLayout = new HorizontalLayout();
 		setFirstComponent(buttonLayout);
-		setSplitPosition(50, Unit.PIXELS);
+		setSplitPosition(65, Unit.PIXELS);
 		setLocked(true);
-		addStyleName("mainramhsplitpanel"); 
+		addStyleName("invisiblesplitterh"); 
 	}
 	
 	public VerticalSplitWithButton(Component downComponent) {
@@ -25,7 +25,7 @@ public class VerticalSplitWithButton extends VerticalSplitPanel{
 		buttonLayout = new HorizontalLayout();
 		setFirstComponent(buttonLayout);
 		setSecondComponent(downComponent);
-		addStyleName("mainramhsplitpanel"); 
+		addStyleName("invisiblesplitter"); 
 	}
 	
 	public void addButton(Button but) {

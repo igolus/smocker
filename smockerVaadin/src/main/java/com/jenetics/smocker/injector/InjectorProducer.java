@@ -32,7 +32,7 @@ public class InjectorProducer {
     	final ParameterizedType parameterizedType = (ParameterizedType) injectionPoint.getType();
         final Class<T> genericTypeClass = 
             (Class<T>) parameterizedType.getActualTypeArguments()[0];
-        EntityManager em = Persistence.createEntityManagerFactory(SmockerUI.PERSISTENCE_UNIT).createEntityManager();
+        EntityManager em = SmockerUI.getEm();
         return new DaoManager<T>(genericTypeClass, em);  
     }  
     

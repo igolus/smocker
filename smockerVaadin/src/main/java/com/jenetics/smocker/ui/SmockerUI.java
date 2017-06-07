@@ -83,7 +83,7 @@ public class SmockerUI extends UI {
         	//.withLoginPopupLoginStyle("propupStyle")
         	.build();
 		
-		easyAppMainView.setSplitPosition(100);
+		easyAppMainView.setSplitPosition(93);
 		
 		manageButtons();
 		

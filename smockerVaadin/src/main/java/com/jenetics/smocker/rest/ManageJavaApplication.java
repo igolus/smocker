@@ -60,7 +60,7 @@ public class ManageJavaApplication {
 		daoManager.update(target);
 		//notify the creation
 		connectionEventSrc.fire(conn);
-		return Response.status(Status.OK).build();
+		return Response.ok().entity(conn).build();
 	}
 	
 	@DELETE
@@ -80,7 +80,7 @@ public class ManageJavaApplication {
 		daoManager.update(target.getId(), target);
 		//notify the creation
 		javaApplicationEventSrc.fire(target);
-		return Response.status(Status.OK).build();
+		return Response.ok().build();
 	}
 	
 	

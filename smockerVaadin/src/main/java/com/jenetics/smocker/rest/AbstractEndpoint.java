@@ -13,19 +13,27 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.GenericEntity;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.Response.StatusType;
 import javax.ws.rs.core.UriBuilder;
 
 import org.jboss.logging.Logger;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jenetics.smocker.dao.IDaoManager;
 import com.jenetics.smocker.injector.Dao;
+import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.ui.SmockerUI;
 
 public abstract class AbstractEndpoint<T extends EntityWithId> {
 
+	ObjectMapper mapper = new ObjectMapper();
+	
 	@Inject
 	Logger logger;
 
@@ -43,10 +51,7 @@ public abstract class AbstractEndpoint<T extends EntityWithId> {
 		daoManager.create(entity);
 		//notify the creation
 		entityEventSrc.fire(entity);
-		return Response
-				.created(UriBuilder.fromResource(ConnectionEndpoint.class).path(String.valueOf(entity.getId())).build())
-				.build();
-
+		return Response.ok(entity).build();
 	}
 
 	@GET
@@ -61,8 +66,9 @@ public abstract class AbstractEndpoint<T extends EntityWithId> {
 	}
 
 	@GET
-	public List<T> listAll(@QueryParam("start") final Integer startPosition, @QueryParam("max") final Integer maxResult) {
-		return daoManager.listAll(startPosition, maxResult);
+	public Response listAll(@QueryParam("start") final Integer startPosition, @QueryParam("max") final Integer maxResult) {
+		List<T> all = daoManager.listAll(startPosition, maxResult);
+		return Response.ok().entity(all).build();
 	}
 
 	@PUT

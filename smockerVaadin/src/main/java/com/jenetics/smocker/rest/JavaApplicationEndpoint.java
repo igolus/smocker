@@ -16,5 +16,4 @@ import com.jenetics.smocker.model.JavaApplication;
 @Consumes("application/json")
 public class JavaApplicationEndpoint extends AbstractEndpoint<JavaApplication>{
 
-
 }

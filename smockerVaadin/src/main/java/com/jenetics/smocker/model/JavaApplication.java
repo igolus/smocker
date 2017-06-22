@@ -28,8 +28,11 @@ public class JavaApplication implements EntityWithId {
 	@Column(length = 1024)
 	private String classQualifiedName;
 
-	@OneToMany(cascade=CascadeType.PERSIST, mappedBy="javaApplication") 
+	@OneToMany(cascade = CascadeType.PERSIST, mappedBy = "javaApplication")
 	private Set<Connection> Connections = new HashSet<Connection>();
+
+	@Column
+	private String Host;
 
 	public Long getId() {
 		return this.id;
@@ -72,25 +75,12 @@ public class JavaApplication implements EntityWithId {
 		return result;
 	}
 
-
-
 	public String getClassQualifiedName() {
 		return classQualifiedName;
 	}
 
 	public void setClassQualifiedName(String classQualifiedName) {
 		this.classQualifiedName = classQualifiedName;
-	}
-
-	@Override
-	public String toString() {
-		String result = getClass().getSimpleName() + " ";
-		if (id != null)
-			result += "id: " + id;
-		result += ", version: " + version;
-		if (classQualifiedName != null && !classQualifiedName.trim().isEmpty())
-			result += ", ClassName: " + classQualifiedName;
-		return result;
 	}
 
 	public Set<Connection> getConnections() {
@@ -100,5 +90,28 @@ public class JavaApplication implements EntityWithId {
 	public void setConnections(final Set<Connection> Connections) {
 		this.Connections = Connections;
 	}
-	
+
+	public String getHost() {
+		return Host;
+	}
+
+	public void setHost(String Host) {
+		this.Host = Host;
+	}
+
+	@Override
+	public String toString() {
+		String result = getClass().getSimpleName() + " ";
+		if (id != null)
+			result += "id: " + id;
+		result += ", version: " + version;
+		if (classQualifiedName != null && !classQualifiedName.trim().isEmpty())
+			result += ", classQualifiedName: " + classQualifiedName;
+		if (Connections != null)
+			result += ", Connections: " + Connections;
+		if (Host != null && !Host.trim().isEmpty())
+			result += ", Host: " + Host;
+		return result;
+	}
+
 }

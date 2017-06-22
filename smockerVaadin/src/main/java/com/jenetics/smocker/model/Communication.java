@@ -3,10 +3,17 @@ package com.jenetics.smocker.model;
 import javax.persistence.Entity;
 import java.io.Serializable;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Column;
 import javax.persistence.Version;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.Date;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 @Entity
 public class Communication implements EntityWithId {
@@ -20,8 +27,28 @@ public class Communication implements EntityWithId {
 	@Column(name = "version")
 	private int version;
 
+	@Column(columnDefinition = "TEXT")
+	private String request;
+
+	@Column(columnDefinition = "TEXT")
+	private String response;
+
+	@JoinColumn(nullable = false)
+	@OneToOne
+	@JsonIgnore
+	private Connection connection;
+
 	@Column
-	private String Reqest;
+	@Temporal(TemporalType.TIME)
+	private Date dateTime;
+
+	public Connection getConnection() {
+		return connection;
+	}
+
+	public void setConnection(Connection connection) {
+		this.connection = connection;
+	}
 
 	public Long getId() {
 		return this.id;
@@ -67,12 +94,28 @@ public class Communication implements EntityWithId {
 		return result;
 	}
 
-	public String getReqest() {
-		return Reqest;
+	public String getRequest() {
+		return request;
 	}
 
-	public void setReqest(String Reqest) {
-		this.Reqest = Reqest;
+	public void setRequest(String request) {
+		this.request = request;
+	}
+
+	public String getResponse() {
+		return response;
+	}
+
+	public void setResponse(String response) {
+		this.response = response;
+	}
+
+	public Date getDateTime() {
+		return dateTime;
+	}
+
+	public void setDateTime(Date dateTime) {
+		this.dateTime = dateTime;
 	}
 
 	@Override
@@ -81,8 +124,14 @@ public class Communication implements EntityWithId {
 		if (id != null)
 			result += "id: " + id;
 		result += ", version: " + version;
-		if (Reqest != null && !Reqest.trim().isEmpty())
-			result += ", Reqest: " + Reqest;
+		if (request != null && !request.trim().isEmpty())
+			result += ", request: " + request;
+		if (response != null && !response.trim().isEmpty())
+			result += ", response: " + response;
+		if (connection != null)
+			result += ", connection: " + connection;
+		if (dateTime != null)
+			result += ", dateTime: " + dateTime;
 		return result;
 	}
 }

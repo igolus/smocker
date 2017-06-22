@@ -6,6 +6,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Version;
 
@@ -34,7 +35,7 @@ public class Connection implements EntityWithId {
 	@Column(nullable = false)
 	private Integer port;
 
-	@OneToMany
+	@OneToMany(cascade = CascadeType.PERSIST, mappedBy = "connection")
 	private Set<Communication> Communications = new HashSet<Communication>();
 
 	@JoinColumn(nullable = false)

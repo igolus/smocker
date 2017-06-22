@@ -3,6 +3,7 @@ package com.jenetics.smocker.ui.view;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
 
@@ -10,6 +11,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+import org.apache.commons.lang.StringUtils;
 import org.jboss.logging.Logger;
 import org.vaadin.easyapp.util.annotations.ContentView;
 
@@ -17,41 +19,51 @@ import com.jenetics.smocker.dao.DaoManager;
 import com.jenetics.smocker.dao.IDaoManager;
 import com.jenetics.smocker.injector.BundleUI;
 import com.jenetics.smocker.injector.Dao;
+import com.jenetics.smocker.model.Communication;
 import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.SmockerUI.EnumButton;
 import com.jenetics.smocker.ui.util.ButtonWithId;
+import com.jenetics.smocker.ui.util.CommunicationTreeItem;
 import com.jenetics.smocker.ui.util.EventManager;
 import com.jenetics.smocker.ui.util.RefreshableView;
 import com.jenetics.smocker.ui.util.VerticalSplitWithButton;
 import com.vaadin.addon.jpacontainer.JPAContainer;
 import com.vaadin.addon.jpacontainer.JPAContainerFactory;
 import com.vaadin.annotations.Push;
+import com.vaadin.event.ItemClickEvent;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.ThemeResource;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.Position;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.Tree;
 import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 
 @Push
 @ViewScope
 @ContentView(sortingOrder=1, viewName = "Java Applications", icon = "icons/Java-icon.png", homeView=true, rootViewParent=ConnectionsRoot.class)
-public class JavaApplicationsView extends VerticalLayout implements RefreshableView {
+public class JavaApplicationsView extends VerticalSplitPanel implements RefreshableView {
 
+
+	private static final String SEP_CONN = ":";
 
 	private static final int PORT_ARRAY_LOC = 2;
 
@@ -80,6 +92,17 @@ public class JavaApplicationsView extends VerticalLayout implements RefreshableV
 
 	private TreeTable treetable= null;
 	private JPAContainer<JavaApplication> jpaJavaApplication;
+
+	private VerticalLayout second;
+	
+	private Map<Object ,Object > applicationItemById = new HashMap<>();
+	private Map<String ,ButtonWithId> buttonByUiId = new HashMap<>();
+	private Map<String ,Long > applicationIdIByAdressAndPort = new HashMap<>();
+
+	private TextArea areaInput;
+
+	private TextArea areaOutput;
+	
 	/**
 	 * 
 	 */
@@ -93,14 +116,33 @@ public class JavaApplicationsView extends VerticalLayout implements RefreshableV
 		daoManagerJavaApplication = new DaoManager<JavaApplication>(JavaApplication.class, SmockerUI.getEm()) ;
 
 		mainLayout.setMargin(true);
+		buildTreeTable();
+
+
+		fillTreeTable();
+		treetable.setWidth("100%");;
+		treetable.setHeight("40%");
+		
+		
+		
+		
+		buildSecondArea();
+		treetable.setSizeFull();
+		setFirstComponent(treetable);
+		setSecondComponent(second);
+		setSplitPosition(100, Unit.PIXELS);
+		
+		setSizeFull();
+	}
+
+	private void buildTreeTable() {
 		treetable = new TreeTable();
 		treetable.setSelectable(true);
 		treetable.addContainerProperty(APPLICATION, String.class, "");
 		treetable.addContainerProperty(ADRESS, String.class, "");
 		treetable.addContainerProperty(PORT, String.class, "");
 		treetable.addContainerProperty(CONNECTION_TYPE, String.class, "");
-
-
+		
 		treetable.addGeneratedColumn("Watch", new Table.ColumnGenerator() {
 			public Component generateCell(Table source, Object itemId,  Object columnId) {
 				if (!treetable.getItem(itemId).getItemProperty(ADRESS).getValue().toString().isEmpty() &&
@@ -132,12 +174,80 @@ public class JavaApplicationsView extends VerticalLayout implements RefreshableV
 				return null;
 			}
 		});
+		
+		treetable.addItemClickListener(new ItemClickEvent.ItemClickListener() {
+		    @Override
+		    public void itemClick(ItemClickEvent itemClickEvent) {
+		    	if (!StringUtils.isEmpty(itemClickEvent.getItem().getItemProperty(ADRESS).toString()) && 
+		    			!StringUtils.isEmpty(itemClickEvent.getItem().getItemProperty(PORT).toString())) {
+		    		String host = itemClickEvent.getItem().getItemProperty(ADRESS).toString();
+					String port = itemClickEvent.getItem().getItemProperty(PORT).toString();
+					String key = host + SEP_CONN + port;
+		    		Long appId = applicationIdIByAdressAndPort.get(key);
+		    		if (appId != null) {
+		    			JavaApplication javaApplication = jpaJavaApplication.getItem(appId).getEntity();
+		    			Set<Connection> connections = javaApplication.getConnections();
+		    			Optional<Connection> connection = connections.stream().
+		    					filter(x -> (StringUtils.equals(host, x.getHost()) && StringUtils.equals(port, x.getPort().toString()))).findFirst();
+		    			if (connection.isPresent()) {
+		    				Set<Communication> communications = connection.get().getCommunications();
+		    				fillCommunications(communications);
+		    			}
+		    		}
+		    	}
+		        System.out.println(itemClickEvent.getItemId().toString());
+		    }
+		});
+	}
 
+	protected void fillCommunications(Set<Communication> communications) {
+		Tree menu = new Tree();
+		for (Communication communication : communications) {
+			//String dateTime = communication.getDateTime().toString();
+			menu.addItem(new CommunicationTreeItem(communication));
+			menu.setChildrenAllowed(communication, false);
+		}
+		
+		menu.addItem("Venus");
+		menu.setChildrenAllowed("Venus", false);
+		menu.setSizeFull();
+		
 
-		fillTreeTable();
-		treetable.setSizeFull();
-		addComponent(treetable);
-		setSizeFull();
+//		grid.setColumnExpandRatio(0, 0.2f);
+//		grid.setColumnExpandRatio(1, 0.4f);
+//		grid.setColumnExpandRatio(2, 0.4f);
+		
+		areaInput = new TextArea();
+		areaInput.setSizeFull();
+		areaInput.setSizeFull();
+		areaOutput = new TextArea();
+		areaOutput.setSizeFull();
+		areaOutput.setSizeFull();
+		
+		GridLayout grid = new GridLayout(2, 1);
+		grid.setSizeFull();
+		grid.addComponent(areaInput, 0, 0);
+		grid.addComponent(areaOutput, 1, 0);
+		
+		VerticalSplitPanel vsplitPane = new VerticalSplitPanel();
+		vsplitPane.setSplitPosition(0.2f);
+		vsplitPane.setFirstComponent(menu);
+		vsplitPane.setSecondComponent(grid);
+		
+		second.removeAllComponents();
+		second.addComponent(vsplitPane);
+		
+	}
+
+	//**
+	private VerticalLayout buildSecondArea() {
+		second = new VerticalLayout();
+		TextArea area = new TextArea("Big Area");
+		area.setSizeFull();
+		second.addComponent(area);
+		second.setWidth("100%");;
+		second.setHeight("60%");
+		return second;
 	}
 
 	private Object rootTreeItem = null;
@@ -165,8 +275,7 @@ public class JavaApplicationsView extends VerticalLayout implements RefreshableV
 		}
 	}
 
-	private Map<Object ,Object > applicationItemById = new HashMap<>();
-	private Map<String ,ButtonWithId> buttonByUiId = new HashMap<>();
+
 
 	/**
 	 * Update the tree add new items (JavaConnection or Connection) 
@@ -187,7 +296,8 @@ public class JavaApplicationsView extends VerticalLayout implements RefreshableV
 
 
 	private void buildConnectionTreeItem(Connection conn) {
-
+		
+		applicationIdIByAdressAndPort.put(conn.getHost() + SEP_CONN + conn.getPort(), conn.getJavaApplication().getId());
 		Object javaApplicationTreeItem = applicationItemById.get(conn.getJavaApplication().getId());
 		if (javaApplicationTreeItem != null) {
 			
@@ -217,7 +327,7 @@ public class JavaApplicationsView extends VerticalLayout implements RefreshableV
 
 
 	private Object buildJavaApplicationTreeItem(JavaApplication javaApplication) {
-		Object[] javaApplicationItem = new Object[] { javaApplication.getClassQualifiedName(),  "", "", "" };
+		Object[] javaApplicationItem = new Object[] { javaApplication.getClassQualifiedName(),  "", "", ""};
 		Object javaApplicationTreeItem = treetable.addItem(javaApplicationItem, null);
 		treetable.setParent(javaApplicationTreeItem, rootTreeItem);
 		treetable.setChildrenAllowed(javaApplicationTreeItem, false);

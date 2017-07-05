@@ -71,12 +71,12 @@ public abstract class AbstractEndpoint<T extends EntityWithId> {
 		return Response.ok().entity(all).build();
 	}
 
-	@PUT
-	@Path("/{id:[0-9][0-9]*}")
-	public Response update(@PathParam("id") Long id, final T entity) {
-		daoManager.update(id, entity);
-		return Response.ok(entity).build();
-	}
+//	@PUT
+//	@Path("/{id:[0-9][0-9]*}")
+//	public Response update(@PathParam("id") Long id, final T entity) {
+//		daoManager.update(id, entity);
+//		return Response.ok(entity).build();
+//	}
 
 	@DELETE
 	@Path("/{id:[0-9][0-9]*}")

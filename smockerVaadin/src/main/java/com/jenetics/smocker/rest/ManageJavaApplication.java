@@ -64,7 +64,9 @@ public class ManageJavaApplication {
 		target.getConnections().add(conn);
 		daoManager.update(target);
 		//notify the creation
-		connectionEventSrc.fire(conn);
+		Connection[] conns = new Connection[target.getConnections().size()];
+		target.getConnections().toArray(conns);
+		connectionEventSrc.fire(conns[conns.length - 1]);
 		return Response.ok().entity(conn).build();
 	}
 	
@@ -75,14 +77,14 @@ public class ManageJavaApplication {
 		if (target == null) {
 			return Response.status(Status.NOT_FOUND).entity("javaApplication with Id : " + javaApplicationId + " not found").build();
 		}
-		Optional<Connection> targetConn = target.getConnections().stream().filter(conn -> conn.getId() == connectionId).findFirst();
-		if (targetConn == null) {
+		Optional<Connection> targetConn = target.getConnections().stream().filter(conn -> conn.getId().equals(connectionId)).findFirst();
+		if (!targetConn.isPresent()) {
 			return Response.status(Status.NOT_FOUND).entity("Connection with Id : " + targetConn +
 					" not found in javaApplication with Id : " + javaApplicationId ).build();
 		}
 		
 		target.getConnections().remove(targetConn.get());
-		daoManager.update(target.getId(), target);
+		daoManager.update(target);
 		//notify the creation
 		javaApplicationEventSrc.fire(target);
 		return Response.ok().build();
@@ -111,7 +113,7 @@ public class ManageJavaApplication {
 		
 		//notify the creation
 		communicationEventSrc.fire(comm);
-		javaApplicationEventSrc.fire(target);
+		//javaApplicationEventSrc.fire(target);
 		
 		return Response.ok().entity(comm).build();
 	}
@@ -123,12 +125,12 @@ public class ManageJavaApplication {
 		if (target == null) {
 			return Response.status(Status.NOT_FOUND).entity("javaApplication with Id : " + javaApplicationId + " not found").build();
 		}
-		Optional<Connection> targetConn = target.getConnections().stream().filter(conn -> conn.getId() == connectionId).findFirst();
+		Optional<Connection> targetConn = target.getConnections().stream().filter(conn -> conn.getId().equals(connectionId)).findFirst();
 		if (!targetConn.isPresent()) {
 			return Response.status(Status.NOT_FOUND).entity("Connection with Id : " + targetConn +
 					" not found in javaApplication with Id : " + javaApplicationId ).build();
 		}
-		Optional<Communication> targetCommunication = targetConn.get().getCommunications().stream().filter(x -> x.getId() == communicationId).findFirst();
+		Optional<Communication> targetCommunication = targetConn.get().getCommunications().stream().filter(x -> x.getId().equals(communicationId)).findFirst();
 		if (!targetCommunication.isPresent()) {
 			return Response.status(Status.NOT_FOUND).entity("Communication with Id : " + targetCommunication +
 					" not found in javaApplication/Connection with Id : " + javaApplicationId + "/" + connectionId).build();
@@ -136,7 +138,7 @@ public class ManageJavaApplication {
 		
 		
 		targetConn.get().getCommunications().remove(targetCommunication.get());
-		daoManager.update(target.getId(), target);
+		daoManager.update(target);
 		javaApplicationEventSrc.fire(target);
 		return Response.ok().build();
 	}

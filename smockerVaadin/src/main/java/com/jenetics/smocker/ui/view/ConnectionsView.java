@@ -1,5 +1,8 @@
 package com.jenetics.smocker.ui.view;
 
+import java.util.List;
+
+import org.vaadin.easyapp.util.ButtonDescriptor;
 import org.vaadin.easyapp.util.annotations.ContentView;
 
 import com.jenetics.smocker.model.Connection;
@@ -22,7 +25,7 @@ import com.vaadin.ui.VerticalLayout;
 
 @Push
 @ViewScope
-@ContentView(sortingOrder=2, viewName = "Connections", icon = "icons/Places-network-server-database-icon.png", rootViewParent=ConnectionsRoot.class)
+//@ContentView(sortingOrder=2, viewName = "Connections", icon = "icons/Places-network-server-database-icon.png", rootViewParent=ConnectionsRoot.class)
 public class ConnectionsView extends VerticalLayout implements RefreshableView {
 
 	/**
@@ -71,5 +74,17 @@ public class ConnectionsView extends VerticalLayout implements RefreshableView {
 	public ClickListener getClickListener(String key) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public List<ButtonDescriptor> getButtons() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean isClickable(String key) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

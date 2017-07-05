@@ -51,7 +51,7 @@ public class DaoManager<T extends Serializable> implements IDaoManager<T> {
 		// TODO Auto-generated method stub
 		EntityTransaction entityTransaction = em.getTransaction();
         entityTransaction.begin();
-		em.persist(entity);
+		em.merge(entity);
 		entityTransaction.commit();
 		return entity;
 	}
@@ -66,12 +66,6 @@ public class DaoManager<T extends Serializable> implements IDaoManager<T> {
 	@Override
 	public List<T> listAll() {
 		return listAll(0, -1);
-	}
-
-	@Override
-	public void update(Long id, T entity) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override

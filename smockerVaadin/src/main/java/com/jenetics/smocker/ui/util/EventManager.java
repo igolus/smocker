@@ -2,6 +2,7 @@ package com.jenetics.smocker.ui.util;
 
 import javax.enterprise.event.Observes;
 
+import com.jenetics.smocker.model.Communication;
 import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.model.JavaApplication;
@@ -18,7 +19,12 @@ public class EventManager {
 	
    public void newJavaApplication(@Observes JavaApplication application) {
 		refreshView(JAVA_APPLICATIONS, application);
-	}
+    }
+   
+   public void newCommunication(@Observes Communication comm) {
+		refreshView(JAVA_APPLICATIONS, comm);
+   }
+
 
 	private void refreshView(String viewName, EntityWithId entityWithId) {
 		if (SmockerUI.getInstance() != null && SmockerUI.getInstance().getSession() != null) {

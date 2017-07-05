@@ -42,6 +42,9 @@ public class Communication implements EntityWithId {
 	@Temporal(TemporalType.TIME)
 	private Date dateTime;
 
+	@Column(columnDefinition = "TEXT")
+	private String callerStack;
+
 	public Connection getConnection() {
 		return connection;
 	}
@@ -118,6 +121,14 @@ public class Communication implements EntityWithId {
 		this.dateTime = dateTime;
 	}
 
+	public String getCallerStack() {
+		return callerStack;
+	}
+
+	public void setCallerStack(String CallerStack) {
+		this.callerStack = CallerStack;
+	}
+
 	@Override
 	public String toString() {
 		String result = getClass().getSimpleName() + " ";
@@ -132,6 +143,8 @@ public class Communication implements EntityWithId {
 			result += ", connection: " + connection;
 		if (dateTime != null)
 			result += ", dateTime: " + dateTime;
+		if (callerStack != null && !callerStack.trim().isEmpty())
+			result += ", CallerStack: " + callerStack;
 		return result;
 	}
 }

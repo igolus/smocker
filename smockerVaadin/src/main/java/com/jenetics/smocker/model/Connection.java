@@ -35,7 +35,7 @@ public class Connection implements EntityWithId {
 	@Column(nullable = false)
 	private Integer port;
 
-	@OneToMany(cascade = CascadeType.PERSIST, mappedBy = "connection")
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval=true, mappedBy = "connection" )
 	private Set<Communication> Communications = new HashSet<Communication>();
 
 	@JoinColumn(nullable = false)

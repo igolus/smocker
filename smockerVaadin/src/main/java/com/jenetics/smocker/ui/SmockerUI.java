@@ -63,6 +63,11 @@ public class SmockerUI extends UI {
 	private EasyAppMainView easyAppMainView; 
 
 
+	public EasyAppMainView getEasyAppMainView() {
+		return easyAppMainView;
+	}
+
+
 	@Override
 	protected void init(VaadinRequest request) {
 		
@@ -85,7 +90,7 @@ public class SmockerUI extends UI {
 		
 		easyAppMainView.setSplitPosition(93);
 		
-		manageButtons();
+//		manageButtons();
 		
 		layout.addComponents(easyAppMainView);
         
@@ -96,12 +101,13 @@ public class SmockerUI extends UI {
 	}
 
 	public enum EnumButton {
-		CLEAN_ALL
+		CLEAN_ALL,
+		STACK
 	}
 	
-	private void manageButtons() {
-		easyAppMainView.getToolBar().addButton(bundle.getString("CleanAll"), bundle.getString("CleanAllToolTip"), FontAwesome.REMOVE, EnumButton.CLEAN_ALL.toString());
-	}
+//	private void manageButtons() {
+//		easyAppMainView.getToolBar().addButton(bundle.getString("CleanAll"), bundle.getString("CleanAllToolTip"), FontAwesome.REMOVE, EnumButton.CLEAN_ALL.toString());
+//	}
 
 
 	private Object search(String searchValue) {

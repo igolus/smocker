@@ -4,6 +4,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,6 +20,9 @@ public class RESTClient {
     private InetAddress inetAddress;
     private int port;
     private String path;
+    
+    public static final String POST = "POST";
+    public static final String PUT = "PUT";
     
     public void setPath(String path) {
 		this.path = path;
@@ -100,11 +104,11 @@ public class RESTClient {
 
     }
 
-    public String post(String content, Map<String,String> headers) throws Exception {
-        return post(content, headers, TIMEOUT);
+    public String post(String content, Map<String,String> headers, String method) throws Exception {
+        return post(content, headers, TIMEOUT, method);
     }
 
-    public String post(String content, Map<String,String> headers, int timeout) throws Exception {
+    public String post(String content, Map<String,String> headers, int timeout, String method) throws Exception {
         Socket socket = null;
         BufferedWriter wr = null;
         InputStreamReader is = null;
@@ -112,8 +116,10 @@ public class RESTClient {
             socket = new Socket(inetAddress, port);
             socket.setSoTimeout(timeout);
             wr = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF8"));
+            //wr = new BufferedWriter(new OutputStreamWriter(System.out));
+            
             is = new InputStreamReader(socket.getInputStream());
-            wr.write("POST " + path + " HTTP/1.0\r\n");
+            wr.write(method + " " + path + " HTTP/1.0\r\n");
             wr.write(getFormattedHeader("Content-Length","" + content.length()));
             wr.write(getFormattedHeader("Content-Type", "application/json"));
             for (Map.Entry<String, String> header : headers.entrySet()) {
@@ -129,7 +135,7 @@ public class RESTClient {
             }
             return stringWriter.toString();
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Problem communicating with SIX services: {0}", e);
+            logger.log(Level.SEVERE, "Problem communicating", e);
             throw e;
         }finally{
             try {
@@ -152,6 +158,10 @@ public class RESTClient {
     public String get(String content, Map<String,String> headers) {
         return get(content, headers, TIMEOUT);
     }
+    
+    public String get() {
+        return get(null, null, TIMEOUT);
+    }
 
     public String get(String content, Map<String,String> headers, int timeout) {
         Socket socket = null;
@@ -163,13 +173,20 @@ public class RESTClient {
             wr = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF8"));
             is = new InputStreamReader(socket.getInputStream());
             wr.write("GET " + path + " HTTP/1.0\r\n");
-            wr.write(getFormattedHeader("Content-Length","" + content.length()));
-            wr.write(getFormattedHeader("Content-Type", "application/json"));
-            for (Map.Entry<String, String> header : headers.entrySet()) {
-                wr.write(getFormattedHeader(HEADER_NAME_PREFIX + header.getKey(),header.getValue()));
+            if (content != null) {
+            	wr.write(getFormattedHeader("Content-Length","" + content.length()));
+                wr.write(getFormattedHeader("Content-Type", "application/json"));
+
+            }
+            if (headers != null) {
+            	for (Map.Entry<String, String> header : headers.entrySet()) {
+                    wr.write(getFormattedHeader(HEADER_NAME_PREFIX + header.getKey(),header.getValue()));
+                }
             }
             wr.write("\r\n");
-            wr.write(content);
+            if (content != null) {
+            	wr.write(content);
+            }
             wr.flush();
             char[] buffer = new char[1024];
             StringWriter stringWriter = new StringWriter();

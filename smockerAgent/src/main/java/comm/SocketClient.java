@@ -18,6 +18,8 @@ public class SocketClient {
 		}
 		return new SocketClient();
 	}
+	
+	
 
 	public void sendConnectionOpen(SmockerContainer smockerContainer) {
 		System.out.println(	 buildJsonConnection(

@@ -19,6 +19,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import org.jboss.logging.Logger;
+
 import com.jenetics.smocker.dao.DaoManager;
 import com.jenetics.smocker.dao.IDaoManager;
 import com.jenetics.smocker.injector.Dao;
@@ -48,6 +50,9 @@ public class ManageJavaApplication {
 	@Inject @Dao
 	protected IDaoManager<JavaApplication> daoManager;
 	
+	@Inject
+	private Logger logger;
+	
 	@PUT
 	@Path("/addConnection/{javaApplicationId}")
 	public Response create(@PathParam("javaApplicationId") Long javaApplicationId, Connection conn) {
@@ -66,8 +71,9 @@ public class ManageJavaApplication {
 		//notify the creation
 		Connection[] conns = new Connection[target.getConnections().size()];
 		target.getConnections().toArray(conns);
-		connectionEventSrc.fire(conns[conns.length - 1]);
-		return Response.ok().entity(conn).build();
+		Connection connUpdated = conns[conns.length - 1];
+		connectionEventSrc.fire(connUpdated);
+		return Response.ok().entity(connUpdated).build();
 	}
 	
 	@DELETE
@@ -104,18 +110,19 @@ public class ManageJavaApplication {
 		Optional<Connection> connection = target.getConnections().stream().filter(x -> x.getId().equals(connectionId)).findFirst();
 		
 		if (!connection.isPresent()) {
-			return Response.status(Status.NOT_FOUND).entity("Connection with Id : " + connectionId +
-					" not found in javaApplication with Id : " + javaApplicationId ).build();
+			return Response.status(Status.NOT_FOUND).build();
 		}
-		comm.setConnection(connection.get());
-		connection.get().getCommunications().add(comm);
-		daoManager.update(target);
-		
-		//notify the creation
-		communicationEventSrc.fire(comm);
-		//javaApplicationEventSrc.fire(target);
-		
-		return Response.ok().entity(comm).build();
+		if (connection.get().getWatched() != null && connection.get().getWatched()) {
+			comm.setConnection(connection.get());
+			connection.get().getCommunications().add(comm);
+			daoManager.update(target);
+			
+			//notify the creation
+			communicationEventSrc.fire(comm);
+			return Response.ok().entity(comm).build();
+		}
+		return Response.status(Status.FORBIDDEN).build();
+
 	}
 	
 	@DELETE
@@ -123,17 +130,19 @@ public class ManageJavaApplication {
 	public Response create(@PathParam("javaApplicationId") Long javaApplicationId, @PathParam("connectionId") Long connectionId, @PathParam("communicationId") Long communicationId) {
 		JavaApplication target = daoManager.findById(javaApplicationId);
 		if (target == null) {
-			return Response.status(Status.NOT_FOUND).entity("javaApplication with Id : " + javaApplicationId + " not found").build();
+			logger.warn("javaApplication with Id : " + javaApplicationId + " not found");
+			return Response.status(Status.NOT_FOUND).build();
 		}
 		Optional<Connection> targetConn = target.getConnections().stream().filter(conn -> conn.getId().equals(connectionId)).findFirst();
 		if (!targetConn.isPresent()) {
-			return Response.status(Status.NOT_FOUND).entity("Connection with Id : " + targetConn +
-					" not found in javaApplication with Id : " + javaApplicationId ).build();
+			logger.warn("Connection with Id : " + targetConn + " not found in javaApplication with Id : " + javaApplicationId);
+			return Response.status(Status.NOT_FOUND).build();
 		}
 		Optional<Communication> targetCommunication = targetConn.get().getCommunications().stream().filter(x -> x.getId().equals(communicationId)).findFirst();
 		if (!targetCommunication.isPresent()) {
-			return Response.status(Status.NOT_FOUND).entity("Communication with Id : " + targetCommunication +
-					" not found in javaApplication/Connection with Id : " + javaApplicationId + "/" + connectionId).build();
+			logger.warn("Communication with Id : " + targetCommunication + 
+					"not found in javaApplication/Connection with Id : " + javaApplicationId + "/" + connectionId);
+			return Response.status(Status.NOT_FOUND).build();
 		}
 		
 		

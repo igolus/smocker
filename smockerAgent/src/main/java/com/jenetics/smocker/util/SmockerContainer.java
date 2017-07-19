@@ -11,7 +11,13 @@ public class SmockerContainer {
 	private boolean ssl;
 	private TeeInputStream teeInputStream;
 	private TeeOutputStream teeOutputStream;
+	private String stackTrace;
 	
+	public String getStackTrace() {
+		return stackTrace;
+	}
+
+
 	public String getHost() {
 		return host;
 	}
@@ -22,9 +28,10 @@ public class SmockerContainer {
 	}
 
 
-	public SmockerContainer(String host, int port) {
+	public SmockerContainer(String host, int port, String stackTrace) {
 		this.host = host;
 		this.port = port;
+		this.stackTrace = stackTrace;
 	}
 
 

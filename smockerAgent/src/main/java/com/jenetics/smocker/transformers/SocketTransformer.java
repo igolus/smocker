@@ -27,12 +27,23 @@ public class SocketTransformer extends AbstractTransformer {
 		
 		redefineGetOutputStream(classPool, ctClass);
 		redefineGetInputStream(classPool, ctClass);
+		redefineClose(classPool, ctClass);
 		redefineConstructors(classPool, ctClass);
 		
 		byteCode = ctClass.toBytecode();
 		ctClass.detach();
 		ctClass.defrost();
 		return byteCode;
+	}
+
+	private void redefineClose(ClassPool classPool, CtClass ctClass) throws NotFoundException, CannotCompileException {
+		// TODO Auto-generated method stub
+		CtMethod closeMethod = ctClass.getDeclaredMethod("close");
+
+		String body = "{" + " try{" + " 	com.jenetics.smocker.util.TransformerUtility.socketClosed( $0 );"
+				+ "} catch (Throwable t) { " + "    throw t; " + "}" + "}";
+
+		closeMethod.insertAfter(body);
 	}
 
 	private void redefineGetInputStream(ClassPool classPool, CtClass ctClass) throws NotFoundException, CannotCompileException {

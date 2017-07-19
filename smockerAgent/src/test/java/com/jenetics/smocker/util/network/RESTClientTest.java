@@ -13,7 +13,7 @@ public class RESTClientTest {
 		headers.put("Content-Type", "application/json");
 		String post = null;
 		try {
-			post = restClient.post("{\"id\": 0, \"version\": 0, \"host\": \"toto\",  \"port\": 10}", headers);
+			post = restClient.post("{\"id\": 0, \"version\": 0, \"host\": \"toto\",  \"port\": 10}", headers, RESTClient.POST);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

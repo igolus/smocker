@@ -1,6 +1,7 @@
 package com.jenetics.smocker.ui.view;
 
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,6 +23,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.jenetics.smocker.dao.DaoManager;
 import com.jenetics.smocker.dao.IDaoManager;
+import com.jenetics.smocker.injector.BundleUI;
 import com.jenetics.smocker.model.Communication;
 import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.EntityWithId;
@@ -58,6 +60,7 @@ import com.vaadin.ui.Tree;
 import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
+import com.vaadin.ui.Window;
 
 @Push
 @ViewScope
@@ -97,10 +100,10 @@ public class JavaApplicationsView extends VerticalSplitPanel implements Refresha
 
 	private VerticalLayout second;
 
-	private BiMap<Long ,Object > applicationItemById = HashBiMap.create();
-	private BiMap<String ,ButtonWithId> buttonByUiId = HashBiMap.create();
-	private BiMap<String ,Long > applicationIdIByAdressAndPort = HashBiMap.create();
-	private BiMap<Long, Object> connectionTreeItemByConnectionId = HashBiMap.create();
+	private Map<Long ,Object > applicationItemById = new HashMap<>();
+	private Map<String ,ButtonWithId> buttonByUiId =  new HashMap<>();
+	private Map<String ,Long > applicationIdIByAdressAndPort =  new HashMap<>();
+	private Map<Long, Object> connectionTreeItemByConnectionId = new HashMap<>();
 
 	private TextArea areaInput;
 
@@ -108,7 +111,7 @@ public class JavaApplicationsView extends VerticalSplitPanel implements Refresha
 
 	protected Item selectedTreeItem;
 
-	protected Communication selectedCommunication;
+	protected Communication selectedCommunication = null;
 
 	/**
 	 * 
@@ -136,6 +139,7 @@ public class JavaApplicationsView extends VerticalSplitPanel implements Refresha
 		setSplitPosition(150, Unit.PIXELS);
 
 		setSizeFull();
+		checkToolBar();
 	}
 
 	private void buildTreeTable() {
@@ -182,7 +186,7 @@ public class JavaApplicationsView extends VerticalSplitPanel implements Refresha
 			@Override
 			public void itemClick(ItemClickEvent itemClickEvent) {
 				selectedTreeItem = itemClickEvent.getItem();
-				SmockerUI.getInstance().getEasyAppMainView().getToolBar().checkClickable(JavaApplicationsView.this);
+				checkToolBar();
 				
 				if (!StringUtils.isEmpty(itemClickEvent.getItem().getItemProperty(ADRESS).toString()) && 
 						!StringUtils.isEmpty(itemClickEvent.getItem().getItemProperty(PORT).toString())) {
@@ -201,13 +205,27 @@ public class JavaApplicationsView extends VerticalSplitPanel implements Refresha
 						}
 					}
 				}
+				else {
+					selectedCommunication = null;
+				}
+				checkToolBar();
 			}
+
+			
 		});
+	}
+	
+	private void checkToolBar() {
+		if (SmockerUI.getInstance()!=null) {
+			SmockerUI.getInstance().getEasyAppMainView().getToolBar().checkClickable(JavaApplicationsView.this);
+		}
 	}
 
 	protected void fillCommunications(Connection conn, boolean checkSelected) {
+		
 		//only if the connection is selected and if there are some communications items exccept if if comes from click event
 		Object connectionItem = connectionTreeItemByConnectionId.get(conn.getId());
+		
 		if (connectionItem != null && 
 				(treetable.isSelected(connectionItem) || !checkSelected) && 
 				conn.getCommunications().size() > 0) {
@@ -262,10 +280,11 @@ public class JavaApplicationsView extends VerticalSplitPanel implements Refresha
 					selectedCommunication = comm;
 					areaInput.setReadOnly(false);
 					areaOutput.setReadOnly(false);
-					areaInput.setValue(comm.getRequest());
-					areaOutput.setValue(comm.getResponse());
+					areaInput.setValue(decode(comm.getRequest()));
+					areaOutput.setValue(decode(comm.getResponse()));
 					areaInput.setReadOnly(true);
 					areaOutput.setReadOnly(true);
+					checkToolBar();
 				}
 			});
 
@@ -284,11 +303,19 @@ public class JavaApplicationsView extends VerticalSplitPanel implements Refresha
 			second.addComponent(hsplitPane);
 
 		}
-		else if (conn.getCommunications().size() == 0) {
+		else if (conn.getCommunications().size() == 0 && !checkSelected) {
 			selectedCommunication = null;
 			second.removeAllComponents();
 		}
 
+	}
+
+	protected String decode(String code) {
+		String ret = null;
+		if (code != null) {
+			ret = new String(Base64.getDecoder().decode(code)); 
+		}
+		return ret;
 	}
 
 	//**
@@ -371,13 +398,14 @@ public class JavaApplicationsView extends VerticalSplitPanel implements Refresha
 			buttonByUiId.put(buttonWithId.getUiId(), buttonWithId);
 			Object[] itemConnection = new Object[] { javaApplication.getClassQualifiedName(),  connection.getHost(), connection.getPort().toString(), ""};
 			Object connectionTreeItem = treetable.addItem(itemConnection, null);
-
+			connectionTreeItemByConnectionId.remove(connection.getId());
 			connectionTreeItemByConnectionId.put(connection.getId(), connectionTreeItem);
 
 			treetable.setChildrenAllowed(javaApplicationTreeItem, true);
 			treetable.setParent(connectionTreeItem, javaApplicationTreeItem);
 			treetable.setChildrenAllowed(connectionTreeItem, false);
 			
+			applicationIdIByAdressAndPort.remove(connection.getHost() + SEP_CONN + connection.getPort());
 			applicationIdIByAdressAndPort.put(connection.getHost() + SEP_CONN + connection.getPort(), connection.getJavaApplication().getId());
 
 			fillCommunications(connection, true);
@@ -453,12 +481,24 @@ public class JavaApplicationsView extends VerticalSplitPanel implements Refresha
 				@Override
 				public void buttonClick(ClickEvent event) {
 					if (selectedCommunication != null) {
-						TextArea stackArea = new TextArea();
-						stackArea.setValue(selectedCommunication.getCallerStack());
-						stackArea.setReadOnly(true);
-						PopupView popup = new PopupView(null, stackArea );
-						addComponent(popup);
-						popup.setPopupVisible(true);
+						
+						Window subwindow = new Window(bundle.getString("StackTrace"));
+						subwindow.setWidth("800px");
+						subwindow.setHeight("600px");;
+						subwindow.setModal(true);
+						
+						VerticalLayout subContent = new VerticalLayout();
+						subContent.setMargin(true);
+						subContent.setSpacing(true);
+						subwindow.setContent(subContent);
+
+
+				        Label message = new Label(decode(selectedCommunication.getCallerStack()));
+				        message.setSizeFull();
+				        subContent.addComponent(message);
+				        subwindow.center();
+				        
+				        SmockerUI.getInstance().addWindow(subwindow);
 					}
 				}
 			};
@@ -486,7 +526,7 @@ public class JavaApplicationsView extends VerticalSplitPanel implements Refresha
 		}
 		if (key.equals(EnumButton.STACK.toString())) {
 			//enable only if connection is selected
-			return (connectionTreeItemByConnectionId.values().contains(selectedItem));
+			return selectedCommunication != null;
 		}
 		return false;
 	}

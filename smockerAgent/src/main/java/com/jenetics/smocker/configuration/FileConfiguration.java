@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import com.jenetics.smocker.util.ExceptionLogger;
+import com.jenetics.smocker.util.MessageLogger;
 
 public class FileConfiguration {
 	
@@ -30,7 +30,7 @@ public class FileConfiguration {
 			InputStream input = new FileInputStream(SMOCKER_CONF_PROPERTY_FILE);
 			configProperties.load(input);
 		} catch (Exception e) {
-			ExceptionLogger.logThrowable(e);
+			MessageLogger.logThrowable(e);
 		}
 	}
 	

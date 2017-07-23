@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.jenetics.smocker.util.MessageLogger;
+
 
 /**
  * @author Riccardo Merolla
@@ -195,24 +197,29 @@ public class RESTClient {
             }
             return stringWriter.toString();
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Problem communicating with SIX services: {0}", e);
+        	MessageLogger.logErrorWithMessage("Unable to communicate with smocker App", e, getClass());
             return "--";
         }finally{
             try {
-                wr.close();
+            	if (wr != null) {
+            		wr.close();
+            	}
             } catch (IOException ex) {
             }
             try {
-                is.close();
+                if (is != null) {
+                	is.close();
+                }
             } catch (IOException ex) {
             }
             try {
-                socket.close();
+            	if (socket != null) {
+                    socket.close();
+            	}
             } catch (IOException ex) {
             }
 
         }
-
     }
 
     String getFormattedHeader(String key,String value){

@@ -139,7 +139,7 @@ public class Connection implements EntityWithId {
 		if (Communications != null)
 			result += ", Communications: " + Communications;
 		if (javaApplication != null)
-			result += ", javaApplication: " + javaApplication;
+			result += ", javaApplication: " + javaApplication.getId();
 		if (watched != null)
 			result += ", watched: " + watched;
 		return result;

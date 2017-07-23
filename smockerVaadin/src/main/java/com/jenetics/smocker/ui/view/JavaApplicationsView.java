@@ -166,12 +166,18 @@ public class JavaApplicationsView extends VerticalSplitPanel implements Refresha
 								if (buttonWithId.getEntity().getWatched() == null || !buttonWithId.getEntity().getWatched()) {
 									buttonWithId.setCaption(bundle.getString("UnWatch_Button"));
 									buttonWithId.getEntity().setWatched(true);
+									buttonWithId.setEnabled(false);
 									daoManagerConnection.update(buttonWithId.getEntity());
+									buttonWithId.setEntity(daoManagerConnection.findById(buttonWithId.getEntity().getId()));
+									buttonWithId.setEnabled(true);
 								}
 								else {
 									buttonWithId.setCaption(bundle.getString("Watch_Button"));
 									buttonWithId.getEntity().setWatched(false);
+									buttonWithId.setEnabled(false);
 									daoManagerConnection.update(buttonWithId.getEntity());
+									buttonWithId.setEntity(daoManagerConnection.findById(buttonWithId.getEntity().getId()));
+									buttonWithId.setEnabled(true);
 								}
 							}
 						});

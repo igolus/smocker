@@ -47,11 +47,13 @@ public class ResponseReader {
 	
 	public static String readStatusCodeFromResponse(String response) throws IOException {
 		String status = null;
-		BufferedReader reader = new BufferedReader(new StringReader(response));
-		String line = reader.readLine();
-		
-		if (!line.isEmpty() && line.split(" ").length == 3) {
-			status = line.split(" ")[1];
+		if (response != null) {
+			BufferedReader reader = new BufferedReader(new StringReader(response));
+			String line = reader.readLine();
+			
+			if (!line.isEmpty() && line.split(" ").length == 3) {
+				status = line.split(" ")[1];
+			}
 		}
 		return status;
 	}

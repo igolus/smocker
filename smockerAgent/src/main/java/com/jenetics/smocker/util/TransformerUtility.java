@@ -36,7 +36,7 @@ public class TransformerUtility {
 	private static Hashtable<Socket, SmockerContainer> smockerContainerBySocket = new Hashtable<Socket, SmockerContainer>();
 	private static Hashtable<Socket, Long> connectionIdBySocket = new Hashtable<Socket, Long>();
 
-	public static InputStream manageInputStream(InputStream is, Socket source) {
+	public synchronized static InputStream manageInputStream(InputStream is, Socket source) {
 		if (!filterSmockerBehavior()) {
 			if (smockerContainerBySocket.containsKey(source)) {
 				SmockerContainer smockerContainer = smockerContainerBySocket.get(source);
@@ -48,12 +48,12 @@ public class TransformerUtility {
 				}
 				return smockerContainer.getTeeInputStream();
 			}
-			ExceptionLogger.logMessage("No socket key found in table");
+			MessageLogger.logMessage("No socket key found in table", TransformerUtility.class);
 		}
 		return is;
 	}
 
-	public static OutputStream manageOutputStream(OutputStream os, Socket source) {
+	public synchronized static OutputStream manageOutputStream(OutputStream os, Socket source) {
 		// return create a tee only if not coming from SSL
 		if (!filterSmockerBehavior()) {
 			if (smockerContainerBySocket.containsKey(source)) {
@@ -66,7 +66,7 @@ public class TransformerUtility {
 				}
 				return smockerContainer.getTeeOutputStream();
 			}
-			ExceptionLogger.logMessage("No socket key found in table");
+			MessageLogger.logMessage("No socket key found in table", TransformerUtility.class);
 		}
 		return os;
 	}
@@ -78,7 +78,6 @@ public class TransformerUtility {
 				if (connectionIdBySocket.get(source) != null && javaAppId != null) {
 					Long idConnection = connectionIdBySocket.get(source);
 					String response = RestClientSmocker.getInstance().postCommunication(smockerContainerBySocket.get(source), javaAppId, idConnection);
-					System.out.println(response);
 				}
 			}
 		}
@@ -86,10 +85,11 @@ public class TransformerUtility {
 		smockerContainerBySocket.remove(source);
 	}
 
-	private static void addSocketReference(Socket source, String host, int port) {
-		if (callerApp == null) {
+	private synchronized static void addSocketReference(Socket source, String host, int port) {
+	if (callerApp == null) {
 			String[] stackTraceAsArray = getStackTraceAsArray();
-			callerApp = stackTraceAsArray[stackTraceAsArray.length - 1];
+			callerApp = stackTraceAsArray[stackTraceAsArray.length - 1].split("\\(")[0];
+			
 		}
 		try {
 			if (!filterSmockerBehavior()) {
@@ -110,11 +110,12 @@ public class TransformerUtility {
 					}
 
 				}
-				if (javaAppId != null) {
+				if (javaAppId != null)  {
 					String response = RestClientSmocker.getInstance().postConnection(smockerContainer, javaAppId);
 					//check the status 
 					String status = ResponseReader.readStatusCodeFromResponse(response);
-					if (status.equals(ResponseReader.CONFLICT) && allResponse != null) {
+					if (status.equals(ResponseReader.CONFLICT)) {
+						allResponse = RestClientSmocker.getInstance().getAll();
 						String existingConnectionId =  ResponseReader.findExistingConnectionId(allResponse, smockerContainer.getHost(), smockerContainer.getPort());
 						connectionIdBySocket.put(source, Long.valueOf(existingConnectionId));
 					}
@@ -130,14 +131,14 @@ public class TransformerUtility {
 
 		}
 		catch (Exception ex) {
-			ExceptionLogger.logThrowable(ex);
+			MessageLogger.logThrowable(ex);
 		} 
 
 	}
 
 
 
-	private static void updateJavaAppId(String response) throws IOException {
+	private synchronized static void updateJavaAppId(String response) throws IOException {
 		String id = ResponseReader.readValueFromResponse(response, "id");
 		if (id != null) {
 			javaAppId = Long.parseLong(id);

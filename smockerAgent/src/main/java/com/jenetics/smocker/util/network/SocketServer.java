@@ -7,6 +7,8 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import com.jenetics.smocker.configuration.SystemPropertyConfiguration;
+
 public class SocketServer {
 
 	private ServerSocket server;
@@ -16,7 +18,7 @@ public class SocketServer {
 
 	public void createSocketServer() {
 		try{
-			server = new ServerSocket(4321); 
+			server = new ServerSocket(SystemPropertyConfiguration.getCommPort()); 
 		} catch (IOException e) {
 			System.out.println("Could not listen on port 4321");
 			System.exit(-1);
@@ -25,7 +27,7 @@ public class SocketServer {
 		try{
 			client = server.accept();
 		} catch (IOException e) {
-			System.out.println("Accept failed: 4321");
+			System.out.println("Accept failed: " + SystemPropertyConfiguration.getCommPort());
 			System.exit(-1);
 		}
 

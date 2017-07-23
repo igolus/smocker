@@ -28,11 +28,20 @@ public class JavaApplication implements EntityWithId {
 	@Column(length = 1024)
 	private String classQualifiedName;
 
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval=true, mappedBy = "javaApplication")
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "javaApplication")
 	private Set<Connection> Connections = new HashSet<Connection>();
 
 	@Column
 	private String Host;
+
+	@Column
+	private int sourcePort;
+
+	@Column
+	private String sourceHost;
+
+	@Column
+	private String sourceIp;
 
 	public Long getId() {
 		return this.id;
@@ -99,6 +108,30 @@ public class JavaApplication implements EntityWithId {
 		this.Host = Host;
 	}
 
+	public int getSourcePort() {
+		return sourcePort;
+	}
+
+	public void setSourcePort(int sourcePort) {
+		this.sourcePort = sourcePort;
+	}
+
+	public String getSourceHost() {
+		return sourceHost;
+	}
+
+	public void setSourceHost(String sourceHost) {
+		this.sourceHost = sourceHost;
+	}
+
+	public String getSourceIp() {
+		return sourceIp;
+	}
+
+	public void setSourceIp(String ip) {
+		this.sourceIp = ip;
+	}
+
 	@Override
 	public String toString() {
 		String result = getClass().getSimpleName() + " ";
@@ -111,6 +144,11 @@ public class JavaApplication implements EntityWithId {
 			result += ", Connections: " + Connections;
 		if (Host != null && !Host.trim().isEmpty())
 			result += ", Host: " + Host;
+		result += ", sourcePort: " + sourcePort;
+		if (sourceHost != null && !sourceHost.trim().isEmpty())
+			result += ", sourceHost: " + sourceHost;
+		if (sourceIp != null && !sourceIp.trim().isEmpty())
+			result += ", ip: " + sourceIp;
 		return result;
 	}
 

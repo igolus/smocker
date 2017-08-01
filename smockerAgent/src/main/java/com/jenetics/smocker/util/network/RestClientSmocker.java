@@ -5,6 +5,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.jenetics.smocker.configuration.MemoryConfiguration;
 import com.jenetics.smocker.configuration.SystemPropertyConfiguration;
 import com.jenetics.smocker.util.MessageLogger;
 import com.jenetics.smocker.util.SmockerContainer;
@@ -55,26 +56,39 @@ public class RestClientSmocker extends RESTClient {
 	}
 	
 	public String postCommunication(SmockerContainer smockerContainer, Long javaAppId, Long connectionId) {
-		StringBuffer buffer = new StringBuffer();
-		Map<String, String> headers = buildHeader();
-		if (
-				smockerContainer.getSmockerSocketOutputStream() != null &&
-				smockerContainer.getSmockerSocketOutputStream().getSmockerOutputStreamData() != null &&
-				smockerContainer.getSmockerSocketInputStream() != null &&
-				smockerContainer.getSmockerSocketInputStream().getSmockerOutputStreamData() != null
-		)
-		try {
-			buffer.append("{\"id\": 0, \"request\":\"")
-			.append(encode(smockerContainer.getSmockerSocketOutputStream().getSmockerOutputStreamData().getString()))
-			.append("\",  \"response\":\"")
-			.append(encode(smockerContainer.getSmockerSocketInputStream().getSmockerOutputStreamData().getString()))
-			.append("\",  \"callerStack\":\"")
-			.append(encode(smockerContainer.getStackTrace()))
-			.append("\"}");
-			setPath(SMOCKER_REST_PATH + SMOCKER_ADDCOMM + "/" + javaAppId + "/" + connectionId);
-			return post(buffer.toString(), headers, PUT);
-		} catch (Exception e) {
-			MessageLogger.logThrowable(e);
+		
+		String host = smockerContainer.getHost();
+		int port = smockerContainer.getPort();
+		
+		if (!MemoryConfiguration.isConnecctionThere(host, port)) {
+			MemoryConfiguration.setConnecctionWatched(host, port);	
+		}
+		
+		
+		//send only if the connection is watched
+
+		if (MemoryConfiguration.isConnecctionWatched(host, port)) {
+			StringBuffer buffer = new StringBuffer();
+			Map<String, String> headers = buildHeader();
+			if (
+					smockerContainer.getSmockerSocketOutputStream() != null &&
+					smockerContainer.getSmockerSocketOutputStream().getSmockerOutputStreamData() != null &&
+					smockerContainer.getSmockerSocketInputStream() != null &&
+					smockerContainer.getSmockerSocketInputStream().getSmockerOutputStreamData() != null
+					)
+				try {
+					buffer.append("{\"id\": 0, \"request\":\"")
+					.append(encode(smockerContainer.getSmockerSocketOutputStream().getSmockerOutputStreamData().getString()))
+					.append("\",  \"response\":\"")
+					.append(encode(smockerContainer.getSmockerSocketInputStream().getSmockerOutputStreamData().getString()))
+					.append("\",  \"callerStack\":\"")
+					.append(encode(smockerContainer.getStackTrace()))
+					.append("\"}");
+					setPath(SMOCKER_REST_PATH + SMOCKER_ADDCOMM + "/" + javaAppId + "/" + connectionId);
+					return post(buffer.toString(), headers, PUT);
+				} catch (Exception e) {
+					MessageLogger.logThrowable(e);
+				}
 		}
 		return null;
 	}

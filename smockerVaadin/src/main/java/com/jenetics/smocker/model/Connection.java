@@ -43,7 +43,7 @@ public class Connection implements EntityWithId {
 	private JavaApplication javaApplication;
 
 	@Column
-	private Boolean watched;
+	private Boolean watched = true;
 
 	public JavaApplication getJavaApplication() {
 		return javaApplication;

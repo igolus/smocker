@@ -20,19 +20,9 @@ public class MainTransformer implements ClassFileTransformer {
 	
 	private static final String SSLSocketImplGetOutputStreamSRCFile = "sun.security.ssl.SSLSocketImpl_getOutputStream.txt";
 		
-	private static SmockerServer smockerServer = null;
-	
-	public static SmockerServer getSmockerServer() {
-		return smockerServer;
-	}
-
 	public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
 			ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
 		// TODO Auto-generated method stub
-		if (smockerServer == null) {
-			smockerServer = new SmockerServer();
-			smockerServer.startServer();
-		}
 		
 		
 		byte[] byteCode = classfileBuffer;

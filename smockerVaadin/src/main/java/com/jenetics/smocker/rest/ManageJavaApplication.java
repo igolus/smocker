@@ -66,6 +66,7 @@ public class ManageJavaApplication {
 			}
 		}
 		conn.setJavaApplication(target);
+		conn.setWatched(true);
 		target.getConnections().add(conn);
 		daoManager.update(target);
 		//notify the creation

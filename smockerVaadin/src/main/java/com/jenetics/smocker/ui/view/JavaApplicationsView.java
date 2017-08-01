@@ -19,15 +19,13 @@ import org.jboss.logging.Logger;
 import org.vaadin.easyapp.util.ButtonDescriptor;
 import org.vaadin.easyapp.util.annotations.ContentView;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import com.jenetics.smocker.dao.DaoManager;
 import com.jenetics.smocker.dao.IDaoManager;
-import com.jenetics.smocker.injector.BundleUI;
 import com.jenetics.smocker.model.Communication;
 import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.model.JavaApplication;
+import com.jenetics.smocker.network.ClientCommunicator;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.SmockerUI.EnumButton;
 import com.jenetics.smocker.ui.util.ButtonWithId;
@@ -43,7 +41,6 @@ import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.shared.Position;
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -53,7 +50,6 @@ import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.PopupView;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.Tree;
@@ -164,11 +160,12 @@ public class JavaApplicationsView extends VerticalSplitPanel implements Refresha
 							public void buttonClick(ClickEvent event) {
 								ButtonWithId<Connection> buttonWithId = (ButtonWithId<Connection>)event.getSource();
 								if (buttonWithId.getEntity().getWatched() == null || !buttonWithId.getEntity().getWatched()) {
-									buttonWithId.setCaption(bundle.getString("UnWatch_Button"));
+									buttonWithId.setCaption(bundle.getString("Mute_Button"));
 									buttonWithId.getEntity().setWatched(true);
 									buttonWithId.setEnabled(false);
 									daoManagerConnection.update(buttonWithId.getEntity());
 									buttonWithId.setEntity(daoManagerConnection.findById(buttonWithId.getEntity().getId()));
+									ClientCommunicator.sendWatched(buttonWithId.getEntity());
 									buttonWithId.setEnabled(true);
 								}
 								else {
@@ -177,6 +174,7 @@ public class JavaApplicationsView extends VerticalSplitPanel implements Refresha
 									buttonWithId.setEnabled(false);
 									daoManagerConnection.update(buttonWithId.getEntity());
 									buttonWithId.setEntity(daoManagerConnection.findById(buttonWithId.getEntity().getId()));
+									ClientCommunicator.sendUnWatched(buttonWithId.getEntity());
 									buttonWithId.setEnabled(true);
 								}
 							}
@@ -393,10 +391,10 @@ public class JavaApplicationsView extends VerticalSplitPanel implements Refresha
 		if (javaApplicationTreeItem != null) {
 			String buttonString;
 			if (connection.getWatched() == null || connection.getWatched()) {
-				buttonString = bundle.getString("Watch_Button");
+				buttonString = bundle.getString("Mute_Button");
 			}
 			else {
-				buttonString = bundle.getString("UnWatch_Button");
+				buttonString = bundle.getString("Watch_Button");
 			}
 			ButtonWithId<Connection> buttonWithId = new ButtonWithId<Connection>(connection.getHost() + connection.getPort().toString(), connection);
 			buttonWithId.setCaption(buttonString);

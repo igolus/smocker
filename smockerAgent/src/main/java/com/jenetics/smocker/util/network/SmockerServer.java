@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.jenetics.smocker.configuration.MemoryConfiguration;
 import com.jenetics.smocker.configuration.SystemPropertyConfiguration;
 import com.jenetics.smocker.util.MessageLogger;
 
@@ -50,13 +51,11 @@ public class SmockerServer {
             // Do whatever required to process the client's request
 
             try {
-                clientSocket.close();
                 System.out.println("Got a client !");
                 BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
                 String line = in.readLine();
                 manageAction(line);
-    			System.out.println(line);
     			out.println("OK");
     			clientSocket.close();
             } catch (IOException e) {
@@ -65,7 +64,24 @@ public class SmockerServer {
         }
 
 		private void manageAction(String line) {
-			System.out.println(line);
+			if (line.startsWith("WATCH")) {
+				String connection = line.substring(6);
+				String[] connectionsItem = connection.split(MemoryConfiguration.SEP_CONNECTION);
+				if (connectionsItem.length != 2) {
+					MessageLogger.logError("Bad format of WATCH message", SmockerServer.class);
+					return;
+				}
+				MemoryConfiguration.setConnecctionWatched(connectionsItem[0], Integer.parseInt(connectionsItem[1]));
+			} 
+			if (line.startsWith("MUTE")) {
+				String connection = line.substring(5);
+				String[] connectionsItem = connection.split(MemoryConfiguration.SEP_CONNECTION);
+				if (connectionsItem.length != 2) {
+					MessageLogger.logError("Bad format of MUTE message", SmockerServer.class);
+					return;
+				}
+				MemoryConfiguration.setConnecctionMute(connectionsItem[0], Integer.parseInt(connectionsItem[1]));
+			} 
 		}
     }
 

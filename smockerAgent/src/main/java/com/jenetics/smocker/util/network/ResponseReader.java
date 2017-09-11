@@ -3,7 +3,10 @@ package com.jenetics.smocker.util.network;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Map;
 
+import com.jenetics.smocker.configuration.MemoryConfiguration;
+import com.jenetics.smocker.configuration.util.ConnectionBehavior;
 import com.jenetics.smocker.util.SimpleJsonReader;
 import com.jenetics.smocker.util.TransformerUtility;
 
@@ -72,6 +75,33 @@ public class ResponseReader {
 			int idAppIndexEnd = remaining.indexOf(",");
 			String idStr = remaining.substring(0, idAppIndexEnd);
 			return idStr;
+		}
+		return null;
+	}
+	
+
+	/**
+	 * Read the reponse to find all the connections
+	 * @param allResponse
+	 * @return
+	 */
+	public static  Map<String, ConnectionBehavior> getConnections(String allResponse) {
+		String[] connections = SimpleJsonReader.readSubResources(allResponse, "connections");
+		for (int i = 0; connections != null && i < connections.length; i++) {
+			String connectionString = connections[i];
+			String host = SimpleJsonReader.readValue(connectionString, "host");
+			String port = SimpleJsonReader.readValue(connectionString, "port");
+			String watched = SimpleJsonReader.readValue(connectionString, "watched");
+			
+			int portInt = Integer.valueOf(port).intValue();
+			boolean watchedBool = Boolean.valueOf(watched).booleanValue();
+			
+			if (watchedBool) {
+				MemoryConfiguration.setConnecctionWatched(host, portInt);
+			}
+			else {
+				MemoryConfiguration.setConnecctionMute(host, portInt);
+			}
 		}
 		return null;
 	}

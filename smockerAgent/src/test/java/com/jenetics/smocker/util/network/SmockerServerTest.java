@@ -12,7 +12,6 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import comm.SocketClient;
 
 public class SmockerServerTest {
 	@Test

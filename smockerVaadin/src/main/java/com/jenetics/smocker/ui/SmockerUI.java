@@ -101,8 +101,9 @@ public class SmockerUI extends UI {
 	}
 
 	public enum EnumButton {
-		CLEAN_ALL,
-		STACK
+		REMOVE,
+		STACK,
+		ADD_TO_MOCK
 	}
 	
 //	private void manageButtons() {

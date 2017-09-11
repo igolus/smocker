@@ -63,8 +63,6 @@ public class RestClientSmocker extends RESTClient {
 		if (!MemoryConfiguration.isConnecctionThere(host, port)) {
 			MemoryConfiguration.setConnecctionWatched(host, port);	
 		}
-		
-		
 		//send only if the connection is watched
 
 		if (MemoryConfiguration.isConnecctionWatched(host, port)) {

@@ -28,6 +28,12 @@ public class SmockerAgent {
 				smockerServer = new SmockerServer();
 				smockerServer.startServer();
 			}
+			
+			Runtime.getRuntime().addShutdownHook(new Thread(){public void run(){
+			    smockerServer.release();
+			}});
+			
+			
 			String smockerAscii = RessourceLoader.readFile(SMOCKER_ASCII_TXT);
 			System.out.println(smockerAscii);
 			inst.addTransformer(new MainTransformer());

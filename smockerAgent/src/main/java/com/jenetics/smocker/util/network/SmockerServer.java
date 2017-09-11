@@ -14,15 +14,20 @@ import com.jenetics.smocker.configuration.SystemPropertyConfiguration;
 import com.jenetics.smocker.util.MessageLogger;
 
 public class SmockerServer {
+	
+	private ServerSocket serverSocket = null;
 
     public void startServer() {
-        final ExecutorService clientProcessingPool = Executors.newFixedThreadPool(10);
-
+    	if (serverSocket != null) {
+    		MessageLogger.logError("Already started", SmockerServer.class);
+    		return;
+    	}
+    	final ExecutorService clientProcessingPool = Executors.newFixedThreadPool(10);
         Runnable serverTask = new Runnable() {
             @Override
             public void run() {
                 try {
-                    ServerSocket serverSocket = new ServerSocket(SystemPropertyConfiguration.getCommPort());
+                    serverSocket = new ServerSocket(SystemPropertyConfiguration.getCommPort());
                     MessageLogger.logMessage("Waiting for clients to connect...", SmockerServer.class);
                     while (true) {
                         Socket clientSocket = serverSocket.accept();
@@ -36,6 +41,17 @@ public class SmockerServer {
         Thread serverThread = new Thread(serverTask);
         serverThread.start();
 
+    }
+    
+    //close the socket
+    public void release() {
+    	if (serverSocket != null) {
+    		try {
+				serverSocket.close();
+			} catch (IOException e) {
+				MessageLogger.logErrorWithMessage("Unable to close server socket", e, SmockerServer.class);
+			}
+    	}
     }
 
     private class ClientTask implements Runnable {
@@ -51,7 +67,7 @@ public class SmockerServer {
             // Do whatever required to process the client's request
 
             try {
-                System.out.println("Got a client !");
+                //System.out.println("Got a client !");
                 BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
                 String line = in.readLine();

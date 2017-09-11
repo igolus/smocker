@@ -190,10 +190,14 @@ public class RESTClient {
             	wr.write(content);
             }
             wr.flush();
-            char[] buffer = new char[1024];
+            
+            
+            BufferedReader inFromServer = new BufferedReader(is);
+            String response;
             StringWriter stringWriter = new StringWriter();
-            while(is.read(buffer)!=-1){
-                stringWriter.write(buffer);
+            while((response = inFromServer.readLine()) != null){
+            	stringWriter.write(response);
+            	stringWriter.write(System.lineSeparator());
             }
             return stringWriter.toString();
         } catch (Exception e) {

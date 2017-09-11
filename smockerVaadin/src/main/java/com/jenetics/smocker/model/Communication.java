@@ -1,7 +1,6 @@
 package com.jenetics.smocker.model;
 
 import javax.persistence.Entity;
-import java.io.Serializable;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
@@ -53,6 +52,7 @@ public class Communication implements EntityWithId {
 		this.connection = connection;
 	}
 
+	@Override	
 	public Long getId() {
 		return this.id;
 	}
@@ -81,10 +81,8 @@ public class Communication implements EntityWithId {
 			return false;
 		}
 		Communication other = (Communication) obj;
-		if (id != null) {
-			if (!id.equals(other.id)) {
-				return false;
-			}
+		if (id != null && !id.equals(other.id)) {
+			return false;
 		}
 		return true;
 	}
@@ -125,8 +123,8 @@ public class Communication implements EntityWithId {
 		return callerStack;
 	}
 
-	public void setCallerStack(String CallerStack) {
-		this.callerStack = CallerStack;
+	public void setCallerStack(String callerStack) {
+		this.callerStack = callerStack;
 	}
 
 	@Override
@@ -140,7 +138,7 @@ public class Communication implements EntityWithId {
 		if (response != null && !response.trim().isEmpty())
 			result += ", response: " + response;
 		if (connection != null)
-			result += ", connection: " + connection;
+			result += ", connection: " + connection.getId();
 		if (dateTime != null)
 			result += ", dateTime: " + dateTime;
 		if (callerStack != null && !callerStack.trim().isEmpty())

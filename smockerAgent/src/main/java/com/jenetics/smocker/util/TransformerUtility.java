@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -12,15 +11,15 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.input.TeeInputStream;
 import org.apache.commons.io.output.TeeOutputStream;
 //import com.jenetics.smocker.util.SmockerSocketInputStream;
 
+import com.jenetics.smocker.configuration.util.ConnectionBehavior;
 import com.jenetics.smocker.util.network.ResponseReader;
 import com.jenetics.smocker.util.network.RestClientSmocker;
-
-import comm.SocketClient;
 
 public class TransformerUtility {
 
@@ -74,10 +73,9 @@ public class TransformerUtility {
 	public synchronized static void socketClosed(Socket source) throws UnsupportedEncodingException {
 		if (!filterSmockerBehavior()) {
 			if (smockerContainerBySocket.get(source) != null) {
-				SocketClient.getSocketClient().sendConnectionClosed(smockerContainerBySocket.get(source));
 				if (connectionIdBySocket.get(source) != null && javaAppId != null) {
 					Long idConnection = connectionIdBySocket.get(source);
-					String response = RestClientSmocker.getInstance().postCommunication(smockerContainerBySocket.get(source), javaAppId, idConnection);
+					RestClientSmocker.getInstance().postCommunication(smockerContainerBySocket.get(source), javaAppId, idConnection);
 				}
 			}
 		}
@@ -108,7 +106,9 @@ public class TransformerUtility {
 						String response = RestClientSmocker.getInstance().postJavaApp(smockerContainer);
 						updateJavaAppId(response);
 					}
-
+					//fill the connection in the memory config
+					Map<String, ConnectionBehavior> connectionsMap = ResponseReader.getConnections(allResponse);
+						
 				}
 				if (javaAppId != null)  {
 					String response = RestClientSmocker.getInstance().postConnection(smockerContainer, javaAppId);
@@ -222,7 +222,9 @@ public class TransformerUtility {
 
 
 	private static boolean filterSmockerBehavior() {
-		return inSocketFromSSL() || inStack("com.jenetics.smocker.util.network.RestClientSmocker");
+		return inSocketFromSSL() || 
+				inStack("com.jenetics.smocker.util.network.RestClientSmocker") || 
+				inStack("com.jenetics.smocker.util.network.SmockerServer$ClientTask");
 	}
 
 	protected static boolean inStack(String className) {

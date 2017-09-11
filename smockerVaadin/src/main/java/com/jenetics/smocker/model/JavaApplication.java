@@ -1,7 +1,6 @@
 package com.jenetics.smocker.model;
 
 import javax.persistence.Entity;
-import java.io.Serializable;
 import javax.persistence.Id;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -29,10 +28,7 @@ public class JavaApplication implements EntityWithId {
 	private String classQualifiedName;
 
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "javaApplication")
-	private Set<Connection> Connections = new HashSet<Connection>();
-
-	@Column
-	private String Host;
+	private Set<Connection> connections = new HashSet<>();
 
 	@Column
 	private int sourcePort;
@@ -42,7 +38,8 @@ public class JavaApplication implements EntityWithId {
 
 	@Column
 	private String sourceIp;
-
+	
+	@Override
 	public Long getId() {
 		return this.id;
 	}
@@ -68,10 +65,8 @@ public class JavaApplication implements EntityWithId {
 			return false;
 		}
 		JavaApplication other = (JavaApplication) obj;
-		if (id != null) {
-			if (!id.equals(other.id)) {
-				return false;
-			}
+		if (id != null && !id.equals(other.id)) {
+			return false;
 		}
 		return true;
 	}
@@ -93,19 +88,11 @@ public class JavaApplication implements EntityWithId {
 	}
 
 	public Set<Connection> getConnections() {
-		return this.Connections;
+		return this.connections;
 	}
 
-	public void setConnections(final Set<Connection> Connections) {
-		this.Connections = Connections;
-	}
-
-	public String getHost() {
-		return Host;
-	}
-
-	public void setHost(String Host) {
-		this.Host = Host;
+	public void setConnections(final Set<Connection> connections) {
+		this.connections = connections;
 	}
 
 	public int getSourcePort() {
@@ -140,11 +127,8 @@ public class JavaApplication implements EntityWithId {
 		result += ", version: " + version;
 		if (classQualifiedName != null && !classQualifiedName.trim().isEmpty())
 			result += ", classQualifiedName: " + classQualifiedName;
-		if (Connections != null)
-			result += ", Connections: " + Connections;
-		if (Host != null && !Host.trim().isEmpty())
-			result += ", Host: " + Host;
-		result += ", sourcePort: " + sourcePort;
+		if (connections != null)
+			result += ", Connections: " + connections;
 		if (sourceHost != null && !sourceHost.trim().isEmpty())
 			result += ", sourceHost: " + sourceHost;
 		if (sourceIp != null && !sourceIp.trim().isEmpty())

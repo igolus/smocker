@@ -2,13 +2,12 @@ package com.jenetics.smocker.ui.view;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -32,9 +31,7 @@ import com.jenetics.smocker.ui.netdisplayer.NetDisplayerFactoryInput;
 import com.jenetics.smocker.ui.netdisplayer.NetDisplayerFactoryOutput;
 import com.jenetics.smocker.ui.util.ButtonWithId;
 import com.jenetics.smocker.ui.util.CommunicationTreeItem;
-import com.jenetics.smocker.ui.util.RefreshableView;
 import com.jenetics.smocker.util.NetworkReaderUtility;
-import com.vaadin.addon.jpacontainer.EntityItem;
 import com.vaadin.addon.jpacontainer.JPAContainer;
 import com.vaadin.addon.jpacontainer.JPAContainerFactory;
 import com.vaadin.annotations.Push;
@@ -42,8 +39,6 @@ import com.vaadin.data.Item;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.Page;
-import com.vaadin.shared.Position;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -51,20 +46,15 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Table;
-import com.vaadin.ui.TextArea;
 import com.vaadin.ui.Tree;
-import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.Window;
 
 @Push
 @ViewScope
 @ContentView(sortingOrder=1, viewName = "Java Applications", icon = "icons/Java-icon.png", homeView=true, rootViewParent=ConnectionsRoot.class)
-public class JavaApplicationsView extends VerticalSplitPanel implements RefreshableView {
+public class JavaApplicationsView extends AbstractConnectionTreeView {
 
 	private static final String ALL = "all";
 
@@ -94,19 +84,9 @@ public class JavaApplicationsView extends VerticalSplitPanel implements Refresha
 	}
 
 
-	private transient Object rootTreeItem = null;
+	private Object rootTreeItem;
 
 	private static final String SEP_CONN = ":";
-
-	private static ResourceBundle bundle = ResourceBundle.getBundle("BundleUI");
-
-	private static final String CONNECTION_TYPE = bundle.getString("ConnectionType");
-
-	private static final String PORT = bundle.getString("Port");
-
-	private static final String ADRESS = bundle.getString("Adress");
-
-	private static final String APPLICATION = bundle.getString("Application");
 
 	protected transient IDaoManager<Connection> daoManagerConnection = null;
 	protected transient IDaoManager<JavaApplication> daoManagerJavaApplication = null;
@@ -119,16 +99,7 @@ public class JavaApplicationsView extends VerticalSplitPanel implements Refresha
 	protected static final String MODIFIED_PROPERTY = "Last Modified";
 
 
-	private TreeTable treetable= null;
 	private JPAContainer<JavaApplication> jpaJavaApplication;
-
-	private VerticalLayout second;
-
-	private transient Map<Long ,Object > applicationItemById = new HashMap<>();
-	private transient Map<String ,ButtonWithId> buttonByUiId =  new HashMap<>();
-	private transient Map<String ,Long > applicationIdIByAdressAndPort =  new HashMap<>();
-	private transient Map<String ,String > applicationIdIByApplicationClass =  new HashMap<>();
-	private transient Map<Long, Object> connectionTreeItemByConnectionId = new HashMap<>();
 
 	protected Item selectedTreeItem;
 	
@@ -141,46 +112,28 @@ public class JavaApplicationsView extends VerticalSplitPanel implements Refresha
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
 	public JavaApplicationsView() {
 		super();
-		VerticalLayout mainLayout = new VerticalLayout();
+	}
 
+	protected void initDao() {
 		jpaJavaApplication = JPAContainerFactory.make(JavaApplication.class, SmockerUI.getEm());
 		daoManagerConnection = new DaoManager<>(Connection.class, SmockerUI.getEm()) ;
-		daoManagerJavaApplication = new DaoManager<>(JavaApplication.class, SmockerUI.getEm()) ;
-
-		mainLayout.setMargin(true);
-		buildTreeTable();
-		buildSecondArea();
-		fillTreeTable();
-		treetable.setWidth("100%");
-		treetable.setHeight("40%");
-
-
-		treetable.setSizeFull();
-		setFirstComponent(treetable);
-		setSecondComponent(second);
-		setSplitPosition(150, Unit.PIXELS);
-
-		setSizeFull();
-		checkToolBar();
+		daoManagerJavaApplication = new DaoManager<>(JavaApplication.class, SmockerUI.getEm());
 	}
-
-	private void buildTreeTable() {
-		treetable = new TreeTable();
-		treetable.setSelectable(true);
-		treetable.addContainerProperty(APPLICATION, String.class, "");
-		treetable.addContainerProperty(ADRESS, String.class, "");
-		treetable.addContainerProperty(PORT, String.class, "");
-		treetable.addContainerProperty(CONNECTION_TYPE, String.class, "");
-
-		addColumnToTreeTable();
-
-		treetable.addItemClickListener(this::treeTableItemClicked);
+	
+	protected Map<String, Class<?>> getColumnMap() {
+		Map<String, Class<?>> ret = new LinkedHashMap <>();
+		ret.put(APPLICATION, String.class);
+		ret.put(ADRESS, String.class);
+		ret.put(PORT, String.class);
+		ret.put(CONNECTION_TYPE, String.class);
+		return ret;
 	}
 
 
-	private void treeTableItemClicked(ItemClickEvent itemClickEvent) {
+	protected void treeTableItemClicked(ItemClickEvent itemClickEvent) {
 		selectedTreeItem = itemClickEvent.getItem();
 		checkToolBar();
 
@@ -203,13 +156,12 @@ public class JavaApplicationsView extends VerticalSplitPanel implements Refresha
 			}
 		}
 		else {
-			
 			String application = itemClickEvent.getItem().getItemProperty(APPLICATION).toString();
 			if (application.equals(ALL)) {
 				setSelection(null, null, null, true);
 			}
 			else if (application != null) {
-				String selectedApplicationId = applicationIdIByApplicationClass.get(application);
+				long selectedApplicationId = applicationIdIByApplicationClass.get(application);
 				JavaApplication selectedApplication = jpaJavaApplication.getItem(selectedApplicationId).getEntity();
 				setSelection(selectedApplication, null, null, false);
 			}
@@ -224,7 +176,7 @@ public class JavaApplicationsView extends VerticalSplitPanel implements Refresha
 		this.allSelected = allSelected;
 	}
 
-	private void addColumnToTreeTable() {
+	protected void addColumnToTreeTable() {
 		treetable.addGeneratedColumn("Watch", (Table source, Object itemId,  Object columnId) -> {
 			if (!treetable.getItem(itemId).getItemProperty(ADRESS).getValue().toString().isEmpty() &&
 					!treetable.getItem(itemId).getItemProperty(PORT).getValue().toString().isEmpty()) {
@@ -239,12 +191,6 @@ public class JavaApplicationsView extends VerticalSplitPanel implements Refresha
 			}
 			return null;
 		});
-	}
-
-	private void checkToolBar() {
-		if (SmockerUI.getInstance()!=null) {
-			SmockerUI.getInstance().getEasyAppMainView().getToolBar().checkClickable(JavaApplicationsView.this);
-		}
 	}
 
 	protected void fillCommunications(Connection conn, boolean checkSelected) {
@@ -307,21 +253,13 @@ public class JavaApplicationsView extends VerticalSplitPanel implements Refresha
 		}
 	}
 
-	//**
-	private VerticalLayout buildSecondArea() {
-		second = new VerticalLayout();
-		second.setSizeFull();
-		return second;
-	}
-
-
-	private void fillTreeTable() {
+	protected void fillTreeTable() {
 		treetable.removeAllItems();
 		jpaJavaApplication = JPAContainerFactory.make(JavaApplication.class, SmockerUI.getEm());
 		Collection<Object> itemIds = jpaJavaApplication.getItemIds();
 
 		Object[] root = new Object[] { ALL, "", "", "" };
-		rootTreeItem = treetable.addItem(root, null);
+		this.rootTreeItem = treetable.addItem(root, null);
 		for (Object id : itemIds) {
 			JavaApplication javaApplication = jpaJavaApplication.getItem(id).getEntity();
 			buildJavaApplicationTreeItem(javaApplication);
@@ -334,7 +272,7 @@ public class JavaApplicationsView extends VerticalSplitPanel implements Refresha
 	 * Update the tree add new items (JavaConnection or Connection) 
 	 * @param entityWithId
 	 */
-	private void updateTree(EntityWithId entityWithId) {
+	protected void updateTree(EntityWithId entityWithId) {
 		if (entityWithId instanceof JavaApplication) {
 			JavaApplication javaApplication = (JavaApplication) entityWithId;
 			buildJavaApplicationTreeItem(javaApplication);
@@ -414,6 +352,7 @@ public class JavaApplicationsView extends VerticalSplitPanel implements Refresha
 			treetable.setParent(javaApplicationTreeItem, rootTreeItem);
 			treetable.setChildrenAllowed(javaApplicationTreeItem, false);
 			applicationItemById.put(javaApplication.getId(), javaApplicationTreeItem);
+			applicationIdIByApplicationClass.put(javaApplication.getClassQualifiedName(), javaApplication.getId());
 			
 		}
 		Set<Connection> connections = javaApplication.getConnections();
@@ -426,25 +365,8 @@ public class JavaApplicationsView extends VerticalSplitPanel implements Refresha
 	}
 
 
-	@Override
-	public void refresh(EntityWithId entityWithId) {
-		Notification notif = new Notification(
-				"Warning",
-				"Area of reindeer husbandry",
-				Type.WARNING_MESSAGE);
-
-		// Customize it
-		notif.setDelayMsec(100);
-		notif.setPosition(Position.BOTTOM_RIGHT);
-		notif.setIcon(FontAwesome.SPINNER);
-
-		// Show it in the page
-		notif.show(Page.getCurrent());
-
-		treetable.setEnabled(true);
-
+	protected void refreshEntity(EntityWithId entityWithId) {
 		jpaJavaApplication.refreshItem(entityWithId.getId());
-		updateTree(entityWithId);
 	}
 
 

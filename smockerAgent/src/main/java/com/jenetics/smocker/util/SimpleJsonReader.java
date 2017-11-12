@@ -61,6 +61,9 @@ public class SimpleJsonReader {
 	 */
 	private static String[] findInBracket(String toScan) {
 		List<String> listRet = new ArrayList<String>();
+		if (toScan.startsWith("]")) {
+			return null;
+		}
 		
 		byte[] bytesToScan = toScan.getBytes();
 		int openBrackets = 0;

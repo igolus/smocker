@@ -36,7 +36,7 @@ public class Connection implements EntityWithId {
 	private Integer port;
 
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval=true, mappedBy = "connection" )
-	private Set<Communication> Communications = new HashSet<Communication>();
+	private Set<Communication> communications = new HashSet<Communication>();
 
 	@JoinColumn(nullable = false)
 	@OneToOne @JsonIgnore 
@@ -111,11 +111,11 @@ public class Connection implements EntityWithId {
 	}
 
 	public Set<Communication> getCommunications() {
-		return this.Communications;
+		return this.communications;
 	}
 
 	public void setCommunications(final Set<Communication> Communications) {
-		this.Communications = Communications;
+		this.communications = Communications;
 	}
 
 	public Boolean getWatched() {
@@ -136,8 +136,8 @@ public class Connection implements EntityWithId {
 			result += ", host: " + host;
 		if (port != null)
 			result += ", port: " + port;
-		if (Communications != null)
-			result += ", Communications: " + Communications;
+		if (communications != null)
+			result += ", Communications: " + communications;
 		if (javaApplication != null)
 			result += ", javaApplication: " + javaApplication.getId();
 		if (watched != null)

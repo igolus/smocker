@@ -15,6 +15,9 @@
 		<class>com.jenetics.smocker.model.Connection</class>
 		<class>com.jenetics.smocker.model.JavaApplication</class>
 		<class>com.jenetics.smocker.model.Communication</class>
+		<class>com.jenetics.smocker.model.JavaApplicationMocked</class>
+		<class>com.jenetics.smocker.model.ConnectionMocked</class>
+		<class>com.jenetics.smocker.model.CommunicationMocked</class>
 		<exclude-unlisted-classes>false</exclude-unlisted-classes>
 		
 		<properties>

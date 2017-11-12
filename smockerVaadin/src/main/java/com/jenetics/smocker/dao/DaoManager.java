@@ -13,7 +13,7 @@ import org.jboss.logging.Logger;
 public class DaoManager<T extends Serializable> implements IDaoManager<T> {
 	
 	@Inject
-	private Logger logger;
+	private Logger logger = Logger.getLogger(DaoManager.class);
 	
 	private EntityManager entityManager;
 	

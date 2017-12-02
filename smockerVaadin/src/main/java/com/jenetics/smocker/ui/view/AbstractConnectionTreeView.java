@@ -36,11 +36,15 @@ public abstract class AbstractConnectionTreeView extends VerticalSplitPanel impl
 	protected abstract void initDao();
 	protected abstract Map<String, Class<?>> getColumnMap();
 	
+	/**
+	 * Tree Item object by javaApplication id used to find the associated UI Item from an Application id
+	 */
 	protected transient Map<Long ,Object > applicationItemById = new HashMap<>();
 	protected transient Map<String ,ButtonWithId> buttonByUiId =  new HashMap<>();
 	protected transient Map<String ,Long > applicationIdIByAdressAndPort =  new HashMap<>();
 	protected transient Map<String ,Long > applicationIdIByApplicationClass =  new HashMap<>();
 	protected transient Map<Long, Object> connectionTreeItemByConnectionId = new HashMap<>();
+	
 
 	public AbstractConnectionTreeView() {
 		super();
@@ -62,6 +66,17 @@ public abstract class AbstractConnectionTreeView extends VerticalSplitPanel impl
 
 		setSizeFull();
 		checkToolBar();
+	}
+	
+	/**
+	 * Clear all the reference maps
+	 */
+	public void clearAssociationMaps() {
+		applicationItemById.clear();
+		buttonByUiId.clear();
+		applicationIdIByAdressAndPort.clear();
+		applicationIdIByApplicationClass.clear();
+		connectionTreeItemByConnectionId.clear();
 	}
 
 	protected void buildTreeTable() {

@@ -1,21 +1,15 @@
 package com.jenetics.smocker.ui.netdisplayer.implementation;
 
-import java.io.IOException;
 import java.util.ResourceBundle;
 
-import javax.inject.Inject;
+import org.jboss.logging.Logger;
 
-import org.json.simple.JSONObject;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jenetics.smocker.ui.netdisplayer.ComponentWithDisplayChange;
 import com.jenetics.smocker.util.NetworkReaderUtility;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextArea;
-import org.jboss.logging.Logger;
 
 public class JsonViewer implements ComponentWithDisplayChange {
 	

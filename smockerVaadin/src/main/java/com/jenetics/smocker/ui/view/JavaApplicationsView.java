@@ -26,6 +26,7 @@ import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.network.ClientCommunicator;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.SmockerUI.EnumButton;
+import com.jenetics.smocker.ui.dialog.Dialog;
 import com.jenetics.smocker.ui.netdisplayer.ComponentWithDisplayChange;
 import com.jenetics.smocker.ui.netdisplayer.NetDisplayerFactoryInput;
 import com.jenetics.smocker.ui.netdisplayer.NetDisplayerFactoryOutput;
@@ -57,6 +58,32 @@ import com.vaadin.ui.Window;
 public class JavaApplicationsView extends AbstractConnectionTreeView {
 
 	private static final String ALL = "all";
+	private static final long serialVersionUID = 1L;
+
+	protected static IDaoManager<Connection> daoManagerConnection = new DaoManager<>(Connection.class, SmockerUI.getEm());
+	protected static IDaoManager<JavaApplication> daoManagerJavaApplication = new DaoManager<>(JavaApplication.class, SmockerUI.getEm());
+	
+
+	protected static final String NAME_PROPERTY = "Name";
+	protected static final String HOURS_PROPERTY = "Hours done";
+	protected static final String MODIFIED_PROPERTY = "Last Modified";
+	
+	private static final String SEP_CONN = ":";
+	
+
+	private Object rootTreeItem;
+	private JPAContainer<JavaApplication> jpaJavaApplication;
+
+	protected Item selectedTreeItem;
+	
+	protected JavaApplication selectedJavaApplication = null;
+	protected Communication selectedCommunication = null;
+	protected Connection selectedConnection = null;
+	protected boolean allSelected;
+
+
+	@Inject
+	private Logger logger;
 
 	private final class WatchMuteClicked implements ClickListener {
 		@Override
@@ -84,43 +111,12 @@ public class JavaApplicationsView extends AbstractConnectionTreeView {
 	}
 
 
-	private Object rootTreeItem;
-
-	private static final String SEP_CONN = ":";
-
-	protected transient IDaoManager<Connection> daoManagerConnection = null;
-	protected transient IDaoManager<JavaApplication> daoManagerJavaApplication = null;
-
-	@Inject
-	private Logger logger;
-
-	protected static final String NAME_PROPERTY = "Name";
-	protected static final String HOURS_PROPERTY = "Hours done";
-	protected static final String MODIFIED_PROPERTY = "Last Modified";
-
-
-	private JPAContainer<JavaApplication> jpaJavaApplication;
-
-	protected Item selectedTreeItem;
-	
-	protected JavaApplication selectedJavaApplication = null;
-	protected Communication selectedCommunication = null;
-	protected Connection selectedConnection = null;
-	protected boolean allSelected;
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	
 	public JavaApplicationsView() {
 		super();
 	}
 
 	protected void initDao() {
 		jpaJavaApplication = JPAContainerFactory.make(JavaApplication.class, SmockerUI.getEm());
-		daoManagerConnection = new DaoManager<>(Connection.class, SmockerUI.getEm()) ;
-		daoManagerJavaApplication = new DaoManager<>(JavaApplication.class, SmockerUI.getEm());
 	}
 	
 	protected Map<String, Class<?>> getColumnMap() {
@@ -150,7 +146,7 @@ public class JavaApplicationsView extends AbstractConnectionTreeView {
 				Optional<Connection> connection = connections.stream().
 						filter(x -> StringUtils.equals(host, x.getHost()) && StringUtils.equals(port, x.getPort().toString())).findFirst();
 				if (connection.isPresent()) {
-					setSelection(null, connection.get(), null, false);
+					setSelection(null, connection.get(), false);
 					fillCommunications(connection.get(), false);
 				}
 			}
@@ -158,21 +154,21 @@ public class JavaApplicationsView extends AbstractConnectionTreeView {
 		else {
 			String application = itemClickEvent.getItem().getItemProperty(APPLICATION).toString();
 			if (application.equals(ALL)) {
-				setSelection(null, null, null, true);
+				setSelection(null, null, true);
 			}
 			else if (application != null) {
 				long selectedApplicationId = applicationIdIByApplicationClass.get(application);
 				JavaApplication selectedApplication = jpaJavaApplication.getItem(selectedApplicationId).getEntity();
-				setSelection(selectedApplication, null, null, false);
+				setSelection(selectedApplication, null, false);
 			}
 		}
 		checkToolBar();
 	}
 	
-	private void setSelection(JavaApplication javaApplication,  Connection connection, Communication communication, boolean allSelected) {
+	private void setSelection(JavaApplication javaApplication,  Connection connection, boolean allSelected) {
 		selectedJavaApplication = javaApplication;
 		selectedConnection = connection;
-		selectedCommunication = communication;
+		//selectedCommunication = communication;
 		this.allSelected = allSelected;
 	}
 
@@ -194,7 +190,9 @@ public class JavaApplicationsView extends AbstractConnectionTreeView {
 	}
 
 	protected void fillCommunications(Connection conn, boolean checkSelected) {
-
+		//clean communication panel
+		second.removeAllComponents();
+		
 		//only if the connection is selected and if there are some communications items exccept if if comes from click event
 		Object connectionItem = connectionTreeItemByConnectionId.get(conn.getId());
 
@@ -216,6 +214,8 @@ public class JavaApplicationsView extends AbstractConnectionTreeView {
 
 			menu.addItemClickListener((ItemClickEvent event) -> {
 				Communication comm =  ((CommunicationTreeItem) event.getItemId()).getCommunication();
+				//remove selection in the table
+				treetable.select(null);
 				selectedCommunication = comm;
 				
 				String response = NetworkReaderUtility.decode(comm.getResponse());
@@ -234,35 +234,35 @@ public class JavaApplicationsView extends AbstractConnectionTreeView {
 				checkToolBar();
 			});
 
-
-			
-
 			HorizontalSplitPanel hsplitPane = new HorizontalSplitPanel();
 
 			hsplitPane.setFirstComponent(menu);
 			hsplitPane.setSecondComponent(grid);
 			hsplitPane.setSplitPosition(20);
-
-			second.removeAllComponents();
+			
 			second.addComponent(hsplitPane);
-
 		}
 		else if (conn.getCommunications().isEmpty() && !checkSelected) {
 			selectedCommunication = null;
-			second.removeAllComponents();
 		}
 	}
-
+	
+	/**
+	 * Rebuild the treeTable
+	 */
 	protected void fillTreeTable() {
+		clearAssociationMaps();
+		
 		treetable.removeAllItems();
-		jpaJavaApplication = JPAContainerFactory.make(JavaApplication.class, SmockerUI.getEm());
-		Collection<Object> itemIds = jpaJavaApplication.getItemIds();
+		second.removeAllComponents();
+		
+		List<JavaApplication> listAllJavaApplications = daoManagerJavaApplication.listAll();
 
 		Object[] root = new Object[] { ALL, "", "", "" };
 		this.rootTreeItem = treetable.addItem(root, null);
-		for (Object id : itemIds) {
-			JavaApplication javaApplication = jpaJavaApplication.getItem(id).getEntity();
-			buildJavaApplicationTreeItem(javaApplication);
+		
+		for (JavaApplication javaApplication : listAllJavaApplications) {
+			fillJavaApplicationTreeItem(javaApplication, true);
 		}
 	}
 
@@ -275,7 +275,7 @@ public class JavaApplicationsView extends AbstractConnectionTreeView {
 	protected void updateTree(EntityWithId entityWithId) {
 		if (entityWithId instanceof JavaApplication) {
 			JavaApplication javaApplication = (JavaApplication) entityWithId;
-			buildJavaApplicationTreeItem(javaApplication);
+			fillJavaApplicationTreeItem(javaApplication, false);
 		}
 		else if (entityWithId instanceof Connection)
 		{
@@ -340,23 +340,24 @@ public class JavaApplicationsView extends AbstractConnectionTreeView {
 		else {
 			logger.warn("Unable to find javaApplicationTreeItem");
 		}
-
 	}
 
+	/**
+	 * Rebuild the UI for the JavaApplications
+	 * @param javaApplication
+	 * @param rebuild true when the Full UI is redisplayed
+	 */
+	private void fillJavaApplicationTreeItem(JavaApplication javaApplication, boolean rebuild) {
 
-	private void buildJavaApplicationTreeItem(JavaApplication javaApplication) {
-
-		if (applicationItemById.get(javaApplication.getId()) == null) {
+		if (applicationItemById.get(javaApplication.getId()) == null || rebuild) {
 			Object[] javaApplicationItem = new Object[] { javaApplication.getClassQualifiedName(),  "", "", ""};
 			Object javaApplicationTreeItem = treetable.addItem(javaApplicationItem, null);
 			treetable.setParent(javaApplicationTreeItem, rootTreeItem);
 			treetable.setChildrenAllowed(javaApplicationTreeItem, false);
 			applicationItemById.put(javaApplication.getId(), javaApplicationTreeItem);
 			applicationIdIByApplicationClass.put(javaApplication.getClassQualifiedName(), javaApplication.getId());
-			
 		}
 		Set<Connection> connections = javaApplication.getConnections();
-
 		rebuildConnectionsTreeItem(connections, javaApplication);
 
 		if (connections.isEmpty()) {
@@ -374,8 +375,7 @@ public class JavaApplicationsView extends AbstractConnectionTreeView {
 	public ClickListener getClickListener(String key) {
 		if (key.equals(EnumButton.REMOVE.toString())) {
 			return (ClickEvent event) -> {
-				daoManagerJavaApplication.deleteAll();
-				fillTreeTable();
+				deleteSelectedItem();
 			};
 		}
 		if (key.equals(EnumButton.STACK.toString())) {
@@ -405,6 +405,35 @@ public class JavaApplicationsView extends AbstractConnectionTreeView {
 
 		return null;
 
+	}
+	
+	
+	/**
+	 * Delete the selected Item, Could be JavaApplication, 
+	 * Connection or communications
+	 */
+	private void deleteSelectedItem() {
+		Dialog.ask(bundle.getString("RemoveQuestion"), null, () -> {
+			if (selectedConnection != null) {
+				Set<Communication> communications = selectedConnection.getCommunications();
+				for (Communication communication : communications) {
+					selectedConnection.getCommunications().remove(communication);
+				}
+				daoManagerConnection.update(selectedConnection);
+				
+				selectedConnection.getJavaApplication().getConnections().remove(selectedConnection);
+				daoManagerJavaApplication.update(selectedConnection.getJavaApplication());
+			}
+			else if (selectedJavaApplication != null) {
+				daoManagerJavaApplication.deleteById(selectedJavaApplication.getId());
+			}
+			else if (selectedCommunication != null) {
+				selectedCommunication.getConnection().getCommunications().remove(selectedCommunication);
+				daoManagerConnection.update(selectedCommunication.getConnection());
+			}
+			
+			fillTreeTable();
+		}, null);
 	}
 
 	@Override

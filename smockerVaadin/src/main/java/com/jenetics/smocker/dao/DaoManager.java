@@ -3,16 +3,15 @@ package com.jenetics.smocker.dao;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
+
 import org.jboss.logging.Logger;
 
 
 public class DaoManager<T extends Serializable> implements IDaoManager<T> {
 	
-	@Inject
 	private Logger logger = Logger.getLogger(DaoManager.class);
 	
 	private EntityManager entityManager;
@@ -27,10 +26,6 @@ public class DaoManager<T extends Serializable> implements IDaoManager<T> {
     private DaoManager() {
 		super();
 	}
-
-
-
-	
 
 	@Override
 	public void setEm(EntityManager em) {

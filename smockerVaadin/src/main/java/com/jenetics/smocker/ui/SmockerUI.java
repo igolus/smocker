@@ -74,7 +74,6 @@ public class SmockerUI extends UI {
 		final VerticalLayout layout = new VerticalLayout();
         layout.setSizeFull();
         
-        
         Image image = new Image(null, new ThemeResource("icons/smocker_small.png"));
 		
 		easyAppMainView = new EasyAppBuilder(Collections.singletonList("com.jenetics.smocker.ui.view"))
@@ -90,8 +89,6 @@ public class SmockerUI extends UI {
 		
 		easyAppMainView.setSplitPosition(93);
 		
-//		manageButtons();
-		
 		layout.addComponents(easyAppMainView);
         
 		easyAppMainView.getTopBar().setStyleName("topBannerBackGround");
@@ -106,13 +103,7 @@ public class SmockerUI extends UI {
 		ADD_TO_MOCK
 	}
 	
-//	private void manageButtons() {
-//		easyAppMainView.getToolBar().addButton(bundle.getString("CleanAll"), bundle.getString("CleanAllToolTip"), FontAwesome.REMOVE, EnumButton.CLEAN_ALL.toString());
-//	}
-
-
 	private Object search(String searchValue) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

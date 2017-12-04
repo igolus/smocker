@@ -71,7 +71,6 @@ public class JavaApplicationsView extends AbstractConnectionTreeView {
 	private static final String SEP_CONN = ":";
 	
 
-	private Object rootTreeItem;
 	private JPAContainer<JavaApplication> jpaJavaApplication;
 
 	protected Item selectedTreeItem;
@@ -168,8 +167,8 @@ public class JavaApplicationsView extends AbstractConnectionTreeView {
 	private void setSelection(JavaApplication javaApplication,  Connection connection, boolean allSelected) {
 		selectedJavaApplication = javaApplication;
 		selectedConnection = connection;
-		//selectedCommunication = communication;
 		this.allSelected = allSelected;
+		checkToolBar();
 	}
 
 	protected void addColumnToTreeTable() {
@@ -309,8 +308,6 @@ public class JavaApplicationsView extends AbstractConnectionTreeView {
 	private void addConnectionItemToTreeTable(JavaApplication javaApplication, Connection connection) {
 
 		Object javaApplicationTreeItem = applicationItemById.get(javaApplication.getId());
-		
-		
 		if (javaApplicationTreeItem != null) {
 			String buttonString;
 			if (connection.getWatched() == null || connection.getWatched()) {
@@ -350,12 +347,7 @@ public class JavaApplicationsView extends AbstractConnectionTreeView {
 	private void fillJavaApplicationTreeItem(JavaApplication javaApplication, boolean rebuild) {
 
 		if (applicationItemById.get(javaApplication.getId()) == null || rebuild) {
-			Object[] javaApplicationItem = new Object[] { javaApplication.getClassQualifiedName(),  "", "", ""};
-			Object javaApplicationTreeItem = treetable.addItem(javaApplicationItem, null);
-			treetable.setParent(javaApplicationTreeItem, rootTreeItem);
-			treetable.setChildrenAllowed(javaApplicationTreeItem, false);
-			applicationItemById.put(javaApplication.getId(), javaApplicationTreeItem);
-			applicationIdIByApplicationClass.put(javaApplication.getClassQualifiedName(), javaApplication.getId());
+			createJavaApplicationItem(javaApplication.getClassQualifiedName(), javaApplication.getId());
 		}
 		Set<Connection> connections = javaApplication.getConnections();
 		rebuildConnectionsTreeItem(connections, javaApplication);
@@ -364,8 +356,7 @@ public class JavaApplicationsView extends AbstractConnectionTreeView {
 			treetable.setChildrenAllowed(applicationItemById.get(javaApplication.getId()), false);
 		}
 	}
-
-
+	
 	protected void refreshEntity(EntityWithId entityWithId) {
 		jpaJavaApplication.refreshItem(entityWithId.getId());
 	}
@@ -378,7 +369,7 @@ public class JavaApplicationsView extends AbstractConnectionTreeView {
 				deleteSelectedItem();
 			};
 		}
-		if (key.equals(EnumButton.STACK.toString())) {
+		else if (key.equals(EnumButton.STACK.toString())) {
 			return (ClickEvent event) -> {
 				if (selectedCommunication != null) {
 
@@ -402,12 +393,24 @@ public class JavaApplicationsView extends AbstractConnectionTreeView {
 				}
 			};
 		}
+		else if (key.equals(EnumButton.ADD_TO_MOCK.toString())) {
+			return (ClickEvent event) -> {
+				addItemToMock();
+			};
+		}
 
 		return null;
 
 	}
 	
-	
+	/**
+	 * Add item to mock space
+	 */
+	private void addItemToMock() {
+		SmockerUI.getInstance().getEasyAppMainView().getScanner().navigateTo(MockSpaceView.class);
+		
+	}
+
 	/**
 	 * Delete the selected Item, Could be JavaApplication, 
 	 * Connection or communications
@@ -446,7 +449,7 @@ public class JavaApplicationsView extends AbstractConnectionTreeView {
 						FontAwesome.BARS, EnumButton.STACK.toString()),
 
 				new ButtonDescriptor(bundle.getString("addToMock"), bundle.getString("StackTraceToolTip"), 
-						FontAwesome.PLUS, EnumButton.STACK.toString())
+						FontAwesome.PLUS, EnumButton.ADD_TO_MOCK.toString())
 		});
 	}
 
@@ -458,6 +461,9 @@ public class JavaApplicationsView extends AbstractConnectionTreeView {
 		if (key.equals(EnumButton.STACK.toString())) {
 			//enable only if connection is selected
 			return selectedCommunication != null;
+		}
+		if (key.equals(EnumButton.ADD_TO_MOCK.toString())) {
+			return true;
 		}
 		return false;
 	}

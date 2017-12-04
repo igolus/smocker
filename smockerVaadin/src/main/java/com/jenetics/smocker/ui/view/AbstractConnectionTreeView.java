@@ -44,6 +44,7 @@ public abstract class AbstractConnectionTreeView extends VerticalSplitPanel impl
 	protected transient Map<String ,Long > applicationIdIByAdressAndPort =  new HashMap<>();
 	protected transient Map<String ,Long > applicationIdIByApplicationClass =  new HashMap<>();
 	protected transient Map<Long, Object> connectionTreeItemByConnectionId = new HashMap<>();
+	protected Object rootTreeItem;
 	
 
 	public AbstractConnectionTreeView() {
@@ -132,6 +133,21 @@ public abstract class AbstractConnectionTreeView extends VerticalSplitPanel impl
 	protected abstract void updateTree(EntityWithId entityWithId);
 	
 	protected abstract void refreshEntity(EntityWithId entityWithId);
+	
+	/**
+	 * Add Java Application to tree view
+	 * @param className
+	 * @param javaApplicationId
+	 */
+	protected void createJavaApplicationItem(String className, Long javaApplicationId) {
+		Object[] javaApplicationItem = new Object[] { className,  "", "", ""};
+		Object javaApplicationTreeItem = treetable.addItem(javaApplicationItem, null);
+		treetable.setParent(javaApplicationTreeItem, rootTreeItem);
+		treetable.setChildrenAllowed(javaApplicationTreeItem, false);
+		applicationItemById.put(javaApplicationId, javaApplicationTreeItem);
+		applicationIdIByApplicationClass.put(className, javaApplicationId);
+	}
+
 	
 	
 }

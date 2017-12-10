@@ -256,6 +256,9 @@ public class JavaApplicationsView extends AbstractConnectionTreeView<JavaApplica
 		if (selectedConnection != null) {
 			MockConverter.convertConnection(selectedConnection);
 		}
+		else if (selectedJavaApplication != null) {
+			MockConverter.convertJavaApplication(selectedJavaApplication);
+		}
 		SmockerUI.getInstance().getEasyAppMainView().getScanner().navigateTo(MockSpaceView.class);
 		MockSpaceView MockSpaceView = (MockSpaceView)SmockerUI.getInstance().getEasyAppMainView().getScanner().getViewMap().get(MockSpaceView.class.toString());
 		MockSpaceView.fillTreeTable();

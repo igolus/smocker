@@ -17,7 +17,6 @@ public class MockConverter {
 
 	private MockConverter() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	private static IDaoManager<ConnectionMocked> daoManagerConnectionMocked = new DaoManager<>(ConnectionMocked.class,
@@ -33,21 +32,49 @@ public class MockConverter {
 	public static void convertConnection(Connection sourceConnection) {
 		JavaApplication sourceJavaApplication = sourceConnection.getJavaApplication();
 		JavaApplicationMocked targetJavaApplicationMocked = null;
-		List<JavaApplicationMocked> allJavaApplicationsMocked = daoManagerJavaApplicationMocked.listAll();
-		// check if there is already a mocked java application
-		for (JavaApplicationMocked javaApplicationMocked : allJavaApplicationsMocked) {
-			if (javaApplicationMocked.getClassQualifiedName().equals(sourceJavaApplication.getClassQualifiedName())) {
-				targetJavaApplicationMocked = javaApplicationMocked;
-				break;
-			}
-		}
-		// otherwise create it
-		if (targetJavaApplicationMocked == null) {
-			targetJavaApplicationMocked = new JavaApplicationMocked();
-			targetJavaApplicationMocked.setClassQualifiedName(sourceJavaApplication.getClassQualifiedName());
-			daoManagerJavaApplicationMocked.create(targetJavaApplicationMocked);
-		}
+		targetJavaApplicationMocked = findOrCreateTargetJavaApplication(sourceJavaApplication);
+		
+		ConnectionMocked targetConnectionMocked = findOrCreateTargetConnection(sourceConnection,
+				targetJavaApplicationMocked);
+		
+		addCommunications(sourceConnection, targetConnectionMocked);
+	}
+	
+	/**
+	 * convert JavaApplication to javaApplicationMocked
+	 * 
+	 * @param sourceConnection
+	 */
+	public static void convertJavaApplication(JavaApplication sourceJavaApplication) {
+		JavaApplicationMocked targetJavaApplicationMocked = findOrCreateTargetJavaApplication(sourceJavaApplication);
 
+		Set<Connection> connections = sourceJavaApplication.getConnections();	
+		
+		for (Connection sourceConnection : connections) {
+			ConnectionMocked targetConnectionMocked = findOrCreateTargetConnection(sourceConnection, targetJavaApplicationMocked);
+			Set<Communication> sourceCommunications = sourceConnection.getCommunications();
+			addCommunications(sourceConnection, targetConnectionMocked);
+		}
+		
+	}
+
+
+	private static void addCommunications(Connection sourceConnection, ConnectionMocked targetConnectionMocked) {
+		Set<Communication> sourceCommunications = sourceConnection.getCommunications();
+		for (Communication communication : sourceCommunications) {
+			CommunicationMocked communicationMocked = new CommunicationMocked();
+			communicationMocked.setRequest(communication.getRequest());
+			communicationMocked.setResponse(communication.getResponse());
+			communicationMocked.setDateTime(communication.getDateTime());
+			communicationMocked.setConnection(targetConnectionMocked);
+			
+			targetConnectionMocked.getCommunications().add(communicationMocked);
+		}
+		daoManagerConnectionMocked.update(targetConnectionMocked);
+	}
+
+	private static ConnectionMocked findOrCreateTargetConnection(Connection sourceConnection,
+			JavaApplicationMocked targetJavaApplicationMocked) {
 		ConnectionMocked targetConnectionMocked = null;
 		// check if the connection is already defined
 		Set<ConnectionMocked> connectionsMocked = targetJavaApplicationMocked.getConnections();
@@ -69,15 +96,28 @@ public class MockConverter {
 			
 			daoManagerConnectionMocked.create(targetConnectionMocked);
 		}
-
-		Set<Communication> sourceCommunications = sourceConnection.getCommunications();
-		for (Communication communication : sourceCommunications) {
-			CommunicationMocked communicationMocked = new CommunicationMocked();
-			communicationMocked.setRequest(communication.getRequest());
-			communicationMocked.setResponse(communication.getResponse());
-			communicationMocked.setConnection(targetConnectionMocked);
-			targetConnectionMocked.getCommunications().add(communicationMocked);
-		}
-		daoManagerConnectionMocked.update(targetConnectionMocked);
+		return targetConnectionMocked;
 	}
+	
+
+	private static JavaApplicationMocked findOrCreateTargetJavaApplication(JavaApplication sourceJavaApplication) {
+		
+		JavaApplicationMocked targetJavaApplicationMocked = null;
+		List<JavaApplicationMocked> allJavaApplicationsMocked = daoManagerJavaApplicationMocked.listAll();
+		// check if there is already a mocked java application
+		for (JavaApplicationMocked javaApplicationMocked : allJavaApplicationsMocked) {
+			if (javaApplicationMocked.getClassQualifiedName().equals(sourceJavaApplication.getClassQualifiedName())) {
+				targetJavaApplicationMocked = javaApplicationMocked;
+				break;
+			}
+		}
+		// otherwise create it
+		if (targetJavaApplicationMocked == null) {
+			targetJavaApplicationMocked = new JavaApplicationMocked();
+			targetJavaApplicationMocked.setClassQualifiedName(sourceJavaApplication.getClassQualifiedName());
+			daoManagerJavaApplicationMocked.create(targetJavaApplicationMocked);
+		}
+		return targetJavaApplicationMocked;
+	}
+	
 }

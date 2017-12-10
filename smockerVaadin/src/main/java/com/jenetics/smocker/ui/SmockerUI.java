@@ -6,7 +6,6 @@ import java.util.ResourceBundle;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
-import javax.persistence.PersistenceContext;
 
 import org.jboss.logging.Logger;
 import org.vaadin.easyapp.EasyAppBuilder;
@@ -30,11 +29,9 @@ import com.vaadin.ui.themes.BaseTheme;
 @Theme("smocker")
 public class SmockerUI extends UI {
 
-	private static ResourceBundle bundle = ResourceBundle.getBundle("BundleUI");
-	
 	private static final int SLEEP_TIME = 200;
 
-	//@PersistenceContext(unitName = SmockerUI.PERSISTENCE_UNIT)
+	// @PersistenceContext(unitName = SmockerUI.PERSISTENCE_UNIT)
 	private static EntityManager em;
 
 	@Inject
@@ -54,75 +51,64 @@ public class SmockerUI extends UI {
 		return em;
 	}
 
-
 	public static SmockerUI getInstance() {
 		return instance;
 	}
 
-
-	private EasyAppMainView easyAppMainView; 
-
+	private EasyAppMainView easyAppMainView;
 
 	public EasyAppMainView getEasyAppMainView() {
 		return easyAppMainView;
 	}
 
-
 	@Override
 	protected void init(VaadinRequest request) {
-		
+
 		final VerticalLayout layout = new VerticalLayout();
-        layout.setSizeFull();
-        
-        Image image = new Image(null, new ThemeResource("icons/smocker_small.png"));
-		
+		layout.setSizeFull();
+
+		Image image = new Image(null, new ThemeResource("icons/smocker_small.png"));
+
 		easyAppMainView = new EasyAppBuilder(Collections.singletonList("com.jenetics.smocker.ui.view"))
-        	.withTopBarIcon(image)
-        	.withTopBarStyle("topBannerBackGround")
-        	.withSearchCapabilities( (searchValue) -> search(searchValue) , FontAwesome.SEARCH)
-        	.withBreadcrumb()
-        	.withBreadcrumbStyle("breadcrumbStyle")
-        	.withButtonLinkStyleInBreadCrumb(BaseTheme.BUTTON_LINK)
-        	.withToolBar()
-        	//.withLoginPopupLoginStyle("propupStyle")
-        	.build();
-		
+				.withTopBarIcon(image).withTopBarStyle("topBannerBackGround")
+				.withSearchCapabilities((searchValue) -> search(searchValue), FontAwesome.SEARCH).withBreadcrumb()
+				.withBreadcrumbStyle("breadcrumbStyle").withButtonLinkStyleInBreadCrumb(BaseTheme.BUTTON_LINK)
+				.withToolBar()
+				// .withLoginPopupLoginStyle("propupStyle")
+				.build();
+
 		easyAppMainView.setSplitPosition(93);
-		
+
 		layout.addComponents(easyAppMainView);
-        
+
 		easyAppMainView.getTopBar().setStyleName("topBannerBackGround");
-        
-        setContent(layout);
-        instance = this;
+
+		setContent(layout);
+		instance = this;
 	}
 
 	public enum EnumButton {
-		REMOVE,
-		STACK,
-		ADD_TO_MOCK
+		REMOVE, STACK, ADD_TO_MOCK
 	}
-	
+
 	private Object search(String searchValue) {
 		return null;
 	}
 
-
-	public void refreshView(String viewName, EntityWithId entityWithId) {
-		access(new Runnable() {
-			@Override
-			public void run() {
+	public void refreshView(EntityWithId entityWithId) {
+		access( ()  -> 
+			{
 				try {
 					Thread.sleep(SLEEP_TIME);
-					if (RefreshableView.class.isAssignableFrom(easyAppMainView.getNavigator().getCurrentView().getClass()))
-					{
-						((RefreshableView)easyAppMainView.getNavigator().getCurrentView()).refresh(entityWithId);
+					if (RefreshableView.class
+							.isAssignableFrom(easyAppMainView.getNavigator().getCurrentView().getClass())) {
+						((RefreshableView) easyAppMainView.getNavigator().getCurrentView()).refresh(entityWithId);
 					}
 				} catch (InterruptedException e) {
 					logger.error(MessageBuilder.getEasyAppMessage("Unable to get the view map"), e);
+					Thread.currentThread().interrupt();
 				}
-			}
-		});
+			});
 	}
 
 }

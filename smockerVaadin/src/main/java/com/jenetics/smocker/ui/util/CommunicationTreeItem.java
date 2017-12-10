@@ -18,7 +18,5 @@ public class CommunicationTreeItem {
 	public Communication getCommunication() {
 		return communication;
 	}
-	
-	
 
 }

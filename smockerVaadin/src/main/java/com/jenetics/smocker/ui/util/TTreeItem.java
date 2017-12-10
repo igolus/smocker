@@ -4,7 +4,7 @@ import com.jenetics.smocker.model.Communication;
 
 public class TTreeItem<T> {
 	private Communication communication;
-	
+
 	private T inner;
 
 	public TTreeItem(T inner) {

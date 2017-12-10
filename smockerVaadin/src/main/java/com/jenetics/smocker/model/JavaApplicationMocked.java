@@ -1,16 +1,16 @@
 package com.jenetics.smocker.model;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.Version;
-import com.jenetics.smocker.model.Connection;
-import java.util.Set;
-import java.util.HashSet;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.Version;
 
 @Entity
 public class JavaApplicationMocked implements EntityWithId {
@@ -38,7 +38,7 @@ public class JavaApplicationMocked implements EntityWithId {
 
 	@Column
 	private String sourceIp;
-	
+
 	@Override
 	public Long getId() {
 		return this.id;

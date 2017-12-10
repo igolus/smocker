@@ -7,8 +7,14 @@ import com.jenetics.smocker.ui.netdisplayer.implementation.JsonViewer;
 import com.jenetics.smocker.util.NetworkReaderUtility;
 
 public class NetDisplayerFactoryOutput {
-	private static ResourceBundle bundle = ResourceBundle.getBundle("BundleUI");
 	
+	private NetDisplayerFactoryOutput() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	private static ResourceBundle bundle = ResourceBundle.getBundle("BundleUI");
+
 	public static ComponentWithDisplayChange getComponent(String socketOutput) {
 		if (NetworkReaderUtility.readHeaderValue(socketOutput, NetworkReaderUtility.HEADER_CONTENT_TYPE).trim()
 				.startsWith(NetworkReaderUtility.CONTENT_TYPE_JSON)) {

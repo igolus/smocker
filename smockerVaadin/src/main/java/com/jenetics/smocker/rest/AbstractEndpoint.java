@@ -9,31 +9,24 @@ import javax.persistence.PersistenceContext;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.GenericEntity;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.Response.StatusType;
-import javax.ws.rs.core.UriBuilder;
 
 import org.jboss.logging.Logger;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jenetics.smocker.dao.IDaoManager;
 import com.jenetics.smocker.injector.Dao;
-import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.ui.SmockerUI;
 
 public abstract class AbstractEndpoint<T extends EntityWithId> {
 
 	ObjectMapper mapper = new ObjectMapper();
-	
+
 	@Inject
 	Logger logger;
 
@@ -42,14 +35,15 @@ public abstract class AbstractEndpoint<T extends EntityWithId> {
 
 	@Inject
 	protected Event<T> entityEventSrc;
-	
-	@Inject @Dao
+
+	@Inject
+	@Dao
 	protected IDaoManager<T> daoManager;
 
 	@POST
 	public Response create(final T entity) {
 		daoManager.create(entity);
-		//notify the creation
+		// notify the creation
 		entityEventSrc.fire(entity);
 		return Response.ok(entity).build();
 	}
@@ -57,7 +51,6 @@ public abstract class AbstractEndpoint<T extends EntityWithId> {
 	@GET
 	@Path("/{id:[0-9][0-9]*}")
 	public Response findById(@PathParam("id") final Long id) {
-		//TODO: retrieve the connection 
 		T entity = daoManager.findById(id);
 		if (entity == null) {
 			return Response.status(Status.NOT_FOUND).build();
@@ -66,17 +59,11 @@ public abstract class AbstractEndpoint<T extends EntityWithId> {
 	}
 
 	@GET
-	public Response listAll(@QueryParam("start") final Integer startPosition, @QueryParam("max") final Integer maxResult) {
+	public Response listAll(@QueryParam("start") final Integer startPosition,
+			@QueryParam("max") final Integer maxResult) {
 		List<T> all = daoManager.listAll(startPosition, maxResult);
 		return Response.ok().entity(all).build();
 	}
-
-//	@PUT
-//	@Path("/{id:[0-9][0-9]*}")
-//	public Response update(@PathParam("id") Long id, final T entity) {
-//		daoManager.update(id, entity);
-//		return Response.ok(entity).build();
-//	}
 
 	@DELETE
 	@Path("/{id:[0-9][0-9]*}")

@@ -1,21 +1,20 @@
 package com.jenetics.smocker.model;
 
-import javax.persistence.Entity;
-import java.io.Serializable;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.jenetics.smocker.model.Communication;
-import java.util.Set;
-import java.util.HashSet;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 
 @Entity
 public class Connection implements EntityWithId {
@@ -35,11 +34,12 @@ public class Connection implements EntityWithId {
 	@Column(nullable = false)
 	private Integer port;
 
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval=true, mappedBy = "connection")
-	private Set<Communication> communications = new HashSet<Communication>();
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "connection")
+	private Set<Communication> communications = new HashSet<>();
 
 	@JoinColumn(nullable = false)
-	@OneToOne @JsonIgnore 
+	@OneToOne
+	@JsonIgnore
 	private JavaApplication javaApplication;
 
 	@Column
@@ -53,6 +53,7 @@ public class Connection implements EntityWithId {
 		this.javaApplication = javaApplication;
 	}
 
+	@Override
 	public Long getId() {
 		return this.id;
 	}
@@ -78,10 +79,8 @@ public class Connection implements EntityWithId {
 			return false;
 		}
 		Connection other = (Connection) obj;
-		if (id != null) {
-			if (!id.equals(other.id)) {
-				return false;
-			}
+		if (id != null && !id.equals(other.id)) {
+			return false;
 		}
 		return true;
 	}
@@ -114,8 +113,8 @@ public class Connection implements EntityWithId {
 		return this.communications;
 	}
 
-	public void setCommunications(final Set<Communication> Communications) {
-		this.communications = Communications;
+	public void setCommunications(final Set<Communication> communications) {
+		this.communications = communications;
 	}
 
 	public Boolean getWatched() {

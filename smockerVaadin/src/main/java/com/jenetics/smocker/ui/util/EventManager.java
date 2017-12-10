@@ -9,26 +9,25 @@ import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.ui.SmockerUI;
 
 public class EventManager {
-	
+
 	public static final String CONNECTIONS = "Connections";
 	public static final String JAVA_APPLICATIONS = "Java Applications";
 
 	public void newConnection(@Observes Connection conn) {
-		refreshView(JAVA_APPLICATIONS, conn);
+		refreshView(conn);
 	}
-	
-   public void newJavaApplication(@Observes JavaApplication application) {
-		refreshView(JAVA_APPLICATIONS, application);
-    }
-   
-   public void newCommunication(@Observes Communication comm) {
-		refreshView(JAVA_APPLICATIONS, comm);
-   }
 
+	public void newJavaApplication(@Observes JavaApplication application) {
+		refreshView(application);
+	}
 
-	private void refreshView(String viewName, EntityWithId entityWithId) {
+	public void newCommunication(@Observes Communication comm) {
+		refreshView(comm);
+	}
+
+	private void refreshView(EntityWithId entityWithId) {
 		if (SmockerUI.getInstance() != null && SmockerUI.getInstance().getSession() != null) {
-			SmockerUI.getInstance().refreshView(viewName, entityWithId);
+			SmockerUI.getInstance().refreshView(entityWithId);
 		}
 	}
 }

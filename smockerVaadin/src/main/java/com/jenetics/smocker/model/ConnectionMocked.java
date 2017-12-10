@@ -1,21 +1,20 @@
 package com.jenetics.smocker.model;
 
-import javax.persistence.Entity;
-import java.io.Serializable;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.jenetics.smocker.model.Communication;
-import java.util.Set;
-import java.util.HashSet;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 
 @Entity
 public class ConnectionMocked implements EntityWithId {
@@ -35,11 +34,12 @@ public class ConnectionMocked implements EntityWithId {
 	@Column(nullable = false)
 	private Integer port;
 
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval=true, mappedBy = "connection" )
-	private Set<CommunicationMocked> communications = new HashSet<CommunicationMocked>();
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "connection")
+	private Set<CommunicationMocked> communications = new HashSet<>();
 
 	@JoinColumn(nullable = false)
-	@OneToOne @JsonIgnore 
+	@OneToOne
+	@JsonIgnore
 	private JavaApplicationMocked javaApplication;
 
 	@Column
@@ -52,7 +52,8 @@ public class ConnectionMocked implements EntityWithId {
 	public void setJavaApplication(JavaApplicationMocked javaApplication) {
 		this.javaApplication = javaApplication;
 	}
-
+	
+	@Override
 	public Long getId() {
 		return this.id;
 	}

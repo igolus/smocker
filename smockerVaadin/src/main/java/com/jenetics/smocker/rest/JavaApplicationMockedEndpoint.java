@@ -11,7 +11,6 @@ import com.jenetics.smocker.model.JavaApplicationMocked;
 @Path("/javaapplicationsMocked")
 @Produces("application/json")
 @Consumes("application/json")
-public class JavaApplicationMockedEndpoint extends AbstractEndpoint<JavaApplicationMocked>{
-
+public class JavaApplicationMockedEndpoint extends AbstractEndpoint<JavaApplicationMocked> {
 
 }

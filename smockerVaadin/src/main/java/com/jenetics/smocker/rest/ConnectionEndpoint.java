@@ -11,6 +11,6 @@ import com.jenetics.smocker.model.Connection;
 @Path("/connections")
 @Produces("application/json")
 @Consumes("application/json")
-public class ConnectionEndpoint extends AbstractEndpoint<Connection>{
+public class ConnectionEndpoint extends AbstractEndpoint<Connection> {
 
 }

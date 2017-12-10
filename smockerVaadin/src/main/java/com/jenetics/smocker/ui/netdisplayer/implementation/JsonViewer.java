@@ -12,13 +12,8 @@ import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextArea;
 
 public class JsonViewer implements ComponentWithDisplayChange {
-	
-	private String defaultTitle;
 
-	public JsonViewer(String defaultTitle) {
-		super();
-		this.defaultTitle = defaultTitle;
-	}
+	private String defaultTitle;
 
 	private static ResourceBundle bundle = ResourceBundle.getBundle("BundleUI");
 	private TabSheet tabsheet = new TabSheet();
@@ -26,35 +21,41 @@ public class JsonViewer implements ComponentWithDisplayChange {
 	private TextArea areaOutputJson;
 
 	private Logger logger = Logger.getLogger(JsonViewer.class);
-	
+
+	public JsonViewer(String defaultTitle) {
+		super();
+		this.defaultTitle = defaultTitle;
+	}
+
+
 	@Override
 	public Component getComponent() {
 		areaOutput = new TextArea();
 		areaOutput.setReadOnly(true);
 		areaOutput.setSizeFull();
-		
+
 		areaOutputJson = new TextArea();
 		areaOutputJson.setReadOnly(true);
 		areaOutputJson.setSizeFull();
-		
+
 		tabsheet.addTab(areaOutput, defaultTitle);
 		tabsheet.addTab(areaOutputJson, bundle.getString("Json"));
-		
+
 		tabsheet.setSizeFull();
 		return tabsheet;
 	}
 
 	@Override
 	public void selectionValue(String content) {
-		
+
 		areaOutput.setReadOnly(false);
 		areaOutput.setValue(content);
 		areaOutput.setReadOnly(true);
-		
+
 		areaOutputJson.setReadOnly(false);
 		String message = NetworkReaderUtility.readContentResponse(content);
 		String jsonContent = NetworkReaderUtility.getJsonContent(message);
-		
+
 		ObjectMapper mapper = new ObjectMapper();
 		Object json;
 		String formattedJson;
@@ -63,12 +64,10 @@ public class JsonViewer implements ComponentWithDisplayChange {
 			formattedJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
 			areaOutputJson.setValue(formattedJson);
 		} catch (Exception e) {
-			logger.error("Unable to parse Json response");
+			logger.error("Unable to parse Json response", e);
 			areaOutputJson.setValue(bundle.getString("ParseError"));
-		} 
+		}
 		areaOutputJson.setReadOnly(true);
 	}
-	
-	
 
 }

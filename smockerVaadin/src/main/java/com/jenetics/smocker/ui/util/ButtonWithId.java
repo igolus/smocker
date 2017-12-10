@@ -5,9 +5,19 @@ import com.vaadin.ui.Button;
 
 public class ButtonWithId<T extends EntityWithId> extends Button {
 
-	private String UiId = null;
+	private String uiId = null;
 	private T entity = null;
-	
+
+	public ButtonWithId() {
+		super();
+	}
+
+	public ButtonWithId(String uiId, T entity) {
+		super();
+		this.uiId = uiId;
+		this.entity = entity;
+	}
+
 	public T getEntity() {
 		return entity;
 	}
@@ -16,24 +26,14 @@ public class ButtonWithId<T extends EntityWithId> extends Button {
 		this.entity = entity;
 	}
 
-	public ButtonWithId(String uiId, T entity ) {
-		super();
-		UiId = uiId;
-		this.entity = entity;
-	}
-
-	public ButtonWithId() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
-
-
 	public String getUiId() {
-		return UiId;
+		return uiId;
 	}
 
 	public void setUiId(String uiId) {
-		UiId = uiId;
+		this.uiId = uiId;
 	}
 	
+	
+
 }

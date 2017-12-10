@@ -11,6 +11,6 @@ import com.jenetics.smocker.model.ConnectionMocked;
 @Path("/connectionsMocked")
 @Produces("application/json")
 @Consumes("application/json")
-public class ConnectionMockedEndpoint extends AbstractEndpoint<ConnectionMocked>{
+public class ConnectionMockedEndpoint extends AbstractEndpoint<ConnectionMocked> {
 
 }

@@ -1,7 +1,7 @@
 package com.jenetics.smocker.util.network;
 
 import java.net.InetAddress;
-import java.util.Base64;
+import javax.xml.bind.DatatypeConverter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -93,7 +93,7 @@ public class RestClientSmocker extends RESTClient {
 	
 
 	private Object encode(String source) {
-		return Base64.getEncoder().encodeToString(source.getBytes());
+		return DatatypeConverter.printBase64Binary(source.getBytes());
 	}
 
 	public String postJavaApp(SmockerContainer smockerContainer) {

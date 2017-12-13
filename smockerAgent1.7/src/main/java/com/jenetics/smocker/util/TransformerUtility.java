@@ -211,6 +211,20 @@ public class TransformerUtility {
 			Object sniMatchers, boolean preferLocalCipherSuites, Socket source) {
 		// addSocketReference(source);
 	}
+	
+	public static void sslSocketCreated(Object o, boolean serverMode, Object suites, byte clientAuth,
+			boolean sessionCreation, Object protocols, String identificationProtocol, Object algorithmConstraints) {
+		// addSocketReference(source);
+	}
+	
+	public static void sslSocketCreated(Object o, boolean serverMode, Object suites, byte clientAuth,
+			boolean sessionCreation, Object protocols, String identificationProtocol, Object algorithmConstraints, Object sSLSocketImpl) {
+		// addSocketReference(source);
+	}
+	
+//	public static void sslSocketCreated(Object sSLContextImpl, boolean serverMode ,Object cipherSuiteList,
+//			byte clientAuth, boolean sessionCreation ,Object protocols,String identificationProtocol,
+//			Object algorithmConstraints)
 
 	public static void sslSocketCreated(Object o, Socket sock, InputStream consumed, boolean autoClose, Socket source) {
 		// addSocketReference(source);

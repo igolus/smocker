@@ -211,6 +211,25 @@ public class TransformerUtility {
 			Object sniMatchers, boolean preferLocalCipherSuites, Socket source) {
 		// addSocketReference(source);
 	}
+	
+	public static void sslSocketCreated(Object o, boolean serverMode, Object suites, byte clientAuth,
+			boolean sessionCreation, Object protocols, String identificationProtocol, Object algorithmConstraints) {
+		// addSocketReference(source);
+	}
+	
+	public static void sslSocketCreated(Object o, boolean serverMode, Object suites, byte clientAuth,
+			boolean sessionCreation, Object protocols, String identificationProtocol, Object algorithmConstraints, Object sSLSocketImpl) {
+		// addSocketReference(source);
+	}
+	
+	//sslSocketCreated(sun.security.ssl.SSLContextImpl,boolean,sun.security.ssl.CipherSuiteList,byte,boolean,sun.security.ssl.ProtocolList,java.lang.String,java.security.AlgorithmConstraints,sun.security.ssl.SSLSocketImpl)
+	
+//	SSLSocketImpl(SSLContextImpl context, boolean serverMode,
+//			473             CipherSuiteList suites, byte clientAuth,
+//			474             boolean sessionCreation, ProtocolList protocols,
+//			475             String identificationProtocol,
+//			476             AlgorithmConstraints algorithmConstraints) throws IOException {
+//			477 
 
 	public static void sslSocketCreated(Object o, Socket sock, InputStream consumed, boolean autoClose, Socket source) {
 		// addSocketReference(source);
@@ -219,6 +238,7 @@ public class TransformerUtility {
 	public static void sslSocketCreated(Object o, Object context) {
 		// System.out.println("Socket Created 9");
 	}
+	
 
 
 	private static boolean filterSmockerBehavior() {

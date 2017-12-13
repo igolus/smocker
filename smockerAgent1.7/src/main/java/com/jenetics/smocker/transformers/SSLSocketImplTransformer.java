@@ -123,7 +123,12 @@ public class SSLSocketImplTransformer extends AbstractTransformer {
 		
 		CtConstructor[] constructors = ctClass.getDeclaredConstructors();
 		for (CtConstructor ctConstructor : constructors) {
-			ctConstructor.insertAfter(body);
+			try {
+				ctConstructor.insertAfter(body);
+			}
+			catch (Throwable t) {
+				t.printStackTrace();
+			}
 		}
 
 

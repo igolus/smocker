@@ -31,7 +31,7 @@ public class SSLSocketImplTransformer extends AbstractTransformer {
 		redefineClose(classPool, ctClass);
 		// redefineBind(classPool, ctClass);
 		//redefineConnect(classPool, ctClass);
-		redefineConstructors(classPool, ctClass);
+		//redefineConstructors(classPool, ctClass);
 
 		byteCode = ctClass.toBytecode();
 		ctClass.detach();

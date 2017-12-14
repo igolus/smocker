@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -35,8 +36,17 @@ public class TransformerUtility {
 	private static Hashtable<Socket, SmockerContainer> smockerContainerBySocket = new Hashtable<Socket, SmockerContainer>();
 	private static Hashtable<Socket, Long> connectionIdBySocket = new Hashtable<Socket, Long>();
 
-	public synchronized static InputStream manageInputStream(InputStream is, Socket source) {
+	public synchronized static InputStream manageInputStream(InputStream is, Socket source) throws IOException {
+		if (callerApp == null) {
+			String[] stackTraceAsArray = getStackTraceAsArray();
+			callerApp = stackTraceAsArray[stackTraceAsArray.length - 1].split("\\(")[0];
+		}
+		
 		if (!filterSmockerBehavior()) {
+			if (!smockerContainerBySocket.containsKey(source)) {
+				addSmockerContainer(source);
+				//smockerContainerBySocket.put(source, value)
+			}
 			if (smockerContainerBySocket.containsKey(source)) {
 				SmockerContainer smockerContainer = smockerContainerBySocket.get(source);
 				if (smockerContainer.getSmockerSocketInputStream() == null) {
@@ -91,42 +101,7 @@ public class TransformerUtility {
 		}
 		try {
 			if (!filterSmockerBehavior()) {
-				String stackTrace = getStackTrace();
-				SmockerContainer smockerContainer = new SmockerContainer(host, port, stackTrace);
-				String allResponse = null;
-				//only if the javaAppId was not found
-				if (javaAppId == null) {
-					//first get all the application from server
-					allResponse = RestClientSmocker.getInstance().getAll();
-					String existingId = ResponseReader.findExistingAppId(allResponse);
-					if (existingId != null) {
-						javaAppId = Long.valueOf(existingId);
-					}
-					else {
-						String response = RestClientSmocker.getInstance().postJavaApp(smockerContainer);
-						updateJavaAppId(response);
-					}
-					//fill the connection in the memory config
-					Map<String, ConnectionBehavior> connectionsMap = ResponseReader.getConnections(allResponse);
-						
-				}
-				if (javaAppId != null)  {
-					String response = RestClientSmocker.getInstance().postConnection(smockerContainer, javaAppId);
-					//check the status 
-					String status = ResponseReader.readStatusCodeFromResponse(response);
-					if (status.equals(ResponseReader.CONFLICT)) {
-						allResponse = RestClientSmocker.getInstance().getAll();
-						String existingConnectionId =  ResponseReader.findExistingConnectionId(allResponse, smockerContainer.getHost(), smockerContainer.getPort());
-						connectionIdBySocket.put(source, Long.valueOf(existingConnectionId));
-					}
-					else {
-						String idConnection = ResponseReader.readValueFromResponse(response, "id");
-						if (idConnection != null) {
-							connectionIdBySocket.put(source, Long.valueOf(idConnection));
-						}
-					}
-				}
-				smockerContainerBySocket.put(source, smockerContainer);
+				addSmockerContainer(source);
 			}
 
 		}
@@ -134,6 +109,45 @@ public class TransformerUtility {
 			MessageLogger.logThrowable(ex);
 		} 
 
+	}
+
+	private static void addSmockerContainer(Socket source) throws IOException {
+		String stackTrace = getStackTrace();
+		SmockerContainer smockerContainer = new SmockerContainer(source.getInetAddress().getHostAddress(), source.getPort(), stackTrace);
+		String allResponse = null;
+		//only if the javaAppId was not found
+		if (javaAppId == null) {
+			//first get all the application from server
+			allResponse = RestClientSmocker.getInstance().getAll();
+			String existingId = ResponseReader.findExistingAppId(allResponse);
+			if (existingId != null) {
+				javaAppId = Long.valueOf(existingId);
+			}
+			else {
+				String response = RestClientSmocker.getInstance().postJavaApp(smockerContainer);
+				updateJavaAppId(response);
+			}
+			//fill the connection in the memory config
+			Map<String, ConnectionBehavior> connectionsMap = ResponseReader.getConnections(allResponse);
+				
+		}
+		if (javaAppId != null)  {
+			String response = RestClientSmocker.getInstance().postConnection(smockerContainer, javaAppId);
+			//check the status 
+			String status = ResponseReader.readStatusCodeFromResponse(response);
+			if (status.equals(ResponseReader.CONFLICT)) {
+				allResponse = RestClientSmocker.getInstance().getAll();
+				String existingConnectionId =  ResponseReader.findExistingConnectionId(allResponse, smockerContainer.getHost(), smockerContainer.getPort());
+				connectionIdBySocket.put(source, Long.valueOf(existingConnectionId));
+			}
+			else {
+				String idConnection = ResponseReader.readValueFromResponse(response, "id");
+				if (idConnection != null) {
+					connectionIdBySocket.put(source, Long.valueOf(idConnection));
+				}
+			}
+		}
+		smockerContainerBySocket.put(source, smockerContainer);
 	}
 
 
@@ -169,70 +183,81 @@ public class TransformerUtility {
 		return ret;
 	}
 
-	public static void socketCreated(InetSocketAddress adress, InetSocketAddress localAdress, boolean stream,
-			Socket source) {
-		System.out.println();
-		addSocketReference(source, source.getInetAddress().getHostName(), source.getPort());
-	}
-
-	public static void sslSocketCreated(Object o, InetAddress address, int port, Socket source) {
-		//System.out.println();
-		// addSocketReference(source);
-	}
-
-	public static void sslSocketCreated(Object o, String address, int port, Socket source) {
-		//System.out.println();
-		// addSocketReference(source);
-	}
-
-	public static void sslSocketCreated(Object o, String address, int port, InetAddress inetAddress, Socket source) {
-		//System.out.println();
-		// addSocketReference(source);
-	}
-
-	public static void sslSocketCreated(Object o, String address, int port, InetAddress inetAddress, int localPort,
-			Socket source) {
-		//System.out.println();
-		// addSocketReference(source);
-	}
-
-	public static void sslSocketCreated(Object o, InetAddress host, int port, InetAddress localAddr, int localPort,
-			Socket source) {
-		// addSocketReference(source);
-	}
-
-	public static void sslSocketCreated(Object o, Socket sock, String host, int port, boolean autoClose,
-			Socket source) {
-		addSocketReference(source, host, port);
-	}
-
-	public static void sslSocketCreated(Object o, boolean serverMode, Object suites, byte clientAuth,
-			boolean sessionCreation, Object protocols, String identificationProtocol, Object algorithmConstraints,
-			Object sniMatchers, boolean preferLocalCipherSuites, Socket source) {
-		// addSocketReference(source);
-	}
-	
-	public static void sslSocketCreated(Object o, boolean serverMode, Object suites, byte clientAuth,
-			boolean sessionCreation, Object protocols, String identificationProtocol, Object algorithmConstraints) {
-		// addSocketReference(source);
-	}
-	
-	public static void sslSocketCreated(Object o, boolean serverMode, Object suites, byte clientAuth,
-			boolean sessionCreation, Object protocols, String identificationProtocol, Object algorithmConstraints, Object sSLSocketImpl) {
-		// addSocketReference(source);
-	}
-	
-//	public static void sslSocketCreated(Object sSLContextImpl, boolean serverMode ,Object cipherSuiteList,
-//			byte clientAuth, boolean sessionCreation ,Object protocols,String identificationProtocol,
-//			Object algorithmConstraints)
-
-	public static void sslSocketCreated(Object o, Socket sock, InputStream consumed, boolean autoClose, Socket source) {
-		// addSocketReference(source);
-	}
-
-	public static void sslSocketCreated(Object o, Object context) {
-		// System.out.println("Socket Created 9");
-	}
+//	public static void socketCreated(InetSocketAddress adress, InetSocketAddress localAdress, boolean stream,
+//			Socket source) {
+//		System.out.println();
+//		addSocketReference(source, source.getInetAddress().getHostName(), source.getPort());
+//	}
+//	
+//	public static void socketCreated(Proxy proxy, Socket source) {
+//		System.out.println();
+//		addSocketReference(source, source.getInetAddress().getHostName(), source.getPort());
+//	}
+//	
+//	public static void socketCreated(Socket socket, Socket source) {
+//		System.out.println();
+//		addSocketReference(source, source.getInetAddress().getHostName(), source.getPort());
+//	}
+//
+//
+//	public static void sslSocketCreated(Object o, InetAddress address, int port, Socket source) {
+//		//System.out.println();
+//		// addSocketReference(source);
+//	}
+//
+//	public static void sslSocketCreated(Object o, String address, int port, Socket source) {
+//		//System.out.println();
+//		// addSocketReference(source);
+//	}
+//
+//	public static void sslSocketCreated(Object o, String address, int port, InetAddress inetAddress, Socket source) {
+//		//System.out.println();
+//		// addSocketReference(source);
+//	}
+//
+//	public static void sslSocketCreated(Object o, String address, int port, InetAddress inetAddress, int localPort,
+//			Socket source) {
+//		//System.out.println();
+//		// addSocketReference(source);
+//	}
+//
+//	public static void sslSocketCreated(Object o, InetAddress host, int port, InetAddress localAddr, int localPort,
+//			Socket source) {
+//		// addSocketReference(source);
+//	}
+//
+//	public static void sslSocketCreated(Object o, Socket sock, String host, int port, boolean autoClose,
+//			Socket source) {
+//		addSocketReference(source, host, port);
+//	}
+//
+//	public static void sslSocketCreated(Object o, boolean serverMode, Object suites, byte clientAuth,
+//			boolean sessionCreation, Object protocols, String identificationProtocol, Object algorithmConstraints,
+//			Object sniMatchers, boolean preferLocalCipherSuites, Socket source) {
+//		// addSocketReference(source);
+//	}
+//	
+//	public static void sslSocketCreated(Object o, boolean serverMode, Object suites, byte clientAuth,
+//			boolean sessionCreation, Object protocols, String identificationProtocol, Object algorithmConstraints) {
+//		// addSocketReference(source);
+//	}
+//	
+//	public static void sslSocketCreated(Object o, boolean serverMode, Object suites, byte clientAuth,
+//			boolean sessionCreation, Object protocols, String identificationProtocol, Object algorithmConstraints, Object sSLSocketImpl) {
+//		// addSocketReference(source);
+//	}
+//	
+////	public static void sslSocketCreated(Object sSLContextImpl, boolean serverMode ,Object cipherSuiteList,
+////			byte clientAuth, boolean sessionCreation ,Object protocols,String identificationProtocol,
+////			Object algorithmConstraints)
+//
+//	public static void sslSocketCreated(Object o, Socket sock, InputStream consumed, boolean autoClose, Socket source) {
+//		// addSocketReference(source);
+//	}
+//
+//	public static void sslSocketCreated(Object o, Object context) {
+//		// System.out.println("Socket Created 9");
+//	}
 
 
 	private static boolean filterSmockerBehavior() {

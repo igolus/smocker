@@ -136,6 +136,13 @@
 			<artifactId>easyApp</artifactId>
 			<version>1.0-beta</version>
 		</dependency>
+
+
+		<dependency>
+			<groupId>org.vaadin.addons</groupId>
+			<artifactId>aceeditor</artifactId>
+			<version>0.8.14</version>
+		</dependency>
 		<!-- <dependency> <groupId>org.springframework</groupId> <artifactId>spring-context</artifactId> 
 			<version>4.2.0.RELEASE</version> <scope>provided</scope> </dependency> -->
 

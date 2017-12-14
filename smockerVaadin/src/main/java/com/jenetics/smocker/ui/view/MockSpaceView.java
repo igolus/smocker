@@ -13,6 +13,9 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang.StringUtils;
 import org.jboss.logging.Logger;
+import org.vaadin.aceeditor.AceEditor;
+import org.vaadin.aceeditor.AceMode;
+import org.vaadin.aceeditor.AceTheme;
 import org.vaadin.easyapp.util.ButtonDescriptor;
 import org.vaadin.easyapp.util.annotations.ContentView;
 
@@ -122,12 +125,24 @@ public class MockSpaceView extends AbstractConnectionTreeView<JavaApplicationMoc
 				treetable.select(null);
 				selectedCommunication = comm;
 
-				String response = NetworkReaderUtility.decode(comm.getResponse());
-				ComponentWithDisplayChange outputComponent = NetDisplayerFactoryOutput.getComponent(response);
-				grid.removeComponent(1, 0);
-				grid.addComponent(outputComponent.getComponent(), 1, 0);
-				outputComponent.selectionValue(response);
+//				String response = NetworkReaderUtility.decode(comm.getResponse());
+//				ComponentWithDisplayChange outputComponent = NetDisplayerFactoryOutput.getComponent(response);
+//				grid.removeComponent(1, 0);
+//				grid.addComponent(outputComponent.getComponent(), 1, 0);
+//				outputComponent.selectionValue(response);
+				
+				AceEditor editor = new AceEditor();
+				editor.setThemePath("/static/ace");	
+				editor.setMode(AceMode.java);
+				editor.setTheme(AceTheme.eclipse);
 
+				// Use worker (if available for the current mode)
+				editor.setUseWorker(true);
+				editor.setSizeFull();
+				editor.setValue("Hello world!");
+				grid.removeComponent(1, 0);
+				grid.addComponent(editor, 1, 0);
+				
 				String request = NetworkReaderUtility.decode(comm.getRequest());
 				ComponentWithDisplayChange inputComponent = NetDisplayerFactoryInput.getComponent(request);
 				grid.removeComponent(0, 0);

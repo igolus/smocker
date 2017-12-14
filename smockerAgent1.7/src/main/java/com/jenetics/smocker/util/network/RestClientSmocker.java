@@ -13,7 +13,7 @@ import com.jenetics.smocker.util.TransformerUtility;
 
 public class RestClientSmocker extends RESTClient {
 
-	private static final String CONNECTIONS = "connections";
+	//private static final String CONNECTIONS = "connections";
 	private static final String SMOCKER_REST_PATH = "/smocker/rest";
 	private static final String SMOCKER_JAVAAPP_PATH = "/javaapplications";
 	private static final String SMOCKER_ADDCONN = "/manageJavaApplication/addConnection";

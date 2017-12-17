@@ -201,8 +201,8 @@ public class RESTClient {
             }
             return stringWriter.toString();
         } catch (Exception e) {
-        	MessageLogger.logErrorWithMessage("Unable to communicate with smocker App", e, getClass());
-            return "--";
+        	MessageLogger.logError("Unable to communicate with smocker App", getClass());
+            return null;
         }finally{
             try {
             	if (wr != null) {

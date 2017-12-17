@@ -12,12 +12,6 @@ public class SmockerSocketOutputStream extends BaseSmockerSocketHandler {
 	
 	SmockerSocketOutputStreamData smockerSocketOutputStreamData = new SmockerSocketOutputStreamData(new ByteArrayOutputStream());
 	
-	private Socket socketSource;
-
-	public SmockerSocketOutputStream(Socket source) {
-		this.socketSource = source;
-	}
-
 	@Override
 	public void write(int b) throws IOException {
 		smockerSocketOutputStreamData.buffer.write(b);

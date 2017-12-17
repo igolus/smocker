@@ -10,12 +10,6 @@ public class SmockerSocketInputStream extends OutputStream {
 
 	SmockerSocketOutputStreamData smockerOutputStreamData = new SmockerSocketOutputStreamData(new ByteArrayOutputStream());
 	
-	private Socket socketSource;
-
-	public SmockerSocketInputStream(Socket source) {
-		this.socketSource = source;
-	}
-	
 
 	public SmockerSocketOutputStreamData getSmockerOutputStreamData() {
 		return smockerOutputStreamData;

@@ -14,7 +14,6 @@ public class PrivilegedExceptionActionForSocketOutputStream implements Privilege
 	private SocketImpl impl;
 
 	public OutputStream run() throws Exception {
-		// TODO Auto-generated method stub
 		return impl.getOutputStream();
 	}
 

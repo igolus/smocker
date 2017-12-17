@@ -5,8 +5,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.SocketChannel;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -27,6 +31,7 @@ public class App
 			
 			//google
 			callGoogle();
+			callGoogleSocketChannell();
 	    }
 	    catch (Exception ex) {
 	    	ex.printStackTrace();
@@ -56,6 +61,36 @@ public class App
 		}
 
 		httpClient.getConnectionManager().shutdown();
+	}
+	
+	private static void callGoogleSocketChannell() throws UnknownHostException, IOException {
+//		InetAddress addr = InetAddress.getByName("www.google.com");
+//		Socket socket = new Socket(addr, 80);
+//		boolean autoflush = true;
+//		PrintWriter out = new PrintWriter(socket.getOutputStream(), autoflush);
+		
+		SocketChannel socketChannel = SocketChannel.open(new InetSocketAddress("www.google.com", 80));
+		
+//		SocketChannel socketChannel = SocketChannel.open();
+//		socketChannel.socket().connect(new InetSocketAddress("www.google.com", 80), 1000);
+		
+		Channels.newOutputStream(socketChannel);
+		
+		StringBuffer bf = new StringBuffer();
+		
+		String lineSeparator = System.getProperty("line.separator");
+		bf.append("GET / HTTP/1.1").append(lineSeparator);
+		bf.append("Host: www.google.com:80").append(lineSeparator);
+		bf.append("Connection: Close").append(lineSeparator);
+		bf.append(lineSeparator);
+		
+		ByteBuffer buf = ByteBuffer.wrap(bf.toString().getBytes());
+		socketChannel.write(buf);
+		buf.clear();
+		socketChannel.read(buf);
+		socketChannel.close();
+		System.out.println(new String(buf.array()));
+		
 	}
 
 	private static void callGoogle() throws UnknownHostException, IOException {

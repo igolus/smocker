@@ -10,13 +10,13 @@ public class NetDisplayerFactoryOutput {
 	
 	private NetDisplayerFactoryOutput() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	private static ResourceBundle bundle = ResourceBundle.getBundle("BundleUI");
 
 	public static ComponentWithDisplayChange getComponent(String socketOutput) {
-		if (NetworkReaderUtility.readHeaderValue(socketOutput, NetworkReaderUtility.HEADER_CONTENT_TYPE).trim()
+		if (NetworkReaderUtility.readHeaderValue(socketOutput, NetworkReaderUtility.HEADER_CONTENT_TYPE) != null && 
+				NetworkReaderUtility.readHeaderValue(socketOutput, NetworkReaderUtility.HEADER_CONTENT_TYPE).trim()
 				.startsWith(NetworkReaderUtility.CONTENT_TYPE_JSON)) {
 			return new JsonViewer(bundle.getString("Output"));
 		}

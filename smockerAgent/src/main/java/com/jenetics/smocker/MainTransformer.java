@@ -29,7 +29,7 @@ public class MainTransformer implements ClassFileTransformer {
 		try {
 			if (className != null && className.equals("sun/security/ssl/SSLSocketImpl")) {
 				byteCode = new SSLSocketImplTransformer().transform(classfileBuffer);
-			};
+			}
 			
 			if (className != null && className.equals("java/net/Socket")) {
 				byteCode = new SocketTransformer().transform(classfileBuffer);

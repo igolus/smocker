@@ -10,7 +10,12 @@ public class MemoryConfiguration {
   
 	public static final String SEP_CONNECTION = ":";
 	private static Map<String, ConnectionBehavior> connectionsWatched = new HashMap<String, ConnectionBehavior>();
+	private static boolean replayMode;
 	
+	public static boolean isReplayMode() {
+		return replayMode;
+	}
+
 	public static void setConnecctionWatched(String host, int port) {
 		//if (connectionWatched.contains(o))
 		String key = getKey(host, port);
@@ -59,6 +64,11 @@ public class MemoryConfiguration {
 			return connectionsWatched.get(key).isWatched(); 
 		}
 		return false;
+	}
+
+
+	public static void switchMode() {
+		replayMode = !replayMode;
 	} 
 	
   }

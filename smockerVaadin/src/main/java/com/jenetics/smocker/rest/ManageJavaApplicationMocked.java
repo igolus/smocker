@@ -64,7 +64,6 @@ public class ManageJavaApplicationMocked {
 			}
 		}
 		conn.setJavaApplication(target);
-		conn.setWatched(true);
 		target.getConnections().add(conn);
 		daoManager.update(target);
 		// notify the creation
@@ -116,16 +115,16 @@ public class ManageJavaApplicationMocked {
 		if (!connection.isPresent()) {
 			return Response.status(Status.NOT_FOUND).build();
 		}
-		if (connection.get().getWatched() != null && connection.get().getWatched()) {
-			comm.setConnection(connection.get());
-			connection.get().getCommunications().add(comm);
-			daoManager.update(target);
+//		if (connection.get().getWatched() != null && connection.get().getWatched()) {
+		comm.setConnection(connection.get());
+		connection.get().getCommunications().add(comm);
+		daoManager.update(target);
 
-			// notify the creation
-			communicationEventSrc.fire(comm);
-			return Response.ok().entity(comm).build();
-		}
-		return Response.status(Status.FORBIDDEN).build();
+		// notify the creation
+		communicationEventSrc.fire(comm);
+		return Response.ok().entity(comm).build();
+//		}
+//		return Response.status(Status.FORBIDDEN).build();
 
 	}
 

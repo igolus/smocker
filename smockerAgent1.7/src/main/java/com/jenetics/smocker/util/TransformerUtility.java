@@ -1,7 +1,10 @@
 package com.jenetics.smocker.util;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
@@ -18,6 +21,7 @@ import org.apache.commons.io.input.TeeInputStream;
 import org.apache.commons.io.output.TeeOutputStream;
 //import com.jenetics.smocker.util.SmockerSocketInputStream;
 
+import com.jenetics.smocker.configuration.MemoryConfiguration;
 import com.jenetics.smocker.configuration.util.ConnectionBehavior;
 import com.jenetics.smocker.util.network.ResponseReader;
 import com.jenetics.smocker.util.network.RestClientSmocker;
@@ -33,16 +37,41 @@ public class TransformerUtility {
 	private static Hashtable<Object, Long> connectionIdBySocket = new Hashtable<Object, Long>();
 
 	public static String getCallerApp() {
-		return callerApp;
-	}
-
-
-	public synchronized static InputStream manageInputStream(InputStream is, Socket source) throws IOException {
 		if (callerApp == null) {
 			String[] stackTraceAsArray = getStackTraceAsArray();
 			callerApp = stackTraceAsArray[stackTraceAsArray.length - 1].split("\\(")[0];
 		}
+		return callerApp;
+	}
+	
+	public synchronized static OutputStream manageOutputStream(OutputStream os, Socket source) throws IOException {
+		// return create a tee only if not coming from SSL
+		if (!filterSmockerBehavior()) {
+			
+			SmockerContainer container = null;
+			if (!smockerContainerBySocket.containsKey(source)) {
+				container = addSmockerContainer(source, source.getInetAddress().getHostName(),
+						source.getPort());
+			}
+			else {
+				container = smockerContainerBySocket.get(source);
+			}
 
+			SmockerSocketOutputStream smockerOutputStream = new SmockerSocketOutputStream();
+			container.setSmockerSocketOutputStream(smockerOutputStream);
+			TeeOutputStream teeOutputStream = new TeeOutputStream(os, smockerOutputStream);
+			container.setTeeOutputStream(teeOutputStream);
+			SmockerContainer smockerContainer = smockerContainerBySocket.get(source);
+			return smockerContainer.getTeeOutputStream();
+			// MessageLogger.logMessage("No socket key found in table",
+			// TransformerUtility.class);
+		}
+		return os;
+	}
+
+
+	public synchronized static InputStream manageInputStream(InputStream is, Socket source) throws IOException {
+		
 		if (!filterSmockerBehavior()) {
 			if (!smockerContainerBySocket.containsKey(source)) {
 				addSmockerContainer(source, source.getInetAddress().getHostName(), source.getPort());
@@ -50,14 +79,19 @@ public class TransformerUtility {
 			}
 			SmockerContainer smockerContainer = smockerContainerBySocket.get(source);
 			if (smockerContainer.getSmockerSocketInputStream() == null) {
-				SmockerSocketInputStream smockerInputStream = new SmockerSocketInputStream();
-				smockerContainer.setSmockerSocketInputStream(smockerInputStream);
-				TeeInputStream teeInputStream = new TeeInputStream(is, smockerInputStream, true);
-				smockerContainer.setTeeInputStream(teeInputStream);
+				if (!MemoryConfiguration.isReplayMode()) { 
+					SmockerSocketOutputStream smockerInputStream = new SmockerSocketOutputStream();
+					smockerContainer.setSmockerSocketInputStream(smockerInputStream);
+					TeeInputStream teeInputStream = new TeeInputStream(is, smockerInputStream, true);
+					smockerContainer.setTeeInputStream(teeInputStream);
+					return smockerContainer.getTeeInputStream();
+					
+				}
+				else {
+					InputStream mockIs = new MockInputStream(is, smockerContainerBySocket, source);
+					return mockIs;	
+				}
 			}
-			return smockerContainer.getTeeInputStream();
-			// MessageLogger.logMessage("No socket key found in table",
-			// TransformerUtility.class);
 		}
 		return is;
 	}
@@ -88,14 +122,10 @@ public class TransformerUtility {
 	public synchronized static void socketChannelRead (SocketChannel socketChannel, Object socketAdaptorObject, ByteBuffer b) throws IOException {
 		System.out.println(new String(b.array()));
 		if (socketChannel != null) {
-			//SocketAdaptor socketAdaptor = (SocketAdaptor) socketAdaptorObject;
 			SmockerContainer smockerContainer = smockerContainerBySocket.get(socketChannel);
 			if (smockerContainer != null) {
-				//InetSocketAddress remoteAddress = (InetSocketAddress) socketAdaptor.getChannel().getRemoteAddress();
 				smockerContainer = smockerContainerBySocket.get(socketChannel);
-				
-				SmockerSocketInputStream smockerInputStream = new SmockerSocketInputStream();
-				//SmockerSocketOutputStream smockerOutputStream = new SmockerSocketOutputStream(socketAdaptor);
+				SmockerSocketOutputStream smockerInputStream = new SmockerSocketOutputStream();
 				smockerContainer.setSmockerSocketInputStream(smockerInputStream);
 			}
 			smockerContainer.getSmockerSocketInputStream().write(b.array());
@@ -108,36 +138,7 @@ public class TransformerUtility {
 	
 	
 	
-	public synchronized static OutputStream manageOutputStream(OutputStream os, Socket source) throws IOException {
-		// return create a tee only if not coming from SSL
-		if (!filterSmockerBehavior()) {
-			
-			SmockerContainer container = null;
-			if (!smockerContainerBySocket.containsKey(source)) {
-				container = addSmockerContainer(source, source.getInetAddress().getHostName(),
-						source.getPort());
-			}
-			else {
-				container = smockerContainerBySocket.get(source);
-			}
-			
-			
-			SmockerSocketOutputStream smockerOutputStream = new SmockerSocketOutputStream();
-			container.setSmockerSocketOutputStream(smockerOutputStream);
-			TeeOutputStream teeOutputStream = new TeeOutputStream(os, smockerOutputStream);
-			container.setTeeOutputStream(teeOutputStream);
-			// smockerContainerBySocket.put(source, value)
-
-			SmockerContainer smockerContainer = smockerContainerBySocket.get(source);
-			if (smockerContainer.getSmockerSocketOutputStream() == null) {
-				
-			}
-			return smockerContainer.getTeeOutputStream();
-			// MessageLogger.logMessage("No socket key found in table",
-			// TransformerUtility.class);
-		}
-		return os;
-	}
+	
 
 	public synchronized static void socketClosed(Object source) throws UnsupportedEncodingException {
 		if (!filterSmockerBehavior()) {

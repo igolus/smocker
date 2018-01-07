@@ -9,9 +9,11 @@ import java.net.Socket;
 
 import javax.inject.Inject;
 
+import org.eclipse.persistence.jaxb.javamodel.JavaPackage;
 import org.jboss.logging.Logger;
 
 import com.jenetics.smocker.model.Connection;
+import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.util.SmockerException;
 
 public class ClientCommunicator {
@@ -19,6 +21,7 @@ public class ClientCommunicator {
 	private static final String SEP = ":";
 	private static final String WATCH = "WATCH";
 	private static final String MUTE = "MUTE";
+	private static final String MODE = "MODE";
 	
 	@Inject
 	private static Logger logger;
@@ -32,6 +35,18 @@ public class ClientCommunicator {
 		String message = WATCH + " " + conn.getHost() + SEP + conn.getPort();
 		try {
 			sendMessageToClient(conn.getJavaApplication().getSourceHost(), conn.getJavaApplication().getSourcePort(),
+					message);
+		} catch (Exception e) {
+			logger.error(e);
+			return false;
+		}
+		return true;
+	}
+	
+	public static boolean sendMode(String mode, JavaApplication javaApplication) {
+		String message = MODE + " " + mode;
+		try {
+			sendMessageToClient(javaApplication.getSourceHost(), javaApplication.getSourcePort(),
 					message);
 		} catch (Exception e) {
 			logger.error(e);

@@ -92,7 +92,7 @@ public class RestClientSmocker extends RESTClient {
 	}
 	
 
-	private Object encode(String source) {
+	public static String encode(String source) {
 		return Base64.getEncoder().encodeToString(source.getBytes());
 	}
 

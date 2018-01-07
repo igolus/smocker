@@ -12,7 +12,9 @@ import org.vaadin.easyapp.EasyAppBuilder;
 import org.vaadin.easyapp.EasyAppMainView;
 import org.vaadin.easyapp.util.MessageBuilder;
 
+import com.jenetics.smocker.dao.DaoManager;
 import com.jenetics.smocker.model.EntityWithId;
+import com.jenetics.smocker.model.config.SmockerConf;
 import com.jenetics.smocker.ui.util.RefreshableView;
 import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
@@ -84,6 +86,14 @@ public class SmockerUI extends UI {
 		easyAppMainView.getTopBar().setStyleName("topBannerBackGround");
 
 		setContent(layout);
+		
+		
+		//create the smockerConf
+		DaoManager<SmockerConf> daoConf = new DaoManager<SmockerConf>(SmockerConf.class, em);
+		SmockerConf conf = new SmockerConf();
+		conf.setMode("VIEW");
+		daoConf.create(conf);
+		
 		instance = this;
 	}
 

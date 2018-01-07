@@ -97,6 +97,10 @@ public class SmockerServer {
 				}
 				MemoryConfiguration.setConnecctionMute(connectionsItem[0], Integer.parseInt(connectionsItem[1]));
 			} 
+			if (line.startsWith("MODE")) {
+				String mode = line.substring(5);
+				MemoryConfiguration.switchMode();
+			} 
 		}
     }
 

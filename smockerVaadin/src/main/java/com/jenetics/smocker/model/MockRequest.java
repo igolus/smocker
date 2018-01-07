@@ -1,56 +1,37 @@
 package com.jenetics.smocker.model;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
+import java.io.Serializable;
+import javax.persistence.Id;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
+import javax.persistence.Column;
 import javax.persistence.Version;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 @Entity
-public class ConnectionMocked implements EntityWithId {
+public class MockRequest implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "id", updatable = false, nullable = false)
 	private Long id;
 	@Version
 	@Column(name = "version")
 	private int version;
 
-	@Column(nullable = false)
+	@Column(columnDefinition = "TEXT")
+	private String request;
+
+	@Column
+	private String className;
+
+	@Column
 	private String host;
 
-	@Column(nullable = false)
+	@Column
 	private Integer port;
 
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "connection")
-	private Set<CommunicationMocked> communications = new HashSet<>();
-
-	@JoinColumn(nullable = false)
-	@OneToOne
-	@JsonIgnore
-	private JavaApplicationMocked javaApplication;
-
-	public JavaApplicationMocked getJavaApplication() {
-		return javaApplication;
-	}
-
-	public void setJavaApplication(JavaApplicationMocked javaApplication) {
-		this.javaApplication = javaApplication;
-	}
-	
-	@Override
 	public Long getId() {
 		return this.id;
 	}
@@ -72,10 +53,10 @@ public class ConnectionMocked implements EntityWithId {
 		if (this == obj) {
 			return true;
 		}
-		if (!(obj instanceof ConnectionMocked)) {
+		if (!(obj instanceof MockRequest)) {
 			return false;
 		}
-		ConnectionMocked other = (ConnectionMocked) obj;
+		MockRequest other = (MockRequest) obj;
 		if (id != null) {
 			if (!id.equals(other.id)) {
 				return false;
@@ -90,6 +71,22 @@ public class ConnectionMocked implements EntityWithId {
 		int result = 1;
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		return result;
+	}
+
+	public String getRequest() {
+		return request;
+	}
+
+	public void setRequest(String reauest) {
+		this.request = reauest;
+	}
+
+	public String getClassName() {
+		return className;
+	}
+
+	public void setClassName(String className) {
+		this.className = className;
 	}
 
 	public String getHost() {
@@ -108,28 +105,20 @@ public class ConnectionMocked implements EntityWithId {
 		this.port = port;
 	}
 
-	public Set<CommunicationMocked> getCommunications() {
-		return this.communications;
-	}
-
-	public void setCommunications(final Set<CommunicationMocked> communications) {
-		this.communications = communications;
-	}
-
-   @Override
+	@Override
 	public String toString() {
 		String result = getClass().getSimpleName() + " ";
 		if (id != null)
 			result += "id: " + id;
 		result += ", version: " + version;
+		if (request != null && !request.trim().isEmpty())
+			result += ", request: " + request;
+		if (className != null && !className.trim().isEmpty())
+			result += ", className: " + className;
 		if (host != null && !host.trim().isEmpty())
 			result += ", host: " + host;
 		if (port != null)
 			result += ", port: " + port;
-		if (communications != null)
-			result += ", Communications: " + communications;
-		if (javaApplication != null)
-			result += ", javaApplication: " + javaApplication.getId();
 		return result;
 	}
 }

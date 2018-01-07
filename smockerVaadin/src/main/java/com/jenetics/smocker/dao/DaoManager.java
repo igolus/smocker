@@ -71,6 +71,14 @@ public class DaoManager<T extends Serializable> implements IDaoManager<T> {
 		Query query = entityManager.createQuery("SELECT e FROM " + entityName + " e");
 		return query.getResultList();
 	}
+	
+	@Override
+	public List<T> findByColumn(String columnName, String value) {
+		String entityName = typeParameterClass.getSimpleName();
+		Query query = entityManager.createQuery("SELECT e FROM " + entityName + " e WHERE e." + columnName + " = '" + value + "'");
+		return query.getResultList();
+	}
+	
 
 	@Override
 	public List<T> listAll() {

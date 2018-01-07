@@ -11,13 +11,15 @@ import com.jenetics.smocker.util.MessageLogger;
 import com.jenetics.smocker.util.SmockerContainer;
 import com.jenetics.smocker.util.TransformerUtility;
 
+import static com.jenetics.smocker.util.network.Base64Util.*;
+
 public class RestClientSmocker extends RESTClient {
 
-	//private static final String CONNECTIONS = "connections";
 	private static final String SMOCKER_REST_PATH = "/smocker/rest";
 	private static final String SMOCKER_JAVAAPP_PATH = "/javaapplications";
 	private static final String SMOCKER_ADDCONN = "/manageJavaApplication/addConnection";
 	private static final String SMOCKER_ADDCOMM = "/manageJavaApplication/addCommunication";
+	private static final String SMOCKER_FINDMOCKS = "/findMock";
 	
 	private static RestClientSmocker instance;
 	
@@ -38,6 +40,29 @@ public class RestClientSmocker extends RESTClient {
 		return get();
 	}
 	
+	public String findMock(String request, String className, String host, int port) {
+		StringBuffer buffer = new StringBuffer();
+		Map<String, String> headers = buildHeader();
+		
+		buffer
+		.append("{\"id\": 0, \"version\": 0,  \"request\":\"")
+		.append(request)
+		.append("\",  \"className\":\"" )
+		.append(className)
+		.append("\",  \"host\":\"")
+		.append(host)
+		.append("\",  \"port\":")
+		.append(port)
+		.append("}");
+		setPath(SMOCKER_REST_PATH + SMOCKER_FINDMOCKS);
+		try {
+			return post(buffer.toString(), null, POST);
+		} catch (Exception e) {
+			MessageLogger.logThrowable(e);
+		}
+		return null;
+	}
+	
 	public String postConnection(SmockerContainer smockerContainer, Long javaAppId) {
 		StringBuffer buffer = new StringBuffer();
 		Map<String, String> headers = buildHeader();
@@ -56,7 +81,6 @@ public class RestClientSmocker extends RESTClient {
 	}
 	
 	public String postCommunication(SmockerContainer smockerContainer, Long javaAppId, Long connectionId) {
-		
 		String host = smockerContainer.getHost();
 		int port = smockerContainer.getPort();
 		
@@ -92,9 +116,7 @@ public class RestClientSmocker extends RESTClient {
 	}
 	
 
-	private Object encode(String source) {
-		return DatatypeConverter.printBase64Binary(source.getBytes());
-	}
+
 
 	public String postJavaApp(SmockerContainer smockerContainer) {
 		StringBuffer buffer = new StringBuffer();

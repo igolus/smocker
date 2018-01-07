@@ -25,17 +25,19 @@ import org.jboss.resteasy.spi.HttpResponse;
 public class App 
 {
 	public static void main(String[] args) {
-	    	
-	    try {	
-		    callYahoo();
-			
-			//google
-			callGoogle();
-			callGoogleSocketChannell();
-	    }
-	    catch (Exception ex) {
-	    	ex.printStackTrace();
-	    }
+		while (true) {	
+			try {	
+				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+				String line = bufferedReader.readLine();
+
+				line = bufferedReader.readLine();
+				callGoogle();
+			}
+
+			catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		}
 	}
 
 	private static void callYahoo() throws IOException, ClientProtocolException {

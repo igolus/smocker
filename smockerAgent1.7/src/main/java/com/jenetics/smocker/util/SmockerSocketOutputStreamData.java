@@ -7,6 +7,11 @@ import java.io.UnsupportedEncodingException;
 import com.jenetics.smocker.util.network.RestClientSmocker;
 import static com.jenetics.smocker.util.network.Base64Util.*;
 
+/**
+ * Used to store data from a buffer to restore it later
+ * @author igolus
+ *
+ */
 public class SmockerSocketOutputStreamData {
 	public ByteArrayOutputStream buffer;
 	private int index = 0;

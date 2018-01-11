@@ -45,7 +45,7 @@ public abstract class AbstractConnectionTreeView<T extends Serializable, U exten
 	 * Item from an Application id
 	 */
 	protected transient Map<Long, Object> applicationItemById = new HashMap<>();
-	protected transient Map<String, ButtonWithId> buttonByUiId = new HashMap<>();
+
 	protected transient Map<String, Long> applicationIdIByAdressAndPort = new HashMap<>();
 	protected transient Map<String, Long> applicationIdIByApplicationClass = new HashMap<>();
 	protected transient Map<Long, Object> connectionTreeItemByConnectionId = new HashMap<>();
@@ -95,6 +95,7 @@ public abstract class AbstractConnectionTreeView<T extends Serializable, U exten
 		mainLayout.setMargin(true);
 		buildTreeTable();
 		buildSecondArea();
+		instanciateMaps();
 		fillTreeTable();
 		treetable.setWidth("100%");
 		treetable.setHeight("40%");
@@ -108,6 +109,8 @@ public abstract class AbstractConnectionTreeView<T extends Serializable, U exten
 		checkToolBar();
 	}
 	
+	protected abstract void instanciateMaps();
+
 	protected abstract Map<String, Class<?>> getColumnMap();
 	
 	protected abstract void addColumnToTreeTable();
@@ -238,7 +241,6 @@ public abstract class AbstractConnectionTreeView<T extends Serializable, U exten
 	 */
 	public void clearAssociationMaps() {
 		applicationItemById.clear();
-		buttonByUiId.clear();
 		applicationIdIByAdressAndPort.clear();
 		applicationIdIByApplicationClass.clear();
 		connectionTreeItemByConnectionId.clear();

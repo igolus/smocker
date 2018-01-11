@@ -1,6 +1,7 @@
 package com.jenetics.smocker.ui.view;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -59,6 +60,8 @@ public class JavaApplicationsView extends AbstractConnectionTreeView<JavaApplica
 	protected static final String NAME_PROPERTY = "Name";
 	protected static final String HOURS_PROPERTY = "Hours done";
 	protected static final String MODIFIED_PROPERTY = "Last Modified";
+	
+	protected Map<String, ButtonWithId<Connection>> buttonByUiId;
 
 	@Inject
 	private Logger logger;
@@ -195,7 +198,13 @@ public class JavaApplicationsView extends AbstractConnectionTreeView<JavaApplica
 //	}
 
 
-
+	@Override
+	public void clearAssociationMaps() {
+		super.clearAssociationMaps();
+		if (buttonByUiId != null) {
+			buttonByUiId.clear();
+		}
+	}
 
 	@Override
 	protected void manageSpecialUIBehaviourInJavaApplication(Connection connection) {
@@ -370,6 +379,11 @@ public class JavaApplicationsView extends AbstractConnectionTreeView<JavaApplica
 	@Override
 	protected Connection getConnectionFromCommunication(Communication comm) {
 		return comm.getConnection();
+	}
+
+	@Override
+	protected void instanciateMaps() {
+		buttonByUiId = new HashMap<>();
 	}
 
 }

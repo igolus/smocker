@@ -34,23 +34,38 @@ import com.jenetics.smocker.ui.netdisplayer.ComponentWithDisplayChange;
 import com.jenetics.smocker.ui.netdisplayer.NetDisplayerFactoryInput;
 import com.jenetics.smocker.ui.netdisplayer.NetDisplayerFactoryOutput;
 import com.jenetics.smocker.ui.util.ButtonWithId;
+import com.jenetics.smocker.ui.util.ComboWithId;
 import com.jenetics.smocker.ui.util.CommunicationMockedTreeItem;
 import com.jenetics.smocker.ui.util.CommunicationTreeItem;
+import com.jenetics.smocker.ui.util.ListSelectWithId;
 import com.jenetics.smocker.util.NetworkReaderUtility;
 import com.vaadin.annotations.Push;
+import com.vaadin.data.Container.ItemSetChangeEvent;
+import com.vaadin.data.Container.ItemSetChangeListener;
+import com.vaadin.data.Container.PropertySetChangeEvent;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.ListSelect;
+import com.vaadin.ui.Table;
 import com.vaadin.ui.Tree;
+import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.ComboBox;
 
 @Push
 @ViewScope
 @ContentView(sortingOrder = 1, viewName = "Mock Space", icon = "icons/Java-icon.png", homeView = false, rootViewParent = ConnectionsRoot.class)
 public class MockSpaceView extends AbstractConnectionTreeView<JavaApplicationMocked, ConnectionMocked, CommunicationMocked> {
+	
+	protected transient Map<String, ComboWithId<ConnectionMocked>> listComboByUiId;
 	
 	@Inject
 	private Logger logger;
@@ -61,13 +76,17 @@ public class MockSpaceView extends AbstractConnectionTreeView<JavaApplicationMoc
 
 	@Override
 	public ClickListener getClickListener(String key) {
+		if (key.equals(EnumButton.REMOVE.toString())) {
+			return (ClickEvent event) -> deleteSelectedItem();
+		} 
 		return null;
+
 	}
 
-	@Override
-	public List<ButtonDescriptor> getButtons() {
-		return Arrays.asList(new ButtonDescriptor[] { new ButtonDescriptor(bundle.getString("remove"),
-				bundle.getString("removeToolTip"), FontAwesome.REMOVE, EnumButton.REMOVE.toString()), });
+
+	private Object deleteSelectedItem() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
@@ -89,10 +108,28 @@ public class MockSpaceView extends AbstractConnectionTreeView<JavaApplicationMoc
 		ret.put(CONNECTION_TYPE, String.class);
 		return ret;
 	}
+	
 
 	@Override
 	protected void addColumnToTreeTable() {
-		//no implementation
+		treetable.addGeneratedColumn("Watch", (Table source, Object itemId, Object columnId) -> {
+			if (!treetable.getItem(itemId).getItemProperty(ADRESS).getValue().toString().isEmpty()
+					&& !treetable.getItem(itemId).getItemProperty(PORT).getValue().toString().isEmpty()) {
+				String uiId = treetable.getItem(itemId).getItemProperty(ADRESS).getValue().toString()
+						+ treetable.getItem(itemId).getItemProperty(PORT).getValue().toString();
+				ComboBox box = listComboByUiId.get(uiId);
+				
+				box.addItemSetChangeListener(new ItemSetChangeListener() {
+					
+					@Override
+					public void containerItemSetChange(ItemSetChangeEvent event) {
+						System.out.println("");
+					}
+				});
+				return box;
+			}
+			return null;
+		});
 	}
 	
 	
@@ -186,7 +223,18 @@ public class MockSpaceView extends AbstractConnectionTreeView<JavaApplicationMoc
 
 	@Override
 	protected void manageSpecialUIBehaviourInJavaApplication(ConnectionMocked connection) {
-		//do nothing yet
+		ListSelectWithId<ConnectionMocked> listSelectWithId = new ListSelectWithId<>(
+				null, connection.getHost() + connection.getPort().toString(), connection);
+		ComboWithId<ConnectionMocked> box = new ComboWithId();
+		box.setScrollToSelectedItem(false);
+		box.setTextInputAllowed(false);
+		
+		
+		box.addItems(
+				bundle.getString("mock_mode_disabled"), 
+				bundle.getString("mock_mode_mock_or_call"),
+				bundle.getString("mock_mode_strict"));
+		listComboByUiId.put(listSelectWithId.getUiId(), box);
 	}
 
 	@Override
@@ -217,6 +265,17 @@ public class MockSpaceView extends AbstractConnectionTreeView<JavaApplicationMoc
 	@Override
 	protected ConnectionMocked getConnectionFromCommunication(CommunicationMocked comm) {
 		return comm.getConnection();
+	}
+	
+	@Override
+	public List<ButtonDescriptor> getButtons() {
+		return Arrays.asList(new ButtonDescriptor[] { new ButtonDescriptor(bundle.getString("remove"),
+				bundle.getString("removeToolTip"), FontAwesome.REMOVE, EnumButton.REMOVE.toString())});
+	}
+
+	@Override
+	protected void instanciateMaps() {
+		listComboByUiId = new HashMap<>();
 	}
 
 }

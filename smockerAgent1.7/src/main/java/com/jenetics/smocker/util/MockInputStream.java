@@ -30,6 +30,7 @@ public class MockInputStream extends InputStream {
 	public int read() throws IOException {
 		if (!lookedIntoMock) {
 			toReturn = findMock();
+			lookedIntoMock = true;
 		}
 		if (toReturn != null) {
 			return toReturn.read();
@@ -40,7 +41,7 @@ public class MockInputStream extends InputStream {
 	}
 
 	private SmockerSocketOutputStreamData findMock() {
-		SmockerContainer smockerContainer = smockerContainerBySocket.get(sourceIs);
+		SmockerContainer smockerContainer = smockerContainerBySocket.get(sourceSocket);
 		if (smockerContainer != null && 
 				smockerContainer.getSmockerSocketOutputStream() != null && 
 				smockerContainer.getSmockerSocketOutputStream().getSmockerOutputStreamData() != null ) {
@@ -57,6 +58,16 @@ public class MockInputStream extends InputStream {
 			} 
 		}
 		return null;
+	}
+
+	@Override
+	public int available() throws IOException {
+		if (toReturn != null) {
+			return toReturn.available();
+		}
+		else {
+			return sourceIs.available();
+		}
 	}
 
 }

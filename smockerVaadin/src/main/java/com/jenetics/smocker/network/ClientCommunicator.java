@@ -13,6 +13,7 @@ import org.eclipse.persistence.jaxb.javamodel.JavaPackage;
 import org.jboss.logging.Logger;
 
 import com.jenetics.smocker.model.Connection;
+import com.jenetics.smocker.model.ConnectionMocked;
 import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.util.SmockerException;
 
@@ -22,6 +23,10 @@ public class ClientCommunicator {
 	private static final String WATCH = "WATCH";
 	private static final String MUTE = "MUTE";
 	private static final String MODE = "MODE";
+	
+	public static final String MODE_DISABLED = "DISABLED";
+	public static final String MODE_MOCK_OR_CALL = "MOCK_OR_CALL";
+	public static final String MODE_STRICT = "STRICT";
 	
 	@Inject
 	private static Logger logger;
@@ -47,6 +52,19 @@ public class ClientCommunicator {
 		String message = MODE + " " + mode;
 		try {
 			sendMessageToClient(javaApplication.getSourceHost(), javaApplication.getSourcePort(),
+					message);
+		} catch (Exception e) {
+			logger.error(e);
+			return false;
+		}
+		return true;
+	}
+	
+	public static boolean sendMode(String mode, ConnectionMocked connectionMocked) {
+		String message = MODE + " " + connectionMocked.getHost() + SEP + connectionMocked.getPort();
+		//String message = MODE + " " + mode;
+		try {
+			sendMessageToClient(connectionMocked.getJavaApplication().getSourceHost(), connectionMocked.getJavaApplication().getSourcePort(),
 					message);
 		} catch (Exception e) {
 			logger.error(e);

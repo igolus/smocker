@@ -10,10 +10,6 @@ public class ComboWithId<T extends EntityWithId> extends ComboBox {
 	private String uiId = null;
 	private T entity = null;
 
-	public ComboWithId() {
-		super();
-	}
-
 	public ComboWithId(String title, String uiId, T entity) {
 		super(title);
 		this.uiId = uiId;

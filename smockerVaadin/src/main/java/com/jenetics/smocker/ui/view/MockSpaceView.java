@@ -2,8 +2,6 @@ package com.jenetics.smocker.ui.view;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -19,46 +17,31 @@ import org.vaadin.aceeditor.AceTheme;
 import org.vaadin.easyapp.util.ButtonDescriptor;
 import org.vaadin.easyapp.util.annotations.ContentView;
 
-import com.jenetics.smocker.dao.DaoManager;
-import com.jenetics.smocker.dao.IDaoManager;
-import com.jenetics.smocker.model.Communication;
 import com.jenetics.smocker.model.CommunicationMocked;
-import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.ConnectionMocked;
-import com.jenetics.smocker.model.EntityWithId;
-import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.model.JavaApplicationMocked;
-import com.jenetics.smocker.ui.SmockerUI;
+import com.jenetics.smocker.network.ClientCommunicator;
 import com.jenetics.smocker.ui.SmockerUI.EnumButton;
 import com.jenetics.smocker.ui.netdisplayer.ComponentWithDisplayChange;
 import com.jenetics.smocker.ui.netdisplayer.NetDisplayerFactoryInput;
-import com.jenetics.smocker.ui.netdisplayer.NetDisplayerFactoryOutput;
-import com.jenetics.smocker.ui.util.ButtonWithId;
 import com.jenetics.smocker.ui.util.ComboWithId;
 import com.jenetics.smocker.ui.util.CommunicationMockedTreeItem;
-import com.jenetics.smocker.ui.util.CommunicationTreeItem;
 import com.jenetics.smocker.ui.util.ListSelectWithId;
 import com.jenetics.smocker.util.NetworkReaderUtility;
 import com.vaadin.annotations.Push;
 import com.vaadin.data.Container.ItemSetChangeEvent;
 import com.vaadin.data.Container.ItemSetChangeListener;
-import com.vaadin.data.Container.PropertySetChangeEvent;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.GridLayout;
-import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.ListSelect;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.Tree;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.GridLayout;
+import com.vaadin.ui.HorizontalSplitPanel;
+import com.vaadin.ui.Table;
+import com.vaadin.ui.Tree;
 
 @Push
 @ViewScope
@@ -118,14 +101,32 @@ public class MockSpaceView extends AbstractConnectionTreeView<JavaApplicationMoc
 				String uiId = treetable.getItem(itemId).getItemProperty(ADRESS).getValue().toString()
 						+ treetable.getItem(itemId).getItemProperty(PORT).getValue().toString();
 				ComboBox box = listComboByUiId.get(uiId);
-				
-				box.addItemSetChangeListener(new ItemSetChangeListener() {
-					
-					@Override
-					public void containerItemSetChange(ItemSetChangeEvent event) {
-						System.out.println("");
-					}
-				});
+				if (box != null) {
+					//box.addItemSetChangeListener(new ComboModeChanged(box)); 
+					box.addListener(new Listener() {
+						
+						@Override
+						public void componentEvent(Event event) {
+							ComboWithId<ConnectionMocked> comboBox =  (ComboWithId<ConnectionMocked>) event.getSource(); 
+							ConnectionMocked connectionMocked = comboBox.getEntity();
+							String mode = getModeByComboSelection(comboBox);
+							ClientCommunicator.sendMode(mode, connectionMocked);
+						}
+ 
+						private String getModeByComboSelection(ComboWithId<ConnectionMocked> comboBox) {
+							if (comboBox.getValue().equals(bundle.getString("mock_mode_disabled"))) {
+								return ClientCommunicator.MODE_DISABLED;
+							}
+							else if (comboBox.getValue().equals(bundle.getString("mock_mode_mock_or_call"))) {
+								return ClientCommunicator.MODE_MOCK_OR_CALL;
+							}
+							else if (comboBox.getValue().equals(bundle.getString("mock_mode_strict"))) {
+								return ClientCommunicator.MODE_STRICT;
+							}
+							return null;
+						}
+					});
+				}
 				return box;
 			}
 			return null;
@@ -225,7 +226,8 @@ public class MockSpaceView extends AbstractConnectionTreeView<JavaApplicationMoc
 	protected void manageSpecialUIBehaviourInJavaApplication(ConnectionMocked connection) {
 		ListSelectWithId<ConnectionMocked> listSelectWithId = new ListSelectWithId<>(
 				null, connection.getHost() + connection.getPort().toString(), connection);
-		ComboWithId<ConnectionMocked> box = new ComboWithId();
+		ComboWithId<ConnectionMocked> box = 
+				new ComboWithId<ConnectionMocked>(null, connection.getHost() + connection.getPort().toString(), connection);
 		box.setScrollToSelectedItem(false);
 		box.setTextInputAllowed(false);
 		
@@ -276,6 +278,23 @@ public class MockSpaceView extends AbstractConnectionTreeView<JavaApplicationMoc
 	@Override
 	protected void instanciateMaps() {
 		listComboByUiId = new HashMap<>();
+	}
+	
+	private final class ComboModeChanged implements ItemSetChangeListener {
+
+		private ComboBox box;
+
+		public ComboModeChanged(ComboBox box) {
+			this.box = box;
+		}
+
+		@Override
+		public void containerItemSetChange(ItemSetChangeEvent event) {
+			//ComboWithId<ConnectionMocked> comboWithId = (ComboWithId<ConnectionMocked>) event.getSource();
+			//ClientCommunicator
+			System.out.println("");
+		}
+		
 	}
 
 }

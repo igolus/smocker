@@ -23,6 +23,7 @@ import org.apache.commons.io.output.TeeOutputStream;
 
 import com.jenetics.smocker.configuration.MemoryConfiguration;
 import com.jenetics.smocker.configuration.util.ConnectionBehavior;
+import com.jenetics.smocker.configuration.util.MockCconnectionMode;
 import com.jenetics.smocker.util.network.ResponseReader;
 import com.jenetics.smocker.util.network.RestClientSmocker;
 
@@ -73,13 +74,18 @@ public class TransformerUtility {
 	public synchronized static InputStream manageInputStream(InputStream is, Socket source) throws IOException {
 		
 		if (!filterSmockerBehavior()) {
+			
+			String host = source.getInetAddress().getHostName();
+			int port = source.getPort();
+			
 			if (!smockerContainerBySocket.containsKey(source)) {
-				addSmockerContainer(source, source.getInetAddress().getHostName(), source.getPort());
+				addSmockerContainer(source, host, port);
 				// smockerContainerBySocket.put(source, value)
 			}
 			SmockerContainer smockerContainer = smockerContainerBySocket.get(source);
 			if (smockerContainer.getSmockerSocketInputStream() == null) {
-				if (!MemoryConfiguration.isReplayMode()) { 
+				MockCconnectionMode mode = MemoryConfiguration.getConnectionMode(host, port);
+				if (mode == MockCconnectionMode.DISABLED || mode == null) { 
 					SmockerSocketOutputStream smockerInputStream = new SmockerSocketOutputStream();
 					smockerContainer.setSmockerSocketInputStream(smockerInputStream);
 					TeeInputStream teeInputStream = new TeeInputStream(is, smockerInputStream, true);
@@ -87,7 +93,7 @@ public class TransformerUtility {
 					return smockerContainer.getTeeInputStream();
 					
 				}
-				else {
+				else if (mode == MockCconnectionMode.STRICT) {
 					InputStream mockIs = new MockInputStream(is, smockerContainerBySocket, source);
 					return mockIs;	
 				}
@@ -185,34 +191,43 @@ public class TransformerUtility {
 				if (existingId != null) {
 					javaAppId = Long.valueOf(existingId);
 				} else {
-					String response = RestClientSmocker.getInstance().postJavaApp(smockerContainer);
-					updateJavaAppId(response);
+					updateJavaAppId(smockerContainer);
 				}
 				// fill the connection in the memory config
 				//Map<String, ConnectionBehavior> connectionsMap = ResponseReader.getConnections(allResponse);
 			}
 		}
 		if (javaAppId != null) {
+			String idConnection = null;
 			String response = RestClientSmocker.getInstance().postConnection(smockerContainer, javaAppId);
 			// check the status
 			String status = ResponseReader.readStatusCodeFromResponse(response);
-			if (status.equals(ResponseReader.CONFLICT)) {
+			if (status.equals(ResponseReader.NOT_FOUND)) {
+				//if no found post again the container
+				updateJavaAppId(smockerContainer);
+				//post again 
+				response = RestClientSmocker.getInstance().postConnection(smockerContainer, javaAppId);
+			}
+			else if (status.equals(ResponseReader.CONFLICT)) {
 				allResponse = RestClientSmocker.getInstance().getAll();
-				String existingConnectionId = ResponseReader.findExistingConnectionId(allResponse,
+				idConnection = ResponseReader.findExistingConnectionId(allResponse,
 						smockerContainer.getHost(), smockerContainer.getPort());
-				connectionIdBySocket.put(source, Long.valueOf(existingConnectionId));
-			} else {
-				String idConnection = ResponseReader.readValueFromResponse(response, "id");
-				if (idConnection != null) {
-					connectionIdBySocket.put(source, Long.valueOf(idConnection));
-				}
+				//connectionIdBySocket.put(source, Long.valueOf(existingConnectionId));
+			}
+			if (idConnection == null) {
+				idConnection = ResponseReader.readValueFromResponse(response, "id");
+				
+			}
+			if (idConnection != null) {
+				connectionIdBySocket.put(source, Long.valueOf(idConnection));
 			}
 		}
 		smockerContainerBySocket.put(source, smockerContainer);
 		return smockerContainer;
 	}
 
-	private synchronized static void updateJavaAppId(String response) throws IOException {
+	private synchronized static void updateJavaAppId(SmockerContainer smockerContainer) throws IOException {
+		String response = RestClientSmocker.getInstance().postJavaApp(smockerContainer);
 		String id = ResponseReader.readValueFromResponse(response, "id");
 		if (id != null) {
 			javaAppId = Long.parseLong(id);

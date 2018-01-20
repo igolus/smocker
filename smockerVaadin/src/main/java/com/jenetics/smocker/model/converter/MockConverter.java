@@ -115,6 +115,8 @@ public class MockConverter {
 		if (targetJavaApplicationMocked == null) {
 			targetJavaApplicationMocked = new JavaApplicationMocked();
 			targetJavaApplicationMocked.setClassQualifiedName(sourceJavaApplication.getClassQualifiedName());
+			targetJavaApplicationMocked.setSourceHost(sourceJavaApplication.getSourceHost());
+			targetJavaApplicationMocked.setSourcePort(sourceJavaApplication.getSourcePort());
 			daoManagerJavaApplicationMocked.create(targetJavaApplicationMocked);
 		}
 		return targetJavaApplicationMocked;

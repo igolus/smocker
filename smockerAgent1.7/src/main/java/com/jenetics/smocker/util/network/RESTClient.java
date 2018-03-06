@@ -116,7 +116,7 @@ public class RESTClient {
         InputStreamReader is = null;
         try {
             socket = new Socket(inetAddress, port);
-            socket.setSoTimeout(timeout);
+            socket.setSoTimeout(timeout + 1000);
             wr = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF8"));
             //wr = new BufferedWriter(new OutputStreamWriter(System.out));
             

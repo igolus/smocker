@@ -52,7 +52,8 @@ import com.vaadin.ui.Window;
 
 @Push
 @ViewScope
-@ContentView(sortingOrder = 1, viewName = "Java Applications", icon = "icons/Java-icon.png", homeView = true, rootViewParent = ConnectionsRoot.class)
+@ContentView(sortingOrder = 1, viewName = "JavaApplicationView", icon = "icons/Java-icon.png", homeView = true, rootViewParent = ConnectionsRoot.class, 
+bundle = "BundleUI")
 public class JavaApplicationsView extends AbstractConnectionTreeView<JavaApplication, Connection, Communication> {
 
 	private static final long serialVersionUID = 1L;

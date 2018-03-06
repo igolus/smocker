@@ -13,6 +13,7 @@ import static com.jenetics.smocker.util.network.Base64Util.*;
  *
  */
 public class SmockerSocketOutputStreamData {
+	
 	public ByteArrayOutputStream buffer;
 	private int index = 0;
 
@@ -41,5 +42,9 @@ public class SmockerSocketOutputStreamData {
 	public int available() {
 		// TODO Auto-generated method stub
 		return buffer.size() - index;
+	}
+	
+	public ByteArrayOutputStream getBuffer() {
+		return buffer;
 	}
 }

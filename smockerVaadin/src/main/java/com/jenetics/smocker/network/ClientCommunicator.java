@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -15,14 +17,16 @@ import org.jboss.logging.Logger;
 import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.ConnectionMocked;
 import com.jenetics.smocker.model.JavaApplication;
+import com.jenetics.smocker.network.util.ReplaceHeaderItem;
 import com.jenetics.smocker.util.SmockerException;
 
 public class ClientCommunicator {
 
-	private static final String SEP = ":";
+	private static final String SEP = "%*%";
 	private static final String WATCH = "WATCH";
 	private static final String MUTE = "MUTE";
 	private static final String MODE = "MODE";
+	private static final String HEADER_REPLACE = "HEADER_REPLACE";
 	
 	public static final String MODE_DISABLED = "DISABLED";
 	public static final String MODE_MOCK_OR_CALL = "MOCK_OR_CALL";
@@ -47,6 +51,28 @@ public class ClientCommunicator {
 		}
 		return true;
 	}
+	
+	public static boolean sendHeaderReplace(List<ReplaceHeaderItem> replaceItems, JavaApplication javaApplication) {
+		StringBuffer sb = new StringBuffer();
+		
+		Iterator<ReplaceHeaderItem> iterator = replaceItems.iterator();
+		while (iterator.hasNext()) {
+			ReplaceHeaderItem item = iterator.next();
+			sb.append(item.getRegExp()).append(SEP).append(item.getReplaceValue());
+			if (iterator.hasNext()) {
+				sb.append(SEP);
+			}
+		}
+		try {
+			sendMessageToClient(javaApplication.getSourceHost(), javaApplication.getSourcePort(),
+					sb.toString());
+		} catch (Exception e) {
+			logger.error(e);
+			return false;
+		}
+		return true;
+	}
+	
 	
 	public static boolean sendMode(String mode, JavaApplication javaApplication) {
 		String message = MODE + " " + mode;

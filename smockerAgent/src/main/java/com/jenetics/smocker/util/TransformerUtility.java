@@ -198,7 +198,7 @@ public class TransformerUtility {
 
 	public static void sslSocketCreated(Object o, InetAddress host, int port, InetAddress localAddr, int localPort,
 			Socket source) {
-		// addSocketReference(source);
+		addSocketReference(source, host.getHostName(), port);
 	}
 
 	public static void sslSocketCreated(Object o, Socket sock, String host, int port, boolean autoClose,

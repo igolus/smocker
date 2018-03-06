@@ -21,4 +21,8 @@ public class SmockerSocketOutputStream extends OutputStream {
 		return smockerSocketOutputStreamData;
 	}
 
+	public void resetBuffer() {
+		smockerSocketOutputStreamData = new SmockerSocketOutputStreamData(new ByteArrayOutputStream());
+	}
+
 }

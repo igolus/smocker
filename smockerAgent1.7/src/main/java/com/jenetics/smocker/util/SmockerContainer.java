@@ -89,6 +89,13 @@ public class SmockerContainer {
 	public void setTeeOutputStream(TeeOutputStream teeOutputStream) {
 		this.teeOutputStream = teeOutputStream;
 	}
+
+
+	public void resetBuffer() {
+		smockerSocketOutputStream.resetBuffer();
+		smockerSocketInputStream.resetBuffer();
+		
+	}
 	
 	
 }

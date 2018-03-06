@@ -10,13 +10,24 @@ import com.jenetics.smocker.util.MessageLogger;
 
 public class MemoryConfiguration {
   
-	public static final String SEP_CONNECTION = ":";
+	public static final String SEP = "%*%";
 	private static Map<String, ConnectionBehavior> connectionsWatched = new HashMap<String, ConnectionBehavior>();
 	private static Map<String, MockCconnectionMode> connectionsMockedModes = new HashMap<String, MockCconnectionMode>();
+	private static Map<String, String> headerReplace = new HashMap<String, String>();
+	
+	
 	private static boolean replayMode;
 	
 	public static boolean isReplayMode() {
 		return replayMode;
+	}
+
+	public static void addHeaderReplace (String regExp, String replace) {
+		headerReplace.put(regExp, replace);
+	}
+	
+	public static Map<String, String> getHeaderReplace() {
+		return headerReplace;
 	}
 
 	public static void setConnecctionWatched(String host, int port) {
@@ -52,7 +63,7 @@ public class MemoryConfiguration {
 
 
 	private static String getKey(String host, int port) {
-		return host + SEP_CONNECTION + port;
+		return host + SEP + port;
 	} 
 	
 	public static boolean isConnecctionThere(String host, int port) {
@@ -80,7 +91,6 @@ public class MemoryConfiguration {
 			MockCconnectionMode connectionMockedBehavior = getConnectionMockedBehavior(mode);
 			connectionsMockedModes.put(key, connectionMockedBehavior);
 		}
-		
 	}
 
 	private static MockCconnectionMode getConnectionMockedBehavior(String mode) {

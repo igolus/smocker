@@ -45,7 +45,8 @@ import com.vaadin.ui.Tree;
 
 @Push
 @ViewScope
-@ContentView(sortingOrder = 1, viewName = "Mock Space", icon = "icons/Java-icon.png", homeView = false, rootViewParent = ConnectionsRoot.class)
+@ContentView(sortingOrder = 1, viewName = "MockSpaceView", icon = "icons/Java-icon.png", homeView = false, rootViewParent = ConnectionsRoot.class, 
+bundle = "BundleUI")
 public class MockSpaceView extends AbstractConnectionTreeView<JavaApplicationMocked, ConnectionMocked, CommunicationMocked> {
 	
 	protected transient Map<String, ComboWithId<ConnectionMocked>> listComboByUiId;

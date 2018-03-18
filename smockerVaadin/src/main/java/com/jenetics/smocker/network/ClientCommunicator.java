@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 import javax.inject.Inject;
 
@@ -16,6 +17,7 @@ import com.jenetics.smocker.util.SmockerException;
 
 public class ClientCommunicator {
 
+	private static final String LOCAL_IP = "127.0.0.1";
 	private static final String SEP = ":";
 	private static final String WATCH = "WATCH";
 	private static final String MUTE = "MUTE";
@@ -31,7 +33,7 @@ public class ClientCommunicator {
 	public static boolean sendWatched(Connection conn) {
 		String message = WATCH + " " + conn.getHost() + SEP + conn.getPort();
 		try {
-			sendMessageToClient(conn.getJavaApplication().getSourceHost(), conn.getJavaApplication().getSourcePort(),
+			sendMessageToClient(conn.getJavaApplication().getSourceIp(), conn.getJavaApplication().getSourcePort(),
 					message);
 		} catch (Exception e) {
 			logger.error(e);
@@ -43,7 +45,7 @@ public class ClientCommunicator {
 	public static boolean sendUnWatched(Connection conn) {
 		String message = MUTE + " " + conn.getHost() + SEP + conn.getPort();
 		try {
-			sendMessageToClient(conn.getJavaApplication().getSourceHost(), conn.getJavaApplication().getSourcePort(),
+			sendMessageToClient(conn.getJavaApplication().getSourceIp(), conn.getJavaApplication().getSourcePort(),
 					message);
 		} catch (Exception e) {
 			logger.error(e);
@@ -52,8 +54,19 @@ public class ClientCommunicator {
 		return true;
 	}
 
-	private static String sendMessageToClient(String host, int port, String message) throws SmockerException {
-		try (Socket socket = new Socket(InetAddress.getByName(host), port);) {
+	private static String sendMessageToClient(String ip, int port, String message) throws SmockerException {
+		try {
+			String localIp = InetAddress.getLocalHost().getHostAddress();
+			if (localIp.equals(localIp)) {
+				ip = LOCAL_IP;
+			}
+		} catch (UnknownHostException e) {
+			throw new SmockerException("Unable to get local ip", e);
+
+		}
+		
+		try (Socket socket = new Socket(ip, port);) 
+		{
 			boolean autoflush = true;
 			PrintWriter out = new PrintWriter(socket.getOutputStream(), autoflush);
 			BufferedReader in = new BufferedReader(

@@ -34,7 +34,6 @@ import com.jenetics.smocker.ui.util.ButtonWithId;
 import com.jenetics.smocker.ui.util.CommunicationTreeItem;
 import com.jenetics.smocker.util.NetworkReaderUtility;
 import com.vaadin.annotations.Push;
-import com.vaadin.event.ItemClickEvent;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.ViewScope;
@@ -44,7 +43,6 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.Table;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -103,20 +101,20 @@ public class JavaApplicationsView extends AbstractConnectionTreeView<JavaApplica
 	
 	@Override
 	protected void addColumnToTreeTable() {
-		treetable.addGeneratedColumn("Watch", (Table source, Object itemId, Object columnId) -> {
-			if (!treetable.getItem(itemId).getItemProperty(ADRESS).getValue().toString().isEmpty()
-					&& !treetable.getItem(itemId).getItemProperty(PORT).getValue().toString().isEmpty()) {
-				String uiId = treetable.getItem(itemId).getItemProperty(ADRESS).getValue().toString()
-						+ treetable.getItem(itemId).getItemProperty(PORT).getValue().toString();
-				Button button = buttonByUiId.get(uiId);
-
-				if (button != null && button.getListeners(ClickEvent.class).isEmpty()) {
-					button.addClickListener(new WatchMuteClicked());
-				}
-				return button;
-			}
-			return null;
-		});
+//		treetable.addGeneratedColumn("Watch", (Table source, Object itemId, Object columnId) -> {
+//			if (!treetable.getItem(itemId).getItemProperty(ADRESS).getValue().toString().isEmpty()
+//					&& !treetable.getItem(itemId).getItemProperty(PORT).getValue().toString().isEmpty()) {
+//				String uiId = treetable.getItem(itemId).getItemProperty(ADRESS).getValue().toString()
+//						+ treetable.getItem(itemId).getItemProperty(PORT).getValue().toString();
+//				Button button = buttonByUiId.get(uiId);
+//
+//				if (button != null && button.getListeners(ClickEvent.class).isEmpty()) {
+//					button.addClickListener(new WatchMuteClicked());
+//				}
+//				return button;
+//			}
+//			return null;
+//		});
 	}
 
 	@Override
@@ -127,51 +125,51 @@ public class JavaApplicationsView extends AbstractConnectionTreeView<JavaApplica
 		// communications items exccept if if comes from click event
 		Object connectionItem = connectionTreeItemByConnectionId.get(conn.getId());
 
-		if (connectionItem != null && (treetable.isSelected(connectionItem) || !checkSelected)
-				&& !conn.getCommunications().isEmpty()) {
-			Set<Communication> communications = conn.getCommunications();
-
-			Tree menu = new Tree();
-			for (Communication communication : communications) {
-				CommunicationTreeItem commTreeItem = new CommunicationTreeItem(communication);
-				menu.addItem(commTreeItem);
-				menu.setChildrenAllowed(commTreeItem, false);
-			}
-
-			menu.setSizeFull();
-			GridLayout grid = new GridLayout(2, 1);
-			grid.setSizeFull();
-
-			menu.addItemClickListener((ItemClickEvent event) -> {
-				Communication comm = ((CommunicationTreeItem) event.getItemId()).getCommunication();
-				// remove selection in the table
-				treetable.select(null);
-				selectedCommunication = comm;
-
-				String response = NetworkReaderUtility.decode(comm.getResponse());
-				ComponentWithDisplayChange outputComponent = NetDisplayerFactoryOutput.getComponent(response);
-				grid.removeComponent(1, 0);
-				grid.addComponent(outputComponent.getComponent(), 1, 0);
-				outputComponent.selectionValue(response);
-
-				String request = NetworkReaderUtility.decode(comm.getRequest());
-				ComponentWithDisplayChange inputComponent = NetDisplayerFactoryInput.getComponent(request);
-				grid.removeComponent(0, 0);
-				grid.addComponent(inputComponent.getComponent(), 0, 0);
-				inputComponent.selectionValue(request);
-				checkToolBar();
-			});
-
-			HorizontalSplitPanel hsplitPane = new HorizontalSplitPanel();
-
-			hsplitPane.setFirstComponent(menu);
-			hsplitPane.setSecondComponent(grid);
-			hsplitPane.setSplitPosition(20);
-
-			second.addComponent(hsplitPane);
-		} else if (conn.getCommunications().isEmpty() && !checkSelected) {
-			selectedCommunication = null;
-		}
+//		if (connectionItem != null && (treetable.isSelected(connectionItem) || !checkSelected)
+//				&& !conn.getCommunications().isEmpty()) {
+//			Set<Communication> communications = conn.getCommunications();
+//
+//			Tree menu = new Tree();
+//			for (Communication communication : communications) {
+//				CommunicationTreeItem commTreeItem = new CommunicationTreeItem(communication);
+//				menu.addItem(commTreeItem);
+//				menu.setChildrenAllowed(commTreeItem, false);
+//			}
+//
+//			menu.setSizeFull();
+//			GridLayout grid = new GridLayout(2, 1);
+//			grid.setSizeFull();
+//
+//			menu.addItemClickListener((ItemClickEvent event) -> {
+//				Communication comm = ((CommunicationTreeItem) event.getItemId()).getCommunication();
+//				// remove selection in the table
+//				treetable.select(null);
+//				selectedCommunication = comm;
+//
+//				String response = NetworkReaderUtility.decode(comm.getResponse());
+//				ComponentWithDisplayChange outputComponent = NetDisplayerFactoryOutput.getComponent(response);
+//				grid.removeComponent(1, 0);
+//				grid.addComponent(outputComponent.getComponent(), 1, 0);
+//				outputComponent.selectionValue(response);
+//
+//				String request = NetworkReaderUtility.decode(comm.getRequest());
+//				ComponentWithDisplayChange inputComponent = NetDisplayerFactoryInput.getComponent(request);
+//				grid.removeComponent(0, 0);
+//				grid.addComponent(inputComponent.getComponent(), 0, 0);
+//				inputComponent.selectionValue(request);
+//				checkToolBar();
+//			});
+//
+//			HorizontalSplitPanel hsplitPane = new HorizontalSplitPanel();
+//
+//			hsplitPane.setFirstComponent(menu);
+//			hsplitPane.setSecondComponent(grid);
+//			hsplitPane.setSplitPosition(20);
+//
+//			second.addComponent(hsplitPane);
+//		} else if (conn.getCommunications().isEmpty() && !checkSelected) {
+//			selectedCommunication = null;
+//		}
 	}
 
 //	/**
@@ -215,39 +213,39 @@ public class JavaApplicationsView extends AbstractConnectionTreeView<JavaApplica
 	
 	
 
-	@Override
-	public ClickListener getClickListener(String key) {
-		if (key.equals(EnumButton.REMOVE.toString())) {
-			return (ClickEvent event) -> deleteSelectedItem();
-		} else if (key.equals(EnumButton.STACK.toString())) {
-			return (ClickEvent event) -> {
-				if (selectedCommunication != null) {
-
-					Window subwindow = new Window(bundle.getString("StackTrace"));
-					subwindow.setWidth("800px");
-					subwindow.setHeight("600px");
-					subwindow.setModal(true);
-
-					VerticalLayout subContent = new VerticalLayout();
-					subContent.setMargin(true);
-					subContent.setSpacing(true);
-					subwindow.setContent(subContent);
-
-					Label message = new Label(NetworkReaderUtility.decode(selectedCommunication.getCallerStack()));
-					message.setSizeFull();
-					subContent.addComponent(message);
-					subwindow.center();
-
-					SmockerUI.getInstance().addWindow(subwindow);
-				}
-			};
-		} else if (key.equals(EnumButton.ADD_TO_MOCK.toString())) {
-			return (ClickEvent event) -> addItemToMock();
-		}
-
-		return null;
-
-	}
+//	@Override
+//	public ClickListener getClickListener(String key) {
+//		if (key.equals(EnumButton.REMOVE.toString())) {
+//			return (ClickEvent event) -> deleteSelectedItem();
+//		} else if (key.equals(EnumButton.STACK.toString())) {
+//			return (ClickEvent event) -> {
+//				if (selectedCommunication != null) {
+//
+//					Window subwindow = new Window(bundle.getString("StackTrace"));
+//					subwindow.setWidth("800px");
+//					subwindow.setHeight("600px");
+//					subwindow.setModal(true);
+//
+//					VerticalLayout subContent = new VerticalLayout();
+//					subContent.setMargin(true);
+//					subContent.setSpacing(true);
+//					subwindow.setContent(subContent);
+//
+//					Label message = new Label(NetworkReaderUtility.decode(selectedCommunication.getCallerStack()));
+//					message.setSizeFull();
+//					subContent.addComponent(message);
+//					subwindow.center();
+//
+//					SmockerUI.getInstance().addWindow(subwindow);
+//				}
+//			};
+//		} else if (key.equals(EnumButton.ADD_TO_MOCK.toString())) {
+//			return (ClickEvent event) -> addItemToMock();
+//		}
+//
+//		return null;
+//
+//	}
 
 	/**
 	 * Add item to mock space
@@ -290,38 +288,38 @@ public class JavaApplicationsView extends AbstractConnectionTreeView<JavaApplica
 		}, null);
 	}
 
-	@Override
-	public List<ButtonDescriptor> getButtons() {
-		return Arrays.asList(new ButtonDescriptor[] { new ButtonDescriptor(bundle.getString("remove"),
-				bundle.getString("removeToolTip"), FontAwesome.REMOVE, EnumButton.REMOVE.toString()),
+//	@Override
+//	public List<ButtonDescriptor> getButtons() {
+//		return Arrays.asList(new ButtonDescriptor[] { new ButtonDescriptor(bundle.getString("remove"),
+//				bundle.getString("removeToolTip"), FontAwesome.REMOVE, EnumButton.REMOVE.toString()),
+//
+//				new ButtonDescriptor(bundle.getString("StackTrace"), bundle.getString("StackTraceToolTip"),
+//						FontAwesome.BARS, EnumButton.STACK.toString()),
+//
+//				new ButtonDescriptor(bundle.getString("addToMock"), bundle.getString("StackTraceToolTip"),
+//						FontAwesome.PLUS, EnumButton.ADD_TO_MOCK.toString()) });
+//	}
 
-				new ButtonDescriptor(bundle.getString("StackTrace"), bundle.getString("StackTraceToolTip"),
-						FontAwesome.BARS, EnumButton.STACK.toString()),
+//	@Override
+//	public boolean isClickable(String key) {
+//		if (key.equals(EnumButton.REMOVE.toString())) {
+//			return true;
+//		}
+//		if (key.equals(EnumButton.STACK.toString())) {
+//			// enable only if connection is selected
+//			return selectedCommunication != null;
+//		}
+//		if (key.equals(EnumButton.ADD_TO_MOCK.toString())) {
+//			return true;
+//		}
+//		return false;
+//	}
 
-				new ButtonDescriptor(bundle.getString("addToMock"), bundle.getString("StackTraceToolTip"),
-						FontAwesome.PLUS, EnumButton.ADD_TO_MOCK.toString()) });
-	}
-
-	@Override
-	public boolean isClickable(String key) {
-		if (key.equals(EnumButton.REMOVE.toString())) {
-			return true;
-		}
-		if (key.equals(EnumButton.STACK.toString())) {
-			// enable only if connection is selected
-			return selectedCommunication != null;
-		}
-		if (key.equals(EnumButton.ADD_TO_MOCK.toString())) {
-			return true;
-		}
-		return false;
-	}
-
-	@Override
-	public void enter(ViewChangeEvent event) {
-		// nothing to show
-
-	}
+//	@Override
+//	public void enter(ViewChangeEvent event) {
+//		// nothing to show
+//
+//	}
 	
 	@Override
 	protected Connection getCorrespondingConnection(String host, String port, JavaApplication javaApplication) {

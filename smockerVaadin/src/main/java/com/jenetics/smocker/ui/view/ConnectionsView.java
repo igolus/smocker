@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.vaadin.easyapp.util.ButtonDescriptor;
+import org.vaadin.easyapp.util.EasyAppLayout;
 
 import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.EntityWithId;
@@ -17,7 +18,7 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Table;
+import com.vaadin.ui.Grid;
 import com.vaadin.ui.VerticalLayout;
 
 @Push
@@ -25,30 +26,30 @@ import com.vaadin.ui.VerticalLayout;
 // @ContentView(sortingOrder=2, viewName = "Connections", icon =
 // "icons/Places-network-server-database-icon.png",
 // rootViewParent=ConnectionsRoot.class)
-public class ConnectionsView extends VerticalLayout implements RefreshableView {
+public class ConnectionsView extends EasyAppLayout implements RefreshableView {
 
 	private static final long serialVersionUID = 1L;
 
 	JPAContainer<Connection> connections = null;
-	private Table connectionTable;
+	private Grid connectionTable;
 
 	public ConnectionsView() {
 
 		setMargin(true);
 		connections = JPAContainerFactory.make(Connection.class, SmockerUI.PERSISTENCE_UNIT);
-		connectionTable = new Table(null, connections);
-		connectionTable.setSelectable(true);
-		connectionTable.setSizeFull();
-		connectionTable.setImmediate(true);
-
-		connectionTable.addGeneratedColumn("Watch", (source, itemId, columnId) -> {
-			Button button = new Button("Test");
-			button.setIcon(FontAwesome.GLOBE);
-			return button;
-		});
-		setSizeFull();
-		addComponent(connectionTable);
-		setImmediate(true);
+//		connectionTable = new Table(null, connections);
+//		connectionTable.setSelectable(true);
+//		connectionTable.setSizeFull();
+//		connectionTable.setImmediate(true);
+//
+//		connectionTable.addGeneratedColumn("Watch", (source, itemId, columnId) -> {
+//			Button button = new Button("Test");
+//			button.setIcon(FontAwesome.GLOBE);
+//			return button;
+//		});
+//		setSizeFull();
+//		addComponent(connectionTable);
+//		setImmediate(true);
 	}
 
 
@@ -62,18 +63,4 @@ public class ConnectionsView extends VerticalLayout implements RefreshableView {
 		connections.refresh();
 	}
 
-	@Override
-	public ClickListener getClickListener(String key) {
-		return null;
-	}
-
-	@Override
-	public List<ButtonDescriptor> getButtons() {
-		return new ArrayList<>();
-	}
-
-	@Override
-	public boolean isClickable(String key) {
-		return false;
-	}
 }

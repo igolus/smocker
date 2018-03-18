@@ -24,16 +24,17 @@ import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.util.ButtonWithId;
 import com.jenetics.smocker.ui.util.RefreshableView;
+import com.jenetics.smocker.ui.util.TreeGridConnectionData;
 import com.vaadin.addon.jpacontainer.JPAContainer;
 import com.vaadin.addon.jpacontainer.JPAContainerFactory;
-import com.vaadin.data.Item;
-import com.vaadin.event.ItemClickEvent;
+import com.vaadin.data.TreeData;
+import com.vaadin.data.provider.TreeDataProvider;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.shared.Position;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.TreeTable;
+import com.vaadin.ui.TreeGrid;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
 
@@ -52,7 +53,7 @@ public abstract class AbstractConnectionTreeView<T extends Serializable, U exten
 	protected transient Object rootTreeItem;
 	
 
-	protected TreeTable treetable = null;
+	protected TreeGrid<TreeGridConnectionData<T, U>> treeGrid = null;
 	protected VerticalLayout second;
 	
 	static ResourceBundle bundle = ResourceBundle.getBundle("BundleUI");
@@ -74,8 +75,12 @@ public abstract class AbstractConnectionTreeView<T extends Serializable, U exten
 	private Class<T> tParameterClass = null;
 	private Class<U> uParameterClass = null;
 	private Class<V> vParameterClass = null;
-	protected Item selectedTreeItem;
+	//protected Item selectedTreeItem;
 	protected JPAContainer<T> jpaJavaApplication;
+	
+	
+	protected TreeData<TreeGridConnectionData<T, U>> treeData = null;
+	protected TreeDataProvider<TreeGridConnectionData<T, U>> treeDataProvider = null;
 	
 	@Inject
 	private Logger logger;
@@ -94,14 +99,12 @@ public abstract class AbstractConnectionTreeView<T extends Serializable, U exten
 
 		mainLayout.setMargin(true);
 		buildTreeTable();
-		buildSecondArea();
 		fillTreeTable();
-		treetable.setWidth("100%");
-		treetable.setHeight("40%");
+		treeGrid.setWidth("100%");
+		treeGrid.setHeight("40%");
 
-		treetable.setSizeFull();
-		setFirstComponent(treetable);
-		setSecondComponent(second);
+		treeGrid.setSizeFull();
+		setFirstComponent(treeGrid);
 		setSplitPosition(150, Unit.PIXELS);
 
 		setSizeFull();
@@ -142,13 +145,15 @@ public abstract class AbstractConnectionTreeView<T extends Serializable, U exten
 	protected void fillTreeTable() {
 		clearAssociationMaps();
 
-		treetable.removeAllItems();
+		//data.clear();
+		//treeGrid.removeAllItems();
+		//treeGrid.getDataProvider().get
 		second.removeAllComponents();
 
 		List<T> listAllJavaApplications = daoManagerJavaApplication.listAll();
 
 		Object[] root = new Object[] { ALL, "", "", "" };
-		this.rootTreeItem = treetable.addItem(root, null);
+		//this.rootTreeItem = treeGrid.addItem(root, null);
 
 		for (T javaApplication : listAllJavaApplications) {
 			fillJavaApplicationTreeItem(javaApplication, true);
@@ -171,7 +176,7 @@ public abstract class AbstractConnectionTreeView<T extends Serializable, U exten
 		rebuildConnectionsTreeItem(connections, javaApplication);
 
 		if (connections.isEmpty()) {
-			treetable.setChildrenAllowed(applicationItemById.get(getJavaAppId(javaApplication)), false);
+			//treeGrid.setChildrenAllowed(applicationItemById.get(getJavaAppId(javaApplication)), false);
 		}
 	}
 	
@@ -187,13 +192,13 @@ public abstract class AbstractConnectionTreeView<T extends Serializable, U exten
 			manageSpecialUIBehaviourInJavaApplication(connection);
 			Object[] itemConnection = new Object[] { getJavaAppClassQualifiedName(javaApplication), getConnectionHost(connection),
 					getConnectionPort(connection).toString(), "" };
-			Object connectionTreeItem = treetable.addItem(itemConnection, null);
-			connectionTreeItemByConnectionId.remove(getConnectionId(connection));
-			connectionTreeItemByConnectionId.put(getConnectionId(connection), connectionTreeItem);
+			//Object connectionTreeItem = treeGrid.addItem(itemConnection, null);
+			//connectionTreeItemByConnectionId.remove(getConnectionId(connection));
+			//connectionTreeItemByConnectionId.put(getConnectionId(connection), connectionTreeItem);
 
-			treetable.setChildrenAllowed(javaApplicationTreeItem, true);
-			treetable.setParent(connectionTreeItem, javaApplicationTreeItem);
-			treetable.setChildrenAllowed(connectionTreeItem, false);
+			//treeGrid.setChildrenAllowed(javaApplicationTreeItem, true);
+			//treeGrid.setParent(connectionTreeItem, javaApplicationTreeItem);
+			//treeGrid.setChildrenAllowed(connectionTreeItem, false);
 
 			applicationIdIByAdressAndPort.remove(getConnectionHost(connection) + SEP_CONN + getConnectionHost(connection));
 			applicationIdIByAdressAndPort.put(getConnectionHost(connection) + SEP_CONN + getConnectionPort(connection), 
@@ -208,12 +213,12 @@ public abstract class AbstractConnectionTreeView<T extends Serializable, U exten
 
 		Object applicationTreeItemId = applicationItemById.get(getJavaAppId(javaApplication));
 		// remove all the items
-		if (treetable.getChildren(applicationTreeItemId) != null) {
-			for (Object child : new HashSet<Object>(treetable.getChildren(applicationTreeItemId))) {
-				treetable.removeItem(child);
-				connectionTreeItemByConnectionId.values().remove(child);
-			}
-		}
+//		if (treeGrid.getChildren(applicationTreeItemId) != null) {
+//			for (Object child : new HashSet<Object>(treeGrid.getChildren(applicationTreeItemId))) {
+//				treeGrid.removeItem(child);
+//				connectionTreeItemByConnectionId.values().remove(child);
+//			}
+//		}
 
 		for (Iterator iterator = connections.iterator(); iterator.hasNext();) {
 			U connection = (U) iterator.next();
@@ -245,13 +250,24 @@ public abstract class AbstractConnectionTreeView<T extends Serializable, U exten
 	}
 
 	protected void buildTreeTable() {
-		treetable = new TreeTable();
-		for (Map.Entry<String, Class<?>> entry : getColumnMap().entrySet()) {
-			treetable.addContainerProperty(entry.getKey(), entry.getValue(), "");
-		}
-		treetable.setSelectable(true);
-		addColumnToTreeTable();
-		treetable.addItemClickListener(this::treeTableItemClicked);
+		treeGrid = new TreeGrid<TreeGridConnectionData<T, U>>();
+		
+		treeData = new TreeData<>();
+		treeDataProvider = new TreeDataProvider<>(treeData);
+		
+		treeGrid.addColumn(item -> item.getApplication()).setCaption("APP");
+		treeGrid.addColumn(item -> item.getAdress()).setCaption("ADD");
+		treeGrid.addColumn(item -> item.getPort()).setCaption("PORT");
+
+		
+		treeGrid.setDataProvider(treeDataProvider);
+		
+//		for (Map.Entry<String, Class<?>> entry : getColumnMap().entrySet()) {
+//			treeGrid.addContainerProperty(entry.getKey(), entry.getValue(), "");
+//		}
+//		treeGrid.setSelectable(true);
+//		addColumnToTreeTable();
+//		treeGrid.addItemClickListener(this::treeTableItemClicked);
 	}
 
 	protected VerticalLayout buildSecondArea() {
@@ -261,9 +277,9 @@ public abstract class AbstractConnectionTreeView<T extends Serializable, U exten
 	}
 
 	protected void checkToolBar() {
-		if (SmockerUI.getInstance() != null) {
-			SmockerUI.getInstance().getEasyAppMainView().getToolBar().checkClickable(this);
-		}
+//		if (SmockerUI.getInstance() != null) {
+//			SmockerUI.getInstance().getEasyAppMainView().getToolBar().checkClickable(this);
+//		}
 	}
 
 	@Override
@@ -278,7 +294,7 @@ public abstract class AbstractConnectionTreeView<T extends Serializable, U exten
 		// Show it in the page
 		notif.show(Page.getCurrent());
 
-		treetable.setEnabled(true);
+		treeGrid.setEnabled(true);
 
 		refreshEntity(entityWithId);
 		updateTree(entityWithId);
@@ -292,10 +308,10 @@ public abstract class AbstractConnectionTreeView<T extends Serializable, U exten
 	 */
 	protected void createJavaApplicationItem(String className, Long javaApplicationId) {
 		Object[] javaApplicationItem = new Object[] { className, "", "", "" };
-		Object javaApplicationTreeItem = treetable.addItem(javaApplicationItem, null);
-		treetable.setParent(javaApplicationTreeItem, rootTreeItem);
-		treetable.setChildrenAllowed(javaApplicationTreeItem, false);
-		applicationItemById.put(javaApplicationId, javaApplicationTreeItem);
+		//Object javaApplicationTreeItem = treeGrid.addItem(javaApplicationItem, null);
+		//treeGrid.setParent(javaApplicationTreeItem, rootTreeItem);
+		//treeGrid.setChildrenAllowed(javaApplicationTreeItem, false);
+		//applicationItemById.put(javaApplicationId, javaApplicationTreeItem);
 		applicationIdIByApplicationClass.put(className, javaApplicationId);
 	}
 
@@ -306,31 +322,31 @@ public abstract class AbstractConnectionTreeView<T extends Serializable, U exten
 		checkToolBar();
 	}
 
-	protected void treeTableItemClicked(ItemClickEvent itemClickEvent) {
-		selectedTreeItem = itemClickEvent.getItem();
-		checkToolBar();
-	
-		if (!StringUtils.isEmpty(itemClickEvent.getItem().getItemProperty(ADRESS).toString())
-				&& !StringUtils.isEmpty(itemClickEvent.getItem().getItemProperty(PORT).toString())) {
-			String host = itemClickEvent.getItem().getItemProperty(ADRESS).toString();
-			String port = itemClickEvent.getItem().getItemProperty(PORT).toString();
-			String key = host + SEP_CONN + port;
-			Long appId = applicationIdIByAdressAndPort.get(key);
-			if (appId != null) {
-				refreshCommunications(host, port, appId);
-			}
-		} else {
-			String application = itemClickEvent.getItem().getItemProperty(APPLICATION).toString();
-			if (application.equals(ALL)) {
-				setSelection(null, null, true);
-			} else if (!StringUtils.isEmpty(application)) {
-				long selectedApplicationId = applicationIdIByApplicationClass.get(application);
-				T selectedApplication = jpaJavaApplication.getItem(selectedApplicationId).getEntity();
-				setSelection(selectedApplication, null, false);
-			}
-		}
-		checkToolBar();
-	}
+//	protected void treeTableItemClicked(ItemClickEvent itemClickEvent) {
+//		selectedTreeItem = itemClickEvent.getItem();
+//		checkToolBar();
+//	
+//		if (!StringUtils.isEmpty(itemClickEvent.getItem().getItemProperty(ADRESS).toString())
+//				&& !StringUtils.isEmpty(itemClickEvent.getItem().getItemProperty(PORT).toString())) {
+//			String host = itemClickEvent.getItem().getItemProperty(ADRESS).toString();
+//			String port = itemClickEvent.getItem().getItemProperty(PORT).toString();
+//			String key = host + SEP_CONN + port;
+//			Long appId = applicationIdIByAdressAndPort.get(key);
+//			if (appId != null) {
+//				refreshCommunications(host, port, appId);
+//			}
+//		} else {
+//			String application = itemClickEvent.getItem().getItemProperty(APPLICATION).toString();
+//			if (application.equals(ALL)) {
+//				setSelection(null, null, true);
+//			} else if (!StringUtils.isEmpty(application)) {
+//				long selectedApplicationId = applicationIdIByApplicationClass.get(application);
+//				T selectedApplication = jpaJavaApplication.getItem(selectedApplicationId).getEntity();
+//				setSelection(selectedApplication, null, false);
+//			}
+//		}
+//		checkToolBar();
+//	}
 
 	/**
 	 * refresh the communications

@@ -10,6 +10,7 @@ import javax.persistence.Persistence;
 import org.jboss.logging.Logger;
 import org.vaadin.easyapp.EasyAppBuilder;
 import org.vaadin.easyapp.EasyAppMainView;
+import org.vaadin.easyapp.ui.ViewWithToolBar;
 import org.vaadin.easyapp.util.MessageBuilder;
 
 import com.jenetics.smocker.model.EntityWithId;
@@ -23,10 +24,9 @@ import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.BaseTheme;
 
 @Push
-@Theme("smocker")
+@Theme("mytheme")
 public class SmockerUI extends UI {
 
 	private static final int SLEEP_TIME = 200;
@@ -72,16 +72,16 @@ public class SmockerUI extends UI {
 		easyAppMainView = new EasyAppBuilder(Collections.singletonList("com.jenetics.smocker.ui.view"))
 				.withTopBarIcon(image).withTopBarStyle("topBannerBackGround")
 				.withSearchCapabilities((searchValue) -> search(searchValue), FontAwesome.SEARCH).withBreadcrumb()
-				.withBreadcrumbStyle("breadcrumbStyle").withButtonLinkStyleInBreadCrumb(BaseTheme.BUTTON_LINK)
+				.withBreadcrumbStyle("breadcrumbStyle")
 				.withToolBar()
 				// .withLoginPopupLoginStyle("propupStyle")
-				.build();
+				.build(this);
 
-		easyAppMainView.setSplitPosition(93);
+		//easyAppMainView.setSplitPosition(93);
 
 		layout.addComponents(easyAppMainView);
 
-		easyAppMainView.getTopBar().setStyleName("topBannerBackGround");
+		//easyAppMainView.getTopBar().setStyleName("topBannerBackGround");
 
 		setContent(layout);
 		instance = this;
@@ -100,9 +100,19 @@ public class SmockerUI extends UI {
 			{
 				try {
 					Thread.sleep(SLEEP_TIME);
-					if (RefreshableView.class
-							.isAssignableFrom(easyAppMainView.getNavigator().getCurrentView().getClass())) {
-						((RefreshableView) easyAppMainView.getNavigator().getCurrentView()).refresh(entityWithId);
+					Class<?> currentViewClass =  easyAppMainView.getNavigator().getCurrentView().getClass();
+					RefreshableView targetView = null;
+					if (ViewWithToolBar.class.isAssignableFrom(currentViewClass)) {
+						ViewWithToolBar viewWithToolBar =  (ViewWithToolBar)easyAppMainView.getNavigator().getCurrentView();
+						if (RefreshableView.class.isAssignableFrom(viewWithToolBar.getInnerComponent().getClass())) {
+							targetView = (RefreshableView) viewWithToolBar.getInnerComponent();
+						}
+					}
+					else if (RefreshableView.class.isAssignableFrom(currentViewClass)) {
+						targetView = ((RefreshableView) easyAppMainView.getNavigator().getCurrentView());
+					}
+					if (targetView != null) {
+						targetView.refresh(entityWithId);
 					}
 				} catch (InterruptedException e) {
 					logger.error(MessageBuilder.getEasyAppMessage("Unable to get the view map"), e);

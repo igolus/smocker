@@ -38,7 +38,6 @@ import com.jenetics.smocker.ui.util.CommunicationMockedTreeItem;
 import com.jenetics.smocker.ui.util.CommunicationTreeItem;
 import com.jenetics.smocker.util.NetworkReaderUtility;
 import com.vaadin.annotations.Push;
-import com.vaadin.event.ItemClickEvent;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.ViewScope;
@@ -59,26 +58,26 @@ public class MockSpaceView extends AbstractConnectionTreeView<JavaApplicationMoc
 		super(JavaApplicationMocked.class, ConnectionMocked.class, CommunicationMocked.class);
 	}
 
-	@Override
-	public ClickListener getClickListener(String key) {
-		return null;
-	}
-
-	@Override
-	public List<ButtonDescriptor> getButtons() {
-		return Arrays.asList(new ButtonDescriptor[] { new ButtonDescriptor(bundle.getString("remove"),
-				bundle.getString("removeToolTip"), FontAwesome.REMOVE, EnumButton.REMOVE.toString()), });
-	}
-
-	@Override
-	public boolean isClickable(String key) {
-		return false;
-	}
-
-	@Override
-	public void enter(ViewChangeEvent event) {
-		//do nothing
-	}
+//	@Override
+//	public ClickListener getClickListener(String key) {
+//		return null;
+//	}
+//
+//	@Override
+//	public List<ButtonDescriptor> getButtons() {
+//		return Arrays.asList(new ButtonDescriptor[] { new ButtonDescriptor(bundle.getString("remove"),
+//				bundle.getString("removeToolTip"), FontAwesome.REMOVE, EnumButton.REMOVE.toString()), });
+//	}
+//
+//	@Override
+//	public boolean isClickable(String key) {
+//		return false;
+//	}
+//
+//	@Override
+//	public void enter(ViewChangeEvent event) {
+//		//do nothing
+//	}
 	
 	@Override
 	protected Map<String, Class<?>> getColumnMap() {
@@ -104,63 +103,57 @@ public class MockSpaceView extends AbstractConnectionTreeView<JavaApplicationMoc
 		// communications items exccept if if comes from click event
 		Object connectionItem = connectionTreeItemByConnectionId.get(conn.getId());
 
-		if (connectionItem != null && (treetable.isSelected(connectionItem) || !checkSelected)
-				&& !conn.getCommunications().isEmpty()) {
-			Set<CommunicationMocked> communications = conn.getCommunications();
-
-			Tree menu = new Tree();
-			for (CommunicationMocked communication : communications) {
-				CommunicationMockedTreeItem commTreeItem = new CommunicationMockedTreeItem(communication);
-				menu.addItem(commTreeItem);
-				menu.setChildrenAllowed(commTreeItem, false);
-			}
-
-			menu.setSizeFull();
-			GridLayout grid = new GridLayout(2, 1);
-			grid.setSizeFull();
-
-			menu.addItemClickListener((ItemClickEvent event) -> {
-				CommunicationMocked comm = ((CommunicationMockedTreeItem) event.getItemId()).getCommunication();
-				// remove selection in the table
-				treetable.select(null);
-				selectedCommunication = comm;
-
-//				String response = NetworkReaderUtility.decode(comm.getResponse());
-//				ComponentWithDisplayChange outputComponent = NetDisplayerFactoryOutput.getComponent(response);
+//		if (connectionItem != null && (treeGrid.isSelected(connectionItem) || !checkSelected)
+//				&& !conn.getCommunications().isEmpty()) {
+//			Set<CommunicationMocked> communications = conn.getCommunications();
+//
+//			Tree menu = new Tree();
+//			for (CommunicationMocked communication : communications) {
+//				CommunicationMockedTreeItem commTreeItem = new CommunicationMockedTreeItem(communication);
+//				menu.addItem(commTreeItem);
+//				menu.setChildrenAllowed(commTreeItem, false);
+//			}
+//
+//			menu.setSizeFull();
+//			GridLayout grid = new GridLayout(2, 1);
+//			grid.setSizeFull();
+//
+//			menu.addItemClickListener((ItemClickEvent event) -> {
+//				CommunicationMocked comm = ((CommunicationMockedTreeItem) event.getItemId()).getCommunication();
+//				// remove selection in the table
+//				treeGrid.select(null);
+//				selectedCommunication = comm;
+//				
+//				AceEditor editor = new AceEditor();
+//				editor.setThemePath("/static/ace");	
+//				editor.setMode(AceMode.java);
+//				editor.setTheme(AceTheme.eclipse);
+//
+//				// Use worker (if available for the current mode)
+//				editor.setUseWorker(true);
+//				editor.setSizeFull();
+//				editor.setValue("Hello world!");
 //				grid.removeComponent(1, 0);
-//				grid.addComponent(outputComponent.getComponent(), 1, 0);
-//				outputComponent.selectionValue(response);
-				
-				AceEditor editor = new AceEditor();
-				editor.setThemePath("/static/ace");	
-				editor.setMode(AceMode.java);
-				editor.setTheme(AceTheme.eclipse);
-
-				// Use worker (if available for the current mode)
-				editor.setUseWorker(true);
-				editor.setSizeFull();
-				editor.setValue("Hello world!");
-				grid.removeComponent(1, 0);
-				grid.addComponent(editor, 1, 0);
-				
-				String request = NetworkReaderUtility.decode(comm.getRequest());
-				ComponentWithDisplayChange inputComponent = NetDisplayerFactoryInput.getComponent(request);
-				grid.removeComponent(0, 0);
-				grid.addComponent(inputComponent.getComponent(), 0, 0);
-				inputComponent.selectionValue(request);
-				checkToolBar();
-			});
-
-			HorizontalSplitPanel hsplitPane = new HorizontalSplitPanel();
-
-			hsplitPane.setFirstComponent(menu);
-			hsplitPane.setSecondComponent(grid);
-			hsplitPane.setSplitPosition(20);
-
-			second.addComponent(hsplitPane);
-		} else if (conn.getCommunications().isEmpty() && !checkSelected) {
-			selectedCommunication = null;
-		}
+//				grid.addComponent(editor, 1, 0);
+//				
+//				String request = NetworkReaderUtility.decode(comm.getRequest());
+//				ComponentWithDisplayChange inputComponent = NetDisplayerFactoryInput.getComponent(request);
+//				grid.removeComponent(0, 0);
+//				grid.addComponent(inputComponent.getComponent(), 0, 0);
+//				inputComponent.selectionValue(request);
+//				checkToolBar();
+//			});
+//
+//			HorizontalSplitPanel hsplitPane = new HorizontalSplitPanel();
+//
+//			hsplitPane.setFirstComponent(menu);
+//			hsplitPane.setSecondComponent(grid);
+//			hsplitPane.setSplitPosition(20);
+//
+//			second.addComponent(hsplitPane);
+//		} else if (conn.getCommunications().isEmpty() && !checkSelected) {
+//			selectedCommunication = null;
+//		}
 	}
 
 

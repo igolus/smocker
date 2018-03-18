@@ -42,16 +42,17 @@ public class ConnectionDetailsView extends EasyAppLayout {
 		
 		menu.addItemClickListener(this::treeItemClick);
 		treeDataProvider.refreshAll();
-		menu.setSizeFull();
+		
 		
 		// Show all leaf nodes as disabled
 		menu.setStyleGenerator(item -> {
 		        return item.getDateTime().toString();
 		    }
 		);
-		
+		menu.setSizeFull();
 		
 		grid = new GridLayout(2, 1);
+		grid.setSizeFull();
 		grid.setSizeFull();
 
 
@@ -68,11 +69,15 @@ public class ConnectionDetailsView extends EasyAppLayout {
 		String response = NetworkReaderUtility.decode(comm.getResponse());
 		ComponentWithDisplayChange outputComponent = NetDisplayerFactoryOutput.getComponent(response);
 		grid.removeComponent(1, 0);
+		outputComponent.getComponent().setSizeFull();
 		grid.addComponent(outputComponent.getComponent(), 1, 0);
+		outputComponent.selectionValue(response);
 		
 		String request = NetworkReaderUtility.decode(comm.getRequest());
 		ComponentWithDisplayChange inputComponent = NetDisplayerFactoryInput.getComponent(request);
+		inputComponent.getComponent().setSizeFull();
 		grid.removeComponent(0, 0);
 		grid.addComponent(inputComponent.getComponent(), 0, 0);
+		inputComponent.selectionValue(request);
 	}
 }

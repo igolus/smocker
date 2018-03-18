@@ -1,11 +1,9 @@
 package com.jenetics.smocker.ui.view;
 
-import java.util.List;
 import java.util.Set;
 
 import org.vaadin.easyapp.util.ActionContainer;
 import org.vaadin.easyapp.util.ActionContainerBuilder;
-import org.vaadin.easyapp.util.ButtonDescriptor;
 import org.vaadin.easyapp.util.annotations.ContentView;
 
 import com.jenetics.smocker.model.Communication;
@@ -13,20 +11,20 @@ import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.network.ClientCommunicator;
+import com.jenetics.smocker.ui.SmockerUI;
+import com.jenetics.smocker.ui.component.ConnectionDetailsView;
 import com.jenetics.smocker.ui.util.ButtonWithIEntity;
-import com.jenetics.smocker.ui.util.ButtonWithId;
 import com.jenetics.smocker.ui.util.RefreshableView;
 import com.jenetics.smocker.ui.util.StrandardTreeGridConnectionData;
 import com.jenetics.smocker.ui.util.TreeGridConnectionData;
 import com.vaadin.annotations.Push;
+import com.vaadin.event.selection.SelectionEvent;
 import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.themes.ValoTheme;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.Window;
 
 @SuppressWarnings("serial")
 @Push
@@ -38,6 +36,7 @@ public class JavaApplicationView2 extends AbstractConnectionTreeView2<JavaApplic
 
 	public JavaApplicationView2() {
 		super(JavaApplication.class, Connection.class, Communication.class);
+		treeGrid.addSelectionListener(this::treeSelectionChange);
 	}
 	
 	@Override
@@ -112,10 +111,11 @@ public class JavaApplicationView2 extends AbstractConnectionTreeView2<JavaApplic
 		}
 	}
 	
-	public void switchWatch() {
-		
+	
+	public void treeSelectionChange(SelectionEvent<TreeGridConnectionData<JavaApplication, Connection>> event) {
+		refreshClickable();
 	}
-
+	
 	@Override
 	public void refresh(EntityWithId entityWithId) {
 		refreshEntity(entityWithId);
@@ -124,21 +124,41 @@ public class JavaApplicationView2 extends AbstractConnectionTreeView2<JavaApplic
 	@Override
 	public ActionContainer buildActionContainer() {
 		ActionContainerBuilder builder = new ActionContainerBuilder(BUNDLE_NAME)
-				.addButton("addToMock", VaadinIcons.PLUS, null,  this::canAddToMock			
-					, this::addToMock)
+				.addButton("Clean_Button", VaadinIcons.MINUS, null,  this::isSelected			
+						, this::clean)
+				.addButton("ViewDetails_Button", VaadinIcons.EYE, null,  this::isConnectionSelected			
+						, this::details)
 				.setSearch(this::search);
 
 		return builder.build();
 	}
 	
-	public void addToMock(ClickEvent event) {
-		Notification.show("Add To Mock");
+	public void clean(ClickEvent event) {
+		Notification.show("Clean");
 	}
 	
+	public void details(ClickEvent event) {
+		if (isConnectionSelected()) {
+			Connection conn = treeGrid.getSelectedItems().iterator().next().getConnection();
+			Window subWindow = new Window(bundle.getString("Communications"));
+			subWindow.setModal(true);
+			ConnectionDetailsView connectionDetailsView = new ConnectionDetailsView(conn);
+			subWindow.setContent(connectionDetailsView);
+			subWindow.center();
+			SmockerUI.getInstance().addWindow(subWindow);
+			subWindow.setHeight("800px");
+			subWindow.setWidth("600px");
+			
+		}
+	}
 	
-
-	public boolean canAddToMock() {
+	public boolean isSelected() {
 		return treeGrid.getSelectedItems().size() == 1;
+	}
+	
+	public boolean isConnectionSelected() {
+		return treeGrid.getSelectedItems().size() == 1 && 
+				treeGrid.getSelectedItems().iterator().next().isConnection();
 	}
 	
 	public void search(String searchValue) {

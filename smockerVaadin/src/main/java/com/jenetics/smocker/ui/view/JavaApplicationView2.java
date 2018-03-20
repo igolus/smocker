@@ -2,6 +2,7 @@ package com.jenetics.smocker.ui.view;
 
 import java.util.Set;
 
+import org.vaadin.easyapp.ui.ViewWithToolBar;
 import org.vaadin.easyapp.util.ActionContainer;
 import org.vaadin.easyapp.util.ActionContainerBuilder;
 import org.vaadin.easyapp.util.annotations.ContentView;
@@ -142,12 +143,14 @@ public class JavaApplicationView2 extends AbstractConnectionTreeView2<JavaApplic
 			Connection conn = treeGrid.getSelectedItems().iterator().next().getConnection();
 			Window subWindow = new Window(bundle.getString("Communications"));
 			subWindow.setModal(true);
-			ConnectionDetailsView connectionDetailsView = new ConnectionDetailsView(conn);
-			subWindow.setContent(connectionDetailsView);
+			ConnectionDetailsView connectionWithDetail = new ConnectionDetailsView(conn);
+			ViewWithToolBar view = new ViewWithToolBar(connectionWithDetail);
+			subWindow.setContent(view);
 			subWindow.center();
 			SmockerUI.getInstance().addWindow(subWindow);
 			subWindow.setHeight("800px");
 			subWindow.setWidth("600px");
+			subWindow.setSizeFull();
 			
 		}
 	}

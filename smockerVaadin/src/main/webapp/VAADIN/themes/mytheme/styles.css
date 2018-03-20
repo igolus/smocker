@@ -15068,3 +15068,7 @@ div.v-layout.v-horizontal.v-widget {
 .mytheme .v-margin-bottom {
 	padding-bottom: 0px;
 }
+
+.mytheme .v-textarea {
+	overflow-y: auto !important;
+}

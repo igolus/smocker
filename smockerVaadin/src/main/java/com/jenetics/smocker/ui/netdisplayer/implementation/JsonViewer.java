@@ -31,6 +31,7 @@ public class JsonViewer implements ComponentWithDisplayChange {
 	@Override
 	public Component getComponent() {
 		areaOutput = new TextArea();
+		areaOutput.setWordWrap(false);
 		areaOutput.setReadOnly(true);
 		areaOutput.setSizeFull();
 

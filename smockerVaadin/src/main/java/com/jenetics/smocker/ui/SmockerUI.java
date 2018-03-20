@@ -36,6 +36,8 @@ public class SmockerUI extends UI {
 
 	@Inject
 	private Logger logger;
+	
+	static ResourceBundle bundle = ResourceBundle.getBundle("BundleUI");
 
 	public static final String PERSISTENCE_UNIT = "smockerLocalData";
 
@@ -43,6 +45,10 @@ public class SmockerUI extends UI {
 	protected static final String MAINVIEW = "main";
 
 	private static SmockerUI instance = null;
+	
+	public static ResourceBundle getBundle() {
+		return bundle;
+	}
 
 	public static EntityManager getEm() {
 		if (em == null) {

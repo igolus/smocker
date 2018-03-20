@@ -2,15 +2,23 @@ package com.jenetics.smocker.ui.component;
 
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.vaadin.easyapp.util.ActionContainer;
 import org.vaadin.easyapp.util.ActionContainerBuilder;
 import org.vaadin.easyapp.util.EasyAppLayout;
 
+import com.jenetics.smocker.dao.IDaoManager;
+import com.jenetics.smocker.injector.Dao;
 import com.jenetics.smocker.model.Communication;
 import com.jenetics.smocker.model.Connection;
+import com.jenetics.smocker.model.JavaApplication;
+import com.jenetics.smocker.ui.SmockerUI;
+import com.jenetics.smocker.ui.dialog.Dialog;
 import com.jenetics.smocker.ui.netdisplayer.ComponentWithDisplayChange;
 import com.jenetics.smocker.ui.netdisplayer.NetDisplayerFactoryInput;
 import com.jenetics.smocker.ui.netdisplayer.NetDisplayerFactoryOutput;
+import com.jenetics.smocker.ui.util.CommunicationDateDisplay;
 import com.jenetics.smocker.util.NetworkReaderUtility;
 import com.vaadin.data.TreeData;
 import com.vaadin.data.provider.TreeDataProvider;
@@ -30,9 +38,13 @@ public class ConnectionDetailsView extends EasyAppLayout {
 	private static final String BUNDLE_NAME = "BundleUI";
 	private Connection connection;
 	private GridLayout grid = null;
-	private Tree<Communication> menu;
-	private TreeData<Communication> treeData;
-	private TreeDataProvider<Communication> treeDataProvider;
+	private Tree<CommunicationDateDisplay> menu;
+	private TreeData<CommunicationDateDisplay> treeData;
+	private TreeDataProvider<CommunicationDateDisplay> treeDataProvider;
+	
+	@Inject
+	@Dao
+	protected IDaoManager<Connection> daoManagerConnection;
 	
 	public ConnectionDetailsView(Connection connection) {
 		super();
@@ -49,13 +61,7 @@ public class ConnectionDetailsView extends EasyAppLayout {
 		
 		menu.addItemClickListener(this::treeItemClick);
 		treeDataProvider.refreshAll();
-		
-		
-		// Show all leaf nodes as disabled
-		menu.setStyleGenerator(item -> {
-		        return item.getDateTime().toString();
-		    }
-		);
+
 		menu.setSizeFull();
 		
 		grid = new GridLayout(2, 1);
@@ -76,13 +82,13 @@ public class ConnectionDetailsView extends EasyAppLayout {
 		treeData.clear();
 		Set<Communication> communications = connection.getCommunications();
 		for (Communication communication : communications) {
-			treeData.addItem(null, communication);
+			treeData.addItem(null, new CommunicationDateDisplay(communication));
 		}
 		treeDataProvider.refreshAll();
 	}
 	
-	public void treeItemClick(ItemClick<Communication> event) {
-		Communication comm = event.getItem();
+	public void treeItemClick(ItemClick<CommunicationDateDisplay> event) {
+		Communication comm = event.getItem().getCommunication();
 		
 		String request = NetworkReaderUtility.decode(comm.getRequest());
 		ComponentWithDisplayChange componentWithDisplayChangeInput = NetDisplayerFactoryInput.getComponent(request);
@@ -100,7 +106,8 @@ public class ConnectionDetailsView extends EasyAppLayout {
 		grid.removeComponent(1, 0);
 		grid.addComponent(outputComponent, 1, 0);
 		componentWithDisplayChangeOutput.selectionValue(response);
-
+		
+		refreshClickable();
 	}
 	
 	public ActionContainer buildActionContainer() {
@@ -120,11 +127,20 @@ public class ConnectionDetailsView extends EasyAppLayout {
 	}
 	
 	public void addToMock(ClickEvent event) {
-		Notification.show("Clean");
+		Notification.show("Add To Mock");
 	}
 	
 	public void clean(ClickEvent event) {
-		Notification.show("Clean");
+		if (isSelected()) {
+			Dialog.ask(SmockerUI.getBundle().getString("RemoveQuestion"), null, this::delete, null);
+		}
+	}
+	
+	public void delete() {
+		Communication communication = menu.getSelectedItems().iterator().next().getCommunication();
+		communication.getConnection().getCommunications().remove(communication);
+		daoManagerConnection.update(communication.getConnection());
+		fillCommunication();
 	}
 	
 	public void cleanAll(ClickEvent event) {

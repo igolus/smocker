@@ -8,28 +8,33 @@ import org.vaadin.easyapp.util.ActionContainer;
 import org.vaadin.easyapp.util.ActionContainerBuilder;
 import org.vaadin.easyapp.util.EasyAppLayout;
 
+import com.jenetics.smocker.dao.DaoManager;
 import com.jenetics.smocker.dao.IDaoManager;
 import com.jenetics.smocker.injector.Dao;
 import com.jenetics.smocker.model.Communication;
 import com.jenetics.smocker.model.Connection;
-import com.jenetics.smocker.model.JavaApplication;
+import com.jenetics.smocker.model.converter.MockConverter;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.dialog.Dialog;
 import com.jenetics.smocker.ui.netdisplayer.ComponentWithDisplayChange;
 import com.jenetics.smocker.ui.netdisplayer.NetDisplayerFactoryInput;
 import com.jenetics.smocker.ui.netdisplayer.NetDisplayerFactoryOutput;
 import com.jenetics.smocker.ui.util.CommunicationDateDisplay;
+import com.jenetics.smocker.ui.view.JavaApplicationView2;
+import com.jenetics.smocker.ui.view.MockSpaceView;
 import com.jenetics.smocker.util.NetworkReaderUtility;
 import com.vaadin.data.TreeData;
 import com.vaadin.data.provider.TreeDataProvider;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.Tree.ItemClick;
+import com.vaadin.ui.Window;
 
 
 @SuppressWarnings("serial")
@@ -41,18 +46,20 @@ public class ConnectionDetailsView extends EasyAppLayout {
 	private Tree<CommunicationDateDisplay> menu;
 	private TreeData<CommunicationDateDisplay> treeData;
 	private TreeDataProvider<CommunicationDateDisplay> treeDataProvider;
+	private Communication selectedCommunication = null;;
 	
-	@Inject
-	@Dao
-	protected IDaoManager<Connection> daoManagerConnection;
+	protected IDaoManager<Connection> daoManagerConnection = new DaoManager<Connection>(Connection.class, SmockerUI.getEm());
+	private Window subWindow;
 	
-	public ConnectionDetailsView(Connection connection) {
+	public ConnectionDetailsView(Connection connection, Window subWindow) {
 		super();
 		HorizontalSplitPanel mainLayout = new HorizontalSplitPanel();
 		
+		this.subWindow = subWindow;
 		this.connection = connection;
 
 		menu = new Tree<>();
+		menu.setSelectionMode(SelectionMode.SINGLE);
 		treeData = new TreeData<>();
 		treeDataProvider = new TreeDataProvider<>(treeData);
 		menu.setDataProvider(treeDataProvider);
@@ -107,6 +114,7 @@ public class ConnectionDetailsView extends EasyAppLayout {
 		grid.addComponent(outputComponent, 1, 0);
 		componentWithDisplayChangeOutput.selectionValue(response);
 		
+		selectedCommunication = comm;
 		refreshClickable();
 	}
 	
@@ -127,7 +135,9 @@ public class ConnectionDetailsView extends EasyAppLayout {
 	}
 	
 	public void addToMock(ClickEvent event) {
-		Notification.show("Add To Mock");
+		MockConverter.convertcommunication(selectedCommunication);
+		subWindow.close();
+		SmockerUI.getInstance().getEasyAppMainView().getScanner().navigateTo(MockSpaceView.class);
 	}
 	
 	public void clean(ClickEvent event) {
@@ -137,9 +147,8 @@ public class ConnectionDetailsView extends EasyAppLayout {
 	}
 	
 	public void delete() {
-		Communication communication = menu.getSelectedItems().iterator().next().getCommunication();
-		communication.getConnection().getCommunications().remove(communication);
-		daoManagerConnection.update(communication.getConnection());
+		selectedCommunication.getConnection().getCommunications().remove(selectedCommunication);
+		daoManagerConnection.update(selectedCommunication.getConnection());
 		fillCommunication();
 	}
 	
@@ -152,7 +161,7 @@ public class ConnectionDetailsView extends EasyAppLayout {
 	}
 	
 	public boolean isSelected() {
-		return menu.getSelectedItems().size() == 1;
+		return selectedCommunication != null;
 	}
 	
 	public boolean always() {

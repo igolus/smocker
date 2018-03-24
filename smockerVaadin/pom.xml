@@ -38,6 +38,7 @@
 		<commons-lang.version>2.6</commons-lang.version>
 		<google-json.version>1.1</google-json.version>
 		<vaadin-sliderpanel.version>1.4.2</vaadin-sliderpanel.version>
+		<version.wildfly-swarm>2018.3.3</version.wildfly-swarm>
 	</properties>
 
 	<repositories>
@@ -54,6 +55,14 @@
 			<name>Vaadin snapshot repository</name>
 			<url>http://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
 		</repository>
+		<repository>
+			<id>maven-central</id>
+			<name>Maven central</name>
+			<url>http://central.maven.org/maven2/</url>
+		</repository>
+
+
+
 	</repositories>
 
 	<dependencyManagement>
@@ -104,6 +113,12 @@
 	<dependencies>
 
 		<dependency>
+			<groupId>org.wildfly.swarm</groupId>
+			<artifactId>jaxrs-jaxb</artifactId>
+			<version>2018.3.3</version>
+		</dependency>
+
+		<dependency>
 			<groupId>com.googlecode.json-simple</groupId>
 			<artifactId>json-simple</artifactId>
 			<version>${google-json.version}</version>
@@ -125,7 +140,7 @@
 		<dependency>
 			<groupId>de.steinwedel.vaadin.addon</groupId>
 			<artifactId>messagebox</artifactId>
-			<version>3.0.19</version>
+			<version>4.0.21</version>
 		</dependency>
 
 		<dependency>
@@ -471,6 +486,17 @@
 				<configuration>
 					<scanIntervalSeconds>2</scanIntervalSeconds>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.wildfly.swarm</groupId>
+				<artifactId>wildfly-swarm-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>package</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

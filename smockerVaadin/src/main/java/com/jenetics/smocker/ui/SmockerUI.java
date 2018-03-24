@@ -73,13 +73,14 @@ public class SmockerUI extends UI {
 		final VerticalLayout layout = new VerticalLayout();
 		layout.setSizeFull();
 
-		Image image = new Image(null, new ThemeResource("icons/smocker_small.png"));
+		Image image = new Image(null, new ThemeResource("smocker_small.png"));
 
 		easyAppMainView = new EasyAppBuilder(Collections.singletonList("com.jenetics.smocker.ui.view"))
 				.withTopBarIcon(image).withTopBarStyle("topBannerBackGround")
 				.withSearchCapabilities((searchValue) -> search(searchValue), FontAwesome.SEARCH).withBreadcrumb()
 				.withBreadcrumbStyle("breadcrumbStyle")
 				.withToolBar()
+				.withNavigationIcon(image)
 				// .withLoginPopupLoginStyle("propupStyle")
 				.build(this);
 

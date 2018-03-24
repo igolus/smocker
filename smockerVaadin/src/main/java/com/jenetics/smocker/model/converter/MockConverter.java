@@ -24,6 +24,25 @@ public class MockConverter {
 	private static IDaoManager<JavaApplicationMocked> daoManagerJavaApplicationMocked = new DaoManager<>(
 			JavaApplicationMocked.class, SmockerUI.getEm());
 
+	
+	/**
+	 * convert communication to communicationMocked
+	 * 
+	 * @param sourceConnection
+	 */
+	public static void convertcommunication(Communication sourceCommunication) {
+		Connection sourceConnection = sourceCommunication.getConnection();
+		JavaApplication sourceJavaApplication = sourceConnection.getJavaApplication();
+		JavaApplicationMocked targetJavaApplicationMocked = null;
+		targetJavaApplicationMocked = findOrCreateTargetJavaApplication(sourceJavaApplication);
+		
+		ConnectionMocked targetConnectionMocked = findOrCreateTargetConnection(sourceConnection,
+				targetJavaApplicationMocked);
+		
+		addSingleCommunicationToConnection(targetConnectionMocked, sourceCommunication);
+	}
+	
+	
 	/**
 	 * convert connection to connectionMocked
 	 * 
@@ -62,15 +81,19 @@ public class MockConverter {
 	private static void addCommunications(Connection sourceConnection, ConnectionMocked targetConnectionMocked) {
 		Set<Communication> sourceCommunications = sourceConnection.getCommunications();
 		for (Communication communication : sourceCommunications) {
-			CommunicationMocked communicationMocked = new CommunicationMocked();
-			communicationMocked.setRequest(communication.getRequest());
-			communicationMocked.setResponse(communication.getResponse());
-			communicationMocked.setDateTime(communication.getDateTime());
-			communicationMocked.setConnection(targetConnectionMocked);
-			
-			targetConnectionMocked.getCommunications().add(communicationMocked);
+			addSingleCommunicationToConnection(targetConnectionMocked, communication);
 		}
 		daoManagerConnectionMocked.update(targetConnectionMocked);
+	}
+
+	private static void addSingleCommunicationToConnection(ConnectionMocked targetConnectionMocked, Communication communication) {
+		CommunicationMocked communicationMocked = new CommunicationMocked();
+		communicationMocked.setRequest(communication.getRequest());
+		communicationMocked.setResponse(communication.getResponse());
+		communicationMocked.setDateTime(communication.getDateTime());
+		communicationMocked.setConnection(targetConnectionMocked);
+		
+		targetConnectionMocked.getCommunications().add(communicationMocked);
 	}
 
 	private static ConnectionMocked findOrCreateTargetConnection(Connection sourceConnection,

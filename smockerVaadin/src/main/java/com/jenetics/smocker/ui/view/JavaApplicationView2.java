@@ -143,7 +143,7 @@ public class JavaApplicationView2 extends AbstractConnectionTreeView2<JavaApplic
 			Connection conn = treeGrid.getSelectedItems().iterator().next().getConnection();
 			Window subWindow = new Window(bundle.getString("Communications"));
 			subWindow.setModal(true);
-			ConnectionDetailsView connectionWithDetail = new ConnectionDetailsView(conn);
+			ConnectionDetailsView connectionWithDetail = new ConnectionDetailsView(conn, subWindow);
 			ViewWithToolBar view = new ViewWithToolBar(connectionWithDetail);
 			subWindow.setContent(view);
 			subWindow.center();

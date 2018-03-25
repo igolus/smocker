@@ -63,4 +63,11 @@ public class ConnectionsView extends EasyAppLayout implements RefreshableView {
 		connections.refresh();
 	}
 
+
+	@Override
+	public boolean always() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

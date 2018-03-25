@@ -37,7 +37,9 @@ public class SmockerUI extends UI {
 	@Inject
 	private Logger logger;
 	
-	static ResourceBundle bundle = ResourceBundle.getBundle("BundleUI");
+	public static final String BUNDLE_NAME = "BundleUI";
+	
+	private static ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_NAME);
 
 	public static final String PERSISTENCE_UNIT = "smockerLocalData";
 
@@ -48,6 +50,17 @@ public class SmockerUI extends UI {
 	
 	public static ResourceBundle getBundle() {
 		return bundle;
+	}
+	
+	/**
+	 * Try to get the bundle value 
+	 * return value if not found
+	 */
+	public static String getBundleValue(String value) {
+		if (bundle.containsKey(value)) {
+			return bundle.getString(value);
+		}
+		return value;
 	}
 
 	public static EntityManager getEm() {

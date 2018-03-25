@@ -14,4 +14,6 @@ public interface RefreshableView {
 
 	void refresh(EntityWithId entityWithId);
 
+	boolean always();
+
 }

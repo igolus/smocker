@@ -1,7 +1,6 @@
 package com.jenetics.smocker.ui.util;
 
 import com.jenetics.smocker.model.Communication;
-import com.jenetics.smocker.model.Connection;
 
 public class CommunicationDateDisplay {
 	private Communication communication;

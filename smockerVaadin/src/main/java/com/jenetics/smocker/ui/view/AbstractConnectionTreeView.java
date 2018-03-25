@@ -379,4 +379,10 @@ public abstract class AbstractConnectionTreeView<T extends Serializable, U exten
 		jpaJavaApplication = JPAContainerFactory.make(tParameterClass, SmockerUI.getEm());
 	}
 
+	@Override
+	public boolean always() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

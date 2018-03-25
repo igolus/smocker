@@ -129,6 +129,8 @@ public class JavaApplicationView2 extends AbstractConnectionTreeView2<JavaApplic
 						, this::clean)
 				.addButton("ViewDetails_Button", VaadinIcons.EYE, null,  this::isConnectionSelected			
 						, this::details)
+				.addButton("Refresh_Button", VaadinIcons.REFRESH, null,  this::always			
+						, this::refresh)
 				.setSearch(this::search);
 
 		return builder.build();
@@ -151,7 +153,6 @@ public class JavaApplicationView2 extends AbstractConnectionTreeView2<JavaApplic
 			subWindow.setHeight("800px");
 			subWindow.setWidth("600px");
 			subWindow.setSizeFull();
-			
 		}
 	}
 	

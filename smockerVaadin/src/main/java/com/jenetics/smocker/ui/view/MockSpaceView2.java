@@ -2,6 +2,7 @@ package com.jenetics.smocker.ui.view;
 
 import java.util.Set;
 
+import org.vaadin.easyapp.ui.ViewWithToolBar;
 import org.vaadin.easyapp.util.ActionContainer;
 import org.vaadin.easyapp.util.ActionContainerBuilder;
 import org.vaadin.easyapp.util.annotations.ContentView;
@@ -10,6 +11,8 @@ import com.jenetics.smocker.model.CommunicationMocked;
 import com.jenetics.smocker.model.ConnectionMocked;
 import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.model.JavaApplicationMocked;
+import com.jenetics.smocker.ui.SmockerUI;
+import com.jenetics.smocker.ui.component.ConnectionMockedDetailsView;
 import com.jenetics.smocker.ui.util.RefreshableView;
 import com.jenetics.smocker.ui.util.StrandardTreeGridConnectionMockedData;
 import com.jenetics.smocker.ui.util.TreeGridConnectionData;
@@ -19,6 +22,7 @@ import com.vaadin.icons.VaadinIcons;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Window;
 
 @SuppressWarnings("serial")
 @Push
@@ -122,6 +126,8 @@ public class MockSpaceView2 extends AbstractConnectionTreeView2<JavaApplicationM
 						, this::clean)
 				.addButton("ViewDetails_Button", VaadinIcons.EYE, null,  this::isConnectionSelected			
 						, this::details)
+				.addButton("Refresh_Button", VaadinIcons.REFRESH, null,  this::always			
+						, this::refresh)
 				.setSearch(this::search);
 
 		return builder.build();
@@ -132,20 +138,20 @@ public class MockSpaceView2 extends AbstractConnectionTreeView2<JavaApplicationM
 	}
 	
 	public void details(ClickEvent event) {
-//		if (isConnectionSelected()) {
-//			Connection conn = treeGrid.getSelectedItems().iterator().next().getConnection();
-//			Window subWindow = new Window(bundle.getString("Communications"));
-//			subWindow.setModal(true);
-//			ConnectionDetailsView connectionWithDetail = new ConnectionDetailsView(conn, subWindow);
-//			ViewWithToolBar view = new ViewWithToolBar(connectionWithDetail);
-//			subWindow.setContent(view);
-//			subWindow.center();
-//			SmockerUI.getInstance().addWindow(subWindow);
-//			subWindow.setHeight("800px");
-//			subWindow.setWidth("600px");
-//			subWindow.setSizeFull();
-//			
-//		}
+		if (isConnectionSelected()) {
+			ConnectionMocked conn = treeGrid.getSelectedItems().iterator().next().getConnection();
+			Window subWindow = new Window(bundle.getString("MockedCommunications"));
+			ConnectionMockedDetailsView connectionWithDetail = new ConnectionMockedDetailsView(conn, subWindow);
+			
+			ViewWithToolBar view = new ViewWithToolBar(connectionWithDetail);
+			subWindow.setModal(true);
+			subWindow.setContent(view);
+			subWindow.center();
+			SmockerUI.getInstance().addWindow(subWindow);
+			subWindow.setHeight("800px");
+			subWindow.setWidth("600px");
+			subWindow.setSizeFull();
+		}
 	}
 	
 	public boolean isSelected() {

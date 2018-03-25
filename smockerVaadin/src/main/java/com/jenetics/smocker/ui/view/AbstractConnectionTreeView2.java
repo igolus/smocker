@@ -34,6 +34,7 @@ import com.vaadin.data.provider.TreeDataProvider;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.shared.Position;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.TreeGrid;
@@ -148,6 +149,7 @@ extends EasyAppLayout  {
 	 * Rebuild the treeTable
 	 */
 	protected void fillTreeTable() {
+		treeData.clear();
 		List<T> listAllJavaApplications = daoManagerJavaApplication.listAll();
 		for (T javaApplication : listAllJavaApplications) {
 			addJavaApplicationToTree(javaApplication);
@@ -196,6 +198,16 @@ extends EasyAppLayout  {
 
 	protected void initDao() {
 		jpaJavaApplication = JPAContainerFactory.make(tParameterClass, SmockerUI.getEm());
+	}
+
+
+	public boolean always() {
+		return true;
+	}
+
+
+	public void refresh(ClickEvent event) {
+		fillTreeTable();
 	}
 
 }

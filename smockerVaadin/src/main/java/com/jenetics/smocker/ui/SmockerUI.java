@@ -23,6 +23,7 @@ import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Image;
+import com.vaadin.ui.TextArea;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -37,7 +38,6 @@ public class SmockerUI extends UI {
 
 	private static final int SLEEP_TIME = 200;
 
-	// @PersistenceContext(unitName = SmockerUI.PERSISTENCE_UNIT)
 	private static EntityManager em;
 
 	@Inject
@@ -118,10 +118,28 @@ public class SmockerUI extends UI {
 	 * Display a subwindow from any component
 	 * @param component
 	 */
-	public static void displayInSubWindow(Component component) {
-		Window subWindow = new Window();
+	public static Window displayInSubWindow(String title, Component component) {
+		Window subWindow = new Window(title);
 		subWindow.setModal(true);
 		subWindow.setContent(component);
+		subWindow.center();
+		getInstance().addWindow(subWindow);
+		subWindow.setHeight(SUB_WINDOW_DEFAULT_HEIGHT);
+		subWindow.setWidth(SUB_WINDOW_DEFAULT_WIDTH);
+		subWindow.setSizeFull();
+		return subWindow;
+	}
+	
+	/**
+	 * Display a subwindow from any component
+	 * @param component
+	 */
+	public static void displayMessageInSubWindow(String title, String message) {
+		Window subWindow = new Window(title);
+		subWindow.setModal(true);
+		TextArea textArea = new TextArea(message);
+		textArea.setSizeFull();
+		subWindow.setContent(textArea);
 		subWindow.center();
 		getInstance().addWindow(subWindow);
 		subWindow.setHeight(SUB_WINDOW_DEFAULT_HEIGHT);

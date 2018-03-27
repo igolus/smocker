@@ -128,11 +128,9 @@ public class MockSpaceView extends AbstractConnectionTreeView2<JavaApplicationMo
 	public void details(ClickEvent event) {
 		if (isConnectionSelected()) {
 			ConnectionMocked conn = treeGrid.getSelectedItems().iterator().next().getConnection();
-			Window subWindow = new Window(bundle.getString("MockedCommunications"));
-			ConnectionMockedDetailsView connectionWithDetail = new ConnectionMockedDetailsView(conn, subWindow);
-			
+			ConnectionMockedDetailsView connectionWithDetail = new ConnectionMockedDetailsView(conn);
 			ViewWithToolBar view = new ViewWithToolBar(connectionWithDetail);
-			SmockerUI.displayInSubWindow(view);
+			connectionWithDetail.setSubWindow(SmockerUI.displayInSubWindow(bundle.getString("MockedCommunications"), view));
 		}
 	}
 	

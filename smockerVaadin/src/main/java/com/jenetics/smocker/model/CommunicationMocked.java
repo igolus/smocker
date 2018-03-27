@@ -45,6 +45,9 @@ public class CommunicationMocked implements EntityWithId {
 	@Column(columnDefinition = "TEXT")
 	private String callerStack;
 
+	@Column(columnDefinition = "TEXT")
+	private String sourceGroovy;
+
 	public ConnectionMocked getConnection() {
 		return connection;
 	}
@@ -128,22 +131,25 @@ public class CommunicationMocked implements EntityWithId {
 		this.callerStack = callerStack;
 	}
 
+	public String getSourceGroovy() {
+		return sourceGroovy;
+	}
+
+	public void setSourceGroovy(String sourceGroovy) {
+		this.sourceGroovy = sourceGroovy;
+	}
+
 	@Override
 	public String toString() {
 		String result = getClass().getSimpleName() + " ";
-		if (id != null)
-			result += "id: " + id;
-		result += ", version: " + version;
 		if (request != null && !request.trim().isEmpty())
-			result += ", request: " + request;
+			result += "request: " + request;
 		if (response != null && !response.trim().isEmpty())
 			result += ", response: " + response;
-		if (connection != null)
-			result += ", connection: " + connection.getId();
-		if (dateTime != null)
-			result += ", dateTime: " + dateTime;
 		if (callerStack != null && !callerStack.trim().isEmpty())
-			result += ", CallerStack: " + callerStack;
+			result += ", callerStack: " + callerStack;
+		if (sourceGroovy != null && !sourceGroovy.trim().isEmpty())
+			result += ", sourceGrrovy: " + sourceGroovy;
 		return result;
 	}
 }

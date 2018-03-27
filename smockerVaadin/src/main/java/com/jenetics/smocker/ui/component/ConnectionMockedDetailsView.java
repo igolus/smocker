@@ -1,9 +1,13 @@
 package com.jenetics.smocker.ui.component;
 
+import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 
 import javax.inject.Inject;
 
+import org.codehaus.groovy.control.ErrorCollector;
+import org.codehaus.groovy.control.MultipleCompilationErrorsException;
 import org.hibernate.proxy.map.MapLazyInitializer;
 import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
@@ -31,6 +35,7 @@ import com.jenetics.smocker.ui.util.CommunicationMockedDateDisplay;
 import com.jenetics.smocker.ui.view.JavaApplicationView;
 import com.jenetics.smocker.ui.view.MockSpaceView;
 import com.jenetics.smocker.util.NetworkReaderUtility;
+import com.jenetics.smocker.util.SmockerUtility;
 import com.vaadin.data.TreeData;
 import com.vaadin.data.provider.TreeDataProvider;
 import com.vaadin.icons.VaadinIcons;
@@ -63,13 +68,27 @@ public class ConnectionMockedDetailsView extends EasyAppLayout {
 	private  AceEditor aceEditor = null;
 	
 	protected IDaoManager<ConnectionMocked> daoManagerConnection = new DaoManager<ConnectionMocked>(ConnectionMocked.class, SmockerUI.getEm());
+	
 	private Window subWindow;
 	
-	public ConnectionMockedDetailsView(ConnectionMocked connectionMocked, Window subWindow) {
+	public Window getSubWindow() {
+		return subWindow;
+	}
+
+	public void setSubWindow(Window subWindow) {
+		this.subWindow = subWindow;
+	}
+	
+	public void close() {
+		if (subWindow != null) {
+			subWindow.close();
+		}
+	}
+
+	public ConnectionMockedDetailsView(ConnectionMocked connectionMocked) {
 		super();
 		mainLayout = new HorizontalSplitPanel();
 		
-		this.subWindow = subWindow;
 		this.connectionMocked = connectionMocked;
 		
 		aceEditor = new AceEditor();
@@ -107,12 +126,9 @@ public class ConnectionMockedDetailsView extends EasyAppLayout {
 		String request = NetworkReaderUtility.decode(comm.getRequest());
 		String response = NetworkReaderUtility.decode(comm.getResponse());
 		
-		
-		
 		aceEditor.setMode(AceMode.groovy);
 		aceEditor.setTheme(AceTheme.eclipse);
 		aceEditor.setSizeFull();
-		
 		
 		TabSheet tabSheet = new TabSheet();
 		tabSheet.setSizeFull();
@@ -145,8 +161,8 @@ public class ConnectionMockedDetailsView extends EasyAppLayout {
 						, this::cleanAll)
 				.addButton("Refresh_Button", VaadinIcons.REFRESH, "Refresh_ToolTip",  this::always			
 						, this::refresh)
-				.addButton("Play Button", VaadinIcons.PLAY, "Play_ToolTip",  this::play			
-						, this::runGrrovy)
+				.addButton("Play Button", VaadinIcons.PLAY, "Play_ToolTip",  this::isSelected		
+						, this::play)
 				
 				.setSearch(this::search);
 
@@ -170,9 +186,23 @@ public class ConnectionMockedDetailsView extends EasyAppLayout {
 	}
 	
 	public void play(ClickEvent event) {
-		Binding binding = new Binding();
-		GroovyShell shell = new GroovyShell(binding);
-		shell.evaluate(aceEditor.getValue());
+		if (evaluateAndShowGroovyErrors()) {
+			selectedCommunication.setSourceGroovy(aceEditor.getValue());
+			Binding binding = new Binding();
+			GroovyShell shell = new GroovyShell(binding);
+			shell.evaluate(aceEditor.getValue());
+		}
+	}
+
+	private boolean evaluateAndShowGroovyErrors() {
+		try {
+		    new GroovyShell().evaluate(aceEditor.getValue());
+		} catch(Exception e) {
+		    SmockerUI.displayMessageInSubWindow(SmockerUI.getBundleValue("GroovyErrors"), SmockerUtility.getStackTrace(e));
+		    SmockerUI.log(Level.SEVERE, SmockerUtility.getStackTrace(e));
+		    return false;
+		}
+		return true;
 	}
 	
 	public void refresh(ClickEvent event) {

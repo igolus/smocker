@@ -49,13 +49,21 @@ public class ConnectionDetailsView extends EasyAppLayout {
 	private Communication selectedCommunication = null;;
 	
 	protected IDaoManager<Connection> daoManagerConnection = new DaoManager<Connection>(Connection.class, SmockerUI.getEm());
+	
 	private Window subWindow;
 	
-	public ConnectionDetailsView(Connection connection, Window subWindow) {
+	public Window getSubWindow() {
+		return subWindow;
+	}
+
+	public void setSubWindow(Window subWindow) {
+		this.subWindow = subWindow;
+	}
+
+	public ConnectionDetailsView(Connection connection) {
 		super();
 		HorizontalSplitPanel mainLayout = new HorizontalSplitPanel();
 		
-		this.subWindow = subWindow;
 		this.connection = connection;
 
 		menu = new Tree<>();

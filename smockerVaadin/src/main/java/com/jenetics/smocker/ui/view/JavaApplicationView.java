@@ -31,7 +31,8 @@ import com.vaadin.ui.Window;
 @SuppressWarnings("serial")
 @Push
 @ViewScope
-@ContentView(sortingOrder = 1, viewName = "Java Applications", icon = "icons/Java-icon.png", homeView = true, rootViewParent = ConnectionsRoot.class)
+@ContentView(sortingOrder = 1, viewName = "JavaAppView", icon = "icons/Java-icon.png", 
+homeView = true, rootViewParent = ConnectionsRoot.class, bundle=SmockerUI.BUNDLE_NAME)
 public class JavaApplicationView extends AbstractConnectionTreeView2<JavaApplication, Connection, Communication> implements RefreshableView {
 
 	private static final String BUNDLE_NAME = "BundleUI";
@@ -166,11 +167,9 @@ public class JavaApplicationView extends AbstractConnectionTreeView2<JavaApplica
 	public void details(ClickEvent event) {
 		if (isConnectionSelected()) {
 			Connection conn = treeGrid.getSelectedItems().iterator().next().getConnection();
-			Window subWindow = new Window(bundle.getString("Communications"));
-			subWindow.setModal(true);
-			ConnectionDetailsView connectionWithDetail = new ConnectionDetailsView(conn, subWindow);
+			ConnectionDetailsView connectionWithDetail = new ConnectionDetailsView(conn);
 			ViewWithToolBar view = new ViewWithToolBar(connectionWithDetail);
-			SmockerUI.displayInSubWindow(view);
+			connectionWithDetail.setSubWindow(SmockerUI.displayInSubWindow(bundle.getString("Communications"), view));
 		}
 	}
 	

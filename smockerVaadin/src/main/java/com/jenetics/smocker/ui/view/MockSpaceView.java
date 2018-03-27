@@ -146,5 +146,6 @@ public class MockSpaceView extends AbstractConnectionTreeView2<JavaApplicationMo
 	public void search(String searchValue) {
 		Notification.show("Search for:" + searchValue);
 	}
-
+	
+	
 }

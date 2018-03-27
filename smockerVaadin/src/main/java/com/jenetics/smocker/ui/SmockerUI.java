@@ -2,6 +2,7 @@ package com.jenetics.smocker.ui;
 
 import java.util.Collections;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -15,6 +16,7 @@ import org.vaadin.easyapp.util.MessageBuilder;
 
 import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.ui.util.RefreshableView;
+import com.jenetics.smocker.ui.view.LogView;
 import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
 import com.vaadin.navigator.Navigator;
@@ -128,6 +130,11 @@ public class SmockerUI extends UI {
 		subWindow.setWidth(SUB_WINDOW_DEFAULT_WIDTH);
 		subWindow.setSizeFull();
 		return subWindow;
+	}
+	
+	public static void log(Level level, String message) {
+		LogView logView = (LogView) getInstance().getEasyAppMainView().getScanner().getViewMap().get(LogView.class);
+		logView.appendMessage(level, message);
 	}
 	
 	/**

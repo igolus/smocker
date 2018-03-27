@@ -20,9 +20,9 @@ import com.jenetics.smocker.ui.netdisplayer.ComponentWithDisplayChange;
 import com.jenetics.smocker.ui.netdisplayer.NetDisplayerFactoryInput;
 import com.jenetics.smocker.ui.netdisplayer.NetDisplayerFactoryOutput;
 import com.jenetics.smocker.ui.util.CommunicationDateDisplay;
-import com.jenetics.smocker.ui.view.JavaApplicationView2;
+import com.jenetics.smocker.ui.view.JavaApplicationView;
 import com.jenetics.smocker.ui.view.MockSpaceView;
-import com.jenetics.smocker.ui.view.MockSpaceView2;
+import com.jenetics.smocker.ui.view.MockSpaceView;
 import com.jenetics.smocker.util.NetworkReaderUtility;
 import com.vaadin.data.TreeData;
 import com.vaadin.data.provider.TreeDataProvider;
@@ -137,7 +137,7 @@ public class ConnectionDetailsView extends EasyAppLayout {
 	public void addToMock(ClickEvent event) {
 		MockConverter.convertcommunication(selectedCommunication);
 		subWindow.close();
-		SmockerUI.getInstance().getEasyAppMainView().getScanner().navigateTo(MockSpaceView2.class);
+		SmockerUI.getInstance().getEasyAppMainView().getScanner().navigateTo(MockSpaceView.class);
 	}
 	
 	public void clean(ClickEvent event) {

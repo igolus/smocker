@@ -95,7 +95,7 @@ extends EasyAppLayout  {
 		setMargin(true);
 		buildTreeTable();
 		fillTreeTable();
-
+		
 		treeGrid.setSizeFull();
 		addComponent(treeGrid);
 
@@ -140,7 +140,6 @@ extends EasyAppLayout  {
 
 		treeGrid.setEnabled(true);
 
-		//refreshEntity(entityWithId);
 		updateTree(entityWithId);
 	}
 

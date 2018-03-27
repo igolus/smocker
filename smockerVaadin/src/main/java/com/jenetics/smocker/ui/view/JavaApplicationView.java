@@ -14,6 +14,7 @@ import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.network.ClientCommunicator;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.component.ConnectionDetailsView;
+import com.jenetics.smocker.ui.dialog.Dialog;
 import com.jenetics.smocker.ui.util.ButtonWithIEntity;
 import com.jenetics.smocker.ui.util.RefreshableView;
 import com.jenetics.smocker.ui.util.StrandardTreeGridConnectionData;
@@ -31,11 +32,11 @@ import com.vaadin.ui.Window;
 @Push
 @ViewScope
 @ContentView(sortingOrder = 1, viewName = "Java Applications", icon = "icons/Java-icon.png", homeView = true, rootViewParent = ConnectionsRoot.class)
-public class JavaApplicationView2 extends AbstractConnectionTreeView2<JavaApplication, Connection, Communication> implements RefreshableView {
+public class JavaApplicationView extends AbstractConnectionTreeView2<JavaApplication, Connection, Communication> implements RefreshableView {
 
 	private static final String BUNDLE_NAME = "BundleUI";
 
-	public JavaApplicationView2() {
+	public JavaApplicationView() {
 		super(JavaApplication.class, Connection.class, Communication.class);
 		treeGrid.addSelectionListener(this::treeSelectionChange);
 	}
@@ -137,6 +138,28 @@ public class JavaApplicationView2 extends AbstractConnectionTreeView2<JavaApplic
 	}
 	
 	public void clean(ClickEvent event) {
+		if (isSelected()) {
+			Dialog.ask(SmockerUI.getBundle().getString("RemoveQuestion"), null, this::delete, null);
+		}
+	}
+	
+	public void delete() {
+		Set<TreeGridConnectionData<JavaApplication, Connection>> selectedItems = treeGrid.getSelectedItems();
+		for (TreeGridConnectionData<JavaApplication, Connection> treeGridConnectionData : selectedItems) {
+			if (treeGridConnectionData.isConnection()) {
+				Connection selectedConnection = treeGridConnectionData.getConnection();
+				selectedConnection.getJavaApplication().getConnections().remove(selectedConnection);
+				daoManagerJavaApplication.update(selectedConnection.getJavaApplication());
+			}
+			else if (treeGridConnectionData.isJavaApplication()) {
+				JavaApplication selectedJavaApplication = treeGridConnectionData.getJavaApplication();
+				daoManagerJavaApplication.deleteById(selectedJavaApplication.getId());
+			}
+			fillTreeTable();
+		}
+	}
+	
+	public void cleanAll(ClickEvent event) {
 		Notification.show("Clean");
 	}
 	
@@ -147,12 +170,7 @@ public class JavaApplicationView2 extends AbstractConnectionTreeView2<JavaApplic
 			subWindow.setModal(true);
 			ConnectionDetailsView connectionWithDetail = new ConnectionDetailsView(conn, subWindow);
 			ViewWithToolBar view = new ViewWithToolBar(connectionWithDetail);
-			subWindow.setContent(view);
-			subWindow.center();
-			SmockerUI.getInstance().addWindow(subWindow);
-			subWindow.setHeight("800px");
-			subWindow.setWidth("600px");
-			subWindow.setSizeFull();
+			SmockerUI.displayInSubWindow(view);
 		}
 	}
 	

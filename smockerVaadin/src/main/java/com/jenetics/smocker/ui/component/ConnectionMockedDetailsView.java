@@ -4,6 +4,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.hibernate.proxy.map.MapLazyInitializer;
 import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
 import org.vaadin.aceeditor.AceTheme;
@@ -27,7 +28,7 @@ import com.jenetics.smocker.ui.netdisplayer.NetDisplayerFactoryInput;
 import com.jenetics.smocker.ui.netdisplayer.NetDisplayerFactoryOutput;
 import com.jenetics.smocker.ui.util.CommunicationDateDisplay;
 import com.jenetics.smocker.ui.util.CommunicationMockedDateDisplay;
-import com.jenetics.smocker.ui.view.JavaApplicationView2;
+import com.jenetics.smocker.ui.view.JavaApplicationView;
 import com.jenetics.smocker.ui.view.MockSpaceView;
 import com.jenetics.smocker.util.NetworkReaderUtility;
 import com.vaadin.data.TreeData;
@@ -54,11 +55,11 @@ import groovy.lang.Script;
 public class ConnectionMockedDetailsView extends EasyAppLayout {
 	
 	private ConnectionMocked connectionMocked;
-	private TabSheet tabSheet = null;
 	private Tree<CommunicationMockedDateDisplay> menu;
 	private TreeData<CommunicationMockedDateDisplay> treeData;
 	private TreeDataProvider<CommunicationMockedDateDisplay> treeDataProvider;
 	private CommunicationMocked selectedCommunication = null;
+	private HorizontalSplitPanel mainLayout = null;
 	private  AceEditor aceEditor = null;
 	
 	protected IDaoManager<ConnectionMocked> daoManagerConnection = new DaoManager<ConnectionMocked>(ConnectionMocked.class, SmockerUI.getEm());
@@ -66,7 +67,7 @@ public class ConnectionMockedDetailsView extends EasyAppLayout {
 	
 	public ConnectionMockedDetailsView(ConnectionMocked connectionMocked, Window subWindow) {
 		super();
-		HorizontalSplitPanel mainLayout = new HorizontalSplitPanel();
+		mainLayout = new HorizontalSplitPanel();
 		
 		this.subWindow = subWindow;
 		this.connectionMocked = connectionMocked;
@@ -81,11 +82,9 @@ public class ConnectionMockedDetailsView extends EasyAppLayout {
 		
 		fillCommunication();
 		menu.addItemClickListener(this::treeItemClick);
-		
-		tabSheet = new TabSheet();
-		tabSheet.setSizeFull();
+
 		mainLayout.setFirstComponent(menu);
-		mainLayout.setSecondComponent(tabSheet);
+		
 		mainLayout.setSplitPosition(20);
 		mainLayout.setSizeFull();
 		addComponent(mainLayout);
@@ -108,19 +107,28 @@ public class ConnectionMockedDetailsView extends EasyAppLayout {
 		String request = NetworkReaderUtility.decode(comm.getRequest());
 		String response = NetworkReaderUtility.decode(comm.getResponse());
 		
-		addTextAreaToTabSheet(request, "Input");
-		addTextAreaToTabSheet(response, "Output");		
+		
 		
 		aceEditor.setMode(AceMode.groovy);
 		aceEditor.setTheme(AceTheme.eclipse);
 		aceEditor.setSizeFull();
+		
+		
+		TabSheet tabSheet = new TabSheet();
+		tabSheet.setSizeFull();
+		
+		addTextAreaToTabSheet(request, "Input", tabSheet);
+		addTextAreaToTabSheet(response, "Output", tabSheet);		
+		
 		tabSheet.addTab(aceEditor, "GroovyEditor");
-	
+		
+		mainLayout.setSecondComponent(tabSheet);
+		
 		selectedCommunication = comm;
 		refreshClickable();
 	}
 
-	private void addTextAreaToTabSheet(String request, String locString) {
+	private void addTextAreaToTabSheet(String request, String locString, TabSheet tabSheet) {
 		TextArea areaOutput = new TextArea();
 		areaOutput.setWordWrap(false);
 		areaOutput.setReadOnly(true);
@@ -137,7 +145,7 @@ public class ConnectionMockedDetailsView extends EasyAppLayout {
 						, this::cleanAll)
 				.addButton("Refresh_Button", VaadinIcons.REFRESH, "Refresh_ToolTip",  this::always			
 						, this::refresh)
-				.addButton("Eval groovy", VaadinIcons.PLAY, "CleanAll_ToolTip",  this::always			
+				.addButton("Play Button", VaadinIcons.PLAY, "Play_ToolTip",  this::play			
 						, this::runGrrovy)
 				
 				.setSearch(this::search);
@@ -161,7 +169,7 @@ public class ConnectionMockedDetailsView extends EasyAppLayout {
 		Notification.show("Clean");
 	}
 	
-	public void runGrrovy(ClickEvent event) {
+	public void play(ClickEvent event) {
 		Binding binding = new Binding();
 		GroovyShell shell = new GroovyShell(binding);
 		shell.evaluate(aceEditor.getValue());

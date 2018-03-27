@@ -21,13 +21,19 @@ import com.vaadin.navigator.Navigator;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
 
 @Push
 @Theme("mytheme")
 public class SmockerUI extends UI {
+
+	private static final String SUB_WINDOW_DEFAULT_WIDTH = "600px";
+
+	private static final String SUB_WINDOW_DEFAULT_HEIGHT = "800px";
 
 	private static final int SLEEP_TIME = 200;
 
@@ -73,7 +79,7 @@ public class SmockerUI extends UI {
 	public static SmockerUI getInstance() {
 		return instance;
 	}
-
+	
 	private EasyAppMainView easyAppMainView;
 
 	public EasyAppMainView getEasyAppMainView() {
@@ -90,18 +96,11 @@ public class SmockerUI extends UI {
 
 		easyAppMainView = new EasyAppBuilder(Collections.singletonList("com.jenetics.smocker.ui.view"))
 				.withTopBarIcon(image).withTopBarStyle("topBannerBackGround")
-				.withSearchCapabilities((searchValue) -> search(searchValue), FontAwesome.SEARCH).withBreadcrumb()
-				.withBreadcrumbStyle("breadcrumbStyle")
 				.withToolBar()
 				.withNavigationIcon(image)
-				// .withLoginPopupLoginStyle("propupStyle")
 				.build(this);
 
-		//easyAppMainView.setSplitPosition(93);
-
 		layout.addComponents(easyAppMainView);
-
-		//easyAppMainView.getTopBar().setStyleName("topBannerBackGround");
 
 		setContent(layout);
 		instance = this;
@@ -114,6 +113,22 @@ public class SmockerUI extends UI {
 	private Object search(String searchValue) {
 		return null;
 	}
+	
+	/**
+	 * Display a subwindow from any component
+	 * @param component
+	 */
+	public static void displayInSubWindow(Component component) {
+		Window subWindow = new Window();
+		subWindow.setModal(true);
+		subWindow.setContent(component);
+		subWindow.center();
+		getInstance().addWindow(subWindow);
+		subWindow.setHeight(SUB_WINDOW_DEFAULT_HEIGHT);
+		subWindow.setWidth(SUB_WINDOW_DEFAULT_WIDTH);
+		subWindow.setSizeFull();
+	}
+	
 
 	public void refreshView(EntityWithId entityWithId) {
 		access( ()  -> 

@@ -42,6 +42,9 @@ public class ConnectionMocked implements EntityWithId {
 	@JsonIgnore
 	private JavaApplicationMocked javaApplication;
 
+	@Column
+	private Boolean watched = true;
+
 	public JavaApplicationMocked getJavaApplication() {
 		return javaApplication;
 	}
@@ -116,7 +119,15 @@ public class ConnectionMocked implements EntityWithId {
 		this.communications = communications;
 	}
 
-   @Override
+	public Boolean getWatched() {
+		return watched;
+	}
+
+	public void setWatched(Boolean watched) {
+		this.watched = watched;
+	}
+
+	@Override
 	public String toString() {
 		String result = getClass().getSimpleName() + " ";
 		if (id != null)
@@ -130,6 +141,8 @@ public class ConnectionMocked implements EntityWithId {
 			result += ", Communications: " + communications;
 		if (javaApplication != null)
 			result += ", javaApplication: " + javaApplication.getId();
+		if (watched != null)
+			result += ", watched: " + watched;
 		return result;
 	}
 }

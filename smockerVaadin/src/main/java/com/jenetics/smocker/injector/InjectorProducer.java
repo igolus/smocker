@@ -13,6 +13,7 @@ import org.jboss.logging.Logger;
 
 import com.jenetics.smocker.dao.DaoManager;
 import com.jenetics.smocker.dao.IDaoManager;
+import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.ui.SmockerUI;
 
 public class InjectorProducer {
@@ -28,7 +29,7 @@ public class InjectorProducer {
 	@Produces
 	@Named
 	@Dao
-	public <T extends Serializable> IDaoManager<T> produceDaoManager(InjectionPoint injectionPoint) {
+	public <T extends EntityWithId> IDaoManager<T> produceDaoManager(InjectionPoint injectionPoint) {
 		final ParameterizedType parameterizedType = (ParameterizedType) injectionPoint.getType();
 		final Class<T> genericTypeClass = (Class<T>) parameterizedType.getActualTypeArguments()[0];
 		EntityManager em = SmockerUI.getEm();

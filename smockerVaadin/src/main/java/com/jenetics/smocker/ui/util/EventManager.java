@@ -22,7 +22,7 @@ public class EventManager {
 	}
 
 	public void newCommunication(@Observes Communication comm) {
-		refreshView(comm);
+		//refreshView(comm);
 	}
 
 	private void refreshView(EntityWithId entityWithId) {

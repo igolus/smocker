@@ -1,0 +1,233 @@
+@import "mytheme.scss";
+@import "addons.scss";
+
+// This file prefixes all rules with the theme name to avoid causing conflicts with other themes.
+// The actual styles should be defined in mytheme.scss
+
+    
+@mixin buttonNoBorder($backgroundColor, $textColor) {
+ 	background-color: $backgroundColor;
+	margin: 0px;
+	text-align: left;
+	padding-left: 5px;
+	border: none;
+    border-radius: 0px;
+    color:$textColor;
+    border-radius: 0px;
+    background-image: none;  
+    display:block; 
+    outline: none;
+    box-shadow: none;
+    top:0px;
+    -webkit-box-shadow: none;
+}
+
+@mixin buttonForTopBar($backgroundColor, $textColor) {
+ 	background-color: $backgroundColor;
+	margin: 0px;
+	text-align: center;
+	border: none;
+    border-radius: 0px;
+    color:$textColor;
+    border-radius: 0px;
+    background-image: none;  
+    display:block; 
+    outline: none;
+    box-shadow: none;
+    top:0px;
+    -webkit-box-shadow: none;
+}
+
+@mixin buttonForContainer($backgroundColor, $textColor) {
+ 	background-color: $backgroundColor;
+    border-radius: 0px;
+    color:$textColor;
+    border-radius: 0px;
+    background-image: none;  
+    display:block; 
+    outline: none;
+    box-shadow: 1px 2px;
+    top:0px;
+}
+
+
+@mixin buttonHoverForContainer($backgroundColor, $textColor) {
+ 	background-color: $backgroundColor;
+    border-radius: 0px;
+    color:$textColor;
+    border-radius: 0px;
+    background-image: none;  
+    display:block; 
+    outline: none;
+    top:0px;
+}
+	   
+	    
+
+.mytheme {
+  //Nav panel
+  $buttonNavigatorBackroundColor: #FFFFFF;
+  $buttonNavigatorTextColor: #000000;
+  $buttonSelectedNavigatorBackroundColor: #EEEEEE;
+  
+  $accordionItemBackroundColor: #4D74C0;
+  $accordionItemBorder: 2px solid #EFB64F;
+  $accordionContentColor: #FEFFFF;
+  
+  //Top Bar
+  $panelTopBarBackgroundColor: #5F6C72;
+  $buttonTopBarBackgroundColor: #5F6C72;
+  $buttonTopBarContentColor: #FFFFFF;
+  
+  $buttonHoverTopBarBackgroundColor: #e3c8b9;
+  $buttonHoverTopBarContentColor: #FFFFFF;
+  
+  
+  //Container
+  $containerBackGround: #FFFFFF;
+  $buttonContainergroundColor: #FFFFFF;
+  $buttonContainerContentColor: #000000;
+  
+  $buttonHoverContainergroundColor: #5F6C72;
+  $buttonHoverContainerContentColor: #000000;
+  
+  
+  
+  @include addons;
+  @include mytheme;
+
+	.v-margin-left   {padding-left:   0px;}
+    .v-margin-right  {padding-right:  0px;}
+    .v-margin-top    {padding-top:    0px;}
+    .v-margin-bottom {padding-bottom: 0px;}	
+    
+    
+	/* White background for the entire UI */
+  .v-ui {
+    background: white;
+  }
+  
+
+      
+	.v-spacing {
+		height: 0px;
+	}
+  
+  
+    .v-button-TopBar {
+    	background-color: $backroundNavigatorColor;
+    	background-image: none;  
+    }
+    
+	 .embedded-frame iframe {
+	    position: absolute;        
+	}
+	
+	.v-widget {
+		height: "100%";
+	}
+	
+//	.v-slot {
+//		height: 10%;
+//	}
+    
+    	    
+    .v-gridlayout-TopBar {
+    	background-color: $panelTopBarBackgroundColor;
+    	margin: none;
+    	height: 0px;
+    	.v-button {
+    		@include buttonForTopBar($buttonTopBarBackgroundColor, $buttonTopBarContentColor)
+    	}
+    	.v-button:hover {
+    		@include buttonForTopBar($buttonHoverTopBarBackgroundColor, $buttonHoverTopBarContentColor)
+    	}
+    	.v-label {
+    		text-shadow: 2px 2px #aaaaaa;
+    		background: $panelTopBarBackgroundColor;
+    		font-size: 20pt;
+    		color: white;
+    		font-weight: bold;
+    		font-family: "Impact";
+    	}
+
+		    	
+    }
+    
+    
+    .v-label-Contextual {
+    	background: $panelTopBarBackgroundColor;
+    	font-size: 15pt;
+        font-weight: bold;
+        font-family: "Impact";
+    }
+    
+    
+    
+    .v-gridlayout-Container {
+    	margin: 0px 0px 5px 0px;
+    	background-color: $containerBackGround;
+    	margin: none;
+    	.v-button {
+    		//@include buttonForContainer($buttonContainergroundColor, $buttonContainerContentColor)
+    	}
+    	.v-button:hover  {
+    		//@include buttonForContainer($buttonHoverContainergroundColor, $buttonHoverContainerContentColor)
+    	}
+    }
+ 	
+	.v-button:focus:after {
+        border: none;
+        -webkit-box-shadow: none;
+        box-shadow: none;
+	}
+
+     .v-button-Nav {
+     	 @include buttonNoBorder($buttonNavigatorBackroundColor, $buttonNavigatorTextColor);
+    }
+    
+    .v-button-Selected {
+        @include buttonNoBorder($buttonSelectedNavigatorBackroundColor, $buttonNavigatorTextColor);
+    }
+	
+		
+	.v-button-link:after {
+	  content: none;
+	  box-shadow: none;
+	}
+	
+	    
+   .v-button-Nav:hover {
+   		@include buttonNoBorder($buttonSelectedNavigatorBackroundColor, $buttonNavigatorTextColor);
+    }
+    
+	.v-accordion-item-content {
+		background-color: #FFFFFF;
+		display: block;
+		outline: none;
+	}
+	
+	
+	.v-accordion-Nav {
+		.v-accordion-item {
+			background-color: $accordionItemBackroundColor;
+			display: block;
+			outline: none;
+			box-shadow: none;
+			margin: 0px;
+	  		padding: 0;
+	 		@include box-shadow(none);
+	 		
+	 		.v-accordion-item-caption {
+				box-shadow: none;
+				@include box-shadow(none);
+				.v-caption {
+					box-shadow: none;
+					border: none;
+					color: $accordionContentColor;;
+					border-bottom: $accordionItemBorder;
+				}
+			}
+		}
+	}
+}

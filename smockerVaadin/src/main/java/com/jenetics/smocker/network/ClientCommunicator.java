@@ -6,31 +6,21 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.util.Iterator;
-import java.util.List;
+import java.net.UnknownHostException;
 
 import javax.inject.Inject;
 
-import org.eclipse.persistence.jaxb.javamodel.JavaPackage;
 import org.jboss.logging.Logger;
 
 import com.jenetics.smocker.model.Connection;
-import com.jenetics.smocker.model.ConnectionMocked;
-import com.jenetics.smocker.model.JavaApplication;
-import com.jenetics.smocker.network.util.ReplaceHeaderItem;
 import com.jenetics.smocker.util.SmockerException;
 
 public class ClientCommunicator {
 
-	private static final String SEP = "%*%";
+	private static final String LOCAL_IP = "127.0.0.1";
+	private static final String SEP = ":";
 	private static final String WATCH = "WATCH";
 	private static final String MUTE = "MUTE";
-	private static final String MODE = "MODE";
-	private static final String HEADER_REPLACE = "HEADER_REPLACE";
-	
-	public static final String MODE_DISABLED = "DISABLED";
-	public static final String MODE_MOCK_OR_CALL = "MOCK_OR_CALL";
-	public static final String MODE_STRICT = "STRICT";
 	
 	@Inject
 	private static Logger logger;
@@ -43,54 +33,7 @@ public class ClientCommunicator {
 	public static boolean sendWatched(Connection conn) {
 		String message = WATCH + " " + conn.getHost() + SEP + conn.getPort();
 		try {
-			sendMessageToClient(conn.getJavaApplication().getSourceHost(), conn.getJavaApplication().getSourcePort(),
-					message);
-		} catch (Exception e) {
-			logger.error(e);
-			return false;
-		}
-		return true;
-	}
-	
-	public static boolean sendHeaderReplace(List<ReplaceHeaderItem> replaceItems, JavaApplication javaApplication) {
-		StringBuffer sb = new StringBuffer();
-		
-		Iterator<ReplaceHeaderItem> iterator = replaceItems.iterator();
-		while (iterator.hasNext()) {
-			ReplaceHeaderItem item = iterator.next();
-			sb.append(item.getRegExp()).append(SEP).append(item.getReplaceValue());
-			if (iterator.hasNext()) {
-				sb.append(SEP);
-			}
-		}
-		try {
-			sendMessageToClient(javaApplication.getSourceHost(), javaApplication.getSourcePort(),
-					sb.toString());
-		} catch (Exception e) {
-			logger.error(e);
-			return false;
-		}
-		return true;
-	}
-	
-	
-	public static boolean sendMode(String mode, JavaApplication javaApplication) {
-		String message = MODE + " " + mode;
-		try {
-			sendMessageToClient(javaApplication.getSourceHost(), javaApplication.getSourcePort(),
-					message);
-		} catch (Exception e) {
-			logger.error(e);
-			return false;
-		}
-		return true;
-	}
-	
-	public static boolean sendMode(String mode, ConnectionMocked connectionMocked) {
-		String message = MODE + " " + connectionMocked.getHost() + SEP + connectionMocked.getPort();
-		//String message = MODE + " " + mode;
-		try {
-			sendMessageToClient(connectionMocked.getJavaApplication().getSourceHost(), connectionMocked.getJavaApplication().getSourcePort(),
+			sendMessageToClient(conn.getJavaApplication().getSourceIp(), conn.getJavaApplication().getSourcePort(),
 					message);
 		} catch (Exception e) {
 			logger.error(e);
@@ -102,7 +45,7 @@ public class ClientCommunicator {
 	public static boolean sendUnWatched(Connection conn) {
 		String message = MUTE + " " + conn.getHost() + SEP + conn.getPort();
 		try {
-			sendMessageToClient(conn.getJavaApplication().getSourceHost(), conn.getJavaApplication().getSourcePort(),
+			sendMessageToClient(conn.getJavaApplication().getSourceIp(), conn.getJavaApplication().getSourcePort(),
 					message);
 		} catch (Exception e) {
 			logger.error(e);
@@ -111,8 +54,19 @@ public class ClientCommunicator {
 		return true;
 	}
 
-	private static String sendMessageToClient(String host, int port, String message) throws SmockerException {
-		try (Socket socket = new Socket(InetAddress.getByName(host), port);) {
+	private static String sendMessageToClient(String ip, int port, String message) throws SmockerException {
+		try {
+			String localIp = InetAddress.getLocalHost().getHostAddress();
+			if (localIp.equals(localIp)) {
+				ip = LOCAL_IP;
+			}
+		} catch (UnknownHostException e) {
+			throw new SmockerException("Unable to get local ip", e);
+
+		}
+		
+		try (Socket socket = new Socket(ip, port);) 
+		{
 			boolean autoflush = true;
 			PrintWriter out = new PrintWriter(socket.getOutputStream(), autoflush);
 			BufferedReader in = new BufferedReader(

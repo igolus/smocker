@@ -2,7 +2,6 @@ package com.jenetics.smocker.model;
 
 import java.io.Serializable;
 
-@FunctionalInterface
 public interface EntityWithId extends Serializable {
 
 	/**
@@ -11,5 +10,9 @@ public interface EntityWithId extends Serializable {
 	 * @return
 	 */
 	Long getId();
+	
+	void setVersion(final int version);
+	
+	int getVersion();
 
 }

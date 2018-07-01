@@ -23,6 +23,4 @@ public interface IDaoManager<T extends Serializable> {
 
 	void deleteAll();
 
-	List<T> findByColumn(String name, String value);
-
 }

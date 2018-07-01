@@ -9,7 +9,9 @@ import javax.persistence.Query;
 
 import org.jboss.logging.Logger;
 
-public class DaoManager<T extends Serializable> implements IDaoManager<T> {
+import com.jenetics.smocker.model.EntityWithId;
+
+public class DaoManager<T extends EntityWithId> implements IDaoManager<T> {
 
 	private Logger logger = Logger.getLogger(DaoManager.class);
 
@@ -55,6 +57,9 @@ public class DaoManager<T extends Serializable> implements IDaoManager<T> {
 		EntityTransaction entityTransaction = entityManager.getTransaction();
 		entityTransaction.begin();
 		try {
+			
+			T lastEntity = findById(entity.getId());
+			entity.setVersion(lastEntity.getVersion());
 			entityManager.merge(entity);
 			entityTransaction.commit();
 		} catch (Exception ex) {
@@ -71,14 +76,6 @@ public class DaoManager<T extends Serializable> implements IDaoManager<T> {
 		Query query = entityManager.createQuery("SELECT e FROM " + entityName + " e");
 		return query.getResultList();
 	}
-	
-	@Override
-	public List<T> findByColumn(String columnName, String value) {
-		String entityName = typeParameterClass.getSimpleName();
-		Query query = entityManager.createQuery("SELECT e FROM " + entityName + " e WHERE e." + columnName + " = '" + value + "'");
-		return query.getResultList();
-	}
-	
 
 	@Override
 	public List<T> listAll() {

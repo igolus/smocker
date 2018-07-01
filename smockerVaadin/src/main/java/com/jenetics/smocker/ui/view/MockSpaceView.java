@@ -1,263 +1,55 @@
 package com.jenetics.smocker.ui.view;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
-import javax.inject.Inject;
-
-import org.apache.commons.lang.StringUtils;
-import org.jboss.logging.Logger;
-import org.vaadin.aceeditor.AceEditor;
-import org.vaadin.aceeditor.AceMode;
-import org.vaadin.aceeditor.AceTheme;
-import org.vaadin.easyapp.util.ButtonDescriptor;
+import org.vaadin.easyapp.ui.ViewWithToolBar;
+import org.vaadin.easyapp.util.ActionContainer;
+import org.vaadin.easyapp.util.ActionContainerBuilder;
+import org.vaadin.easyapp.util.ActionContainer.InsertPosition;
 import org.vaadin.easyapp.util.annotations.ContentView;
 
 import com.jenetics.smocker.model.CommunicationMocked;
+import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.ConnectionMocked;
+import com.jenetics.smocker.model.EntityWithId;
+import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.model.JavaApplicationMocked;
-import com.jenetics.smocker.network.ClientCommunicator;
-import com.jenetics.smocker.ui.SmockerUI.EnumButton;
-import com.jenetics.smocker.ui.netdisplayer.ComponentWithDisplayChange;
-import com.jenetics.smocker.ui.netdisplayer.NetDisplayerFactoryInput;
-import com.jenetics.smocker.ui.util.ComboWithId;
-import com.jenetics.smocker.ui.util.CommunicationMockedTreeItem;
-import com.jenetics.smocker.ui.util.ListSelectWithId;
-import com.jenetics.smocker.util.NetworkReaderUtility;
+import com.jenetics.smocker.ui.SmockerUI;
+import com.jenetics.smocker.ui.component.ConnectionMockedDetailsView;
+import com.jenetics.smocker.ui.dialog.Dialog;
+import com.jenetics.smocker.ui.util.RefreshableView;
+import com.jenetics.smocker.ui.util.StrandardTreeGridConnectionMockedData;
+import com.jenetics.smocker.ui.util.TreeGridConnectionData;
 import com.vaadin.annotations.Push;
-import com.vaadin.data.Container.ItemSetChangeEvent;
-import com.vaadin.data.Container.ItemSetChangeListener;
-import com.vaadin.event.ItemClickEvent;
+import com.vaadin.event.selection.SelectionEvent;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.GridLayout;
-import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.Tree;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.Window;
 
+@SuppressWarnings("serial")
 @Push
 @ViewScope
-@ContentView(sortingOrder = 1, viewName = "MockSpaceView", icon = "icons/Java-icon.png", homeView = false, rootViewParent = ConnectionsRoot.class, 
-bundle = "BundleUI")
-public class MockSpaceView extends AbstractConnectionTreeView<JavaApplicationMocked, ConnectionMocked, CommunicationMocked> {
-	
-	protected transient Map<String, ComboWithId<ConnectionMocked>> listComboByUiId;
-	
-	@Inject
-	private Logger logger;
+@ContentView(sortingOrder = 1, viewName = "Mock View", icon = "icons/Java-icon.png", homeView = true, rootViewParent = ConnectionsRoot.class)
+public class MockSpaceView extends AbstractConnectionTreeView2<JavaApplicationMocked, ConnectionMocked, CommunicationMocked> implements RefreshableView {
+
+	@Override
+	public void enterInView(ViewChangeEvent event) {
+		fillTreeTable();
+	}
+
+	private static final String BUNDLE_NAME = "BundleUI";
 
 	public MockSpaceView() {
 		super(JavaApplicationMocked.class, ConnectionMocked.class, CommunicationMocked.class);
-	}
-
-	@Override
-	public ClickListener getClickListener(String key) {
-		if (key.equals(EnumButton.REMOVE.toString())) {
-			return (ClickEvent event) -> deleteSelectedItem();
-		} 
-		return null;
-
-	}
-
-
-	private Object deleteSelectedItem() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean isClickable(String key) {
-		return false;
-	}
-
-	@Override
-	public void enter(ViewChangeEvent event) {
-		//do nothing
+		treeGrid.addSelectionListener(this::treeSelectionChange);
 	}
 	
-	@Override
-	protected Map<String, Class<?>> getColumnMap() {
-		Map<String, Class<?>> ret = new HashMap<>();
-		ret.put(APPLICATION, String.class);
-		ret.put(ADRESS, String.class);
-		ret.put(PORT, String.class);
-		ret.put(CONNECTION_TYPE, String.class);
-		return ret;
-	}
-	
-
-	@Override
-	protected void addColumnToTreeTable() {
-		treetable.addGeneratedColumn("Watch", (Table source, Object itemId, Object columnId) -> {
-			if (!treetable.getItem(itemId).getItemProperty(ADRESS).getValue().toString().isEmpty()
-					&& !treetable.getItem(itemId).getItemProperty(PORT).getValue().toString().isEmpty()) {
-				String uiId = treetable.getItem(itemId).getItemProperty(ADRESS).getValue().toString()
-						+ treetable.getItem(itemId).getItemProperty(PORT).getValue().toString();
-				ComboBox box = listComboByUiId.get(uiId);
-				if (box != null) {
-					//box.addItemSetChangeListener(new ComboModeChanged(box)); 
-					box.addListener(new Listener() {
-						
-						@Override
-						public void componentEvent(Event event) {
-							ComboWithId<ConnectionMocked> comboBox =  (ComboWithId<ConnectionMocked>) event.getSource(); 
-							ConnectionMocked connectionMocked = comboBox.getEntity();
-							String mode = getModeByComboSelection(comboBox);
-							ClientCommunicator.sendMode(mode, connectionMocked);
-						}
- 
-						private String getModeByComboSelection(ComboWithId<ConnectionMocked> comboBox) {
-							if (comboBox.getValue().equals(bundle.getString("mock_mode_disabled"))) {
-								return ClientCommunicator.MODE_DISABLED;
-							}
-							else if (comboBox.getValue().equals(bundle.getString("mock_mode_mock_or_call"))) {
-								return ClientCommunicator.MODE_MOCK_OR_CALL;
-							}
-							else if (comboBox.getValue().equals(bundle.getString("mock_mode_strict"))) {
-								return ClientCommunicator.MODE_STRICT;
-							}
-							return null;
-						}
-					});
-				}
-				return box;
-			}
-			return null;
-		});
-	}
-	
-	
-	protected void fillCommunications(ConnectionMocked conn, boolean checkSelected) {
-		// clean communication panel
-		second.removeAllComponents();
-
-		// only if the connection is selected and if there are some
-		// communications items exccept if if comes from click event
-		Object connectionItem = connectionTreeItemByConnectionId.get(conn.getId());
-
-		if (connectionItem != null && (treetable.isSelected(connectionItem) || !checkSelected)
-				&& !conn.getCommunications().isEmpty()) {
-			Set<CommunicationMocked> communications = conn.getCommunications();
-
-			Tree menu = new Tree();
-			for (CommunicationMocked communication : communications) {
-				CommunicationMockedTreeItem commTreeItem = new CommunicationMockedTreeItem(communication);
-				menu.addItem(commTreeItem);
-				menu.setChildrenAllowed(commTreeItem, false);
-			}
-
-			menu.setSizeFull();
-			GridLayout grid = new GridLayout(2, 1);
-			grid.setSizeFull();
-
-			menu.addItemClickListener((ItemClickEvent event) -> {
-				CommunicationMocked comm = ((CommunicationMockedTreeItem) event.getItemId()).getCommunication();
-				// remove selection in the table
-				treetable.select(null);
-				selectedCommunication = comm;
-
-//				String response = NetworkReaderUtility.decode(comm.getResponse());
-//				ComponentWithDisplayChange outputComponent = NetDisplayerFactoryOutput.getComponent(response);
-//				grid.removeComponent(1, 0);
-//				grid.addComponent(outputComponent.getComponent(), 1, 0);
-//				outputComponent.selectionValue(response);
-				
-				AceEditor editor = new AceEditor();
-				editor.setThemePath("/static/ace");	
-				editor.setMode(AceMode.java);
-				editor.setTheme(AceTheme.eclipse);
-
-				// Use worker (if available for the current mode)
-				editor.setUseWorker(true);
-				editor.setSizeFull();
-				editor.setValue("Hello world!");
-				grid.removeComponent(1, 0);
-				grid.addComponent(editor, 1, 0);
-				
-				String request = NetworkReaderUtility.decode(comm.getRequest());
-				ComponentWithDisplayChange inputComponent = NetDisplayerFactoryInput.getComponent(request);
-				grid.removeComponent(0, 0);
-				grid.addComponent(inputComponent.getComponent(), 0, 0);
-				inputComponent.selectionValue(request);
-				checkToolBar();
-			});
-
-			HorizontalSplitPanel hsplitPane = new HorizontalSplitPanel();
-
-			hsplitPane.setFirstComponent(menu);
-			hsplitPane.setSecondComponent(grid);
-			hsplitPane.setSplitPosition(20);
-
-			second.addComponent(hsplitPane);
-		} else if (conn.getCommunications().isEmpty() && !checkSelected) {
-			selectedCommunication = null;
-		}
-	}
-
-
-	@Override
-	protected Long getJavaAppId(JavaApplicationMocked javaApplication) {
-		return javaApplication.getId();
-	}
-
-	@Override
-	protected Long getConnectionId(ConnectionMocked connection) {
-		return connection.getId();
-	}
-
-	@Override
-	protected String getJavaAppClassQualifiedName(JavaApplicationMocked javaApplication) {
-		return javaApplication.getClassQualifiedName();
-	}
-
 	@Override
 	protected Set<ConnectionMocked> getJavaAppConnections(JavaApplicationMocked javaApplication) {
 		return javaApplication.getConnections();
-	}
-
-	@Override
-	protected void manageSpecialUIBehaviourInJavaApplication(ConnectionMocked connection) {
-		ListSelectWithId<ConnectionMocked> listSelectWithId = new ListSelectWithId<>(
-				null, connection.getHost() + connection.getPort().toString(), connection);
-		ComboWithId<ConnectionMocked> box = 
-				new ComboWithId<ConnectionMocked>(null, connection.getHost() + connection.getPort().toString(), connection);
-		box.setScrollToSelectedItem(false);
-		box.setTextInputAllowed(false);
-		
-		
-		box.addItems(
-				bundle.getString("mock_mode_disabled"), 
-				bundle.getString("mock_mode_mock_or_call"),
-				bundle.getString("mock_mode_strict"));
-		listComboByUiId.put(listSelectWithId.getUiId(), box);
-	}
-
-	@Override
-	protected String getConnectionHost(ConnectionMocked connection) {
-		return connection.getHost();
-	}
-
-	@Override
-	protected Integer getConnectionPort(ConnectionMocked connection) {
-		return connection.getPort();
-	}
-
-	@Override
-	protected ConnectionMocked getCorrespondingConnection(String host, String port,
-			JavaApplicationMocked javaApplication) {
-		Set<ConnectionMocked> connections = javaApplication.getConnections();
-		Optional<ConnectionMocked> connection = connections.stream().filter(
-				x -> StringUtils.equals(host, x.getHost()) && StringUtils.equals(port, x.getPort().toString()))
-				.findFirst();
-		return connection.isPresent() ? connection.get() : null;
 	}
 
 	@Override
@@ -269,33 +61,92 @@ public class MockSpaceView extends AbstractConnectionTreeView<JavaApplicationMoc
 	protected ConnectionMocked getConnectionFromCommunication(CommunicationMocked comm) {
 		return comm.getConnection();
 	}
-	
-	@Override
-	public List<ButtonDescriptor> getButtons() {
-		return Arrays.asList(new ButtonDescriptor[] { new ButtonDescriptor(bundle.getString("remove"),
-				bundle.getString("removeToolTip"), FontAwesome.REMOVE, EnumButton.REMOVE.toString())});
-	}
 
 	@Override
-	protected void instanciateMaps() {
-		listComboByUiId = new HashMap<>();
+	protected TreeGridConnectionData<JavaApplicationMocked, ConnectionMocked> createTreeGridFromJavaApplication(
+			JavaApplicationMocked javaApplication) {
+		return new StrandardTreeGridConnectionMockedData(javaApplication, null);
+	}
+
+	@Override
+	protected TreeGridConnectionData<JavaApplicationMocked, ConnectionMocked> createTreeGridFromJConnection(ConnectionMocked connection) {
+		return new StrandardTreeGridConnectionMockedData(null, connection);
+	}
+
+	@Override
+	protected void addTreeMapping() {
+		treeGrid.addColumn(item -> item.getApplication()).setCaption(APPLICATION);
+		treeGrid.addColumn(item -> item.getAdress()).setCaption(ADRESS);
+		treeGrid.addColumn(item -> item.getPort()).setCaption(PORT);
+		treeGrid.addColumn(item -> item.getConnectionType()).setCaption(CONNECTION_TYPE);
 	}
 	
-	private final class ComboModeChanged implements ItemSetChangeListener {
-
-		private ComboBox box;
-
-		public ComboModeChanged(ComboBox box) {
-			this.box = box;
-		}
-
-		@Override
-		public void containerItemSetChange(ItemSetChangeEvent event) {
-			//ComboWithId<ConnectionMocked> comboWithId = (ComboWithId<ConnectionMocked>) event.getSource();
-			//ClientCommunicator
-			System.out.println("");
-		}
-		
+	public void treeSelectionChange(SelectionEvent<TreeGridConnectionData<JavaApplicationMocked, ConnectionMocked>> event) {
+		refreshClickable();
 	}
+	
+	@Override
+	public void refresh(EntityWithId entityWithId) {
+		refreshEntity(entityWithId);
+	}
+	
+	@Override
+	public ActionContainer buildActionContainer() {
+		ActionContainerBuilder builder = new ActionContainerBuilder(BUNDLE_NAME)
+				.addButton("Clean_Button", VaadinIcons.MINUS, null,  this::isSelected			
+						, this::clean, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
+				.addButton("ViewDetails_Button", VaadinIcons.EYE, null,  this::isConnectionSelected			
+						, this::details, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
+				.addButton("Refresh_Button", VaadinIcons.REFRESH, null,  this::always			
+						, this::refresh, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
+				;
 
+		return builder.build();
+	}
+	
+	public void clean(ClickEvent event) {
+		if (isSelected()) {
+			Dialog.ask(SmockerUI.getBundle().getString("RemoveQuestion"), null, this::delete, null);
+		}
+	}
+	
+	public void delete() {
+		Set<TreeGridConnectionData<JavaApplicationMocked, ConnectionMocked>> selectedItems = treeGrid.getSelectedItems();
+		for (TreeGridConnectionData<JavaApplicationMocked, ConnectionMocked> treeGridConnectionData : selectedItems) {
+			if (treeGridConnectionData.isConnection()) {
+				ConnectionMocked selectedConnection = treeGridConnectionData.getConnection();
+				selectedConnection.getJavaApplication().getConnections().remove(selectedConnection);
+				daoManagerJavaApplication.update(selectedConnection.getJavaApplication());
+			}
+			else if (treeGridConnectionData.isJavaApplication()) {
+				JavaApplicationMocked selectedJavaApplication = treeGridConnectionData.getJavaApplication();
+				daoManagerJavaApplication.deleteById(selectedJavaApplication.getId());
+			}
+			fillTreeTable();
+		}
+	}
+	
+	public void details(ClickEvent event) {
+		if (isConnectionSelected()) {
+			ConnectionMocked conn = treeGrid.getSelectedItems().iterator().next().getConnection();
+			ConnectionMockedDetailsView connectionWithDetail = new ConnectionMockedDetailsView(conn);
+			ViewWithToolBar view = new ViewWithToolBar(connectionWithDetail);
+			connectionWithDetail.setSubWindow(SmockerUI.displayInSubWindow(bundle.getString("MockedCommunications"), view));
+		}
+	}
+	
+	public boolean isSelected() {
+		return treeGrid.getSelectedItems().size() == 1;
+	}
+	
+	public boolean isConnectionSelected() {
+		return treeGrid.getSelectedItems().size() == 1 && 
+				treeGrid.getSelectedItems().iterator().next().isConnection();
+	}
+	
+	public void search(String searchValue) {
+		Notification.show("Search for:" + searchValue);
+	}
+	
+	
 }

@@ -10,8 +10,10 @@ import com.jenetics.smocker.model.EntityWithId;
  * @author igolus
  *
  */
-public interface RefreshableView extends VisitableView {
+public interface RefreshableView {
 
 	void refresh(EntityWithId entityWithId);
+
+	boolean always();
 
 }

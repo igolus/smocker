@@ -1,52 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app id="WebApp_ID" version="3.0"
-  xmlns="http://java.sun.com/xml/ns/javaee"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
-    <display-name>JPAContainer Demo Application</display-name>
-    <servlet>
-        <servlet-name>smocker</servlet-name>
-        <servlet-class>com.vaadin.server.VaadinServlet</servlet-class>
-        <init-param>
-            <param-name>UI</param-name>
-           <param-value>com.jenetics.smocker.ui.SmockerUI</param-value>
-           <!-- <param-value>com.jenetics.smocker.ui.PushyUI</param-value> -->
-            
-        </init-param>
-        
-        <init-param>
-	      <param-name>pushmode</param-name>
-	      <param-value>automatic</param-value>
-    	</init-param>
-    	
-    	<init-param>
-	      <param-name>legacyPropertyToString</param-name>
-	      <param-value>true</param-value>
-    	</init-param>
-    	 
-        <async-supported>true</async-supported>
-        
-        
-    </servlet>
-    
-<!--     <servlet>
-        <servlet-name>rest</servlet-name>
-        <servlet-class>org.jboss.as.quickstarts.kitchensink.rest.JaxRsActivator</servlet-class>
-    </servlet>   -->
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+	<display-name>JPAContainer Demo Application</display-name>
+	<servlet>
+		<servlet-name>smocker</servlet-name>
+		<servlet-class>com.vaadin.server.VaadinServlet</servlet-class>
+		<init-param>
+			<param-name>UI</param-name>
+			<param-value>com.jenetics.smocker.ui.SmockerUI</param-value>
+			<!-- <param-value>com.jenetics.smocker.ui.PushyUI</param-value> -->
 
-<!--     <servlet-mapping>
-        <servlet-name>rest</servlet-name>
-        <url-pattern>/rest/*</url-pattern>
-    </servlet-mapping> -->
-    
-    <servlet-mapping>
-        <servlet-name>smocker</servlet-name>
-        <url-pattern>/*</url-pattern>
-    </servlet-mapping>
-    
-    <servlet-mapping>
-        <servlet-name>smocker</servlet-name>
-        <url-pattern>/VAADIN/*</url-pattern>
-    </servlet-mapping>
-    
+		</init-param>
+
+		<init-param>
+			<param-name>pushmode</param-name>
+			<param-value>automatic</param-value>
+		</init-param>
+
+		<init-param>
+			<param-name>legacyPropertyToString</param-name>
+			<param-value>true</param-value>
+		</init-param>
+
+		<async-supported>true</async-supported>
+
+
+	</servlet>
+
+	<!-- <servlet> <servlet-name>rest</servlet-name> <servlet-class>org.jboss.as.quickstarts.kitchensink.rest.JaxRsActivator</servlet-class> 
+		</servlet> -->
+
+	<!-- <servlet-mapping> <servlet-name>rest</servlet-name> <url-pattern>/rest/*</url-pattern> 
+		</servlet-mapping> -->
+
+	<servlet-mapping>
+		<servlet-name>smocker</servlet-name>
+		<url-pattern>/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>smocker</servlet-name>
+		<url-pattern>/VAADIN/*</url-pattern>
+	</servlet-mapping>
+
 </web-app>

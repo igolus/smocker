@@ -116,7 +116,7 @@ public class RESTClient {
         InputStreamReader is = null;
         try {
             socket = new Socket(inetAddress, port);
-            socket.setSoTimeout(timeout + 1000);
+            socket.setSoTimeout(timeout);
             wr = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF8"));
             //wr = new BufferedWriter(new OutputStreamWriter(System.out));
             
@@ -124,10 +124,8 @@ public class RESTClient {
             wr.write(method + " " + path + " HTTP/1.0\r\n");
             wr.write(getFormattedHeader("Content-Length","" + content.length()));
             wr.write(getFormattedHeader("Content-Type", "application/json"));
-            if (headers != null) {
-            	for (Map.Entry<String, String> header : headers.entrySet()) {
-                    wr.write(getFormattedHeader(HEADER_NAME_PREFIX + header.getKey(),header.getValue()));
-                }
+            for (Map.Entry<String, String> header : headers.entrySet()) {
+                wr.write(getFormattedHeader(HEADER_NAME_PREFIX + header.getKey(),header.getValue()));
             }
             wr.write("\r\n");
             wr.write(content);

@@ -4,32 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.jenetics.smocker.configuration.util.ConnectionBehavior;
-import com.jenetics.smocker.configuration.util.ConnectionMockedBehavior;
-import com.jenetics.smocker.configuration.util.MockCconnectionMode;
 import com.jenetics.smocker.util.MessageLogger;
 
 public class MemoryConfiguration {
   
-	public static final String SEP = "%*%";
+	public static final String SEP_CONNECTION = ":";
 	private static Map<String, ConnectionBehavior> connectionsWatched = new HashMap<String, ConnectionBehavior>();
-	private static Map<String, MockCconnectionMode> connectionsMockedModes = new HashMap<String, MockCconnectionMode>();
-	private static Map<String, String> headerReplace = new HashMap<String, String>();
 	
-	
-	private static boolean replayMode;
-	
-	public static boolean isReplayMode() {
-		return replayMode;
-	}
-
-	public static void addHeaderReplace (String regExp, String replace) {
-		headerReplace.put(regExp, replace);
-	}
-	
-	public static Map<String, String> getHeaderReplace() {
-		return headerReplace;
-	}
-
 	public static void setConnecctionWatched(String host, int port) {
 		//if (connectionWatched.contains(o))
 		String key = getKey(host, port);
@@ -63,7 +44,7 @@ public class MemoryConfiguration {
 
 
 	private static String getKey(String host, int port) {
-		return host + SEP + port;
+		return host + SEP_CONNECTION + port;
 	} 
 	
 	public static boolean isConnecctionThere(String host, int port) {
@@ -78,30 +59,6 @@ public class MemoryConfiguration {
 			return connectionsWatched.get(key).isWatched(); 
 		}
 		return false;
-	}
-
-	public static MockCconnectionMode getConnectionMode(String host, int port) {
-		String key = getKey(host, port);
-		return connectionsMockedModes.get(key);
-	}
-
-	public static void setConnectionMode(String host, int port, String mode) {
-		String key = getKey(host, port);
-		if (connectionsMockedModes.get(key) == null) {
-			MockCconnectionMode connectionMockedBehavior = getConnectionMockedBehavior(mode);
-			connectionsMockedModes.put(key, connectionMockedBehavior);
-		}
-	}
-
-	private static MockCconnectionMode getConnectionMockedBehavior(String mode) {
-		MockCconnectionMode modeEnum =  MockCconnectionMode.valueOf(mode);
-		if (modeEnum == MockCconnectionMode.DISABLED) {
-			connectionsMockedModes.remove(modeEnum);
-		}
-		else {
-			return modeEnum;
-		}
-		return null;
 	} 
 	
   }

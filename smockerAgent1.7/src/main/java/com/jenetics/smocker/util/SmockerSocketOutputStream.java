@@ -8,7 +8,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-public class SmockerSocketOutputStream extends OutputStream {
+public class SmockerSocketOutputStream extends BaseSmockerSocketHandler {
 	
 	SmockerSocketOutputStreamData smockerSocketOutputStreamData = new SmockerSocketOutputStreamData(new ByteArrayOutputStream());
 	
@@ -21,8 +21,21 @@ public class SmockerSocketOutputStream extends OutputStream {
 		return smockerSocketOutputStreamData;
 	}
 
-	public void resetBuffer() {
-		smockerSocketOutputStreamData = new SmockerSocketOutputStreamData(new ByteArrayOutputStream());
-	}
+//	@Override
+//	public void flush() throws IOException {
+//		flushOut(data.buffer.toByteArray());
+//	}
+//
+//	private void flushOut(byte[] byteArray) throws UnsupportedEncodingException {
+//		System.out.println(new String(byteArray,  "UTF-8"));
+//	}
+
+//	@Override
+//	public void close() throws IOException {
+//		// TODO Auto-generated method stub
+//		super.close();
+//	}
+	
+	
 
 }

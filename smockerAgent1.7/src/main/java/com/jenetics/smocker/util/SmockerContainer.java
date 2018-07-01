@@ -4,7 +4,7 @@ import org.apache.commons.io.input.TeeInputStream;
 import org.apache.commons.io.output.TeeOutputStream;
 
 public class SmockerContainer {
-	private SmockerSocketOutputStream smockerSocketInputStream = null;
+	private SmockerSocketInputStream smockerSocketInputStream = null;
 	private SmockerSocketOutputStream smockerSocketOutputStream = null;
 	private String host = null;
 	private int port = 0;
@@ -35,7 +35,7 @@ public class SmockerContainer {
 	}
 
 
-	public SmockerContainer(SmockerSocketOutputStream smockerSocketInputStream,
+	public SmockerContainer(SmockerSocketInputStream smockerSocketInputStream,
 			SmockerSocketOutputStream smockerSocketOutputStream) {
 		super();
 		this.smockerSocketInputStream = smockerSocketInputStream;
@@ -43,12 +43,12 @@ public class SmockerContainer {
 	}
 
 
-	public SmockerSocketOutputStream getSmockerSocketInputStream() {
+	public SmockerSocketInputStream getSmockerSocketInputStream() {
 		return smockerSocketInputStream;
 	}
 
 
-	public void setSmockerSocketInputStream(SmockerSocketOutputStream smockerSocketInputStream) {
+	public void setSmockerSocketInputStream(SmockerSocketInputStream smockerSocketInputStream) {
 		this.smockerSocketInputStream = smockerSocketInputStream;
 	}
 
@@ -88,13 +88,6 @@ public class SmockerContainer {
 
 	public void setTeeOutputStream(TeeOutputStream teeOutputStream) {
 		this.teeOutputStream = teeOutputStream;
-	}
-
-
-	public void resetBuffer() {
-		smockerSocketOutputStream.resetBuffer();
-		smockerSocketInputStream.resetBuffer();
-		
 	}
 	
 	

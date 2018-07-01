@@ -19,7 +19,6 @@ public class ResponseReader {
 	
 	public static final String OK_STATUS = "200";
 	public static final String CONFLICT = "409";
-	public static final String NOT_FOUND = "404";
 
 	public static String readValueFromResponse(String response, String key) throws IOException {
 		String status = readStatusCodeFromResponse(response);
@@ -55,7 +54,7 @@ public class ResponseReader {
 			BufferedReader reader = new BufferedReader(new StringReader(response));
 			String line = reader.readLine();
 			
-			if (!line.isEmpty() && line.split(" ").length >= 3) {
+			if (!line.isEmpty() && line.split(" ").length == 3) {
 				status = line.split(" ")[1];
 			}
 		}

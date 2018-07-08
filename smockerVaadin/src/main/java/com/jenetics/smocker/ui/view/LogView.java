@@ -4,11 +4,15 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 
+import org.apache.commons.lang3.StringUtils;
 import org.vaadin.easyapp.util.EasyAppLayout;
 import org.vaadin.easyapp.util.annotations.ContentView;
 
 import com.vaadin.annotations.Push;
+import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextArea;
 
 @SuppressWarnings("serial")
@@ -17,27 +21,36 @@ import com.vaadin.ui.TextArea;
 @ContentView(sortingOrder = 1, viewName = "Logs", icon = "icons/Java-icon.png", homeView = true, rootViewParent = ConnectionsRoot.class)
 public class LogView extends EasyAppLayout {
 
+	private static final int DEFAULT_MAX_SIZE = 40000;
 	private StringBuilder buffer = new StringBuilder();
 	private int maxSize;
-	private TextArea logTextArea;
-	private static SimpleFormatter simpleFormatter = new SimpleFormatter();
-
-	public LogView(int maxSize, String pattern) {
+	private Label logTextArea;
+	//private static SimpleFormatter simpleFormatter = new SimpleFormatter();
+	
+	public LogView() {
+		this(DEFAULT_MAX_SIZE);
+	}
+	
+	public LogView(int maxSize) {
 		this.maxSize = maxSize;
-		logTextArea = new TextArea();
+		logTextArea = new Label();
+		logTextArea.setContentMode(ContentMode.HTML);
 		logTextArea.setSizeFull();
-
-		simpleFormatter = new SimpleFormatter();
-		// TODO Auto-generated constructor stub
+		Panel panel = new Panel();
+		panel.setSizeFull();
+		panel.setContent(logTextArea);
+		addComponent(panel);
 	}
 
 	public void appendMessage(Level level, String message) {
-
+		
+		
 		String formattedMessage = new SimpleFormatter().format(new LogRecord(level, message));
-
+		formattedMessage = StringUtils.replace(formattedMessage, System.lineSeparator(), "<BR/>");
+		
 		buffer.append(formattedMessage);
 		if (buffer.length() > maxSize) {
-			buffer.replace(0, maxSize - buffer.length(), "");
+			buffer.replace(0, buffer.length() - maxSize, "");
 		}
 		logTextArea.setValue(buffer.toString());
 	}

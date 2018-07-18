@@ -5,6 +5,7 @@ import java.util.Set;
 import org.vaadin.easyapp.ui.ViewWithToolBar;
 import org.vaadin.easyapp.util.ActionContainer;
 import org.vaadin.easyapp.util.ActionContainerBuilder;
+import org.vaadin.easyapp.util.EasyAppLayout;
 import org.vaadin.easyapp.util.ActionContainer.InsertPosition;
 import org.vaadin.easyapp.util.annotations.ContentView;
 
@@ -26,7 +27,10 @@ import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
 import com.vaadin.ui.Window;
 
 @SuppressWarnings("serial")
@@ -38,6 +42,11 @@ public class MockSpaceView extends AbstractConnectionTreeView2<JavaApplicationMo
 	@Override
 	public void enterInView(ViewChangeEvent event) {
 		fillTreeTable();
+	}
+	
+	@Override
+	protected Component getInnerComponent() {
+		return treeGrid;
 	}
 
 	private static final String BUNDLE_NAME = "BundleUI";
@@ -146,6 +155,17 @@ public class MockSpaceView extends AbstractConnectionTreeView2<JavaApplicationMo
 	
 	public void search(String searchValue) {
 		Notification.show("Search for:" + searchValue);
+	}
+
+	@Override
+	protected String getConnectionKey(ConnectionMocked conn) {
+		return conn.getHost() + ":" + conn.getPort();
+	}
+
+	@Override
+	protected EasyAppLayout getConnectionDetailsLayout(ConnectionMocked conn) {
+		// TODO Auto-generated method stub
+		return new ConnectionMockedDetailsView(conn);
 	}
 	
 	

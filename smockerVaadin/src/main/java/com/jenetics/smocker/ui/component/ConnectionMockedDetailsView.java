@@ -14,6 +14,7 @@ import org.vaadin.easyapp.util.EasyAppLayout;
 
 import com.jenetics.smocker.dao.DaoManager;
 import com.jenetics.smocker.dao.IDaoManager;
+import com.jenetics.smocker.injector.BundleUI;
 import com.jenetics.smocker.model.CommunicationMocked;
 import com.jenetics.smocker.model.ConnectionMocked;
 import com.jenetics.smocker.ui.SmockerUI;
@@ -24,6 +25,7 @@ import com.jenetics.smocker.util.SmockerUtility;
 import com.vaadin.data.TreeData;
 import com.vaadin.data.provider.TreeDataProvider;
 import com.vaadin.icons.VaadinIcons;
+import com.vaadin.server.Sizeable;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.HorizontalSplitPanel;
@@ -32,6 +34,7 @@ import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.Tree.ItemClick;
+import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.Window;
 
 import groovy.lang.Binding;
@@ -88,6 +91,7 @@ public class ConnectionMockedDetailsView extends EasyAppLayout {
 		
 		mainLayout.setSplitPosition(20);
 		mainLayout.setSizeFull();
+		
 		addComponent(mainLayout);
 		setSizeFull();
 		
@@ -101,6 +105,8 @@ public class ConnectionMockedDetailsView extends EasyAppLayout {
 		}
 		treeDataProvider.refreshAll();
 	}
+	
+	private LoggerPanel loggerPanel = null;
 	
 	public void treeItemClick(ItemClick<CommunicationMockedDateDisplay> event) {
 		CommunicationMocked comm = event.getItem().getCommunication();
@@ -116,9 +122,16 @@ public class ConnectionMockedDetailsView extends EasyAppLayout {
 		tabSheet.setSizeFull();
 		
 		addTextAreaToTabSheet(request, "Input", tabSheet);
-		addTextAreaToTabSheet(response, "Output", tabSheet);		
+		addTextAreaToTabSheet(response, "Output", tabSheet);	
 		
-		tabSheet.addTab(aceEditor, "GroovyEditor");
+		loggerPanel = new LoggerPanel();
+		
+		VerticalSplitPanel vsplit = new VerticalSplitPanel();
+		vsplit.setSplitPosition(75, Unit.PERCENTAGE);
+		vsplit.setFirstComponent(loggerPanel);
+		vsplit.setSecondComponent(aceEditor);
+		
+		tabSheet.addTab(vsplit, SmockerUI.getBundleValue("GroovyEditor"));
 		
 		mainLayout.setSecondComponent(tabSheet);
 		
@@ -135,19 +148,19 @@ public class ConnectionMockedDetailsView extends EasyAppLayout {
 		tabSheet.addTab(areaOutput, SmockerUI.getBundleValue(locString));
 	}
 	
-	public ActionContainer buildActionContainer() {
-		ActionContainerBuilder builder = new ActionContainerBuilder(SmockerUI.BUNDLE_NAME)
-				.addButton("Clean_Button", VaadinIcons.MINUS, "Clean_ToolTip",  this::isSelected			
-						, this::clean, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
-				.addButton("CleanAll_Button", VaadinIcons.MINUS, "CleanAll_ToolTip",  this::atLeastOneItem			
-						, this::cleanAll, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
-				.addButton("Refresh_Button", VaadinIcons.REFRESH, "Refresh_ToolTip",  this::always			
-						, this::refresh, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
-				.addButton("Play Button", VaadinIcons.PLAY, "Play_ToolTip",  this::isSelected		
-						, this::play, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER);
-
-		return builder.build();
-	}
+//	public ActionContainer buildActionContainer() {
+//		ActionContainerBuilder builder = new ActionContainerBuilder(SmockerUI.BUNDLE_NAME)
+//				.addButton("Clean_Button", VaadinIcons.MINUS, "Clean_ToolTip",  this::isSelected			
+//						, this::clean, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
+//				.addButton("CleanAll_Button", VaadinIcons.MINUS, "CleanAll_ToolTip",  this::atLeastOneItem			
+//						, this::cleanAll, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
+//				.addButton("Refresh_Button", VaadinIcons.REFRESH, "Refresh_ToolTip",  this::always			
+//						, this::refresh, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
+//				.addButton("Play Button", VaadinIcons.PLAY, "Play_ToolTip",  this::isSelected		
+//						, this::play, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER);
+//
+//		return builder.build();
+//	}
 	
 	public void clean(ClickEvent event) {
 		if (isSelected()) {
@@ -187,7 +200,8 @@ public class ConnectionMockedDetailsView extends EasyAppLayout {
 		    new GroovyShell().evaluate(aceEditor.getValue());
 		} catch(Exception e) {
 		    //SmockerUI.displayMessageInSubWindow(SmockerUI.getBundleValue("GroovyErrors"), SmockerUtility.getStackTrace(e));
-		    SmockerUI.log(Level.SEVERE, SmockerUtility.getStackTrace(e));
+			loggerPanel.appendMessage(Level.SEVERE, SmockerUtility.getStackTrace(e));
+		    //SmockerUI.log(Level.SEVERE, SmockerUtility.getStackTrace(e));
 		    return false;
 		}
 		return true;

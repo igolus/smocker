@@ -10,11 +10,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.lang.StringUtils;
 import org.jboss.logging.Logger;
+import org.vaadin.easyapp.ui.ViewWithToolBar;
 import org.vaadin.easyapp.util.EasyAppLayout;
 
 import com.jenetics.smocker.dao.DaoManager;
@@ -24,6 +26,7 @@ import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.ui.SmockerUI;
+import com.jenetics.smocker.ui.component.ConnectionDetailsView;
 import com.jenetics.smocker.ui.util.ButtonWithId;
 import com.jenetics.smocker.ui.util.RefreshableView;
 import com.jenetics.smocker.ui.util.TreeGridConnectionData;
@@ -35,8 +38,12 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.shared.Position;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.Layout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
+import com.vaadin.ui.TabSheet.Tab;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.TreeGrid;
 import com.vaadin.ui.VerticalLayout;
@@ -49,9 +56,9 @@ public abstract class AbstractConnectionTreeView2<T extends EntityWithId, U exte
 	 * Tree Item object by javaApplication id used to find the associated UI
 	 * Item from an Application id
 	 */
-
-
 	protected TreeGrid<TreeGridConnectionData<T, U>> treeGrid = null;
+	
+	protected final TabSheet tabSheet = new TabSheet();
 
 	static ResourceBundle bundle = ResourceBundle.getBundle("BundleUI");
 	protected static final String CONNECTION_TYPE = bundle.getString("ConnectionType");
@@ -78,6 +85,8 @@ public abstract class AbstractConnectionTreeView2<T extends EntityWithId, U exte
 
 	protected TreeData<TreeGridConnectionData<T, U>> treeData = null;
 	protected TreeDataProvider<TreeGridConnectionData<T, U>> treeDataProvider = null;
+	
+	protected Hashtable<String, Tab> tabByConnectionKey = new Hashtable<>();
 
 	@Inject
 	private Logger logger;
@@ -103,9 +112,77 @@ public abstract class AbstractConnectionTreeView2<T extends EntityWithId, U exte
 		TabSheet tabSheet = new TabSheet();
 		tabSheet.setSizeFull();
 		setSizeFull();
-		addComponent(treeGrid);
-		
+		addComponent(getInnerComponent());
 		setSizeFull();
+	}
+	
+	/**
+	 * return the main component to add
+	 * @return
+	 */
+	protected Component getInnerComponent() {
+		treeGrid.setSizeFull();
+		VerticalLayout tabmainlayout = new VerticalLayout();
+		tabmainlayout.setSizeFull();
+		tabmainlayout.setCaption(SmockerUI.getBundleValue("MainTab"));
+		tabmainlayout.addComponent(treeGrid);
+		tabSheet.setSizeFull();
+		tabSheet.addTab(tabmainlayout);
+		tabSheet.addSelectedTabChangeListener(this::tabChanged);
+		tabSheet.setCloseHandler(this::tabClosed);
+		//tabSheet.add
+		return tabSheet;
+	}
+	
+	public void tabChanged(SelectedTabChangeEvent event) {
+		refreshClickable();
+	}
+	
+	public void details(ClickEvent event) {
+		if (isConnectionSelected()) {
+			U conn = treeGrid.getSelectedItems().iterator().next().getConnection();
+			EasyAppLayout connectionWithDetail = getConnectionDetailsLayout(conn);
+			Tab tabForConnection = tabByConnectionKey.get(getConnectionKey(conn));
+			if (tabForConnection != null) {
+				tabSheet.setSelectedTab(tabForConnection);
+			}
+			else {
+				addTabConnectionDetails(connectionWithDetail, conn);
+			}
+		}
+	}
+	
+	protected abstract String getConnectionKey(U conn);
+
+	protected abstract EasyAppLayout getConnectionDetailsLayout(U conn);
+
+	protected void addTabConnectionDetails (EasyAppLayout connectionWithDetail, U conn) {
+		//ViewWithToolBar view = new ViewWithToolBar(connectionWithDetail);
+		//view.setSizeFull();
+		//view.setCaption(getConnectionKey(conn));
+		connectionWithDetail.setSizeFull();
+		Tab connectionWithDetailTab = tabSheet.addTab(connectionWithDetail);
+		connectionWithDetailTab.setClosable(true);
+		tabByConnectionKey.put(getConnectionKey(conn), connectionWithDetailTab);
+		removeAllComponents();
+        addComponent(tabSheet);
+        tabSheet.setSelectedTab(connectionWithDetailTab);
+	}
+	
+	protected abstract boolean isConnectionSelected();
+
+	public void tabClosed(TabSheet tabsheet, Component tabContent) {
+		Tab tab = tabsheet.getTab(tabContent);
+		Map<Tab, String> connectionByTab = 
+				tabByConnectionKey.entrySet()
+				.stream()
+				.collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+
+		String connKey = connectionByTab.get(tab);
+		tabByConnectionKey.remove(connKey);
+
+		tabsheet.removeTab(tab);
+		refreshClickable();
 	}
 
 

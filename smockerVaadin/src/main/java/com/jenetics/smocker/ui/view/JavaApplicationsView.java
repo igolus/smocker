@@ -2,10 +2,10 @@ package com.jenetics.smocker.ui.view;
 
 import java.util.Set;
 
-import org.vaadin.easyapp.ui.ViewWithToolBar;
 import org.vaadin.easyapp.util.ActionContainer;
 import org.vaadin.easyapp.util.ActionContainer.InsertPosition;
 import org.vaadin.easyapp.util.ActionContainerBuilder;
+import org.vaadin.easyapp.util.EasyAppLayout;
 import org.vaadin.easyapp.util.annotations.ContentView;
 
 import com.jenetics.smocker.model.Communication;
@@ -23,12 +23,10 @@ import com.jenetics.smocker.ui.util.TreeGridConnectionData;
 import com.vaadin.annotations.Push;
 import com.vaadin.event.selection.SelectionEvent;
 import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.Position;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.Window;
 
 @SuppressWarnings("serial")
 @Push
@@ -37,14 +35,44 @@ import com.vaadin.ui.Window;
 homeView = true, rootViewParent = ConnectionsRoot.class, bundle=SmockerUI.BUNDLE_NAME)
 public class JavaApplicationsView extends AbstractConnectionTreeView2<JavaApplication, Connection, Communication> implements RefreshableView {
 
-	private static final String BUNDLE_NAME = "BundleUI";
-
+	
 	public JavaApplicationsView() {
 		super(JavaApplication.class, Connection.class, Communication.class);
 		treeGrid.addSelectionListener(this::treeSelectionChange);
 		setSizeFull();
 	}
 	
+	
+//	@Override
+//	protected Component getInnerComponent() {
+//		treeGrid.setSizeFull();
+//		VerticalLayout tabmainlayout = new VerticalLayout();
+//		tabmainlayout.setSizeFull();
+//		tabmainlayout.setCaption("Main");
+//		tabmainlayout.addComponent(treeGrid);
+//		tabSheet.setSizeFull();
+//		tabSheet.addTab(tabmainlayout);
+//		tabSheet.addSelectedTabChangeListener(this::tabChanged);
+//		
+//		tabSheet.setCloseHandler(this::tabClosed);
+//		//tabSheet.add
+//		return tabSheet;
+//	}
+//	public void tabClosed(TabSheet tabsheet, Component tabContent) {
+//		Tab tab = tabsheet.getTab(tabContent);
+//		Map<Tab, String> connectionByTab = 
+//				tabByConnectionKey.entrySet()
+//			       .stream()
+//			       .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+//		
+//		String connKey = connectionByTab.get(tab);
+//		tabByConnectionKey.remove(connKey);
+//		
+//		tabsheet.removeTab(tab);
+//		refreshClickable();
+//	}
+
+
 	@Override
 	protected Set<Connection> getJavaAppConnections(JavaApplication javaApplication) {
 		return javaApplication.getConnections();
@@ -70,7 +98,7 @@ public class JavaApplicationsView extends AbstractConnectionTreeView2<JavaApplic
 	protected TreeGridConnectionData<JavaApplication, Connection> createTreeGridFromJConnection(Connection connection) {
 		return new StrandardTreeGridConnectionData(null, connection);
 	}
-
+	
 	@Override
 	protected void addTreeMapping() {
 		treeGrid.addColumn(item -> item.getApplication()).setCaption(APPLICATION);
@@ -129,17 +157,31 @@ public class JavaApplicationsView extends AbstractConnectionTreeView2<JavaApplic
 	
 	@Override
 	public ActionContainer buildActionContainer() {
-		ActionContainerBuilder builder = new ActionContainerBuilder(BUNDLE_NAME)
-				.addButton("Clean_Button", VaadinIcons.MINUS, null,  this::isSelected			
-						, this::clean, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
+		ActionContainerBuilder builder = new ActionContainerBuilder(SmockerUI.BUNDLE_NAME)
+				
 				.addButton("ViewDetails_Button", VaadinIcons.EYE, null,  this::isConnectionSelected			
 						, this::details, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
 				.addButton("Refresh_Button", VaadinIcons.REFRESH, null,  this::always			
 						, this::refresh, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
+				.addButton("AddToMock_Button", VaadinIcons.PLUS, "AddToMock_ToolTip",  this::canAddToMock			
+						, this::addToMock, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
+				.addButton("Clean_Button", VaadinIcons.MINUS, "Clean_ToolTip",  this::isSelected			
+						, this::clean, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
+				.addButton("CleanAll_Button", VaadinIcons.MINUS, "CleanAll_ToolTip",  this::canCleanAll			
+						, this::cleanAll, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
 				;
 
 		return builder.build();
 	}
+	
+	public void addToMock(ClickEvent event) {
+			
+	}
+	
+	public boolean canAddToMock() {
+		return true;
+	}
+	
 	
 	public void clean(ClickEvent event) {
 		if (isSelected()) {
@@ -164,16 +206,11 @@ public class JavaApplicationsView extends AbstractConnectionTreeView2<JavaApplic
 	}
 	
 	public void cleanAll(ClickEvent event) {
-		Notification.show("Clean");
+		Notification.show("CleanAll");
 	}
 	
-	public void details(ClickEvent event) {
-		if (isConnectionSelected()) {
-			Connection conn = treeGrid.getSelectedItems().iterator().next().getConnection();
-			ConnectionDetailsView connectionWithDetail = new ConnectionDetailsView(conn);
-			ViewWithToolBar view = new ViewWithToolBar(connectionWithDetail);
-			connectionWithDetail.setSubWindow(SmockerUI.displayInSubWindow(bundle.getString("Communications"), view));
-		}
+	public boolean canCleanAll() {
+		return true;
 	}
 	
 	public boolean isSelected() {
@@ -187,6 +224,18 @@ public class JavaApplicationsView extends AbstractConnectionTreeView2<JavaApplic
 	
 	public void search(String searchValue) {
 		Notification.show("Search for:" + searchValue);
+	}
+
+	
+	@Override
+	protected String getConnectionKey(Connection conn) {
+		return conn.getHost() + ":" + conn.getPort();
+	}
+	
+	
+	@Override
+	protected EasyAppLayout getConnectionDetailsLayout(Connection conn) {
+		return new ConnectionDetailsView(conn);
 	}
 
 }

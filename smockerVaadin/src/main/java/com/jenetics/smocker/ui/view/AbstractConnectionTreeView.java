@@ -32,8 +32,11 @@ import com.vaadin.data.provider.TreeDataProvider;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.shared.Position;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
 import com.vaadin.ui.TreeGrid;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
@@ -383,6 +386,18 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 	public boolean always() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public void tabChanged(SelectedTabChangeEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void tabClosed(TabSheet tabsheet, Component tabContent) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

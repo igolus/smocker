@@ -18,14 +18,9 @@ import com.vaadin.ui.TabSheet.Tab;
  */
 public interface RefreshableView {
 
-	Hashtable<String, Tab> tabByConnectionKey = new Hashtable<>();
 
 	void refresh(EntityWithId entityWithId);
 
 	boolean always();
-
-	void tabChanged(SelectedTabChangeEvent event);
-
-	void tabClosed(TabSheet tabsheet, Component tabContent);
 
 }

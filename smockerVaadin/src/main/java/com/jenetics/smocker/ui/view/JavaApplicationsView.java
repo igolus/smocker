@@ -2,6 +2,7 @@ package com.jenetics.smocker.ui.view;
 
 import java.util.Set;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.vaadin.easyapp.util.ActionContainer;
 import org.vaadin.easyapp.util.ActionContainer.InsertPosition;
 import org.vaadin.easyapp.util.ActionContainerBuilder;
@@ -12,6 +13,7 @@ import com.jenetics.smocker.model.Communication;
 import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.model.JavaApplication;
+import com.jenetics.smocker.model.converter.MockConverter;
 import com.jenetics.smocker.network.ClientCommunicator;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.component.ConnectionDetailsView;
@@ -33,7 +35,7 @@ import com.vaadin.ui.Notification;
 @ViewScope
 @ContentView(sortingOrder = 1, viewName = "JavaAppView", icon = "icons/Java-icon.png", 
 homeView = true, rootViewParent = ConnectionsRoot.class, bundle=SmockerUI.BUNDLE_NAME)
-public class JavaApplicationsView extends AbstractConnectionTreeView2<JavaApplication, Connection, Communication> implements RefreshableView {
+public class JavaApplicationsView extends AbstractConnectionTreeView<JavaApplication, Connection, Communication, ConnectionDetailsView> implements RefreshableView {
 
 	
 	public JavaApplicationsView() {
@@ -169,17 +171,22 @@ public class JavaApplicationsView extends AbstractConnectionTreeView2<JavaApplic
 						, this::clean, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
 				.addButton("CleanAll_Button", VaadinIcons.MINUS, "CleanAll_ToolTip",  this::canCleanAll			
 						, this::cleanAll, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
+				.addButton("StackTrace", VaadinIcons.ALIGN_JUSTIFY, "StackTraceToolTip",  this::canDisplayStack		
+						, this::displayStack, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
 				;
 
 		return builder.build();
 	}
 	
 	public void addToMock(ClickEvent event) {
-			
+		ConnectionDetailsView connectionDetailsView = getSelectedDetailView();
+		MockConverter.convertcommunication(connectionDetailsView.getSelectedCommunication());
+		SmockerUI.getInstance().getEasyAppMainView().getScanner().navigateTo(MockSpaceView.class);
 	}
 	
 	public boolean canAddToMock() {
-		return true;
+		ConnectionDetailsView connectionDetailsView = getSelectedDetailView();
+		return (connectionDetailsView != null && !isMainTabSelected() && connectionDetailsView.isSelected());
 	}
 	
 	
@@ -213,12 +220,22 @@ public class JavaApplicationsView extends AbstractConnectionTreeView2<JavaApplic
 		return true;
 	}
 	
+	public void displayStack(ClickEvent event) {		
+		getSelectedDetailView().displayStack();
+		//Notification.show("CleanAll");
+	}
+	
+	public boolean canDisplayStack() {
+		return !isMainTabSelected() && getSelectedDetailView() != null && getSelectedDetailView().isSelected();
+	}
+	
 	public boolean isSelected() {
 		return treeGrid.getSelectedItems().size() == 1;
 	}
 	
 	public boolean isConnectionSelected() {
-		return treeGrid.getSelectedItems().size() == 1 && 
+		return isMainTabSelected() && 
+				treeGrid.getSelectedItems().size() == 1 &&				
 				treeGrid.getSelectedItems().iterator().next().isConnection();
 	}
 	
@@ -234,8 +251,10 @@ public class JavaApplicationsView extends AbstractConnectionTreeView2<JavaApplic
 	
 	
 	@Override
-	protected EasyAppLayout getConnectionDetailsLayout(Connection conn) {
-		return new ConnectionDetailsView(conn);
+	protected ConnectionDetailsView getConnectionDetailsLayout(Connection conn) {
+		ConnectionDetailsView connectionDetailsView = new ConnectionDetailsView(conn);
+		connectionDetailsView.setRefreshClickableAction(this::refreshClickable);
+		return connectionDetailsView;
 	}
 
 }

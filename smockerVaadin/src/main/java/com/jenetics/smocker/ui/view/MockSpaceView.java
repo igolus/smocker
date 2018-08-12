@@ -37,16 +37,13 @@ import com.vaadin.ui.Window;
 @Push
 @ViewScope
 @ContentView(sortingOrder = 1, viewName = "Mock View", icon = "icons/Java-icon.png", homeView = true, rootViewParent = ConnectionsRoot.class)
-public class MockSpaceView extends AbstractConnectionTreeView2<JavaApplicationMocked, ConnectionMocked, CommunicationMocked> implements RefreshableView {
+public class MockSpaceView 
+	extends AbstractConnectionTreeView<JavaApplicationMocked, ConnectionMocked, CommunicationMocked, ConnectionMockedDetailsView> 
+	implements RefreshableView {
 
 	@Override
 	public void enterInView(ViewChangeEvent event) {
 		fillTreeTable();
-	}
-	
-	@Override
-	protected Component getInnerComponent() {
-		return treeGrid;
 	}
 
 	private static final String BUNDLE_NAME = "BundleUI";
@@ -54,6 +51,8 @@ public class MockSpaceView extends AbstractConnectionTreeView2<JavaApplicationMo
 	public MockSpaceView() {
 		super(JavaApplicationMocked.class, ConnectionMocked.class, CommunicationMocked.class);
 		treeGrid.addSelectionListener(this::treeSelectionChange);
+		//treeGrid.setSizeFull();
+		setSizeFull();
 	}
 	
 	@Override
@@ -108,9 +107,19 @@ public class MockSpaceView extends AbstractConnectionTreeView2<JavaApplicationMo
 						, this::details, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
 				.addButton("Refresh_Button", VaadinIcons.REFRESH, null,  this::always			
 						, this::refresh, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
+				.addButton("Play_Button", VaadinIcons.PLAY, null,  this::canPlay			
+						, this::play, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
 				;
 
 		return builder.build();
+	}
+	
+	public boolean canPlay() {
+		return !isMainTabSelected();
+	}
+	
+	public void play(ClickEvent event) {
+		getSelectedDetailView().play();
 	}
 	
 	public void clean(ClickEvent event) {
@@ -135,14 +144,14 @@ public class MockSpaceView extends AbstractConnectionTreeView2<JavaApplicationMo
 		}
 	}
 	
-	public void details(ClickEvent event) {
-		if (isConnectionSelected()) {
-			ConnectionMocked conn = treeGrid.getSelectedItems().iterator().next().getConnection();
-			ConnectionMockedDetailsView connectionWithDetail = new ConnectionMockedDetailsView(conn);
-			ViewWithToolBar view = new ViewWithToolBar(connectionWithDetail);
-			connectionWithDetail.setSubWindow(SmockerUI.displayInSubWindow(bundle.getString("MockedCommunications"), view));
-		}
-	}
+//	public void details(ClickEvent event) {
+//		if (isConnectionSelected()) {
+//			ConnectionMocked conn = treeGrid.getSelectedItems().iterator().next().getConnection();
+//			ConnectionMockedDetailsView connectionWithDetail = new ConnectionMockedDetailsView(conn);
+//			ViewWithToolBar view = new ViewWithToolBar(connectionWithDetail);
+//			connectionWithDetail.setSubWindow(SmockerUI.displayInSubWindow(bundle.getString("MockedCommunications"), view));
+//		}
+//	}
 	
 	public boolean isSelected() {
 		return treeGrid.getSelectedItems().size() == 1;
@@ -163,7 +172,7 @@ public class MockSpaceView extends AbstractConnectionTreeView2<JavaApplicationMo
 	}
 
 	@Override
-	protected EasyAppLayout getConnectionDetailsLayout(ConnectionMocked conn) {
+	protected ConnectionMockedDetailsView getConnectionDetailsLayout(ConnectionMocked conn) {
 		// TODO Auto-generated method stub
 		return new ConnectionMockedDetailsView(conn);
 	}

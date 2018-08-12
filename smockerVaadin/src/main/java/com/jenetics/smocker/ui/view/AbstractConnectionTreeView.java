@@ -3,17 +3,21 @@ package com.jenetics.smocker.ui.view;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.lang.StringUtils;
 import org.jboss.logging.Logger;
+import org.vaadin.easyapp.ui.ViewWithToolBar;
+import org.vaadin.easyapp.util.EasyAppLayout;
 
 import com.jenetics.smocker.dao.DaoManager;
 import com.jenetics.smocker.dao.IDaoManager;
@@ -22,6 +26,7 @@ import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.ui.SmockerUI;
+import com.jenetics.smocker.ui.component.ConnectionDetailsView;
 import com.jenetics.smocker.ui.util.ButtonWithId;
 import com.jenetics.smocker.ui.util.RefreshableView;
 import com.jenetics.smocker.ui.util.TreeGridConnectionData;
@@ -29,36 +34,43 @@ import com.vaadin.addon.jpacontainer.JPAContainer;
 import com.vaadin.addon.jpacontainer.JPAContainerFactory;
 import com.vaadin.data.TreeData;
 import com.vaadin.data.provider.TreeDataProvider;
+import com.vaadin.event.selection.SelectionEvent;
+import com.vaadin.event.selection.SelectionListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.shared.Position;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.Layout;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
+import com.vaadin.ui.TabSheet.Tab;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.TreeGrid;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
 
-public abstract class AbstractConnectionTreeView<T extends EntityWithId, U extends EntityWithId, V extends Serializable> 
-	extends VerticalSplitPanel implements RefreshableView {
-	
+/**
+ * 
+ * @author igolus 
+ *
+ * @param <T> Application
+ * @param <U> Connection
+ * @param <V> Communication
+ * @param <W> Connection details view Details
+ */
+public abstract class AbstractConnectionTreeView<T extends EntityWithId, U extends EntityWithId, V extends Serializable, W extends EasyAppLayout> 
+	extends EasyAppLayout  {
+
 	/**
 	 * Tree Item object by javaApplication id used to find the associated UI
 	 * Item from an Application id
 	 */
-	protected transient Map<Long, Object> applicationItemById = new HashMap<>();
-	protected transient Map<String, ButtonWithId> buttonByUiId = new HashMap<>();
-	protected transient Map<String, Long> applicationIdIByAdressAndPort = new HashMap<>();
-	protected transient Map<String, Long> applicationIdIByApplicationClass = new HashMap<>();
-	protected transient Map<Long, Object> connectionTreeItemByConnectionId = new HashMap<>();
-	protected transient Object rootTreeItem;
-	
-
 	protected TreeGrid<TreeGridConnectionData<T, U>> treeGrid = null;
-	protected VerticalLayout second;
 	
+	protected final TabSheet tabSheet = new TabSheet();
+
 	static ResourceBundle bundle = ResourceBundle.getBundle("BundleUI");
 	protected static final String CONNECTION_TYPE = bundle.getString("ConnectionType");
 	protected static final String PORT = bundle.getString("Port");
@@ -71,53 +83,149 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 	protected U selectedConnection = null;
 	protected V selectedCommunication = null;
 	protected boolean allSelected;
-	
+
 	protected IDaoManager<T> daoManagerJavaApplication = null;
 	protected IDaoManager<U> daoManagerConnection = null;
-	
+
 	private Class<T> tParameterClass = null;
 	private Class<U> uParameterClass = null;
 	private Class<V> vParameterClass = null;
 	//protected Item selectedTreeItem;
 	protected JPAContainer<T> jpaJavaApplication;
-	
-	
+
+
 	protected TreeData<TreeGridConnectionData<T, U>> treeData = null;
 	protected TreeDataProvider<TreeGridConnectionData<T, U>> treeDataProvider = null;
 	
+	protected Hashtable<String, Tab> tabByConnectionKey = new Hashtable<>();
+	
+	protected Hashtable<Tab, W> detailsViewByTab = new Hashtable<>();
+	
+	private W selectedDetailView = null;
+
 	@Inject
 	private Logger logger;
+
+	private VerticalLayout tabmainlayout;
 
 	public AbstractConnectionTreeView(Class<T> tParameterClass, Class<U> uParameterClass, Class<V> vParameterClass) {
 		super();
 		this.tParameterClass = tParameterClass;
 		this.uParameterClass = uParameterClass;
 		this.vParameterClass = vParameterClass;
-		
+
 		daoManagerJavaApplication = new DaoManager<>(tParameterClass, SmockerUI.getEm());
 		daoManagerConnection = new DaoManager<>(uParameterClass, SmockerUI.getEm());
-		
-		VerticalLayout mainLayout = new VerticalLayout();
+
 		initDao();
 
-		mainLayout.setMargin(true);
+		setMargin(true);
 		buildTreeTable();
 		fillTreeTable();
-		treeGrid.setWidth("100%");
-		treeGrid.setHeight("40%");
-
-		treeGrid.setSizeFull();
-		setFirstComponent(treeGrid);
-		setSplitPosition(150, Unit.PIXELS);
-
+		
+		TabSheet tabSheet = new TabSheet();
+		tabSheet.setSizeFull();
 		setSizeFull();
-		checkToolBar();
+		addComponent(getInnerComponent());
+		
+		treeGrid.addSelectionListener(this::treeChanged);
+		treeGrid.setSizeFull();
+		setSizeFull();
 	}
 	
-	protected abstract Map<String, Class<?>> getColumnMap();
+	protected W getSelectedDetailView() {
+		return selectedDetailView;
+	}
 	
-	protected abstract void addColumnToTreeTable();
+	/**
+	 * return the main component to add
+	 * @return
+	 */
+	protected Component getInnerComponent() {
+		treeGrid.setSizeFull();
+		tabmainlayout = new VerticalLayout();
+		tabmainlayout.setSizeFull();
+		tabmainlayout.setCaption(SmockerUI.getBundleValue("MainTab"));
+		tabmainlayout.addComponent(treeGrid);
+		tabSheet.setSizeFull();
+		tabSheet.addTab(tabmainlayout);
+		tabSheet.addSelectedTabChangeListener(this::tabChanged);
+		tabSheet.setCloseHandler(this::tabClosed);
+		//tabSheet.add
+		return tabSheet;
+	}
 	
+	public boolean isMainTabSelected () {
+		return tabSheet.getSelectedTab() == tabmainlayout;
+	}
+	
+	public void tabChanged(SelectedTabChangeEvent event) {
+		refreshClickable();
+	}
+	
+	public void treeChanged(SelectionEvent<TreeGridConnectionData<T, U>> event) {
+		refreshClickable();
+	}
+	
+	public void details(ClickEvent event) {
+		if (isConnectionSelected()) {
+			U conn = treeGrid.getSelectedItems().iterator().next().getConnection();
+			W connectionWithDetail = getConnectionDetailsLayout(conn);
+			selectedDetailView = connectionWithDetail;
+			String connectionKey = getConnectionKey(conn);
+			Tab tabForConnection = tabByConnectionKey.get(connectionKey);
+			if (tabForConnection != null) {
+				tabSheet.setSelectedTab(tabForConnection);
+			}
+			else {
+				tabForConnection = addTabConnectionDetails(connectionWithDetail, conn);
+				detailsViewByTab.put(tabForConnection, connectionWithDetail);
+			}
+			selectedDetailView = detailsViewByTab.get(tabForConnection);
+		}
+	}
+	
+	protected abstract String getConnectionKey(U conn);
+
+	protected abstract W getConnectionDetailsLayout(U conn);
+
+	protected Tab addTabConnectionDetails (EasyAppLayout connectionWithDetail, U conn) {
+		//ViewWithToolBar view = new ViewWithToolBar(connectionWithDetail);
+		//view.setSizeFull();
+		//view.setCaption(getConnectionKey(conn));
+		connectionWithDetail.setSizeFull();
+		Tab connectionWithDetailTab = tabSheet.addTab(connectionWithDetail);
+		
+		connectionWithDetailTab.setClosable(true);
+		String connectionKey = getConnectionKey(conn);
+		connectionWithDetailTab.setCaption(connectionKey);
+		tabByConnectionKey.put(connectionKey, connectionWithDetailTab);
+		
+		removeAllComponents();
+        addComponent(tabSheet);
+        tabSheet.setSelectedTab(connectionWithDetailTab);
+        
+        return connectionWithDetailTab;
+	}
+	
+	protected abstract boolean isConnectionSelected();
+
+	public void tabClosed(TabSheet tabsheet, Component tabContent) {
+		Tab tab = tabsheet.getTab(tabContent);
+		Map<Tab, String> connectionByTab = 
+				tabByConnectionKey.entrySet()
+				.stream()
+				.collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+
+		String connKey = connectionByTab.get(tab);
+		tabByConnectionKey.remove(connKey);
+		detailsViewByTab.remove(tab);
+
+		tabsheet.removeTab(tab);
+		refreshClickable();
+	}
+
+
 	/**
 	 * Update the tree
 	 * 
@@ -126,167 +234,23 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 	protected void updateTree(EntityWithId entityWithId) {
 		if (tParameterClass.isAssignableFrom(entityWithId.getClass())) {
 			T javaApplication = (T) entityWithId;
-			fillJavaApplicationTreeItem(javaApplication, false);
+			addJavaApplicationToTree(javaApplication);
 		} else if (uParameterClass.isAssignableFrom(entityWithId.getClass())) {
 			U conn = (U) entityWithId;
-			addConnectionItemToTreeTable(getJavaAppFromConnection(conn), conn);
-		} else if (vParameterClass.isAssignableFrom(entityWithId.getClass())) {
-			V comm = (V) entityWithId;
-			fillCommunications( getConnectionFromCommunication( comm), true);
-		}
+			addConnectionToTree(getJavaAppFromConnection(conn), conn);
+		} 
+		treeDataProvider.refreshAll();
 	}
 
-	
-	protected void refreshEntity(EntityWithId entityWithId) {
-		jpaJavaApplication.refreshItem(entityWithId.getId());
-	}
-	
-	
-	/**
-	 * Rebuild the treeTable
-	 */
-	protected void fillTreeTable() {
-		clearAssociationMaps();
-
-		//data.clear();
-		//treeGrid.removeAllItems();
-		//treeGrid.getDataProvider().get
-		second.removeAllComponents();
-
-		List<T> listAllJavaApplications = daoManagerJavaApplication.listAll();
-
-		Object[] root = new Object[] { ALL, "", "", "" };
-		//this.rootTreeItem = treeGrid.addItem(root, null);
-
-		for (T javaApplication : listAllJavaApplications) {
-			fillJavaApplicationTreeItem(javaApplication, true);
-		}
-	}
-	
-	/**
-	 * Rebuild the UI for the JavaApplications
-	 * 
-	 * @param javaApplication
-	 * @param rebuild
-	 *            true when the Full UI is redisplayed
-	 */
-	protected void fillJavaApplicationTreeItem(T javaApplication, boolean rebuild) {
-
-		if (applicationItemById.get(getJavaAppId(javaApplication)) == null || rebuild) {
-			createJavaApplicationItem(getJavaAppClassQualifiedName(javaApplication), getJavaAppId(javaApplication));
-		}
-		Set<U> connections = getJavaAppConnections(javaApplication);
-		rebuildConnectionsTreeItem(connections, javaApplication);
-
-		if (connections.isEmpty()) {
-			//treeGrid.setChildrenAllowed(applicationItemById.get(getJavaAppId(javaApplication)), false);
-		}
-	}
-	
-	/**
-	 * Add a connection item to the tree table
-	 * @param javaApplication
-	 * @param connection
-	 */
-	protected void addConnectionItemToTreeTable(T javaApplication, U connection) {
-
-		Object javaApplicationTreeItem = applicationItemById.get(getJavaAppId(javaApplication));
-		if (javaApplicationTreeItem != null) {
-			manageSpecialUIBehaviourInJavaApplication(connection);
-			Object[] itemConnection = new Object[] { getJavaAppClassQualifiedName(javaApplication), getConnectionHost(connection),
-					getConnectionPort(connection).toString(), "" };
-			//Object connectionTreeItem = treeGrid.addItem(itemConnection, null);
-			//connectionTreeItemByConnectionId.remove(getConnectionId(connection));
-			//connectionTreeItemByConnectionId.put(getConnectionId(connection), connectionTreeItem);
-
-			//treeGrid.setChildrenAllowed(javaApplicationTreeItem, true);
-			//treeGrid.setParent(connectionTreeItem, javaApplicationTreeItem);
-			//treeGrid.setChildrenAllowed(connectionTreeItem, false);
-
-			applicationIdIByAdressAndPort.remove(getConnectionHost(connection) + SEP_CONN + getConnectionHost(connection));
-			applicationIdIByAdressAndPort.put(getConnectionHost(connection) + SEP_CONN + getConnectionPort(connection), 
-					getJavaAppId(getJavaAppFromConnection(connection)));
-			fillCommunications(connection, true);
-		} else {
-			logger.warn("Unable to find javaApplicationTreeItem");
-		}
-	}
-	
-	private void rebuildConnectionsTreeItem(Set<U> connections, T javaApplication) {
-
-		Object applicationTreeItemId = applicationItemById.get(getJavaAppId(javaApplication));
-		// remove all the items
-//		if (treeGrid.getChildren(applicationTreeItemId) != null) {
-//			for (Object child : new HashSet<Object>(treeGrid.getChildren(applicationTreeItemId))) {
-//				treeGrid.removeItem(child);
-//				connectionTreeItemByConnectionId.values().remove(child);
-//			}
-//		}
-
-		for (Iterator iterator = connections.iterator(); iterator.hasNext();) {
-			U connection = (U) iterator.next();
-			addConnectionItemToTreeTable(javaApplication, connection);
-		}
-	}
-	
-	protected abstract Long getJavaAppId(T javaApplication);
-	protected abstract Long getConnectionId(U connection);
-	protected abstract String getJavaAppClassQualifiedName(T javaApplication);
 	protected abstract Set<U> getJavaAppConnections(T javaApplication);
-	protected abstract void manageSpecialUIBehaviourInJavaApplication(U connection);
-	protected abstract String getConnectionHost(U connection);
-	protected abstract Integer getConnectionPort(U connection);
 	protected abstract T getJavaAppFromConnection(U connection);
 	protected abstract U getConnectionFromCommunication(V comm);
+	protected abstract TreeGridConnectionData<T, U> createTreeGridFromJavaApplication(T javaApplication);
+	protected abstract TreeGridConnectionData<T, U> createTreeGridFromJConnection(U connection);
 
 
 
-	/**
-	 * Clear all the reference maps
-	 */
-	public void clearAssociationMaps() {
-		applicationItemById.clear();
-		buttonByUiId.clear();
-		applicationIdIByAdressAndPort.clear();
-		applicationIdIByApplicationClass.clear();
-		connectionTreeItemByConnectionId.clear();
-	}
-
-	protected void buildTreeTable() {
-		treeGrid = new TreeGrid<TreeGridConnectionData<T, U>>();
-		
-		treeData = new TreeData<>();
-		treeDataProvider = new TreeDataProvider<>(treeData);
-		
-		treeGrid.addColumn(item -> item.getApplication()).setCaption("APP");
-		treeGrid.addColumn(item -> item.getAdress()).setCaption("ADD");
-		treeGrid.addColumn(item -> item.getPort()).setCaption("PORT");
-
-		
-		treeGrid.setDataProvider(treeDataProvider);
-		
-//		for (Map.Entry<String, Class<?>> entry : getColumnMap().entrySet()) {
-//			treeGrid.addContainerProperty(entry.getKey(), entry.getValue(), "");
-//		}
-//		treeGrid.setSelectable(true);
-//		addColumnToTreeTable();
-//		treeGrid.addItemClickListener(this::treeTableItemClicked);
-	}
-
-	protected VerticalLayout buildSecondArea() {
-		second = new VerticalLayout();
-		second.setSizeFull();
-		return second;
-	}
-
-	protected void checkToolBar() {
-//		if (SmockerUI.getInstance() != null) {
-//			SmockerUI.getInstance().getEasyAppMainView().getToolBar().checkClickable(this);
-//		}
-	}
-
-	@Override
-	public void refresh(EntityWithId entityWithId) {
+	protected void refreshEntity(EntityWithId entityWithId) {
 		Notification notif = new Notification("Refreshing", Type.ASSISTIVE_NOTIFICATION);
 
 		// Customize it
@@ -299,105 +263,74 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 
 		treeGrid.setEnabled(true);
 
-		refreshEntity(entityWithId);
 		updateTree(entityWithId);
 	}
 
-	/**
-	 * Add Java Application to tree view
-	 * 
-	 * @param className
-	 * @param javaApplicationId
-	 */
-	protected void createJavaApplicationItem(String className, Long javaApplicationId) {
-		Object[] javaApplicationItem = new Object[] { className, "", "", "" };
-		//Object javaApplicationTreeItem = treeGrid.addItem(javaApplicationItem, null);
-		//treeGrid.setParent(javaApplicationTreeItem, rootTreeItem);
-		//treeGrid.setChildrenAllowed(javaApplicationTreeItem, false);
-		//applicationItemById.put(javaApplicationId, javaApplicationTreeItem);
-		applicationIdIByApplicationClass.put(className, javaApplicationId);
-	}
-
-	protected void setSelection(T javaApplication, U connection, boolean allSelected) {
-		selectedJavaApplication = javaApplication;
-		selectedConnection = connection;
-		this.allSelected = allSelected;
-		checkToolBar();
-	}
-
-//	protected void treeTableItemClicked(ItemClickEvent itemClickEvent) {
-//		selectedTreeItem = itemClickEvent.getItem();
-//		checkToolBar();
-//	
-//		if (!StringUtils.isEmpty(itemClickEvent.getItem().getItemProperty(ADRESS).toString())
-//				&& !StringUtils.isEmpty(itemClickEvent.getItem().getItemProperty(PORT).toString())) {
-//			String host = itemClickEvent.getItem().getItemProperty(ADRESS).toString();
-//			String port = itemClickEvent.getItem().getItemProperty(PORT).toString();
-//			String key = host + SEP_CONN + port;
-//			Long appId = applicationIdIByAdressAndPort.get(key);
-//			if (appId != null) {
-//				refreshCommunications(host, port, appId);
-//			}
-//		} else {
-//			String application = itemClickEvent.getItem().getItemProperty(APPLICATION).toString();
-//			if (application.equals(ALL)) {
-//				setSelection(null, null, true);
-//			} else if (!StringUtils.isEmpty(application)) {
-//				long selectedApplicationId = applicationIdIByApplicationClass.get(application);
-//				T selectedApplication = jpaJavaApplication.getItem(selectedApplicationId).getEntity();
-//				setSelection(selectedApplication, null, false);
-//			}
-//		}
-//		checkToolBar();
-//	}
 
 	/**
-	 * refresh the communications
-	 * @param host
-	 * @param port
-	 * @param appId
+	 * Rebuild the treeTable
 	 */
-	void refreshCommunications(String host, String port, Long appId) {
-		jpaJavaApplication.refresh();
-		T javaApplication = jpaJavaApplication.getItem(appId).getEntity();
-		U connection = getCorrespondingConnection(host, port, javaApplication);
-		
-		if (connection != null) {
-			setSelection(null, connection, false);
-			fillCommunications(connection, false);
+	protected void fillTreeTable() {
+		treeData.clear();
+		List<T> listAllJavaApplications = daoManagerJavaApplication.listAll();
+		for (T javaApplication : listAllJavaApplications) {
+			//refreshEntity(javaApplication);
+			addJavaApplicationToTree(javaApplication);
+		}
+		treeDataProvider.refreshAll();
+	}
+	
+	Map<T, TreeGridConnectionData<T, U>> treeItemByJavaApplication = new Hashtable<T, TreeGridConnectionData<T, U>>();
+	/**
+	 * Add a Java application item to the tree
+	 * @param javaApplication
+	 */
+	private void addJavaApplicationToTree(T javaApplication) {
+		TreeGridConnectionData<T, U> treeGridConnectionJavaApp = createTreeGridFromJavaApplication(javaApplication);
+		treeItemByJavaApplication.put(javaApplication, treeGridConnectionJavaApp);
+		treeData.addItem(null, treeGridConnectionJavaApp);
+		Set<U> javaAppConnections = getJavaAppConnections(javaApplication);
+		for (U connection : javaAppConnections) {
+			addConnectionToTree(javaApplication, connection);
 		}
 	}
-	
-	protected abstract void fillCommunications(U conn, boolean checkSelected);
-	
-	/**
-	 * get the corresponding connection
-	 * @param host
-	 * @param port
-	 * @return
-	 */
-	protected abstract U getCorrespondingConnection(String host, String port, T javaApplication);
+
+
+	private void addConnectionToTree(T javaApplication, U connection) {
+		TreeGridConnectionData<T, U> treeGridConnection = createTreeGridFromJConnection(connection);
+		if (treeItemByJavaApplication.containsKey(javaApplication)) {
+			treeData.addItem(treeItemByJavaApplication.get(javaApplication), treeGridConnection);
+		}
+	}
+
+	protected void buildTreeTable() {
+		treeGrid = new TreeGrid<TreeGridConnectionData<T, U>>();
+
+		treeData = new TreeData<>();
+		treeDataProvider = new TreeDataProvider<>(treeData);
+		
+		addTreeMapping();
+
+		treeGrid.setDataProvider(treeDataProvider);
+	}
+
+
+
+	protected abstract void addTreeMapping();
+
 
 	protected void initDao() {
 		jpaJavaApplication = JPAContainerFactory.make(tParameterClass, SmockerUI.getEm());
 	}
 
-	@Override
+
 	public boolean always() {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
-	@Override
-	public void tabChanged(SelectedTabChangeEvent event) {
-		// TODO Auto-generated method stub
-		
-	}
 
-	@Override
-	public void tabClosed(TabSheet tabsheet, Component tabContent) {
-		// TODO Auto-generated method stub
-		
+	public void refresh(ClickEvent event) {
+		fillTreeTable();
 	}
 
 }

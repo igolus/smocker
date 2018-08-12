@@ -22,6 +22,8 @@ import com.jenetics.smocker.ui.view.MockSpaceView;
 import com.jenetics.smocker.util.NetworkReaderUtility;
 import com.vaadin.data.TreeData;
 import com.vaadin.data.provider.TreeDataProvider;
+import com.vaadin.event.selection.SelectionEvent;
+import com.vaadin.event.selection.SelectionListener;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
@@ -43,19 +45,12 @@ public class ConnectionDetailsView extends EasyAppLayout {
 	private TreeData<CommunicationDateDisplay> treeData;
 	private TreeDataProvider<CommunicationDateDisplay> treeDataProvider;
 	private Communication selectedCommunication = null;;
-	
+
+
 	protected IDaoManager<Connection> daoManagerConnection = new DaoManager<Connection>(Connection.class, SmockerUI.getEm());
-	
-	private Window subWindow;
-	
-	public Window getSubWindow() {
-		return subWindow;
-	}
 
-	public void setSubWindow(Window subWindow) {
-		this.subWindow = subWindow;
-	}
-
+	private Runnable refreshClickable;
+	
 	public ConnectionDetailsView(Connection connection) {
 		super();
 		HorizontalSplitPanel mainLayout = new HorizontalSplitPanel();
@@ -67,6 +62,7 @@ public class ConnectionDetailsView extends EasyAppLayout {
 		treeData = new TreeData<>();
 		treeDataProvider = new TreeDataProvider<>(treeData);
 		menu.setDataProvider(treeDataProvider);
+		menu.addSelectionListener(this::menuSelectionChange);
 		
 		fillCommunication();
 		
@@ -77,16 +73,23 @@ public class ConnectionDetailsView extends EasyAppLayout {
 		
 		grid = new GridLayout(2, 1);
 		grid.setSizeFull();
-		grid.setSizeFull();
-
 
 		mainLayout.setFirstComponent(menu);
 		mainLayout.setSecondComponent(grid);
-		mainLayout.setSplitPosition(20);
+		mainLayout.setSplitPosition(23);
 		mainLayout.setSizeFull();
 		addComponent(mainLayout);
 		setSizeFull();
-		
+	}
+	
+	public void menuSelectionChange(SelectionEvent<CommunicationDateDisplay> event) {
+		if (refreshClickable != null) {
+			refreshClickable.run();
+		}
+	}
+	
+	public Communication getSelectedCommunication() {
+		return selectedCommunication;
 	}
 
 	private void fillCommunication() {
@@ -120,26 +123,6 @@ public class ConnectionDetailsView extends EasyAppLayout {
 		
 		selectedCommunication = comm;
 		refreshClickable();
-	}
-	
-//	public ActionContainer buildActionContainer() {
-//		ActionContainerBuilder builder = new ActionContainerBuilder(SmockerUI.BUNDLE_NAME)
-//				.addButton("AddToMock_Button", VaadinIcons.PLUS, "AddToMock_ToolTip",  this::isSelected			
-//						, this::addToMock, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
-//				.addButton("Clean_Button", VaadinIcons.MINUS, "Clean_ToolTip",  this::isSelected			
-//						, this::clean, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
-//				.addButton("CleanAll_Button", VaadinIcons.MINUS, "CleanAll_ToolTip",  this::atLeastOneItem			
-//						, this::cleanAll, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
-//				.addButton("Refresh_Button", VaadinIcons.REFRESH, "Refresh_ToolTip",  this::always			
-//						, this::refresh, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER);
-//
-//		return builder.build();
-//	}
-	
-	public void addToMock(ClickEvent event) {
-		MockConverter.convertcommunication(selectedCommunication);
-		subWindow.close();
-		SmockerUI.getInstance().getEasyAppMainView().getScanner().navigateTo(MockSpaceView.class);
 	}
 	
 	public void clean(ClickEvent event) {
@@ -176,6 +159,18 @@ public class ConnectionDetailsView extends EasyAppLayout {
 	
 	public void search(String searchValue) {
 		Notification.show("Search for:" + searchValue);
+	}
+
+	public void setRefreshClickableAction(Runnable refreshClickable) {
+		this.refreshClickable = refreshClickable;
+	}
+	
+	public void displayStack() {
+		Communication selectedCommunication = getSelectedCommunication();
+		if (selectedCommunication != null) {
+			SmockerUI.displayInSubWindow(SmockerUI.getBundle().getString("StackTrace"), 
+					new TextPanel(NetworkReaderUtility.decode(selectedCommunication.getCallerStack())));
+		}
 	}
 	
 }

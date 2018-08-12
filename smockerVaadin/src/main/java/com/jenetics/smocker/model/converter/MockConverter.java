@@ -118,6 +118,8 @@ public class MockConverter {
 			targetConnectionMocked.setJavaApplication(targetJavaApplicationMocked);
 			
 			daoManagerConnectionMocked.create(targetConnectionMocked);
+			//update javaapplication
+			daoManagerJavaApplicationMocked.update(targetJavaApplicationMocked);
 		}
 		return targetConnectionMocked;
 	}

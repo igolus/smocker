@@ -18,6 +18,7 @@ import com.jenetics.smocker.injector.BundleUI;
 import com.jenetics.smocker.model.CommunicationMocked;
 import com.jenetics.smocker.model.ConnectionMocked;
 import com.jenetics.smocker.ui.SmockerUI;
+import com.jenetics.smocker.ui.component.javascript.JsEditor;
 import com.jenetics.smocker.ui.dialog.Dialog;
 import com.jenetics.smocker.ui.util.CommunicationMockedDateDisplay;
 import com.jenetics.smocker.util.NetworkReaderUtility;
@@ -50,7 +51,8 @@ public class ConnectionMockedDetailsView extends EasyAppLayout {
 	private TreeDataProvider<CommunicationMockedDateDisplay> treeDataProvider;
 	private CommunicationMocked selectedCommunication = null;
 	private HorizontalSplitPanel mainLayout = null;
-	private  AceEditor aceEditor = null;
+	//private AceEditor aceEditor = null;
+	private JsEditor jsEditor = null;
 	
 	protected IDaoManager<ConnectionMocked> daoManagerConnection = new DaoManager<ConnectionMocked>(ConnectionMocked.class, SmockerUI.getEm());
 	
@@ -76,10 +78,13 @@ public class ConnectionMockedDetailsView extends EasyAppLayout {
 		
 		this.connectionMocked = connectionMocked;
 		
-		aceEditor = new AceEditor();
+		jsEditor = new JsEditor();
+		jsEditor.setSizeFull();
 		
 		menu = new Tree<>();
 		menu.setSelectionMode(SelectionMode.SINGLE);
+		menu.setSizeFull();
+		
 		treeData = new TreeData<>();
 		treeDataProvider = new TreeDataProvider<>(treeData);
 		menu.setDataProvider(treeDataProvider);
@@ -89,7 +94,7 @@ public class ConnectionMockedDetailsView extends EasyAppLayout {
 
 		mainLayout.setFirstComponent(menu);
 		
-		mainLayout.setSplitPosition(20);
+		mainLayout.setSplitPosition(23);
 		mainLayout.setSizeFull();
 		
 		addComponent(mainLayout);
@@ -114,9 +119,9 @@ public class ConnectionMockedDetailsView extends EasyAppLayout {
 		String request = NetworkReaderUtility.decode(comm.getRequest());
 		String response = NetworkReaderUtility.decode(comm.getResponse());
 		
-		aceEditor.setMode(AceMode.groovy);
-		aceEditor.setTheme(AceTheme.eclipse);
-		aceEditor.setSizeFull();
+//		aceEditor.setMode(AceMode.groovy);
+//		aceEditor.setTheme(AceTheme.eclipse);
+//		aceEditor.setSizeFull();
 		
 		TabSheet tabSheet = new TabSheet();
 		tabSheet.setSizeFull();
@@ -124,14 +129,14 @@ public class ConnectionMockedDetailsView extends EasyAppLayout {
 		addTextAreaToTabSheet(request, "Input", tabSheet);
 		addTextAreaToTabSheet(response, "Output", tabSheet);	
 		
-		loggerPanel = new LoggerPanel();
+//		loggerPanel = new LoggerPanel();
 		
-		VerticalSplitPanel vsplit = new VerticalSplitPanel();
-		vsplit.setSplitPosition(75, Unit.PERCENTAGE);
-		vsplit.setFirstComponent(loggerPanel);
-		vsplit.setSecondComponent(aceEditor);
+//		VerticalSplitPanel vsplit = new VerticalSplitPanel();
+//		vsplit.setSplitPosition(75, Unit.PERCENTAGE);
+//		vsplit.setFirstComponent(loggerPanel);
+//		vsplit.setSecondComponent(aceEditor);
 		
-		tabSheet.addTab(vsplit, SmockerUI.getBundleValue("GroovyEditor"));
+		tabSheet.addTab(jsEditor, SmockerUI.getBundleValue("GroovyEditor"));
 		
 		mainLayout.setSecondComponent(tabSheet);
 		
@@ -186,26 +191,27 @@ public class ConnectionMockedDetailsView extends EasyAppLayout {
 		Notification.show("Clean");
 	}
 	
-	public void play(ClickEvent event) {
-		if (evaluateAndShowGroovyErrors()) {
-			selectedCommunication.setSourceGroovy(aceEditor.getValue());
-			Binding binding = new Binding();
-			GroovyShell shell = new GroovyShell(binding);
-			shell.evaluate(aceEditor.getValue());
-		}
+	public void play() {
+		jsEditor.runScript();
+//		if (evaluateAndShowGroovyErrors()) {
+//			selectedCommunication.setSourceGroovy(aceEditor.getValue());
+//			Binding binding = new Binding();
+//			GroovyShell shell = new GroovyShell(binding);
+//			shell.evaluate(aceEditor.getValue());
+//		}
 	}
 
-	private boolean evaluateAndShowGroovyErrors() {
-		try {
-		    new GroovyShell().evaluate(aceEditor.getValue());
-		} catch(Exception e) {
-		    //SmockerUI.displayMessageInSubWindow(SmockerUI.getBundleValue("GroovyErrors"), SmockerUtility.getStackTrace(e));
-			loggerPanel.appendMessage(Level.SEVERE, SmockerUtility.getStackTrace(e));
-		    //SmockerUI.log(Level.SEVERE, SmockerUtility.getStackTrace(e));
-		    return false;
-		}
-		return true;
-	}
+//	private boolean evaluateAndShowGroovyErrors() {
+//		try {
+//		    new GroovyShell().evaluate(aceEditor.getValue());
+//		} catch(Exception e) {
+//		    //SmockerUI.displayMessageInSubWindow(SmockerUI.getBundleValue("GroovyErrors"), SmockerUtility.getStackTrace(e));
+//			loggerPanel.appendMessage(Level.SEVERE, SmockerUtility.getStackTrace(e));
+//		    //SmockerUI.log(Level.SEVERE, SmockerUtility.getStackTrace(e));
+//		    return false;
+//		}
+//		return true;
+//	}
 	
 	public void refresh(ClickEvent event) {
 		fillCommunication();

@@ -23,12 +23,6 @@ public abstract class TreeGridConnectionData<T, U> {
 		return this.javaApplication != null;
 	}  
 	
-//	protected static final String CONNECTION_TYPE = bundle.getString("ConnectionType");
-//	protected static final String PORT = bundle.getString("Port");
-//	protected static final String ADRESS = bundle.getString("Adress");
-//	protected static final String APPLICATION = bundle.getString("Application");
-//	protected static final String ALL = "all";
-	
 	public T getJavaApplication() {
 		return javaApplication;
 	}
@@ -41,11 +35,6 @@ public abstract class TreeGridConnectionData<T, U> {
 	public abstract String getPort();
 	public abstract String getAdress();
 	public abstract String getApplication();
-	
-//	public TreeGridConnectionData(U connection) {
-//		super();
-//		this.connection = connection;
-//	} 
-	
+
 
 }

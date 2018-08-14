@@ -111,7 +111,6 @@ public class SmockerUI extends UI {
 		easyAppBuilder.withNavigatorSplitPosition(300);
 		easyAppBuilder.withMenuCollapsable();
 		easyAppBuilder.withTopBarStyle("TopBar");
-		easyAppBuilder.withApplicationTitle("EasyApp Laboratory");
 		easyAppBuilder.withContextualTextLabelStyle("Contextual");
 		
 		easyAppBuilder.withMenuCollapsable();

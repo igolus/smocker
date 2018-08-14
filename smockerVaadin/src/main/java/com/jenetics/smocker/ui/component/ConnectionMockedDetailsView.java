@@ -16,11 +16,16 @@ import com.jenetics.smocker.dao.DaoManager;
 import com.jenetics.smocker.dao.IDaoManager;
 import com.jenetics.smocker.injector.BundleUI;
 import com.jenetics.smocker.model.CommunicationMocked;
+import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.ConnectionMocked;
+import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.component.javascript.JsEditor;
 import com.jenetics.smocker.ui.dialog.Dialog;
+import com.jenetics.smocker.ui.util.ButtonWithIEntity;
 import com.jenetics.smocker.ui.util.CommunicationMockedDateDisplay;
+import com.jenetics.smocker.ui.util.TreeGridConnectionData;
+import com.jenetics.smocker.ui.util.TreeGridMockedItem;
 import com.jenetics.smocker.util.NetworkReaderUtility;
 import com.jenetics.smocker.util.SmockerUtility;
 import com.vaadin.data.TreeData;
@@ -28,13 +33,19 @@ import com.vaadin.data.provider.TreeDataProvider;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Sizeable;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.SelectionMode;
+import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.Tree.ItemClick;
+import com.vaadin.ui.components.grid.ItemClickListener;
+import com.vaadin.ui.TreeGrid;
 import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.Window;
 
@@ -43,20 +54,21 @@ import groovy.lang.GroovyShell;
 
 
 @SuppressWarnings("serial")
-public class ConnectionMockedDetailsView extends EasyAppLayout {
+public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 	
 	private ConnectionMocked connectionMocked;
-	private Tree<CommunicationMockedDateDisplay> menu;
-	private TreeData<CommunicationMockedDateDisplay> treeData;
-	private TreeDataProvider<CommunicationMockedDateDisplay> treeDataProvider;
+	private TreeGrid<TreeGridMockedItem> treeGrid;
+	private TreeData<TreeGridMockedItem> treeData;
+	private TreeDataProvider<TreeGridMockedItem> treeDataProvider;
 	private CommunicationMocked selectedCommunication = null;
 	private HorizontalSplitPanel mainLayout = null;
-	//private AceEditor aceEditor = null;
-	private JsEditor jsEditor = null;
+	private JsEditor selectedJsEditor = null;
 	
 	protected IDaoManager<ConnectionMocked> daoManagerConnection = new DaoManager<ConnectionMocked>(ConnectionMocked.class, SmockerUI.getEm());
 	
 	private Window subWindow;
+	private TabSheet tabSheet;
+	private Component tabJs;
 	
 	public Window getSubWindow() {
 		return subWindow;
@@ -78,94 +90,107 @@ public class ConnectionMockedDetailsView extends EasyAppLayout {
 		
 		this.connectionMocked = connectionMocked;
 		
-		jsEditor = new JsEditor();
-		jsEditor.setSizeFull();
-		
-		menu = new Tree<>();
-		menu.setSelectionMode(SelectionMode.SINGLE);
-		menu.setSizeFull();
+		treeGrid = new TreeGrid<>();
+		treeGrid.setSelectionMode(SelectionMode.SINGLE);
+		treeGrid.setSizeFull();
 		
 		treeData = new TreeData<>();
 		treeDataProvider = new TreeDataProvider<>(treeData);
-		menu.setDataProvider(treeDataProvider);
+		treeGrid.setDataProvider(treeDataProvider);
 		
 		fillCommunication();
-		menu.addItemClickListener(this::treeItemClick);
-
-		mainLayout.setFirstComponent(menu);
+		treeGrid.addItemClickListener(this::treeItemClick);
+		mainLayout.setFirstComponent(treeGrid);
 		
 		mainLayout.setSplitPosition(23);
 		mainLayout.setSizeFull();
 		
 		addComponent(mainLayout);
+		
+		addTreeMapping();
+		treeGrid.removeHeaderRow(0);
+		//treeGrid.removeHeaderRow(1);
 		setSizeFull();
 		
+	}
+	
+	protected void addTreeMapping() {
+		treeGrid.addColumn(item -> item.getName());
+		treeGrid.addComponentColumn(this::buildEnableButton);
+	}
+	
+	
+	private Button buildEnableButton(TreeGridMockedItem item) {
+		if (!item.isRoot()) {
+//			String buttonString;
+//			Connection connection = item.getConnection();
+//			if (connection.getWatched() == null || connection.getWatched()) {
+//				buttonString = bundle.getString("Mute_Button");
+//			} else {
+//				buttonString = bundle.getString("Watch_Button");
+//			}
+			ButtonWithIEntity<CommunicationMocked> buttonWithId = new ButtonWithIEntity<>(item.getCommunication());
+			buttonWithId.setCaption("Enable");
+			buttonWithId.addClickListener(this::enableButtonClicked);
+			//buttonByUiId.put(buttonWithId.getUiId(), buttonWithId);
+			return buttonWithId;
+		}
+		return null;
+    }
+	
+	public void enableButtonClicked(ClickEvent event) {
+		ButtonWithIEntity<CommunicationMocked> buttonWithEntity = (ButtonWithIEntity<CommunicationMocked>) event.getSource();
+		CommunicationMocked communicationMockedSelected = buttonWithEntity.getEntity();
 	}
 
 	private void fillCommunication() {
 		treeData.clear();
+		TreeGridMockedItem root = new TreeGridMockedItem(true, "scenario1", null);
+		treeData.addItem(null, root);
+		
 		Set<CommunicationMocked> communications = connectionMocked.getCommunications();
 		for (CommunicationMocked communication : communications) {
-			treeData.addItem(null, new CommunicationMockedDateDisplay(communication));
+			treeData.addItem(root, new TreeGridMockedItem(false, "unamed", communication));
 		}
 		treeDataProvider.refreshAll();
 	}
 	
-	private LoggerPanel loggerPanel = null;
-	
-	public void treeItemClick(ItemClick<CommunicationMockedDateDisplay> event) {
+    public void treeItemClick(com.vaadin.ui.Grid.ItemClick<TreeGridMockedItem> event) {
 		CommunicationMocked comm = event.getItem().getCommunication();
-		
-		String request = NetworkReaderUtility.decode(comm.getRequest());
-		String response = NetworkReaderUtility.decode(comm.getResponse());
-		
-//		aceEditor.setMode(AceMode.groovy);
-//		aceEditor.setTheme(AceTheme.eclipse);
-//		aceEditor.setSizeFull();
-		
-		TabSheet tabSheet = new TabSheet();
-		tabSheet.setSizeFull();
-		
-		addTextAreaToTabSheet(request, "Input", tabSheet);
-		addTextAreaToTabSheet(response, "Output", tabSheet);	
-		
-//		loggerPanel = new LoggerPanel();
-		
-//		VerticalSplitPanel vsplit = new VerticalSplitPanel();
-//		vsplit.setSplitPosition(75, Unit.PERCENTAGE);
-//		vsplit.setFirstComponent(loggerPanel);
-//		vsplit.setSecondComponent(aceEditor);
-		
-		tabSheet.addTab(jsEditor, SmockerUI.getBundleValue("GroovyEditor"));
-		
-		mainLayout.setSecondComponent(tabSheet);
-		
-		selectedCommunication = comm;
+		if (comm != null) {
+			String request = NetworkReaderUtility.decode(comm.getRequest());
+			String response = NetworkReaderUtility.decode(comm.getResponse());
+			
+			tabSheet = new TabSheet();
+			tabSheet.setSizeFull();
+			
+			TextPanel selectedRequestPane =  addTextAreaToTabSheet(request, "Input", tabSheet);
+			TextPanel selectedResponsePane = addTextAreaToTabSheet(response, "Output", tabSheet);	
+			
+			tabJs = new JsEditor(comm, selectedRequestPane, selectedResponsePane);
+			tabJs.setSizeFull();
+			
+			tabSheet.addTab(tabJs, SmockerUI.getBundleValue("NodeEditor"));
+			tabSheet.addSelectedTabChangeListener(this::tabChanged);
+			
+			mainLayout.setSecondComponent(tabSheet);
+			
+			selectedCommunication = comm;
+		}
 		refreshClickable();
 	}
-
-	private void addTextAreaToTabSheet(String request, String locString, TabSheet tabSheet) {
-		TextArea areaOutput = new TextArea();
-		areaOutput.setWordWrap(false);
-		areaOutput.setReadOnly(true);
-		areaOutput.setSizeFull();
-		areaOutput.setValue(request);
-		tabSheet.addTab(areaOutput, SmockerUI.getBundleValue(locString));
-	}
 	
-//	public ActionContainer buildActionContainer() {
-//		ActionContainerBuilder builder = new ActionContainerBuilder(SmockerUI.BUNDLE_NAME)
-//				.addButton("Clean_Button", VaadinIcons.MINUS, "Clean_ToolTip",  this::isSelected			
-//						, this::clean, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
-//				.addButton("CleanAll_Button", VaadinIcons.MINUS, "CleanAll_ToolTip",  this::atLeastOneItem			
-//						, this::cleanAll, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
-//				.addButton("Refresh_Button", VaadinIcons.REFRESH, "Refresh_ToolTip",  this::always			
-//						, this::refresh, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
-//				.addButton("Play Button", VaadinIcons.PLAY, "Play_ToolTip",  this::isSelected		
-//						, this::play, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER);
-//
-//		return builder.build();
-//	}
+	public void tabChanged(SelectedTabChangeEvent event) {
+		if (refreshClickable != null) {
+			refreshClickable.run();
+		}
+	}
+
+	private TextPanel addTextAreaToTabSheet(String request, String locString, TabSheet tabSheet) {
+		TextPanel textPanel = new TextPanel(request, false);
+		tabSheet.addTab(textPanel, SmockerUI.getBundleValue(locString));
+		return textPanel;
+	}
 	
 	public void clean(ClickEvent event) {
 		if (isSelected()) {
@@ -192,26 +217,8 @@ public class ConnectionMockedDetailsView extends EasyAppLayout {
 	}
 	
 	public void play() {
-		jsEditor.runScript();
-//		if (evaluateAndShowGroovyErrors()) {
-//			selectedCommunication.setSourceGroovy(aceEditor.getValue());
-//			Binding binding = new Binding();
-//			GroovyShell shell = new GroovyShell(binding);
-//			shell.evaluate(aceEditor.getValue());
-//		}
+		selectedJsEditor.runScript();
 	}
-
-//	private boolean evaluateAndShowGroovyErrors() {
-//		try {
-//		    new GroovyShell().evaluate(aceEditor.getValue());
-//		} catch(Exception e) {
-//		    //SmockerUI.displayMessageInSubWindow(SmockerUI.getBundleValue("GroovyErrors"), SmockerUtility.getStackTrace(e));
-//			loggerPanel.appendMessage(Level.SEVERE, SmockerUtility.getStackTrace(e));
-//		    //SmockerUI.log(Level.SEVERE, SmockerUtility.getStackTrace(e));
-//		    return false;
-//		}
-//		return true;
-//	}
 	
 	public void refresh(ClickEvent event) {
 		fillCommunication();
@@ -231,6 +238,12 @@ public class ConnectionMockedDetailsView extends EasyAppLayout {
 	
 	public void search(String searchValue) {
 		Notification.show("Search for:" + searchValue);
+	}
+
+	public boolean isJSTabSelected() {
+		return  tabSheet != null &&
+				tabSheet.getSelectedTab() != null && 
+				tabSheet.getSelectedTab() == tabJs;
 	}
 	
 }

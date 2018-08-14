@@ -11,10 +11,7 @@ public class StrandardTreeGridConnectionData extends TreeGridConnectionData<Java
 
 	@Override
 	public String getConnectionType() {
-//		if (isConnection()) {
-//			return connection.
-//		}
-		return null;
+		return connection.getPort().toString();
 	}
 
 	@Override

@@ -1,55 +1,40 @@
 package com.jenetics.smocker.ui.view;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang.StringUtils;
 import org.jboss.logging.Logger;
-import org.vaadin.easyapp.ui.ViewWithToolBar;
 import org.vaadin.easyapp.util.EasyAppLayout;
 
 import com.jenetics.smocker.dao.DaoManager;
 import com.jenetics.smocker.dao.IDaoManager;
-import com.jenetics.smocker.model.Communication;
-import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.EntityWithId;
-import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.ui.SmockerUI;
-import com.jenetics.smocker.ui.component.ConnectionDetailsView;
-import com.jenetics.smocker.ui.util.ButtonWithId;
-import com.jenetics.smocker.ui.util.RefreshableView;
 import com.jenetics.smocker.ui.util.TreeGridConnectionData;
 import com.vaadin.addon.jpacontainer.JPAContainer;
 import com.vaadin.addon.jpacontainer.JPAContainerFactory;
 import com.vaadin.data.TreeData;
 import com.vaadin.data.provider.TreeDataProvider;
 import com.vaadin.event.selection.SelectionEvent;
-import com.vaadin.event.selection.SelectionListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.shared.Position;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.Layout;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
 import com.vaadin.ui.TabSheet.Tab;
-import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.TreeGrid;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.VerticalSplitPanel;
 
 /**
  * 
@@ -90,7 +75,6 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 	private Class<T> tParameterClass = null;
 	private Class<U> uParameterClass = null;
 	private Class<V> vParameterClass = null;
-	//protected Item selectedTreeItem;
 	protected JPAContainer<T> jpaJavaApplication;
 
 
@@ -151,7 +135,6 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 		tabSheet.addTab(tabmainlayout);
 		tabSheet.addSelectedTabChangeListener(this::tabChanged);
 		tabSheet.setCloseHandler(this::tabClosed);
-		//tabSheet.add
 		return tabSheet;
 	}
 	
@@ -190,9 +173,6 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 	protected abstract W getConnectionDetailsLayout(U conn);
 
 	protected Tab addTabConnectionDetails (EasyAppLayout connectionWithDetail, U conn) {
-		//ViewWithToolBar view = new ViewWithToolBar(connectionWithDetail);
-		//view.setSizeFull();
-		//view.setCaption(getConnectionKey(conn));
 		connectionWithDetail.setSizeFull();
 		Tab connectionWithDetailTab = tabSheet.addTab(connectionWithDetail);
 		
@@ -274,7 +254,6 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 		treeData.clear();
 		List<T> listAllJavaApplications = daoManagerJavaApplication.listAll();
 		for (T javaApplication : listAllJavaApplications) {
-			//refreshEntity(javaApplication);
 			addJavaApplicationToTree(javaApplication);
 		}
 		treeDataProvider.refreshAll();

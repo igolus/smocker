@@ -16,6 +16,7 @@ import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.model.converter.MockConverter;
 import com.jenetics.smocker.network.ClientCommunicator;
 import com.jenetics.smocker.ui.SmockerUI;
+import com.jenetics.smocker.ui.component.AbstractConnectionDetails;
 import com.jenetics.smocker.ui.component.ConnectionDetailsView;
 import com.jenetics.smocker.ui.dialog.Dialog;
 import com.jenetics.smocker.ui.util.ButtonWithIEntity;

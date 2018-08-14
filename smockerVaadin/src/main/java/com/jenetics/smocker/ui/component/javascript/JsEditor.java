@@ -14,21 +14,34 @@ import org.vaadin.aceeditor.AceMode;
 import org.vaadin.aceeditor.AceTheme;
 import org.vaadin.easyapp.util.EasyAppLayout;
 
+import com.eclipsesource.v8.JavaCallback;
+import com.eclipsesource.v8.JavaVoidCallback;
 import com.eclipsesource.v8.NodeJS;
 import com.eclipsesource.v8.V8;
+import com.eclipsesource.v8.V8Array;
 import com.eclipsesource.v8.V8Object;
+import com.jenetics.smocker.model.CommunicationMocked;
+import com.jenetics.smocker.ui.component.TextPanel;
+import com.jenetics.smocker.util.SmockerUtility;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.TextArea;
 import com.vaadin.ui.VerticalSplitPanel;
 
 @SuppressWarnings("serial")
 public class JsEditor extends EasyAppLayout {
 
 	private AceEditor aceEditor;
-	private Label logTextArea;
+	private TextPanel logTextArea;
+	private TextPanel selectedRequestPane;
+	private TextPanel selectedResponsePane;
 
-	public JsEditor() {
+	public JsEditor(CommunicationMocked communicationMocked, TextPanel selectedRequestPane, TextPanel selectedResponsePane) {
 		super();
+		//this.communicationMocked = communicationMocked;
+		this.selectedRequestPane = selectedRequestPane;
+		this.selectedResponsePane = selectedResponsePane;
+		
 		VerticalSplitPanel mainLayout = new VerticalSplitPanel();
 		aceEditor = new AceEditor();
 		aceEditor.setMode(AceMode.javascript);
@@ -36,69 +49,40 @@ public class JsEditor extends EasyAppLayout {
 		aceEditor.setSizeFull();
 		mainLayout.setFirstComponent(aceEditor);
 
-		logTextArea = new Label();
+		logTextArea = new TextPanel(false);
 		logTextArea.setSizeFull();
 
 		mainLayout.setSplitPosition(75, Unit.PERCENTAGE);
-		//		LoggerPanel loggerPanel = new LoggerPanel();
-		//		loggerPanel.setSizeFull();
-
-		Panel panel = new Panel();
-		panel.setSizeFull();
-		panel.setContent(logTextArea);
-		panel.getContent().setSizeUndefined();
-
-		mainLayout.setSecondComponent(panel);
+		mainLayout.setSecondComponent(logTextArea);
 
 		addComponent(mainLayout);
 		setSizeFull();
 	}
 
 	public void runScript() {
-		//		try {
 		NodeJS nodeJS = NodeJS.createNodeJS();
-		//nodeJS.getRuntime().redefine
-		//nodeJS.getRuntime().exec
-		nodeJS.getRuntime().executeVoidScript(aceEditor.getValue());
+		V8 runtime =nodeJS.getRuntime();
+
+		Logger logger = new Logger();
+		runtime.registerJavaMethod(logger, "consolelog");
 		
-//		Console console = new Console();
-//		V8Object v8Console = new V8Object(v8);
-//		v8.add("console", v8Console);
-//		v8Console.registerJavaMethod(console, "log", "log", new Class<?>[] { String.class });
-//		v8Console.registerJavaMethod(console, "err", "err", new Class<?>[] { String.class });
-//		v8Console.release();
-//
-//		V8 runtime = V8.createV8Runtime();
-//		Object result = runtime.executeScript(aceEditor.getValue());
-//		logTextArea.setValue(result.toString());
-
-		//			ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
-		//			ScriptContext context = engine.getContext();
-		//			StringWriter sw = new StringWriter();
-		//			context.setWriter(sw);
-		//			context.setErrorWriter(sw);
-		//			
-		//			engine.eval( aceEditor.getValue());
-		//			
-		//			logTextArea.setValue(sw.toString());
-		//			sw.close();
-		//		} catch (ScriptException | IOException e) {
-		//			// TODO Auto-generated catch block
-		//			logTextArea.setValue(e.getMessage());
-		//			//e.printStackTrace();
-		//		}
-
-		//		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		//		Context jsContext = Context.newBuilder("js")
-		//                .out(out)
-		//                .option("js.Strict", "true")
-		//                .allowAllAccess(true)
-		//                .build();
-		//		
-		//		
-		//		//Context jsContext = Context.create("js");
-		//		Value value = jsContext.eval("js", aceEditor.getValue());
-		//		logTextArea.setCaption(new String(out.toByteArray()));
+		
+		String script = "var match = matchAndReturnOutput(realInput, providedInput, providedOutput);\n";
+		
+		runtime.add("realInput", "Real input");
+		runtime.add("providedInput", selectedRequestPane.getText());
+		runtime.add("providedOutput", selectedResponsePane.getText());
+		
+		try {
+			runtime.executeVoidScript(script + aceEditor.getValue());
+			String match = runtime.getString("match");
+		}
+		catch (Exception ex) {
+			logTextArea.setText(SmockerUtility.getStackTrace(ex));
+			return;
+		}
+		runtime.release(false);
+		logTextArea.setText(logger.toString());
 	}
 
 

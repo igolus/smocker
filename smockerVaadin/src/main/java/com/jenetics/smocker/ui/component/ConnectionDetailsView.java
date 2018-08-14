@@ -37,7 +37,7 @@ import com.vaadin.ui.Window;
 
 
 @SuppressWarnings("serial")
-public class ConnectionDetailsView extends EasyAppLayout {
+public class ConnectionDetailsView extends AbstractConnectionDetails {
 
 	private Connection connection;
 	private GridLayout grid = null;
@@ -49,8 +49,6 @@ public class ConnectionDetailsView extends EasyAppLayout {
 
 	protected IDaoManager<Connection> daoManagerConnection = new DaoManager<Connection>(Connection.class, SmockerUI.getEm());
 
-	private Runnable refreshClickable;
-	
 	public ConnectionDetailsView(Connection connection) {
 		super();
 		HorizontalSplitPanel mainLayout = new HorizontalSplitPanel();
@@ -161,15 +159,11 @@ public class ConnectionDetailsView extends EasyAppLayout {
 		Notification.show("Search for:" + searchValue);
 	}
 
-	public void setRefreshClickableAction(Runnable refreshClickable) {
-		this.refreshClickable = refreshClickable;
-	}
-	
 	public void displayStack() {
 		Communication selectedCommunication = getSelectedCommunication();
 		if (selectedCommunication != null) {
 			SmockerUI.displayInSubWindow(SmockerUI.getBundle().getString("StackTrace"), 
-					new TextPanel(NetworkReaderUtility.decode(selectedCommunication.getCallerStack())));
+					new TextPanel(NetworkReaderUtility.decode(selectedCommunication.getCallerStack()), true));
 		}
 	}
 	

@@ -4,6 +4,16 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
 	<display-name>JPAContainer Demo Application</display-name>
+	
+	
+<!-- 	<listener>
+		<listener-class>com.jenetics.smocker.bootstrap.MyServletContextListener</listener-class>
+	</listener> -->
+	
+	 <listener>
+	    <listener-class>com.jenetics.smocker.bootstrap.DbStarter</listener-class>
+	</listener>
+	
 	<servlet>
 		<servlet-name>smocker</servlet-name>
 		<servlet-class>com.vaadin.server.VaadinServlet</servlet-class>
@@ -26,7 +36,6 @@
 
 		<async-supported>true</async-supported>
 
-
 	</servlet>
 
 	<!-- <servlet> <servlet-name>rest</servlet-name> <servlet-class>org.jboss.as.quickstarts.kitchensink.rest.JaxRsActivator</servlet-class> 
@@ -44,5 +53,25 @@
 		<servlet-name>smocker</servlet-name>
 		<url-pattern>/VAADIN/*</url-pattern>
 	</servlet-mapping>
+
+
+	<context-param>
+		<param-name>db.url</param-name>
+		<param-value>"jdbc:h2:~/test"</param-value>
+	</context-param>
+	<context-param>
+		<param-name>db.user</param-name>
+		<param-value>sa</param-value>
+	</context-param>
+	<context-param>
+		<param-name>db.password</param-name>
+		<param-value>sa</param-value>
+	</context-param>
+	<context-param>
+		<param-name>db.tcpServer</param-name>
+		<param-value>-tcpAllowOthers</param-value>
+	</context-param>
+	<!-- <context-param> <param-name>db.url</param-name> <param-value>jdbc:h2:~/smockerPersistant</param-value> 
+		</context-param> -->
 
 </web-app>

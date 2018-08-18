@@ -32,7 +32,7 @@ import com.jenetics.smocker.ui.SmockerUI;
 @Consumes({ "application/json" })
 public class ManageJavaApplicationMocked {
 
-	@PersistenceContext(unitName = SmockerUI.PERSISTENCE_UNIT)
+	@PersistenceContext(unitName = SmockerUI.PERSISTENCE_UNIT_MEMORY)
 	private EntityManager em;
 
 	@Inject

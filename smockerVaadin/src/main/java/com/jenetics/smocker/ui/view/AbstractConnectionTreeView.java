@@ -14,6 +14,7 @@ import org.jboss.logging.Logger;
 import org.vaadin.easyapp.util.EasyAppLayout;
 
 import com.jenetics.smocker.dao.DaoManager;
+import com.jenetics.smocker.dao.DaoManagerByModel;
 import com.jenetics.smocker.dao.IDaoManager;
 import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.ui.SmockerUI;
@@ -97,9 +98,19 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 		this.tParameterClass = tParameterClass;
 		this.uParameterClass = uParameterClass;
 		this.vParameterClass = vParameterClass;
-
-		daoManagerJavaApplication = new DaoManager<>(tParameterClass, SmockerUI.getEm());
-		daoManagerConnection = new DaoManager<>(uParameterClass, SmockerUI.getEm());
+		
+		
+		daoManagerJavaApplication = DaoManagerByModel.getDaoManager(tParameterClass);
+		daoManagerConnection = DaoManagerByModel.getDaoManager(uParameterClass);
+//		if (persistant) {
+//			daoManagerJavaApplication = new DaoManager<>(tParameterClass, SmockerUI.getEmPersitant());
+//			daoManagerConnection = new DaoManager<>(uParameterClass, SmockerUI.getEmPersitant());
+//		}
+//		else {
+//			daoManagerJavaApplication = new DaoManager<>(tParameterClass, SmockerUI.getEm());
+//			daoManagerConnection = new DaoManager<>(uParameterClass, SmockerUI.getEm());
+//		}
+		
 
 		initDao();
 

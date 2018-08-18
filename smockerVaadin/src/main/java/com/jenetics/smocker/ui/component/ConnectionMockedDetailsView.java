@@ -13,6 +13,7 @@ import org.vaadin.easyapp.util.ActionContainerBuilder;
 import org.vaadin.easyapp.util.EasyAppLayout;
 
 import com.jenetics.smocker.dao.DaoManager;
+import com.jenetics.smocker.dao.DaoManagerByModel;
 import com.jenetics.smocker.dao.IDaoManager;
 import com.jenetics.smocker.injector.BundleUI;
 import com.jenetics.smocker.model.CommunicationMocked;
@@ -64,7 +65,7 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 	private HorizontalSplitPanel mainLayout = null;
 	private JsEditor selectedJsEditor = null;
 	
-	protected IDaoManager<ConnectionMocked> daoManagerConnection = new DaoManager<ConnectionMocked>(ConnectionMocked.class, SmockerUI.getEm());
+	protected IDaoManager<ConnectionMocked> daoManagerConnection =  DaoManagerByModel.getDaoManager(ConnectionMocked.class);
 	
 	private Window subWindow;
 	private TabSheet tabSheet;

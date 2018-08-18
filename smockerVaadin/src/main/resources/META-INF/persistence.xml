@@ -14,9 +14,7 @@
 		<class>com.jenetics.smocker.model.Connection</class>
 		<class>com.jenetics.smocker.model.JavaApplication</class>
 		<class>com.jenetics.smocker.model.Communication</class>
-		<class>com.jenetics.smocker.model.JavaApplicationMocked</class>
-		<class>com.jenetics.smocker.model.ConnectionMocked</class>
-		<class>com.jenetics.smocker.model.CommunicationMocked</class>
+
 		<exclude-unlisted-classes>false</exclude-unlisted-classes>
 
 		<properties>
@@ -26,5 +24,29 @@
 				value="org.eclipse.persistence.platform.database.H2Platform" />
 		</properties>
 	</persistence-unit>
+
+	<persistence-unit name="smockerPersistantData"
+		transaction-type="JTA">
+		<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+		<!--provider>org.hibernate.ejb.HibernatePersistence</provider-->
+		<jta-data-source>java:jboss/datasources/smockerPersistantDS</jta-data-source>
+		
+		<class>com.jenetics.smocker.model.JavaApplicationMocked</class> 
+		<class>com.jenetics.smocker.model.ConnectionMocked</class> 
+		<class>com.jenetics.smocker.model.CommunicationMocked</class>
+		
+		<properties>
+			<property name="hibernate.dialect"
+				value="org.hibernate.dialect.H2Dialect" />
+			<property name="hibernate.max_fetch_depth" value="3" />
+			<property name="hibernate.hbm2ddl.auto" value="update" />
+			<property name="hibernate.show_sql" value="true" />
+			<property name="eclipselink.ddl-generation"
+				value="create-tables" />
+			<property name="eclipselink.target-database"
+				value="org.eclipse.persistence.platform.database.H2Platform" />
+		</properties>
+	</persistence-unit>
+
 
 </persistence>

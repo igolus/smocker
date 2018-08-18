@@ -8,6 +8,7 @@ import org.vaadin.easyapp.util.ActionContainerBuilder;
 import org.vaadin.easyapp.util.EasyAppLayout;
 
 import com.jenetics.smocker.dao.DaoManager;
+import com.jenetics.smocker.dao.DaoManagerByModel;
 import com.jenetics.smocker.dao.IDaoManager;
 import com.jenetics.smocker.model.Communication;
 import com.jenetics.smocker.model.Connection;
@@ -47,7 +48,7 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 	private Communication selectedCommunication = null;;
 
 
-	protected IDaoManager<Connection> daoManagerConnection = new DaoManager<Connection>(Connection.class, SmockerUI.getEm());
+	protected IDaoManager<Connection> daoManagerConnection = DaoManagerByModel.getDaoManager(Connection.class);
 
 	public ConnectionDetailsView(Connection connection) {
 		super();

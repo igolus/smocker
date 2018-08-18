@@ -44,6 +44,8 @@ public class SmockerUI extends UI {
 	private static final int SLEEP_TIME = 200;
 
 	private static EntityManager em;
+	
+	private static EntityManager emPersitant;
 
 	@Inject
 	private Logger logger;
@@ -52,7 +54,8 @@ public class SmockerUI extends UI {
 	
 	private static ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_NAME);
 
-	public static final String PERSISTENCE_UNIT = "smockerLocalData";
+	public static final String PERSISTENCE_UNIT_MEMORY = "smockerLocalData";
+	public static final String PERSISTENCE_UNIT_DB = "smockerPersistantData";
 
 	Navigator navigator;
 	protected static final String MAINVIEW = "main";
@@ -76,9 +79,18 @@ public class SmockerUI extends UI {
 
 	public static EntityManager getEm() {
 		if (em == null) {
-			em = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT).createEntityManager();
+			em = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_MEMORY).createEntityManager();
 		}
 		return em;
+	}
+	
+	
+
+	public static EntityManager getEmPersitant() {
+		if (emPersitant == null) {
+			emPersitant = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_DB).createEntityManager();
+		}
+		return emPersitant;
 	}
 
 	public static SmockerUI getInstance() {

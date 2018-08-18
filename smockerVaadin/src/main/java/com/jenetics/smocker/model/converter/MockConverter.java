@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.jenetics.smocker.dao.DaoManager;
+import com.jenetics.smocker.dao.DaoManagerByModel;
 import com.jenetics.smocker.dao.IDaoManager;
 import com.jenetics.smocker.model.Communication;
 import com.jenetics.smocker.model.CommunicationMocked;
@@ -19,10 +20,8 @@ public class MockConverter {
 		super();
 	}
 
-	private static IDaoManager<ConnectionMocked> daoManagerConnectionMocked = new DaoManager<>(ConnectionMocked.class,
-			SmockerUI.getEm());
-	private static IDaoManager<JavaApplicationMocked> daoManagerJavaApplicationMocked = new DaoManager<>(
-			JavaApplicationMocked.class, SmockerUI.getEm());
+	private static IDaoManager<ConnectionMocked> daoManagerConnectionMocked = DaoManagerByModel.getDaoManager(ConnectionMocked.class);
+	private static IDaoManager<JavaApplicationMocked> daoManagerJavaApplicationMocked = DaoManagerByModel.getDaoManager(JavaApplicationMocked.class);
 
 	
 	/**
@@ -39,7 +38,7 @@ public class MockConverter {
 		ConnectionMocked targetConnectionMocked = findOrCreateTargetConnection(sourceConnection,
 				targetJavaApplicationMocked);
 		
-		addSingleCommunicationToConnection(targetConnectionMocked, sourceCommunication);
+		addSingleCommunicationToConnection(targetConnectionMocked, sourceCommunication, true);
 	}
 	
 	
@@ -81,12 +80,13 @@ public class MockConverter {
 	private static void addCommunications(Connection sourceConnection, ConnectionMocked targetConnectionMocked) {
 		Set<Communication> sourceCommunications = sourceConnection.getCommunications();
 		for (Communication communication : sourceCommunications) {
-			addSingleCommunicationToConnection(targetConnectionMocked, communication);
+			addSingleCommunicationToConnection(targetConnectionMocked, communication, false);
 		}
 		daoManagerConnectionMocked.update(targetConnectionMocked);
 	}
 
-	private static void addSingleCommunicationToConnection(ConnectionMocked targetConnectionMocked, Communication communication) {
+	private static void addSingleCommunicationToConnection(
+			ConnectionMocked targetConnectionMocked, Communication communication, boolean updateIdBb ) {
 		CommunicationMocked communicationMocked = new CommunicationMocked();
 		communicationMocked.setRequest(communication.getRequest());
 		communicationMocked.setResponse(communication.getResponse());
@@ -94,6 +94,11 @@ public class MockConverter {
 		communicationMocked.setConnection(targetConnectionMocked);
 		
 		targetConnectionMocked.getCommunications().add(communicationMocked);
+		
+		if (updateIdBb) {
+			daoManagerConnectionMocked.update(targetConnectionMocked);
+		}
+		//
 	}
 
 	private static ConnectionMocked findOrCreateTargetConnection(Connection sourceConnection,

@@ -19,13 +19,9 @@ public class DaoManager<T extends EntityWithId> implements IDaoManager<T> {
 
 	Class<T> typeParameterClass = null;
 
-	public DaoManager(Class<T> typeParameterClass, EntityManager em) {
+	DaoManager(Class<T> typeParameterClass, EntityManager em) {
 		this.typeParameterClass = typeParameterClass;
 		this.entityManager = em;
-	}
-
-	private DaoManager() {
-		super();
 	}
 
 	@Override

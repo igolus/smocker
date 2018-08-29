@@ -34,6 +34,7 @@
 		<class>com.jenetics.smocker.model.JavaApplicationMocked</class> 
 		<class>com.jenetics.smocker.model.ConnectionMocked</class> 
 		<class>com.jenetics.smocker.model.CommunicationMocked</class>
+		<class>com.jenetics.smocker.model.Scenario</class>
 		
 		<properties>
 			<property name="hibernate.dialect"
@@ -42,7 +43,7 @@
 			<property name="hibernate.hbm2ddl.auto" value="update" />
 			<property name="hibernate.show_sql" value="true" />
 			<property name="eclipselink.ddl-generation"
-				value="create-tables" />
+				value="create-or-extend-tables" />
 			<property name="eclipselink.target-database"
 				value="org.eclipse.persistence.platform.database.H2Platform" />
 		</properties>

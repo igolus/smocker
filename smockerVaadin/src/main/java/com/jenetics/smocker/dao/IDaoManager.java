@@ -22,5 +22,7 @@ public interface IDaoManager<T extends Serializable> {
 	T update(T entity);
 
 	void deleteAll();
+	
+	public List<T> queryList(String querySql);
 
 }

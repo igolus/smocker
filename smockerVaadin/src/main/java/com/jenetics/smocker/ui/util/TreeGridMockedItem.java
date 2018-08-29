@@ -6,10 +6,12 @@ public class TreeGridMockedItem {
 	private boolean root;
 	private String name;
 	private CommunicationMocked communicationMocked;
+	private boolean scenario;
 	
-	public TreeGridMockedItem(boolean root, String name, CommunicationMocked communicationMocked) {
+	public TreeGridMockedItem(boolean root, boolean scenario, String name, CommunicationMocked communicationMocked) {
 		super();
 		this.root = root;
+		this.scenario = scenario;
 		this.name = name;
 		this.communicationMocked = communicationMocked;
 	}
@@ -21,7 +23,6 @@ public class TreeGridMockedItem {
 		return name;
 	}
 	public CommunicationMocked getCommunication() {
-		// TODO Auto-generated method stub
 		return communicationMocked;
 	}
 }

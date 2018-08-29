@@ -124,6 +124,8 @@ public class SmockerUI extends UI {
 		easyAppBuilder.withMenuCollapsable();
 		easyAppBuilder.withTopBarStyle("TopBar");
 		easyAppBuilder.withContextualTextLabelStyle("Contextual");
+		easyAppBuilder.withNavigatorSplitPosition(200);
+		easyAppBuilder.withRessourceBundle(getBundle());
 		
 		easyAppBuilder.withMenuCollapsable();
 		
@@ -153,6 +155,18 @@ public class SmockerUI extends UI {
 	 * @param component
 	 */
 	public static Window displayInSubWindow(String title, Component component) {
+		return displayInSubWindow(title, component, true);
+	}
+	
+	public static Window displayInSubWindowMidSize(String title, Component component) {
+		return displayInSubWindow(title, component, false);
+	}
+	
+	/**
+	 * Display a subwindow from any component
+	 * @param component
+	 */
+	private static Window displayInSubWindow(String title, Component component, boolean fullSize) {
 		Window subWindow = new Window(title);
 		subWindow.setModal(true);
 		subWindow.setContent(component);
@@ -160,7 +174,9 @@ public class SmockerUI extends UI {
 		
 		subWindow.setHeight(SUB_WINDOW_DEFAULT_HEIGHT);
 		subWindow.setWidth(SUB_WINDOW_DEFAULT_WIDTH);
-		subWindow.setSizeFull();
+		if (fullSize) {
+			subWindow.setSizeFull();
+		}
 		getInstance().addWindow(subWindow);
 		return subWindow;
 	}

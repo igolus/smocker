@@ -41,6 +41,20 @@ public class ConnectionMocked implements EntityWithId {
 	@OneToOne
 	@JsonIgnore
 	private JavaApplicationMocked javaApplication;
+	
+	
+	@JoinColumn(nullable = false)
+	@OneToOne
+	@JsonIgnore
+	private Scenario scenario;
+	
+	public Scenario getScenario() {
+		return scenario;
+	}
+
+	public void setScenario(Scenario scenario) {
+		this.scenario = scenario;
+	}
 
 	@Column
 	private Boolean watched = true;

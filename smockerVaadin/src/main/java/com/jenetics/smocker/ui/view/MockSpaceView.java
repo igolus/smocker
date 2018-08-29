@@ -6,9 +6,12 @@ import org.vaadin.easyapp.ui.ViewWithToolBar;
 import org.vaadin.easyapp.util.ActionContainer;
 import org.vaadin.easyapp.util.ActionContainerBuilder;
 import org.vaadin.easyapp.util.EasyAppLayout;
+import org.vaadin.easyapp.util.EasyAppView;
 import org.vaadin.easyapp.util.ActionContainer.InsertPosition;
 import org.vaadin.easyapp.util.annotations.ContentView;
 
+import com.jenetics.smocker.dao.DaoManagerByModel;
+import com.jenetics.smocker.dao.IDaoManager;
 import com.jenetics.smocker.model.CommunicationMocked;
 import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.ConnectionMocked;
@@ -17,6 +20,7 @@ import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.model.JavaApplicationMocked;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.component.ConnectionMockedDetailsView;
+import com.jenetics.smocker.ui.component.TextPanel;
 import com.jenetics.smocker.ui.dialog.Dialog;
 import com.jenetics.smocker.ui.util.RefreshableView;
 import com.jenetics.smocker.ui.util.StrandardTreeGridConnectionMockedData;
@@ -36,11 +40,17 @@ import com.vaadin.ui.Window;
 @SuppressWarnings("serial")
 @Push
 @ViewScope
-@ContentView(sortingOrder = 2, viewName = "Mock View", icon = "icons/Java-icon.png", homeView = true, rootViewParent = ConnectionsRoot.class)
+@ContentView(sortingOrder = 2, viewName = "MockView", icon = "icons/952776-200.png", homeView = true, rootViewParent = ConnectionsRoot.class)
 public class MockSpaceView 
 	extends AbstractConnectionTreeView<JavaApplicationMocked, ConnectionMocked, CommunicationMocked, ConnectionMockedDetailsView> 
 	implements RefreshableView {
-
+	
+	public MockSpaceView() {
+		super(JavaApplicationMocked.class, ConnectionMocked.class, CommunicationMocked.class);
+		treeGrid.addSelectionListener(this::treeSelectionChange);
+		setSizeFull();
+	}
+	
 	@Override
 	public void enterInView(ViewChangeEvent event) {
 		fillTreeTable();
@@ -48,11 +58,6 @@ public class MockSpaceView
 
 	private static final String BUNDLE_NAME = "BundleUI";
 
-	public MockSpaceView() {
-		super(JavaApplicationMocked.class, ConnectionMocked.class, CommunicationMocked.class);
-		treeGrid.addSelectionListener(this::treeSelectionChange);
-		setSizeFull();
-	}
 	
 	@Override
 	protected Set<ConnectionMocked> getJavaAppConnections(JavaApplicationMocked javaApplication) {
@@ -106,19 +111,40 @@ public class MockSpaceView
 						, this::details, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
 				.addButton("Refresh_Button", VaadinIcons.REFRESH, null,  this::always			
 						, this::refresh, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
-				.addButton("Play_Button", VaadinIcons.PLAY, null,  this::canTest			
-						, this::test, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
+//				.addButton("Play_Button", VaadinIcons.PLAY, null,  this::canTest			
+//						, this::test, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
+				.addButton("Save_Button", VaadinIcons.DISC, null,  this::canSave			
+						, this::save, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
 				;
 
 		return builder.build();
 	}
 	
-	public boolean canTest() {
-		return !isMainTabSelected() && getSelectedDetailView().isJSTabSelected();
+//	public boolean canTest() {
+//		return !isMainTabSelected() && getSelectedDetailView().isJSTabSelected();
+//	}
+	
+//	public void test(ClickEvent event) {
+//		TextPanel textPanelInput = new TextPanel(false);
+//		textPanelInput.setText(getSelectedDetailView().getSelectedRequestPane().getText());
+//		
+//		EasyAppView container = new EasyAppView() {
+//
+//			sqsq
+//			
+//		};
+//		
+//		SmockerUI.displayInSubWindowMidSize(SmockerUI.getBundleValue("InputForTest"), textPanelInput);
+//		
+//		//getSelectedDetailView().test();
+//	}
+	
+	public boolean canSave() {
+		return !isMainTabSelected();
 	}
 	
-	public void test(ClickEvent event) {
-		getSelectedDetailView().play();
+	public void save(ClickEvent event) {
+		getSelectedDetailView().save();
 	}
 	
 	public void clean(ClickEvent event) {

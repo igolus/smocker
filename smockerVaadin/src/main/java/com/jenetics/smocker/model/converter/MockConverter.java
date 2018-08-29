@@ -88,6 +88,7 @@ public class MockConverter {
 	private static void addSingleCommunicationToConnection(
 			ConnectionMocked targetConnectionMocked, Communication communication, boolean updateIdBb ) {
 		CommunicationMocked communicationMocked = new CommunicationMocked();
+		communicationMocked.setScenario(DaoManagerByModel.getUNDEFINED_SCENARIO());
 		communicationMocked.setRequest(communication.getRequest());
 		communicationMocked.setResponse(communication.getResponse());
 		communicationMocked.setDateTime(communication.getDateTime());
@@ -116,6 +117,7 @@ public class MockConverter {
 		// otherwise create it
 		if (targetConnectionMocked == null) {
 			targetConnectionMocked = new ConnectionMocked();
+			targetConnectionMocked.setScenario(DaoManagerByModel.getUNDEFINED_SCENARIO());
 			targetConnectionMocked.setHost(sourceConnection.getHost());
 			targetConnectionMocked.setPort(sourceConnection.getPort());
 			

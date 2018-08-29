@@ -106,5 +106,13 @@ public class DaoManager<T extends EntityWithId> implements IDaoManager<T> {
 			entityTransaction.rollback();
 		}
 	}
+	
+	@Override
+	public List<T> queryList(String querySql) {
+		String entityName = typeParameterClass.getSimpleName();
+		Query query = entityManager.createQuery(querySql);
+		EntityTransaction entityTransaction = entityManager.getTransaction();
+		return query.getResultList();
+	}
 
 }

@@ -14,6 +14,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.jenetics.smocker.util.SmockerException;
 
 @Entity
 public class CommunicationMocked implements EntityWithId {
@@ -46,7 +47,29 @@ public class CommunicationMocked implements EntityWithId {
 	private String callerStack;
 
 	@Column(columnDefinition = "TEXT")
-	private String sourceGroovy;
+	private String sourceJs;
+
+	@Column(columnDefinition = "TEXT")
+	private String InputForTest;
+	
+	@Column(columnDefinition = "TEXT")
+	private String name;
+	
+	@JoinColumn(nullable = false)
+	@OneToOne
+	@JsonIgnore
+	private Scenario scenario;
+	
+	public Scenario getScenario() {
+		return scenario;
+	}
+
+	public void setScenario(Scenario scenario) {
+//		if (scenario.getConnectionMocked() == null) {
+//			scenario.setConnectionMocked(getConnection());
+//		}
+		this.scenario = scenario;
+	}
 
 	public ConnectionMocked getConnection() {
 		return connection;
@@ -63,6 +86,14 @@ public class CommunicationMocked implements EntityWithId {
 
 	public void setId(final Long id) {
 		this.id = id;
+	}
+	
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public int getVersion() {
@@ -131,12 +162,20 @@ public class CommunicationMocked implements EntityWithId {
 		this.callerStack = callerStack;
 	}
 
-	public String getSourceGroovy() {
-		return sourceGroovy;
+	public String getSourceJs() {
+		return sourceJs;
 	}
 
-	public void setSourceGroovy(String sourceGroovy) {
-		this.sourceGroovy = sourceGroovy;
+	public void setSourceJs(String sourceJs) {
+		this.sourceJs = sourceJs;
+	}
+
+	public String getInputForTest() {
+		return InputForTest;
+	}
+
+	public void setInputForTest(String InputForTest) {
+		this.InputForTest = InputForTest;
 	}
 
 	@Override
@@ -148,8 +187,14 @@ public class CommunicationMocked implements EntityWithId {
 			result += ", response: " + response;
 		if (callerStack != null && !callerStack.trim().isEmpty())
 			result += ", callerStack: " + callerStack;
-		if (sourceGroovy != null && !sourceGroovy.trim().isEmpty())
-			result += ", sourceGrrovy: " + sourceGroovy;
+		if (sourceJs != null && !sourceJs.trim().isEmpty())
+			result += ", sourceJs: " + sourceJs;
+		if (InputForTest != null && !InputForTest.trim().isEmpty())
+			result += ", InputForTest: " + InputForTest;
+		if (name != null && !name.trim().isEmpty())
+			result += ", name: " + name;
+		if (scenario != null)
+			result += ", scenario: " + scenario.getId();
 		return result;
 	}
 }

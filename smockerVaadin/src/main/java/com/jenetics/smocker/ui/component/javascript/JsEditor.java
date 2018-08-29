@@ -1,88 +1,85 @@
 package com.jenetics.smocker.ui.component.javascript;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.StringWriter;
-
-import javax.script.ScriptContext;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
+import java.util.Date;
 
 import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
 import org.vaadin.aceeditor.AceTheme;
 import org.vaadin.easyapp.util.EasyAppLayout;
 
-import com.eclipsesource.v8.JavaCallback;
-import com.eclipsesource.v8.JavaVoidCallback;
 import com.eclipsesource.v8.NodeJS;
 import com.eclipsesource.v8.V8;
-import com.eclipsesource.v8.V8Array;
-import com.eclipsesource.v8.V8Object;
 import com.jenetics.smocker.model.CommunicationMocked;
 import com.jenetics.smocker.ui.component.TextPanel;
 import com.jenetics.smocker.util.SmockerUtility;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.VerticalSplitPanel;
 
 @SuppressWarnings("serial")
 public class JsEditor extends EasyAppLayout {
 
+	private static final String DEFAULT_JS = "function matchAndReturnOutput(recordDate, realInput, providedInput, providedOutput)" + System.lineSeparator()
+		+ "{" + System.lineSeparator()
+		+ "  if (realInput == providedInput)" + System.lineSeparator()
+		+ "  {" + System.lineSeparator()
+		+ "    return providedOutput;" + System.lineSeparator()
+		+ "  }" + System.lineSeparator()
+		+ "  return null;" + System.lineSeparator()
+		+ "}";
+
 	private AceEditor aceEditor;
-	private TextPanel logTextArea;
+
 	private TextPanel selectedRequestPane;
 	private TextPanel selectedResponsePane;
 
 	public JsEditor(CommunicationMocked communicationMocked, TextPanel selectedRequestPane, TextPanel selectedResponsePane) {
 		super();
-		//this.communicationMocked = communicationMocked;
 		this.selectedRequestPane = selectedRequestPane;
 		this.selectedResponsePane = selectedResponsePane;
 		
-		VerticalSplitPanel mainLayout = new VerticalSplitPanel();
 		aceEditor = new AceEditor();
+		setDefaultCodeJsEditor(aceEditor);
 		aceEditor.setMode(AceMode.javascript);
 		aceEditor.setTheme(AceTheme.eclipse);
 		aceEditor.setSizeFull();
-		mainLayout.setFirstComponent(aceEditor);
-
-		logTextArea = new TextPanel(false);
-		logTextArea.setSizeFull();
-
-		mainLayout.setSplitPosition(75, Unit.PERCENTAGE);
-		mainLayout.setSecondComponent(logTextArea);
-
-		addComponent(mainLayout);
+		addComponent(aceEditor);
 		setSizeFull();
 	}
 
-	public void runScript() {
+	private void setDefaultCodeJsEditor(AceEditor aceEditor) {
+		aceEditor.setValue(DEFAULT_JS);
+	}
+
+	public String[] runScript(String input, Date recordDate) {
 		NodeJS nodeJS = NodeJS.createNodeJS();
 		V8 runtime =nodeJS.getRuntime();
 
 		Logger logger = new Logger();
 		runtime.registerJavaMethod(logger, "consolelog");
 		
+		String script = "var output = matchAndReturnOutput(recordDate, realInput, providedInput, providedOutput);\n";
 		
-		String script = "var match = matchAndReturnOutput(realInput, providedInput, providedOutput);\n";
-		
-		runtime.add("realInput", "Real input");
+		runtime.add("recordDate", recordDate.toString());
+		runtime.add("realInput", input);
 		runtime.add("providedInput", selectedRequestPane.getText());
 		runtime.add("providedOutput", selectedResponsePane.getText());
+		String output;
 		
 		try {
 			runtime.executeVoidScript(script + aceEditor.getValue());
-			String match = runtime.getString("match");
+			output = runtime.getString("output");
 		}
 		catch (Exception ex) {
-			logTextArea.setText(SmockerUtility.getStackTrace(ex));
-			return;
+			return new String[] {SmockerUtility.getStackTrace(ex), null};
 		}
 		runtime.release(false);
-		logTextArea.setText(logger.toString());
+		return new String[] {logger.toString(), output};
+	}
+	
+	public String getJSSource() {
+		return aceEditor.getValue();
+	}
+	
+	public void setJSSource(String source) {
+		aceEditor.setValue(source);
 	}
 
 

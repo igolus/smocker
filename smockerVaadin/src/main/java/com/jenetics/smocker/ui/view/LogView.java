@@ -19,7 +19,7 @@ import com.vaadin.ui.VerticalLayout;
 @SuppressWarnings("serial")
 @Push
 @ViewScope
-@ContentView(sortingOrder = 3, viewName = "Logs", icon = "icons/Java-icon.png", homeView = true, rootViewParent = ConnectionsRoot.class)
+@ContentView(sortingOrder = 3, viewName = "LogsView", icon = "icons/log-file-1-504262.png", homeView = true, rootViewParent = ConnectionsRoot.class)
 public class LogView extends EasyAppLayout {
 
 	private static final int DEFAULT_MAX_SIZE = 40000;

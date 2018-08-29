@@ -7,6 +7,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
 import org.vaadin.aceeditor.AceTheme;
+import org.vaadin.easyapp.ui.ViewWithToolBar;
 import org.vaadin.easyapp.util.ActionContainer;
 import org.vaadin.easyapp.util.ActionContainer.InsertPosition;
 import org.vaadin.easyapp.util.ActionContainerBuilder;
@@ -22,6 +23,7 @@ import com.jenetics.smocker.model.ConnectionMocked;
 import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.component.javascript.JsEditor;
+import com.jenetics.smocker.ui.component.javascript.JsTesterPanel;
 import com.jenetics.smocker.ui.dialog.Dialog;
 import com.jenetics.smocker.ui.util.ButtonWithIEntity;
 import com.jenetics.smocker.ui.util.CommunicationMockedDateDisplay;
@@ -63,56 +65,44 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 	private TreeDataProvider<TreeGridMockedItem> treeDataProvider;
 	private CommunicationMocked selectedCommunication = null;
 	private HorizontalSplitPanel mainLayout = null;
-	private JsEditor selectedJsEditor = null;
 	
 	protected IDaoManager<ConnectionMocked> daoManagerConnection =  DaoManagerByModel.getDaoManager(ConnectionMocked.class);
-	
-	private Window subWindow;
-	private TabSheet tabSheet;
-	private Component tabJs;
-	
-	public Window getSubWindow() {
-		return subWindow;
-	}
+	protected IDaoManager<CommunicationMocked> daoManagerCommunicationMocked = DaoManagerByModel.getDaoManager(CommunicationMocked.class);
 
-	public void setSubWindow(Window subWindow) {
-		this.subWindow = subWindow;
-	}
-	
-	public void close() {
-		if (subWindow != null) {
-			subWindow.close();
-		}
-	}
+	private TabSheet tabSheet;
+	private JsEditor tabJs;
+	private TextPanel selectedRequestPane;
+	private TextPanel selectedResponsePane;
+	private JsTesterPanel jsTesterPanel;
 
 	public ConnectionMockedDetailsView(ConnectionMocked connectionMocked) {
 		super();
 		mainLayout = new HorizontalSplitPanel();
 		
 		this.connectionMocked = connectionMocked;
+	
+		ConnectionMockedManager connectionMockedManager = new ConnectionMockedManager(connectionMocked, this::commSelected);
 		
-		treeGrid = new TreeGrid<>();
-		treeGrid.setSelectionMode(SelectionMode.SINGLE);
-		treeGrid.setSizeFull();
-		
-		treeData = new TreeData<>();
-		treeDataProvider = new TreeDataProvider<>(treeData);
-		treeGrid.setDataProvider(treeDataProvider);
-		
-		fillCommunication();
-		treeGrid.addItemClickListener(this::treeItemClick);
-		mainLayout.setFirstComponent(treeGrid);
-		
+		ViewWithToolBar view = new ViewWithToolBar(connectionMockedManager);
+		mainLayout.setFirstComponent(view);
 		mainLayout.setSplitPosition(23);
 		mainLayout.setSizeFull();
 		
 		addComponent(mainLayout);
-		
-		addTreeMapping();
-		treeGrid.removeHeaderRow(0);
-		//treeGrid.removeHeaderRow(1);
+
 		setSizeFull();
-		
+	}
+	
+	public TextPanel getSelectedResponsePane() {
+		return selectedResponsePane;
+	}
+	
+	public CommunicationMocked getSelectedCommunication() {
+		return selectedCommunication;
+	}
+	
+	public TextPanel getSelectedRequestPane() {
+		return selectedRequestPane;
 	}
 	
 	protected void addTreeMapping() {
@@ -123,17 +113,9 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 	
 	private Button buildEnableButton(TreeGridMockedItem item) {
 		if (!item.isRoot()) {
-//			String buttonString;
-//			Connection connection = item.getConnection();
-//			if (connection.getWatched() == null || connection.getWatched()) {
-//				buttonString = bundle.getString("Mute_Button");
-//			} else {
-//				buttonString = bundle.getString("Watch_Button");
-//			}
 			ButtonWithIEntity<CommunicationMocked> buttonWithId = new ButtonWithIEntity<>(item.getCommunication());
 			buttonWithId.setCaption("Enable");
 			buttonWithId.addClickListener(this::enableButtonClicked);
-			//buttonByUiId.put(buttonWithId.getUiId(), buttonWithId);
 			return buttonWithId;
 		}
 		return null;
@@ -156,22 +138,37 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 		treeDataProvider.refreshAll();
 	}
 	
-    public void treeItemClick(com.vaadin.ui.Grid.ItemClick<TreeGridMockedItem> event) {
-		CommunicationMocked comm = event.getItem().getCommunication();
+	public void commSelected(CommunicationMocked comm) {
 		if (comm != null) {
 			String request = NetworkReaderUtility.decode(comm.getRequest());
 			String response = NetworkReaderUtility.decode(comm.getResponse());
+			String sourceJS = comm.getSourceJs();
 			
 			tabSheet = new TabSheet();
 			tabSheet.setSizeFull();
 			
-			TextPanel selectedRequestPane =  addTextAreaToTabSheet(request, "Input", tabSheet);
-			TextPanel selectedResponsePane = addTextAreaToTabSheet(response, "Output", tabSheet);	
+			selectedRequestPane =  addTextAreaToTabSheet(request, "Input", tabSheet);
+			selectedResponsePane = addTextAreaToTabSheet(response, "Output", tabSheet);	
 			
 			tabJs = new JsEditor(comm, selectedRequestPane, selectedResponsePane);
-			tabJs.setSizeFull();
+			if (sourceJS != null) {
+				tabJs.setJSSource(sourceJS);
+			}
 			
+			tabJs.setSizeFull();
 			tabSheet.addTab(tabJs, SmockerUI.getBundleValue("NodeEditor"));
+			
+			jsTesterPanel = new JsTesterPanel(request, tabJs, comm.getDateTime());
+			String inputForTest = comm.getInputForTest();
+			if (inputForTest != null) {
+				jsTesterPanel.setSourceInput(NetworkReaderUtility.decode(inputForTest));
+			}
+			
+			ViewWithToolBar jsView = new ViewWithToolBar(jsTesterPanel);
+			jsView.setSizeFull();
+			tabSheet.addTab(jsView, SmockerUI.getBundleValue("TesterPanel"));
+			
+			
 			tabSheet.addSelectedTabChangeListener(this::tabChanged);
 			
 			mainLayout.setSecondComponent(tabSheet);
@@ -217,8 +214,18 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 		Notification.show("Clean");
 	}
 	
-	public void play() {
-		selectedJsEditor.runScript();
+//	public void test() {
+//		tabJs.runScript();
+//	}
+	
+	public void save() {
+		CommunicationMocked comm = getSelectedCommunication();
+		comm.setSourceJs(tabJs.getJSSource());
+		comm.setRequest(NetworkReaderUtility.encode(selectedRequestPane.getText()));
+		comm.setResponse(NetworkReaderUtility.encode(selectedResponsePane.getText()));
+		comm.setInputForTest(NetworkReaderUtility.encode(jsTesterPanel.getSourceInput()));
+		
+		daoManagerCommunicationMocked.update(comm);
 	}
 	
 	public void refresh(ClickEvent event) {
@@ -246,5 +253,7 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 				tabSheet.getSelectedTab() != null && 
 				tabSheet.getSelectedTab() == tabJs;
 	}
+
+
 	
 }

@@ -34,7 +34,7 @@ import com.vaadin.ui.Notification;
 @SuppressWarnings("serial")
 @Push
 @ViewScope
-@ContentView(sortingOrder = 1, viewName = "JavaAppView", icon = "icons/Java-icon.png", 
+@ContentView(sortingOrder = 1, viewName = "JavaAppView", icon = "icons/java-43-569305.png", 
 homeView = true, rootViewParent = ConnectionsRoot.class, bundle=SmockerUI.BUNDLE_NAME)
 public class JavaApplicationsView extends AbstractConnectionTreeView<JavaApplication, Connection, Communication, ConnectionDetailsView> implements RefreshableView {
 

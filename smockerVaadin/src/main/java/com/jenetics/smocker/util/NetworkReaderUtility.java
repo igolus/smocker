@@ -26,6 +26,14 @@ public class NetworkReaderUtility {
 		}
 		return ret;
 	}
+	
+	public static String encode(String code) {
+		String ret = null;
+		if (code != null) {
+			ret = new String(Base64.getEncoder().encode(code.getBytes()));
+		}
+		return ret;
+	}
 
 	/**
 	 * Get the content in the response

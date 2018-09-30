@@ -5,6 +5,7 @@ import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Label;
@@ -13,6 +14,7 @@ import com.vaadin.ui.VerticalLayout;
 
 public class LoggerPanel extends VerticalLayout {
 	
+	private static final String BR = "<BR/>";
 	private static final int DEFAULT_MAX_SIZE = 40000;
 	private StringBuilder buffer = new StringBuilder();
 	private int maxSize;
@@ -39,13 +41,29 @@ public class LoggerPanel extends VerticalLayout {
 
 	public void appendMessage(Level level, String message) {
 		String formattedMessage = new SimpleFormatter().format(new LogRecord(level, message));
-		formattedMessage = StringUtils.replace(formattedMessage, System.lineSeparator(), "<BR/>");
+		
+		if (level == Level.SEVERE) {
+			formattedMessage = "<font color=\"red\">" + formattedMessage + "</font>";
+		}
+		if (level == Level.INFO) {
+			formattedMessage = "<font color=\"green\">" + formattedMessage + "</font>";
+		}
+		if (level == Level.WARNING) {
+			formattedMessage = "<font color=\"yellow\">" + formattedMessage + "</font>";
+		}
+		formattedMessage = StringUtils.replace(formattedMessage, System.lineSeparator(), BR);
 		
 		buffer.append(formattedMessage);
 		if (buffer.length() > maxSize) {
-			buffer.replace(0, buffer.length() - maxSize, "");
+			int firstLine = buffer.toString().indexOf(BR);
+			
+			buffer.replace(0, firstLine + BR.length() - 1, "");
 		}
 		logTextArea.setValue(buffer.toString());
+	}
+	
+	public void appendMessage(Level level, String message, Exception ex) {
+		appendMessage(level, message + System.lineSeparator() + ExceptionUtils.getStackTrace(ex));
 	}
 	
 

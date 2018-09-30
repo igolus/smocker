@@ -27,7 +27,7 @@ public class CommunicationMocked implements EntityWithId {
 	@Version
 	@Column(name = "version")
 	private int version;
-
+	
 	@Column(columnDefinition = "TEXT")
 	private String request;
 
@@ -60,14 +60,21 @@ public class CommunicationMocked implements EntityWithId {
 	@JsonIgnore
 	private Scenario scenario;
 	
+	private boolean activated;
+	
+	public boolean isActivated() {
+		return activated;
+	}
+
+	public void setActivated(boolean activated) {
+		this.activated = activated;
+	}
+
 	public Scenario getScenario() {
 		return scenario;
 	}
 
 	public void setScenario(Scenario scenario) {
-//		if (scenario.getConnectionMocked() == null) {
-//			scenario.setConnectionMocked(getConnection());
-//		}
 		this.scenario = scenario;
 	}
 
@@ -195,6 +202,7 @@ public class CommunicationMocked implements EntityWithId {
 			result += ", name: " + name;
 		if (scenario != null)
 			result += ", scenario: " + scenario.getId();
+		result += ", activated: " + activated;
 		return result;
 	}
 }

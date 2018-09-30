@@ -155,7 +155,12 @@ public class JavaApplicationsView extends AbstractConnectionTreeView<JavaApplica
 	
 	@Override
 	public void refresh(EntityWithId entityWithId) {
-		refreshEntity(entityWithId);
+		if (isMainTabSelected()) {
+			refreshEntity(entityWithId);
+		}
+		else {
+			getSelectedDetailView().refresh();
+		}
 	}
 	
 	@Override
@@ -182,7 +187,7 @@ public class JavaApplicationsView extends AbstractConnectionTreeView<JavaApplica
 	public void addToMock(ClickEvent event) {
 		ConnectionDetailsView connectionDetailsView = getSelectedDetailView();
 		MockConverter.convertcommunication(connectionDetailsView.getSelectedCommunication());
-		SmockerUI.getInstance().getEasyAppMainView().getScanner().navigateTo(MockSpaceView.class);
+		//SmockerUI.getInstance().getEasyAppMainView().getScanner().navigateTo(MockSpaceView.class);
 	}
 	
 	public boolean canAddToMock() {
@@ -223,7 +228,6 @@ public class JavaApplicationsView extends AbstractConnectionTreeView<JavaApplica
 	
 	public void displayStack(ClickEvent event) {		
 		getSelectedDetailView().displayStack();
-		//Notification.show("CleanAll");
 	}
 	
 	public boolean canDisplayStack() {
@@ -257,5 +261,13 @@ public class JavaApplicationsView extends AbstractConnectionTreeView<JavaApplica
 		connectionDetailsView.setRefreshClickableAction(this::refreshClickable);
 		return connectionDetailsView;
 	}
+
+
+//	@Override
+//	protected void refreshDetailView() {
+//		get
+//		System.out.println();
+//		
+//	}
 
 }

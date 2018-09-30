@@ -61,7 +61,6 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 	
 	private ConnectionMocked connectionMocked;
 	private TreeGrid<TreeGridMockedItem> treeGrid;
-	private TreeData<TreeGridMockedItem> treeData;
 	private TreeDataProvider<TreeGridMockedItem> treeDataProvider;
 	private CommunicationMocked selectedCommunication = null;
 	private HorizontalSplitPanel mainLayout = null;
@@ -74,6 +73,7 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 	private TextPanel selectedRequestPane;
 	private TextPanel selectedResponsePane;
 	private JsTesterPanel jsTesterPanel;
+	private ConnectionMockedManager connectionMockedManager;
 
 	public ConnectionMockedDetailsView(ConnectionMocked connectionMocked) {
 		super();
@@ -81,9 +81,13 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 		
 		this.connectionMocked = connectionMocked;
 	
-		ConnectionMockedManager connectionMockedManager = new ConnectionMockedManager(connectionMocked, this::commSelected);
+		connectionMockedManager = new ConnectionMockedManager(connectionMocked, this::commSelected);
 		
 		ViewWithToolBar view = new ViewWithToolBar(connectionMockedManager);
+		//view.get
+		//view.getRightLayout().setExpandRatio(connectionMockedManager.getComboBox(), 1.0f);
+		//view.setExpandRatio(connectionMockedManager.getComboBox(), 1.0f);
+		
 		mainLayout.setFirstComponent(view);
 		mainLayout.setSplitPosition(23);
 		mainLayout.setSizeFull();
@@ -106,7 +110,7 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 	}
 	
 	protected void addTreeMapping() {
-		treeGrid.addColumn(item -> item.getName());
+		treeGrid.addColumn(item -> item.getDisplay());
 		treeGrid.addComponentColumn(this::buildEnableButton);
 	}
 	
@@ -126,18 +130,6 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 		CommunicationMocked communicationMockedSelected = buttonWithEntity.getEntity();
 	}
 
-	private void fillCommunication() {
-		treeData.clear();
-		TreeGridMockedItem root = new TreeGridMockedItem(true, "scenario1", null);
-		treeData.addItem(null, root);
-		
-		Set<CommunicationMocked> communications = connectionMocked.getCommunications();
-		for (CommunicationMocked communication : communications) {
-			treeData.addItem(root, new TreeGridMockedItem(false, "unamed", communication));
-		}
-		treeDataProvider.refreshAll();
-	}
-	
 	public void commSelected(CommunicationMocked comm) {
 		if (comm != null) {
 			String request = NetworkReaderUtility.decode(comm.getRequest());
@@ -158,7 +150,7 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 			tabJs.setSizeFull();
 			tabSheet.addTab(tabJs, SmockerUI.getBundleValue("NodeEditor"));
 			
-			jsTesterPanel = new JsTesterPanel(request, tabJs, comm.getDateTime());
+			jsTesterPanel = new JsTesterPanel(request, tabJs, comm);
 			String inputForTest = comm.getInputForTest();
 			if (inputForTest != null) {
 				jsTesterPanel.setSourceInput(NetworkReaderUtility.decode(inputForTest));
@@ -175,10 +167,15 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 			
 			selectedCommunication = comm;
 		}
+		else {
+			selectedCommunication = null;
+			mainLayout.setSecondComponent(null);
+		}
 		refreshClickable();
 	}
 	
 	public void tabChanged(SelectedTabChangeEvent event) {
+		Object selectedTabComponent = event.getSource();
 		if (refreshClickable != null) {
 			refreshClickable.run();
 		}
@@ -203,7 +200,7 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 		if (CollectionUtils.isEmpty(selectedCommunication.getConnection().getCommunications())) {
 			clearTabs();
 		}
-		fillCommunication();
+		connectionMockedManager.fillCommunication();
 	}
 	
 	private void clearTabs() {
@@ -214,10 +211,7 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 		Notification.show("Clean");
 	}
 	
-//	public void test() {
-//		tabJs.runScript();
-//	}
-	
+
 	public void save() {
 		CommunicationMocked comm = getSelectedCommunication();
 		comm.setSourceJs(tabJs.getJSSource());
@@ -228,8 +222,8 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 		daoManagerCommunicationMocked.update(comm);
 	}
 	
-	public void refresh(ClickEvent event) {
-		fillCommunication();
+	public void refresh() {
+		connectionMockedManager.fillCommunication();
 	}
 	
 	public boolean isSelected() {
@@ -238,10 +232,6 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 	
 	public boolean always() {
 		return true;
-	}
-	
-	public boolean atLeastOneItem() {
-		return treeData.getRootItems().size() > 1;
 	}
 	
 	public void search(String searchValue) {

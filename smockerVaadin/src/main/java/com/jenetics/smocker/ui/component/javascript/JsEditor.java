@@ -9,8 +9,10 @@ import org.vaadin.easyapp.util.EasyAppLayout;
 
 import com.eclipsesource.v8.NodeJS;
 import com.eclipsesource.v8.V8;
+import com.jenetics.smocker.jseval.JSEvaluator;
 import com.jenetics.smocker.model.CommunicationMocked;
 import com.jenetics.smocker.ui.component.TextPanel;
+import com.jenetics.smocker.util.SmockerException;
 import com.jenetics.smocker.util.SmockerUtility;
 
 @SuppressWarnings("serial")
@@ -48,30 +50,15 @@ public class JsEditor extends EasyAppLayout {
 		aceEditor.setValue(DEFAULT_JS);
 	}
 
-	public String[] runScript(String input, Date recordDate) {
-		NodeJS nodeJS = NodeJS.createNodeJS();
-		V8 runtime =nodeJS.getRuntime();
-
-		Logger logger = new Logger();
-		runtime.registerJavaMethod(logger, "consolelog");
-		
-		String script = "var output = matchAndReturnOutput(recordDate, realInput, providedInput, providedOutput);\n";
-		
-		runtime.add("recordDate", recordDate.toString());
-		runtime.add("realInput", input);
-		runtime.add("providedInput", selectedRequestPane.getText());
-		runtime.add("providedOutput", selectedResponsePane.getText());
-		String output;
-		
+	public String[] runScript(String input, CommunicationMocked comm) {
+		String[] output = null;
 		try {
-			runtime.executeVoidScript(script + aceEditor.getValue());
-			output = runtime.getString("output");
+			output = JSEvaluator.runScript(input, comm, selectedRequestPane.getText(), selectedResponsePane.getText(), aceEditor.getValue());
 		}
-		catch (Exception ex) {
-			return new String[] {SmockerUtility.getStackTrace(ex), null};
+		catch (SmockerException smockerEx) {
+			return new String[] {SmockerUtility.getStackTrace(smockerEx.getCause()), null};
 		}
-		runtime.release(false);
-		return new String[] {logger.toString(), output};
+		return output;
 	}
 	
 	public String getJSSource() {

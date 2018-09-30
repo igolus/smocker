@@ -1,28 +1,62 @@
 package com.jenetics.smocker.ui.util;
 
 import com.jenetics.smocker.model.CommunicationMocked;
+import com.jenetics.smocker.model.Scenario;
+import com.jenetics.smocker.ui.SmockerUI;
 
 public class TreeGridMockedItem {
-	private boolean root;
-	private String name;
+
 	private CommunicationMocked communicationMocked;
-	private boolean scenario;
+	private Scenario scenario;
 	
-	public TreeGridMockedItem(boolean root, boolean scenario, String name, CommunicationMocked communicationMocked) {
+	public TreeGridMockedItem() {
 		super();
-		this.root = root;
-		this.scenario = scenario;
-		this.name = name;
+	}
+	
+	public TreeGridMockedItem(CommunicationMocked communicationMocked) {
+		super();
 		this.communicationMocked = communicationMocked;
 	}
 	
+	public TreeGridMockedItem(Scenario scenario) {
+		super();
+		this.scenario = scenario;
+	}
+	
 	public boolean isRoot() {
-		return root;
+		return scenario == null && communicationMocked == null;
 	}
-	public String getName() {
-		return name;
+	
+	public boolean isScenario() {
+		return scenario != null;
 	}
+	
+	public boolean isCommunication() {
+		return communicationMocked != null;
+	}
+	
+	public String getDisplay() {
+		if (isRoot()) {
+			return SmockerUI.getBundleValue("root");
+		}
+		if (isScenario()) {
+			return scenario.getName();
+		}
+		if (isCommunication()) {
+			return getValueElseUnamed(communicationMocked.getName());
+		}
+		return null;
+	}
+	
+	private String getValueElseUnamed (String name) {
+		return name == null ? SmockerUI.getBundleValue("unamed") : name;
+	}
+	
 	public CommunicationMocked getCommunication() {
 		return communicationMocked;
+	}
+	
+	public Scenario getScenario() {
+		return scenario;
 	}
 }

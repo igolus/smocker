@@ -140,7 +140,7 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 		Notification.show("Clean");
 	}
 	
-	public void refresh(ClickEvent event) {
+	public void refresh() {
 		fillCommunication();
 	}
 	

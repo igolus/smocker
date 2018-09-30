@@ -12,6 +12,7 @@ import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.ConnectionMocked;
 import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.model.JavaApplicationMocked;
+import com.jenetics.smocker.model.Scenario;
 import com.jenetics.smocker.ui.SmockerUI;
 
 public class MockConverter {
@@ -22,7 +23,8 @@ public class MockConverter {
 
 	private static IDaoManager<ConnectionMocked> daoManagerConnectionMocked = DaoManagerByModel.getDaoManager(ConnectionMocked.class);
 	private static IDaoManager<JavaApplicationMocked> daoManagerJavaApplicationMocked = DaoManagerByModel.getDaoManager(JavaApplicationMocked.class);
-
+	private static IDaoManager<Scenario> daoManagerScenario = DaoManagerByModel.getDaoManager(Scenario.class);
+	private static IDaoManager<CommunicationMocked> daoManagerCommuncationMocked = DaoManagerByModel.getDaoManager(CommunicationMocked.class);
 	
 	/**
 	 * convert communication to communicationMocked
@@ -94,10 +96,17 @@ public class MockConverter {
 		communicationMocked.setDateTime(communication.getDateTime());
 		communicationMocked.setConnection(targetConnectionMocked);
 		
+		
+		
+		
 		targetConnectionMocked.getCommunications().add(communicationMocked);
 		
 		if (updateIdBb) {
-			daoManagerConnectionMocked.update(targetConnectionMocked);
+			CommunicationMocked communicationMockedUpdated = 
+					daoManagerCommuncationMocked.create(communicationMocked);
+			//communicationMockedUpdated = daoManagerConnectionMocked.update(targetConnectionMocked);
+			DaoManagerByModel.getUNDEFINED_SCENARIO().getCommunicationsMocked().add(communicationMockedUpdated);
+			daoManagerScenario.update(DaoManagerByModel.getUNDEFINED_SCENARIO());
 		}
 		//
 	}

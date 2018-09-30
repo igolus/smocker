@@ -18,6 +18,7 @@ public class RestClientSmocker extends RESTClient {
 	private static final String SMOCKER_JAVAAPP_PATH = "/javaapplications";
 	private static final String SMOCKER_ADDCONN = "/manageJavaApplication/addConnection";
 	private static final String SMOCKER_ADDCOMM = "/manageJavaApplication/addCommunication";
+	private static final String SMOCKER_GETMOCKEDCONN = "/connectionsMocked";
 	
 	private static RestClientSmocker instance;
 	
@@ -38,6 +39,11 @@ public class RestClientSmocker extends RESTClient {
 		return get();
 	}
 	
+	public String getMockedConnections() {
+		setPath(SMOCKER_REST_PATH + SMOCKER_GETMOCKEDCONN);
+		return get();
+	}
+	
 	public String postConnection(SmockerContainer smockerContainer, Long javaAppId) {
 		StringBuffer buffer = new StringBuffer();
 		Map<String, String> headers = buildHeader();
@@ -55,6 +61,7 @@ public class RestClientSmocker extends RESTClient {
 		return null;
 	}
 	
+
 	public String postCommunication(SmockerContainer smockerContainer, Long javaAppId, Long connectionId) {
 		
 		String host = smockerContainer.getHost();

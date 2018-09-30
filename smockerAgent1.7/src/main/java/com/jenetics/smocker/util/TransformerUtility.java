@@ -46,7 +46,6 @@ public class TransformerUtility {
 		if (!filterSmockerBehavior()) {
 			if (!smockerContainerBySocket.containsKey(source)) {
 				addSmockerContainer(source, source.getInetAddress().getHostName(), source.getPort());
-				// smockerContainerBySocket.put(source, value)
 			}
 			SmockerContainer smockerContainer = smockerContainerBySocket.get(source);
 			if (smockerContainer.getSmockerSocketInputStream() == null) {
@@ -56,8 +55,6 @@ public class TransformerUtility {
 				smockerContainer.setTeeInputStream(teeInputStream);
 			}
 			return smockerContainer.getTeeInputStream();
-			// MessageLogger.logMessage("No socket key found in table",
-			// TransformerUtility.class);
 		}
 		return is;
 	}

@@ -18,6 +18,7 @@ import com.jenetics.smocker.dao.DaoManagerByModel;
 import com.jenetics.smocker.dao.IDaoManager;
 import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.ui.SmockerUI;
+import com.jenetics.smocker.ui.component.AbstractConnectionDetails;
 import com.jenetics.smocker.ui.util.TreeGridConnectionData;
 import com.vaadin.addon.jpacontainer.JPAContainer;
 import com.vaadin.addon.jpacontainer.JPAContainerFactory;
@@ -46,7 +47,7 @@ import com.vaadin.ui.VerticalLayout;
  * @param <V> Communication
  * @param <W> Connection details view Details
  */
-public abstract class AbstractConnectionTreeView<T extends EntityWithId, U extends EntityWithId, V extends Serializable, W extends EasyAppLayout> 
+public abstract class AbstractConnectionTreeView<T extends EntityWithId, U extends EntityWithId, V extends Serializable, W extends AbstractConnectionDetails> 
 	extends EasyAppLayout  {
 
 	/**
@@ -86,7 +87,7 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 	
 	protected Hashtable<Tab, W> detailsViewByTab = new Hashtable<>();
 	
-	private W selectedDetailView = null;
+	protected W selectedDetailView = null;
 
 	@Inject
 	private Logger logger;
@@ -102,15 +103,6 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 		
 		daoManagerJavaApplication = DaoManagerByModel.getDaoManager(tParameterClass);
 		daoManagerConnection = DaoManagerByModel.getDaoManager(uParameterClass);
-//		if (persistant) {
-//			daoManagerJavaApplication = new DaoManager<>(tParameterClass, SmockerUI.getEmPersitant());
-//			daoManagerConnection = new DaoManager<>(uParameterClass, SmockerUI.getEmPersitant());
-//		}
-//		else {
-//			daoManagerJavaApplication = new DaoManager<>(tParameterClass, SmockerUI.getEm());
-//			daoManagerConnection = new DaoManager<>(uParameterClass, SmockerUI.getEm());
-//		}
-		
 
 		initDao();
 
@@ -320,7 +312,18 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 
 
 	public void refresh(ClickEvent event) {
-		fillTreeTable();
+		if (isMainTabSelected()) {
+			fillTreeTable();
+		}
+		else {
+			getSelectedDetailView().refresh();
+		}
 	}
+	
+//	protected void refreshDetailView() {
+//		if (isMainTabSelected()) {
+//			
+//		}
+//	}
 
 }

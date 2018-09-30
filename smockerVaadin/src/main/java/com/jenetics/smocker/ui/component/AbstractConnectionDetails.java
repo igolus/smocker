@@ -10,4 +10,6 @@ public abstract class AbstractConnectionDetails extends EasyAppLayout {
 		this.refreshClickable = refreshClickable;
 	}
 
+	public abstract void refresh();
+
 }

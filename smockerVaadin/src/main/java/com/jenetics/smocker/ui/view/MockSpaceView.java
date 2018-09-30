@@ -111,8 +111,6 @@ public class MockSpaceView
 						, this::details, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
 				.addButton("Refresh_Button", VaadinIcons.REFRESH, null,  this::always			
 						, this::refresh, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
-//				.addButton("Play_Button", VaadinIcons.PLAY, null,  this::canTest			
-//						, this::test, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
 				.addButton("Save_Button", VaadinIcons.DISC, null,  this::canSave			
 						, this::save, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
 				;
@@ -120,27 +118,8 @@ public class MockSpaceView
 		return builder.build();
 	}
 	
-//	public boolean canTest() {
-//		return !isMainTabSelected() && getSelectedDetailView().isJSTabSelected();
-//	}
-	
-//	public void test(ClickEvent event) {
-//		TextPanel textPanelInput = new TextPanel(false);
-//		textPanelInput.setText(getSelectedDetailView().getSelectedRequestPane().getText());
-//		
-//		EasyAppView container = new EasyAppView() {
-//
-//			sqsq
-//			
-//		};
-//		
-//		SmockerUI.displayInSubWindowMidSize(SmockerUI.getBundleValue("InputForTest"), textPanelInput);
-//		
-//		//getSelectedDetailView().test();
-//	}
-	
 	public boolean canSave() {
-		return !isMainTabSelected();
+		return !isMainTabSelected() && selectedDetailView.getSelectedCommunication() != null;
 	}
 	
 	public void save(ClickEvent event) {
@@ -193,6 +172,14 @@ public class MockSpaceView
 		connectionMockedDetailsView.setRefreshClickableAction(this::refreshClickable);
 		return connectionMockedDetailsView;
 	}
+
+//	@Override
+//	protected void refreshDetailView() {
+//		fillTreeTable();
+//		if (getSelectedDetailView() != null) {
+//			getSelectedDetailView().refresh();
+//		}
+//	}
 	
 	
 }

@@ -8,6 +8,7 @@ import org.vaadin.easyapp.util.EasyAppLayout;
 import org.vaadin.easyapp.util.ActionContainer.InsertPosition;
 import org.vaadin.easyapp.util.ActionContainer.Position;
 
+import com.jenetics.smocker.model.CommunicationMocked;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.component.TextPanel;
 import com.vaadin.icons.VaadinIcons;
@@ -22,11 +23,11 @@ public class JsTesterPanel extends EasyAppLayout {
 	private String[] result;
 	private TextPanel textPanelInput;
 	private TextPanel textPanelOutput;
-	private Date recordDate;
+	private CommunicationMocked comm;
 
-	public JsTesterPanel(String sourceInput, JsEditor jsEditor, Date recordDate) {
+	public JsTesterPanel(String sourceInput, JsEditor jsEditor, CommunicationMocked comm) {
 		this.jsEditor = jsEditor;
-		this.recordDate = recordDate;
+		this.comm = comm;
 		VerticalSplitPanel mainLayout = new VerticalSplitPanel();
 		textPanelInput = new TextPanel(false);
 		textPanelInput.setText(sourceInput);
@@ -51,7 +52,7 @@ public class JsTesterPanel extends EasyAppLayout {
 	}
 	
 	public void test(ClickEvent event) {
-		result = jsEditor.runScript(textPanelInput.getText(), this.recordDate);
+		result = jsEditor.runScript(textPanelInput.getText(), comm);
 		String logs = result[0];
 		String outputResult = result[1];
 		

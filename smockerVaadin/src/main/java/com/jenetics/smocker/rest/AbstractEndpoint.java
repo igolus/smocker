@@ -30,9 +30,6 @@ public abstract class AbstractEndpoint<T extends EntityWithId> {
 	@Inject
 	Logger logger;
 
-//	@PersistenceContext(unitName = SmockerUI.PERSISTENCE_UNIT_MEMORY)
-//	protected EntityManager em;
-
 	@Inject
 	protected Event<T> entityEventSrc;
 

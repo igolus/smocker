@@ -186,6 +186,11 @@ public class SmockerUI extends UI {
 		logView.appendMessage(level, message);
 	}
 	
+	public static void log(Level level, String message, Exception ex) {
+		LogView logView = (LogView) getInstance().getEasyAppMainView().getScanner().getViewMap().get(LogView.class.toString());
+		logView.appendMessage(level, message, ex);
+	}
+	
 	/**
 	 * Display a subwindow from any component
 	 * @param component

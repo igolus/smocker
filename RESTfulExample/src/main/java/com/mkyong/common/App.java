@@ -32,7 +32,7 @@ public class App
 
 				line = bufferedReader.readLine();
 				callGoogle();
-				callYahoo();
+				//callYahoo();
 			}
 
 			catch (Exception ex) {

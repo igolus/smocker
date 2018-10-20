@@ -41,6 +41,32 @@ public class SimpleJsonReader {
 		return null;
 	}
 	
+	/**
+	 * Read first value from key in one json string
+	 * @param json
+	 * @param key
+	 * @return
+	 */
+	public static List<String> readValues(String json, String key) {
+		int startIndex = json.indexOf(key);
+		List<String> reValues = new ArrayList<>();
+		if (startIndex != -1) {
+			String after = json.substring(startIndex);
+			int afterDoubleDot = after.indexOf(":");
+			String afterSecond = after.substring(afterDoubleDot + 1);
+			String values = afterSecond.substring(afterSecond.indexOf("[") + 1, afterSecond.indexOf("]"));
+			if (values.equals("")) {
+				return reValues;
+			}
+			String[] valuesArray = values.split(",");
+			for (int i = 0; i < valuesArray.length; i++) {
+				reValues.add(valuesArray[i].substring(1, valuesArray[i].length() - 1));
+			}
+			return reValues;
+		}
+		return null;
+	}
+	
 	
 	public static String[] readSubResources(String json, String key) {
 		//connections":[

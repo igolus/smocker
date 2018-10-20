@@ -1,7 +1,7 @@
 package com.jenetics.smocker.util;
 
-import org.apache.commons.io.input.TeeInputStream;
-import org.apache.commons.io.output.TeeOutputStream;
+import com.jenetics.smocker.util.io.TeeInputStream;
+import com.jenetics.smocker.util.io.TeeOutputStream;
 
 public class SmockerContainer {
 	private SmockerSocketInputStream smockerSocketInputStream = null;
@@ -12,6 +12,7 @@ public class SmockerContainer {
 	private TeeInputStream teeInputStream;
 	private TeeOutputStream teeOutputStream;
 	private String stackTrace;
+	private String responseMocked; 
 	
 	public String getStackTrace() {
 		return stackTrace;
@@ -68,8 +69,15 @@ public class SmockerContainer {
 		return ssl;
 	}
 
+	public String getResponseMocked() {
+		return responseMocked;
+	}
 
-	
+
+	public void setResponseMocked(String responseMocked) {
+		this.responseMocked = responseMocked;
+	}
+
 
 	public TeeInputStream getTeeInputStream() {
 		return teeInputStream;

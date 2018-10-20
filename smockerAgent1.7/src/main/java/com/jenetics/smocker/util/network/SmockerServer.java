@@ -62,11 +62,7 @@ public class SmockerServer {
         }
 
         public void run() {
-            
-            // Do whatever required to process the client's request
-
             try {
-                //System.out.println("Got a client !");
                 BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
                 String line = in.readLine();

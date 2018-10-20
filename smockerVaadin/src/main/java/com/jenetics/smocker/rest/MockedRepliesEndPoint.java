@@ -60,16 +60,23 @@ public class MockedRepliesEndPoint  {
 	@GET
 	@Path("/listHostActivated")
 	public Response listActivated() {
-		List<String> listActivatedHost = daoManagerCommunications.listAll().stream()
-			.filter(CommunicationMocked::isActivated)
-			.map( comm -> comm.getConnection().getHost())
-			.distinct()
-			.collect(Collectors.toList());
+		try {
+			List<String> listActivatedHost = daoManagerCommunications.listAll().stream()
+					.filter(CommunicationMocked::isActivated)
+					.map( comm -> comm.getConnection().getHost())
+					.distinct()
+					.collect(Collectors.toList());
+				
+				ListHostResponse hostResponses = new ListHostResponse();
+				listActivatedHost.stream().forEach( host -> hostResponses.getActivatedHosts().add(host));
+				
+				return Response.ok(hostResponses).build();
+		}
+		catch (Throwable e) {
+			e.printStackTrace();
+		}
+		return null;
 		
-		ListHostResponse hostResponses = new ListHostResponse();
-		listActivatedHost.stream().forEach( host -> hostResponses.getActivatedHosts().add(host));
-		
-		return Response.ok(hostResponses).build();
 	}
 	
 	@POST

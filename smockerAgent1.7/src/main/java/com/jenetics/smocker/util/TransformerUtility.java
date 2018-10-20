@@ -14,11 +14,10 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.input.TeeInputStream;
-import org.apache.commons.io.output.TeeOutputStream;
-//import com.jenetics.smocker.util.SmockerSocketInputStream;
-
 import com.jenetics.smocker.configuration.util.ConnectionBehavior;
+import com.jenetics.smocker.util.io.TeeInputStream;
+import com.jenetics.smocker.util.io.TeeOutputStream;
+import com.jenetics.smocker.util.network.RemoteServerChecker;
 import com.jenetics.smocker.util.network.ResponseReader;
 import com.jenetics.smocker.util.network.RestClientSmocker;
 
@@ -33,17 +32,16 @@ public class TransformerUtility {
 	private static Hashtable<Object, Long> connectionIdBySocket = new Hashtable<Object, Long>();
 
 	public static String getCallerApp() {
+		if (callerApp == null) {
+			String[] stackTraceAsArray = getStackTraceAsArray();
+			callerApp = stackTraceAsArray[stackTraceAsArray.length - 1].split("\\(")[0];
+		}
 		return callerApp;
 	}
 
 
 	public synchronized static InputStream manageInputStream(InputStream is, Socket source) throws IOException {
-		if (callerApp == null) {
-			String[] stackTraceAsArray = getStackTraceAsArray();
-			callerApp = stackTraceAsArray[stackTraceAsArray.length - 1].split("\\(")[0];
-		}
-
-		if (!filterSmockerBehavior()) {
+		if (!filterSmockerBehavior() && RemoteServerChecker.isRemoteServerAlive()) {
 			if (!smockerContainerBySocket.containsKey(source)) {
 				addSmockerContainer(source, source.getInetAddress().getHostName(), source.getPort());
 			}
@@ -51,9 +49,11 @@ public class TransformerUtility {
 			if (smockerContainer.getSmockerSocketInputStream() == null) {
 				SmockerSocketInputStream smockerInputStream = new SmockerSocketInputStream();
 				smockerContainer.setSmockerSocketInputStream(smockerInputStream);
-				TeeInputStream teeInputStream = new TeeInputStream(is, smockerInputStream, true);
+				TeeInputStream teeInputStream = new TeeInputStream(is, smockerInputStream, true, smockerContainer);
 				smockerContainer.setTeeInputStream(teeInputStream);
 			}
+			smockerContainer.getTeeInputStream().setApplyMock(RemoteServerChecker.getMockedHost().contains(source.getInetAddress().getHostName()));
+			smockerContainer.getTeeInputStream().setHost(source.getInetAddress().getHostName());
 			return smockerContainer.getTeeInputStream();
 		}
 		return is;
@@ -106,9 +106,7 @@ public class TransformerUtility {
 	
 	
 	public synchronized static OutputStream manageOutputStream(OutputStream os, Socket source) throws IOException {
-		// return create a tee only if not coming from SSL
-		if (!filterSmockerBehavior()) {
-			
+		if (!filterSmockerBehavior() && RemoteServerChecker.isRemoteServerAlive()) {
 			SmockerContainer container = null;
 			if (!smockerContainerBySocket.containsKey(source)) {
 				container = addSmockerContainer(source, source.getInetAddress().getHostName(),
@@ -117,21 +115,20 @@ public class TransformerUtility {
 			else {
 				container = smockerContainerBySocket.get(source);
 			}
-			
-			
 			SmockerSocketOutputStream smockerOutputStream = new SmockerSocketOutputStream();
 			container.setSmockerSocketOutputStream(smockerOutputStream);
 			TeeOutputStream teeOutputStream = new TeeOutputStream(os, smockerOutputStream);
 			container.setTeeOutputStream(teeOutputStream);
-			// smockerContainerBySocket.put(source, value)
-
-			SmockerContainer smockerContainer = smockerContainerBySocket.get(source);
-			if (smockerContainer.getSmockerSocketOutputStream() == null) {
+			//SmockerContainer smockerContainer = smockerContainerBySocket.get(source);
+			//if (smockerContainer.getSmockerSocketOutputStream() == null) {
 				
-			}
-			return smockerContainer.getTeeOutputStream();
-			// MessageLogger.logMessage("No socket key found in table",
-			// TransformerUtility.class);
+			//}
+			
+			
+			container.getTeeOutputStream().setApplyMock(RemoteServerChecker.getMockedHost().contains(source.getInetAddress().getHostName()));
+			container.getTeeOutputStream().setHost(source.getInetAddress().getHostName());
+			container.getTeeOutputStream().setSmockerContainer(container);
+			return container.getTeeOutputStream();
 		}
 		return os;
 	}
@@ -145,9 +142,9 @@ public class TransformerUtility {
 							idConnection);
 				}
 			}
+			smockerContainerBySocket.remove(source);
 		}
-		// remove the container
-		smockerContainerBySocket.remove(source);
+		
 	}
 
 	private synchronized static void addSocketReference(Socket source, String host, int port) {
@@ -171,21 +168,17 @@ public class TransformerUtility {
 	private static SmockerContainer addSmockerContainer(Object source, String host, int port) throws IOException {
 		String stackTrace = getStackTrace();
 		SmockerContainer smockerContainer = new SmockerContainer(host,port, stackTrace);
-		String allResponse = null;
+		String allResponse = RestClientSmocker.getInstance().getAll();
+		String existingId = ResponseReader.findExistingAppId(allResponse);
 		// only if the javaAppId was not found
-		if (javaAppId == null) {
-			// first get all the application from server
-			allResponse = RestClientSmocker.getInstance().getAll();
+		if (javaAppId == null || existingId == null) {
 			if (allResponse != null) {
-				String existingId = ResponseReader.findExistingAppId(allResponse);
 				if (existingId != null) {
 					javaAppId = Long.valueOf(existingId);
 				} else {
 					String response = RestClientSmocker.getInstance().postJavaApp(smockerContainer);
 					updateJavaAppId(response);
 				}
-				// fill the connection in the memory config
-				//Map<String, ConnectionBehavior> connectionsMap = ResponseReader.getConnections(allResponse);
 			}
 		}
 		if (javaAppId != null) {
@@ -333,8 +326,11 @@ public class TransformerUtility {
 	// }
 
 	private static boolean filterSmockerBehavior() {
-		return inSocketFromSSL() || inStack("com.jenetics.smocker.util.network.RestClientSmocker")
-				|| inStack("com.jenetics.smocker.util.network.SmockerServer$ClientTask");
+		return inSocketFromSSL() 
+				|| inStack("com.jenetics.smocker.util.network.RestClientSmocker")
+				|| inStack("com.jenetics.smocker.util.network.RestClientAdminChecker")
+				|| inStack("com.jenetics.smocker.util.network.SmockerServer$ClientTask")
+				|| inStack("com.jenetics.smocker.util.network.RemoteServerChecker");
 	}
 
 	protected static boolean inStack(String className) {
@@ -350,8 +346,6 @@ public class TransformerUtility {
 	protected static boolean inSocketFromSSL() {
 		StackTraceElement[] stackTrace = new Throwable().getStackTrace();
 		// we are in socket coming from SSLSocket socket
-		// if (stackTrace.length > 1 &&
-		// stackTrace[2].getClassName().equals("java.net.Socket")) {
 		boolean socketTrace = false;
 		for (int i = 1; i < stackTrace.length; i++) {
 			if (!socketTrace) {

@@ -20,16 +20,40 @@ public class ResponseReader {
 	public static final String OK_STATUS = "200";
 	public static final String CONFLICT = "409";
 
-	public static String readValueFromResponse(String response, String key) throws IOException {
-		String status = readStatusCodeFromResponse(response);
-		if (status != null && status.equals(OK_STATUS)) {
-			BufferedReader reader = new BufferedReader(new StringReader(response));
-			String line = reader.readLine();
-			while (!line.isEmpty()) {
+	public static String readValueFromResponse(String response, String key)  {
+		try {
+			String status = readStatusCodeFromResponse(response);
+			if (status != null && status.equals(OK_STATUS)) {
+				BufferedReader reader = new BufferedReader(new StringReader(response));
+				String line;
 				line = reader.readLine();
+				while (!line.isEmpty()) {
+					line = reader.readLine();
+				}
+				String jsonResp = reader.readLine();
+				return SimpleJsonReader.readValue(jsonResp, key);
 			}
-			String jsonResp = reader.readLine();
-			return SimpleJsonReader.readValue(jsonResp, key);
+		} catch (IOException e) {
+			return null;
+		}
+		return null;
+	}
+	
+	public static String readValuesFromResponse(String response, String key)  {
+		try {
+			String status = readStatusCodeFromResponse(response);
+			if (status != null && status.equals(OK_STATUS)) {
+				BufferedReader reader = new BufferedReader(new StringReader(response));
+				String line;
+				line = reader.readLine();
+				while (!line.isEmpty()) {
+					line = reader.readLine();
+				}
+				String jsonResp = reader.readLine();
+				return SimpleJsonReader.readValue(jsonResp, key);
+			}
+		} catch (IOException e) {
+			return null;
 		}
 		return null;
 	}
@@ -48,17 +72,22 @@ public class ResponseReader {
 		return null;
 	}
 	
-	public static String readStatusCodeFromResponse(String response) throws IOException {
+	public static String readStatusCodeFromResponse(String response) {
 		String status = null;
-		if (response != null) {
-			BufferedReader reader = new BufferedReader(new StringReader(response));
-			String line = reader.readLine();
-			
-			if (!line.isEmpty() && line.split(" ").length == 3) {
-				status = line.split(" ")[1];
+		try {
+			if (response != null) {
+				BufferedReader reader = new BufferedReader(new StringReader(response));
+				String line = reader.readLine();
+
+				if (!line.isEmpty() && line.split(" ").length >= 3) {
+					status = line.split(" ")[1];
+				}
+				return status;
 			}
+		} catch (IOException e) {
+			return null;
 		}
-		return status;
+		return null;
 	}
 	
 	/**

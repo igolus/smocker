@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 
 import com.jenetics.smocker.util.RessourceLoader;
+import com.jenetics.smocker.util.network.RemoteServerChecker;
 import com.jenetics.smocker.util.network.SmockerServer;
 
 /**
@@ -29,6 +30,8 @@ public class SmockerAgent {
 				smockerServer.startServer();
 			}
 			
+			RemoteServerChecker.getInstance();
+			
 			Runtime.getRuntime().addShutdownHook(new Thread(){public void run(){
 			    smockerServer.release();
 			}});
@@ -38,7 +41,6 @@ public class SmockerAgent {
 			System.out.println(smockerAscii);
 			inst.addTransformer(new MainTransformer());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

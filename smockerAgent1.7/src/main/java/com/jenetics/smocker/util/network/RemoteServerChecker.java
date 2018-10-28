@@ -55,7 +55,7 @@ public class RemoteServerChecker {
 							String responseHost = RestClientSmocker.getInstance().getAllMockedConnection();
 							mockedHost = SimpleJsonReader.readValues(responseHost, "activatedHosts");
 						}
-					} catch (InterruptedException e) {
+					} catch (Exception e) {
 						MessageLogger.logErrorWithMessage("Unable to check remote server", e, RemoteServerChecker.class);
 					}
 				}

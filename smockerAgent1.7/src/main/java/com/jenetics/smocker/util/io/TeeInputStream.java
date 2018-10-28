@@ -20,8 +20,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 
 import com.jenetics.smocker.util.SmockerContainer;
+import com.jenetics.smocker.util.SmockerSocketInputStream;
 
 /**
  * InputStream proxy that transparently writes a copy of all bytes read
@@ -47,7 +49,7 @@ public class TeeInputStream extends ProxyInputStream {
      * The output stream that will receive a copy of all bytes read from the
      * proxied input stream.
      */
-    private final OutputStream branch;
+    private SmockerSocketInputStream branch;
 
     /**
      * Flag for closing also the associated output stream when this
@@ -64,7 +66,7 @@ public class TeeInputStream extends ProxyInputStream {
      * @param input input stream to be proxied
      * @param branch output stream that will receive a copy of all bytes read
      */
-    public TeeInputStream(final InputStream input, final OutputStream branch, SmockerContainer smockerContainer) {
+    public TeeInputStream(final InputStream input, SmockerSocketInputStream branch, SmockerContainer smockerContainer) {
         this(input, branch, false, smockerContainer);
     }
 
@@ -80,14 +82,24 @@ public class TeeInputStream extends ProxyInputStream {
      *                    stream is closed
      */
     public TeeInputStream(
-            final InputStream input, final OutputStream branch, final boolean closeBranch, SmockerContainer smockerContainer) {
+            final InputStream input, SmockerSocketInputStream branch, final boolean closeBranch, SmockerContainer smockerContainer) {
         super(input);
         this.branch = branch;
         this.closeBranch = closeBranch;
         this.smockerContainer = smockerContainer;
     }
+    
+    public void resetBranch() {
+    	branch = new SmockerSocketInputStream();
+    }
+    
+    
 
-    /**
+    public SmockerSocketInputStream getBranch() {
+		return branch;
+	}
+
+	/**
      * Closes the proxied input stream and, if so configured, the associated
      * output stream. An exception thrown from one stream will not prevent
      * closing of the other stream.
@@ -125,6 +137,7 @@ public class TeeInputStream extends ProxyInputStream {
     @Override
     public int read() throws IOException {
     	initiateMockedResponse();
+    	postCommunication();
     	final int ch = super.read();
         if (ch != EOF && mockBis == null) {
             branch.write(ch);
@@ -134,10 +147,15 @@ public class TeeInputStream extends ProxyInputStream {
         }
         return ch;
     }
-    
-    
 
-    @Override
+    private void postCommunication() throws UnsupportedEncodingException {
+		if (getSmockerContainer().isPostAtNextRead()) {
+			getSmockerContainer().postCommunication();
+			getSmockerContainer().setPostAtNextRead(false);
+		}
+	}
+
+	@Override
 	public int available() throws IOException {
     	initiateMockedResponse();
     	if (mockBis != null) {
@@ -159,12 +177,13 @@ public class TeeInputStream extends ProxyInputStream {
     @Override
     public int read(final byte[] bts, final int st, final int end) throws IOException {
     	initiateMockedResponse();
+    	postCommunication();
+    	if (mockBis != null) {
+        	return mockBis.read(bts, st, end);
+        }
     	final int n = super.read(bts, st, end);
         if (n != -1 && mockBis == null) {
             branch.write(bts, st, n);
-        }
-        if (mockBis != null) {
-        	return mockBis.read(bts, st, end);
         }
         return n;
     }

@@ -17,6 +17,7 @@ import org.vaadin.easyapp.util.MessageBuilder;
 import org.vaadin.easyapp.util.ActionContainer.Position;
 
 import com.jenetics.smocker.model.EntityWithId;
+import com.jenetics.smocker.rest.AliveEndPoint;
 import com.jenetics.smocker.ui.util.RefreshableView;
 import com.jenetics.smocker.ui.view.LogView;
 import com.vaadin.annotations.Push;
@@ -105,7 +106,7 @@ public class SmockerUI extends UI {
 
 	@Override
 	protected void init(VaadinRequest request) {
-		
+
 		final VerticalLayout layout = new VerticalLayout();
 		layout.setSizeFull();
 
@@ -140,6 +141,7 @@ public class SmockerUI extends UI {
 
 		setContent(layout);
 		instance = this;
+		AliveEndPoint.setInitialized(true);
 	}
 
 	public enum EnumButton {

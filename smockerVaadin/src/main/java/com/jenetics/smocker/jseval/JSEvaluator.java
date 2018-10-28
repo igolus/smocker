@@ -1,6 +1,5 @@
 package com.jenetics.smocker.jseval;
 
-import java.util.Date;
 import java.util.logging.Level;
 
 import com.eclipsesource.v8.NodeJS;
@@ -10,7 +9,6 @@ import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.component.javascript.Logger;
 import com.jenetics.smocker.util.NetworkReaderUtility;
 import com.jenetics.smocker.util.SmockerException;
-import com.jenetics.smocker.util.SmockerUtility;
 
 public class JSEvaluator {
 	

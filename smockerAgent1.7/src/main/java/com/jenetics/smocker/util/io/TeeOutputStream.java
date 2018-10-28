@@ -19,8 +19,12 @@ package com.jenetics.smocker.util.io;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 
 import com.jenetics.smocker.util.SmockerContainer;
+import com.jenetics.smocker.util.SmockerSocketInputStream;
+import com.jenetics.smocker.util.SmockerSocketOutputStream;
+import com.jenetics.smocker.util.TransformerUtility;
 import com.jenetics.smocker.util.network.ResponseReader;
 import com.jenetics.smocker.util.network.RestClientSmocker;
 
@@ -39,14 +43,14 @@ public class TeeOutputStream extends ProxyOutputStream {
 	ByteArrayOutputStream bos = new ByteArrayOutputStream(2048);
 	
     /** the second OutputStream to write to */
-    protected OutputStream branch; //TODO consider making this private
+    private SmockerSocketOutputStream branch;
 
     /**
      * Constructs a TeeOutputStream.
      * @param out the main OutputStream
      * @param branch the second OutputStream
      */
-    public TeeOutputStream(final OutputStream out, final OutputStream branch) {
+    public TeeOutputStream(final OutputStream out, final SmockerSocketOutputStream branch) {
         super(out);
         this.branch = branch;
     }
@@ -61,8 +65,18 @@ public class TeeOutputStream extends ProxyOutputStream {
         super.write(b);
         this.branch.write(b);
     }
+    
+    public void resetBranch() {
+    	branch = new SmockerSocketOutputStream();
+    }
+    
+    
 
-    /**
+    public SmockerSocketOutputStream getBranch() {
+		return branch;
+	}
+
+	/**
      * Write the specified bytes to both streams.
      * @param b the bytes to write
      * @param off The start offset
@@ -88,7 +102,7 @@ public class TeeOutputStream extends ProxyOutputStream {
      */
     @Override
     public synchronized void write(final int b) throws IOException {
-        if (applyMock) {
+    	if (applyMock) {
         	bos.write(b);
         }
         else {
@@ -104,18 +118,40 @@ public class TeeOutputStream extends ProxyOutputStream {
     @Override
     public void flush() throws IOException {
     	super.flush();
+    	boolean matchApplied = false;
     	if (applyMock) {
         	String match = RestClientSmocker.getInstance().postCheckMatch(new String(bos.toByteArray()), host);
         	String matchOutput = ResponseReader.readValueFromResponse(match, "outputResponse");
-        	getSmockerContainer().setResponseMocked(RestClientSmocker.decode(matchOutput));
-        	if (getSmockerContainer().getTeeInputStream() != null) {
-        		getSmockerContainer().getTeeInputStream().resetMockBis();
+        	matchApplied = !matchOutput.equals("NO_MATCH");
+        	if (matchApplied) {
+        		getSmockerContainer().setResponseMocked(RestClientSmocker.decode(matchOutput));
+            	if (getSmockerContainer().getTeeInputStream() != null) {
+            		getSmockerContainer().getTeeInputStream().resetMockBis();
+            	}
         	}
         }
-        else {
+        if (!matchApplied && !getSmockerContainer().isPostAtNextRead()) {
+        	getSmockerContainer().setPostAtNextRead(true);
         	this.branch.flush();
+        	getSmockerContainer().setOutputToBesend(getSmockerContainer().getSmockerSocketOutputStream().getSmockerOutputStreamData().getString());
+        	if (getSmockerContainer().getSmockerSocketInputStream() != null && 
+        			!getSmockerContainer().getSmockerSocketInputStream().getSmockerOutputStreamData().getString().isEmpty()) {
+        		resetBranch();
+        	}
         }
     }
+
+	private void postCommunication() throws UnsupportedEncodingException {
+		String lastReaden = null;
+		if (getSmockerContainer().getSmockerSocketInputStream() != null) {
+			lastReaden = getSmockerContainer().getSmockerSocketInputStream().getSmockerOutputStreamData().getString();
+		}
+		
+		if (lastReaden != null && getSmockerContainer().getOutputToBesend() != null) {
+			RestClientSmocker.getInstance().postCommunication(getSmockerContainer(), lastReaden, 
+					 getSmockerContainer().getOutputToBesend());
+		}
+	}
 
     /**
      * Closes both output streams.
@@ -130,7 +166,10 @@ public class TeeOutputStream extends ProxyOutputStream {
      */
     @Override
     public void close() throws IOException {
-        try {
+    	if (!applyMock) {
+    		postCommunication();
+    	}
+    	try {
             super.close();
         } finally {
             this.branch.close();

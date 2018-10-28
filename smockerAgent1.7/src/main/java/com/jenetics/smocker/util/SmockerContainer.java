@@ -1,7 +1,11 @@
 package com.jenetics.smocker.util;
 
+import java.io.UnsupportedEncodingException;
+import java.net.Socket;
+
 import com.jenetics.smocker.util.io.TeeInputStream;
 import com.jenetics.smocker.util.io.TeeOutputStream;
+import com.jenetics.smocker.util.network.RestClientSmocker;
 
 public class SmockerContainer {
 	private SmockerSocketInputStream smockerSocketInputStream = null;
@@ -14,6 +18,31 @@ public class SmockerContainer {
 	private String stackTrace;
 	private String responseMocked; 
 	
+	private String outputToBesend;
+	private String inputToBesend;
+	private Object source;
+	private boolean postAtNextRead = false;
+	
+	public String getOutputToBesend() {
+		return outputToBesend;
+	}
+
+
+	public void setOutputToBesend(String outputToBesend) {
+		this.outputToBesend = outputToBesend;
+	}
+
+
+	public String getInputToBesend() {
+		return inputToBesend;
+	}
+
+
+	public void setInputToBesend(String inputToBesend) {
+		this.inputToBesend = inputToBesend;
+	}
+
+
 	public String getStackTrace() {
 		return stackTrace;
 	}
@@ -29,10 +58,11 @@ public class SmockerContainer {
 	}
 
 
-	public SmockerContainer(String host, int port, String stackTrace) {
+	public SmockerContainer(String host, int port, String stackTrace, Object source) {
 		this.host = host;
 		this.port = port;
 		this.stackTrace = stackTrace;
+		this.source = source;
 	}
 
 
@@ -41,6 +71,11 @@ public class SmockerContainer {
 		super();
 		this.smockerSocketInputStream = smockerSocketInputStream;
 		this.smockerSocketOutputStream = smockerSocketOutputStream;
+	}
+
+
+	public Object getSource() {
+		return source;
 	}
 
 
@@ -96,6 +131,27 @@ public class SmockerContainer {
 
 	public void setTeeOutputStream(TeeOutputStream teeOutputStream) {
 		this.teeOutputStream = teeOutputStream;
+	}
+	
+	public boolean isPostAtNextRead() {
+		return postAtNextRead;
+	}
+
+
+	public void setPostAtNextRead(boolean postAtNextRead) {
+		this.postAtNextRead = postAtNextRead;
+	}
+
+
+	public void postCommunication() throws UnsupportedEncodingException {
+		String lastReaden = null;
+		if (getSmockerSocketInputStream() != null) {
+			lastReaden = getSmockerSocketInputStream().getSmockerOutputStreamData().getString();
+		}
+		
+		if (lastReaden != null && !lastReaden.isEmpty() &&  getOutputToBesend() != null) {
+			RestClientSmocker.getInstance().postCommunication(this, getOutputToBesend(), lastReaden);
+		}
 	}
 	
 	

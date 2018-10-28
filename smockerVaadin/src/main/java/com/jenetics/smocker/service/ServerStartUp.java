@@ -11,6 +11,6 @@ import com.jenetics.smocker.rest.AliveEndPoint;
 public class ServerStartUp {
 	@PostConstruct
 	void init() {
-		AliveEndPoint.setInitialized(true);
+		//AliveEndPoint.setInitialized(true);
 	}
 }

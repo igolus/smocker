@@ -79,7 +79,41 @@ public class RestClientSmocker extends RESTClient {
 	//		getAdmin("")
 	//	}
 
+	public String postCommunication(SmockerContainer smockerContainer, String input, String output) {
 
+		String host = smockerContainer.getHost();
+		int port = smockerContainer.getPort();
+		
+    	Long idConnection = TransformerUtility.getConnectionIdBySocket().get(smockerContainer.getSource());
+		Long javaAppId = TransformerUtility.getJavaAppId();
+
+		if (!MemoryConfiguration.isConnecctionThere(host, port)) {
+			MemoryConfiguration.setConnecctionWatched(host, port);	
+		}
+		//send only if the connection is watched
+
+		if (MemoryConfiguration.isConnecctionWatched(host, port)) {
+			StringBuffer buffer = new StringBuffer();
+			Map<String, String> headers = buildHeader();
+				try {
+					buffer.append("{\"id\": 0, \"request\":\"")
+					.append(encode(input))
+					//.append(encode(smockerContainer.getInputToBesend()))
+					.append("\",  \"response\":\"")
+					.append(encode(output))
+					//.append(encode(smockerContainer.getOutputToBesend()))
+					.append("\",  \"callerStack\":\"")
+					.append(encode(smockerContainer.getStackTrace()))
+					.append("\"}");
+					String path = SMOCKER_REST_PATH + SMOCKER_ADDCOMM + "/" + javaAppId + "/" + idConnection;
+					return put(buffer.toString(), path, headers);
+				} catch (Exception e) {
+					MessageLogger.logThrowable(e);
+				}
+		}
+		return null;
+	}
+	
 	public String postCommunication(SmockerContainer smockerContainer, Long javaAppId, Long connectionId) {
 
 		String host = smockerContainer.getHost();
@@ -93,17 +127,28 @@ public class RestClientSmocker extends RESTClient {
 		if (MemoryConfiguration.isConnecctionWatched(host, port)) {
 			StringBuffer buffer = new StringBuffer();
 			Map<String, String> headers = buildHeader();
-			if (
-					smockerContainer.getSmockerSocketOutputStream() != null &&
-					smockerContainer.getSmockerSocketOutputStream().getSmockerOutputStreamData() != null &&
-					smockerContainer.getSmockerSocketInputStream() != null &&
-					smockerContainer.getSmockerSocketInputStream().getSmockerOutputStreamData() != null
-					)
+			
+//			if (smockerContainer.getInputToBesend() != null &&
+//				smockerContainer.getOutputToBesend() != null
+//			) 
+//			
+//			if (
+//					smockerContainer.getInputToBesend() != null &&
+//					smockerContainer.getOutputToBesend() != null
+//					)
 				try {
+					
+					String input = "";
+					
+					if (smockerContainer.getTeeInputStream() != null) {
+						input = smockerContainer.getTeeInputStream().getBranch().getSmockerOutputStreamData().getString();
+					}
 					buffer.append("{\"id\": 0, \"request\":\"")
-					.append(encode(smockerContainer.getSmockerSocketOutputStream().getSmockerOutputStreamData().getString()))
+					.append(encode(input))
+					//.append(encode(smockerContainer.getInputToBesend()))
 					.append("\",  \"response\":\"")
-					.append(encode(smockerContainer.getSmockerSocketInputStream().getSmockerOutputStreamData().getString()))
+					.append(encode(smockerContainer.getTeeOutputStream().getBranch().getSmockerOutputStreamData().getString()))
+					//.append(encode(smockerContainer.getOutputToBesend()))
 					.append("\",  \"callerStack\":\"")
 					.append(encode(smockerContainer.getStackTrace()))
 					.append("\"}");

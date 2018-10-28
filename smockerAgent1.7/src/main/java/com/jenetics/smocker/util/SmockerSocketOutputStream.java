@@ -21,21 +21,4 @@ public class SmockerSocketOutputStream extends BaseSmockerSocketHandler {
 		return smockerSocketOutputStreamData;
 	}
 
-//	@Override
-//	public void flush() throws IOException {
-//		flushOut(data.buffer.toByteArray());
-//	}
-//
-//	private void flushOut(byte[] byteArray) throws UnsupportedEncodingException {
-//		System.out.println(new String(byteArray,  "UTF-8"));
-//	}
-
-//	@Override
-//	public void close() throws IOException {
-//		// TODO Auto-generated method stub
-//		super.close();
-//	}
-	
-	
-
 }

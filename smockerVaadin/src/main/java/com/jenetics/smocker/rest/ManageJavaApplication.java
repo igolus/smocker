@@ -47,6 +47,14 @@ public class ManageJavaApplication {
 	@Inject
 	@Dao
 	protected IDaoManager<JavaApplication> daoManager;
+	
+	@Inject
+	@Dao
+	protected IDaoManager<Connection> daoManagerConnection;
+	
+	@Inject
+	@Dao
+	protected IDaoManager<Communication> daoManagerCommunication;
 
 	@Inject
 	private Logger logger;
@@ -66,6 +74,7 @@ public class ManageJavaApplication {
 		conn.setJavaApplication(target);
 		conn.setWatched(true);
 		target.getConnections().add(conn);
+		conn = daoManagerConnection.create(conn);
 		daoManager.update(target);
 		// notify the creation
 		Connection[] conns = new Connection[target.getConnections().size()];
@@ -118,6 +127,7 @@ public class ManageJavaApplication {
 		}
 		if (connection.get().getWatched() != null && connection.get().getWatched()) {
 			comm.setConnection(connection.get());
+			comm = daoManagerCommunication.create(comm);
 			connection.get().getCommunications().add(comm);
 			daoManager.update(target);
 

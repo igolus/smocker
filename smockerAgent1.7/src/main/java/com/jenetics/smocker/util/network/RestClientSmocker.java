@@ -74,11 +74,6 @@ public class RestClientSmocker extends RESTClient {
 		return null;
 	}
 
-
-	//	public boolean checkRemoteAppReady() {
-	//		getAdmin("")
-	//	}
-
 	public String postCommunication(SmockerContainer smockerContainer, String input, String output) {
 
 		String host = smockerContainer.getHost();
@@ -91,7 +86,6 @@ public class RestClientSmocker extends RESTClient {
 			MemoryConfiguration.setConnecctionWatched(host, port);	
 		}
 		//send only if the connection is watched
-
 		if (MemoryConfiguration.isConnecctionWatched(host, port)) {
 			StringBuffer buffer = new StringBuffer();
 			Map<String, String> headers = buildHeader();
@@ -127,28 +121,15 @@ public class RestClientSmocker extends RESTClient {
 		if (MemoryConfiguration.isConnecctionWatched(host, port)) {
 			StringBuffer buffer = new StringBuffer();
 			Map<String, String> headers = buildHeader();
-			
-//			if (smockerContainer.getInputToBesend() != null &&
-//				smockerContainer.getOutputToBesend() != null
-//			) 
-//			
-//			if (
-//					smockerContainer.getInputToBesend() != null &&
-//					smockerContainer.getOutputToBesend() != null
-//					)
 				try {
-					
 					String input = "";
-					
 					if (smockerContainer.getTeeInputStream() != null) {
 						input = smockerContainer.getTeeInputStream().getBranch().getSmockerOutputStreamData().getString();
 					}
 					buffer.append("{\"id\": 0, \"request\":\"")
 					.append(encode(input))
-					//.append(encode(smockerContainer.getInputToBesend()))
 					.append("\",  \"response\":\"")
 					.append(encode(smockerContainer.getTeeOutputStream().getBranch().getSmockerOutputStreamData().getString()))
-					//.append(encode(smockerContainer.getOutputToBesend()))
 					.append("\",  \"callerStack\":\"")
 					.append(encode(smockerContainer.getStackTrace()))
 					.append("\"}");
@@ -184,7 +165,7 @@ public class RestClientSmocker extends RESTClient {
 		return null;
 	}
 
-	public String postJavaApp(SmockerContainer smockerContainer) {
+	public String postJavaApp() {
 		StringBuffer buffer = new StringBuffer();
 		Map<String, String> headers = buildHeader();
 		String host = null;

@@ -137,13 +137,15 @@ public class TeeInputStream extends ProxyInputStream {
     @Override
     public int read() throws IOException {
     	initiateMockedResponse();
-    	postCommunication();
     	final int ch = super.read();
         if (ch != EOF && mockBis == null) {
             branch.write(ch);
         }
         if (mockBis != null) {
         	return mockBis.read(); 
+        }
+        if (ch == -1) {
+        	postCommunication();
         }
         return ch;
     }
@@ -177,13 +179,16 @@ public class TeeInputStream extends ProxyInputStream {
     @Override
     public int read(final byte[] bts, final int st, final int end) throws IOException {
     	initiateMockedResponse();
-    	postCommunication();
+    	
     	if (mockBis != null) {
         	return mockBis.read(bts, st, end);
         }
     	final int n = super.read(bts, st, end);
         if (n != -1 && mockBis == null) {
             branch.write(bts, st, n);
+        }
+        if (n == -1) {
+        	postCommunication();
         }
         return n;
     }

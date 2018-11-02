@@ -40,7 +40,8 @@ public class SocketImplTransformer extends AbstractTransformer {
 		String body = "{ return $0.socket; }";
 		
 		publicGetSocket.setModifiers(ctClass.getModifiers() & Modifier.PUBLIC );
-		publicGetSocket.setBody(body);
+		publicGetSocket.setBody(body, body, body);
 		ctClass.addMethod(publicGetSocket);
+
 	}
 }

@@ -13,4 +13,8 @@ public class SmockerSocketOutputStreamData {
 	public String getString () throws UnsupportedEncodingException {
 		return new String(buffer.toByteArray(), "UTF-8");
 	}
+	
+	public byte[] getBytes() {
+		return this.buffer.toByteArray();
+	}
 }

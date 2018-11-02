@@ -21,4 +21,8 @@ public class SmockerSocketOutputStream extends BaseSmockerSocketHandler {
 		return smockerSocketOutputStreamData;
 	}
 
+	public byte[] getBytes() {
+		return smockerSocketOutputStreamData.getBytes();
+	}
+
 }

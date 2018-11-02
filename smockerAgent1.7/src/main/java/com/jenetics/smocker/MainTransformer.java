@@ -12,7 +12,9 @@ import com.jenetics.smocker.transformers.SocketAdaptorImplTransformer;
 import com.jenetics.smocker.transformers.SocketImplTransformer;
 import com.jenetics.smocker.transformers.SocketInputStreamtTransformer;
 import com.jenetics.smocker.transformers.SocketTransformer;
+import com.jenetics.smocker.util.MessageLogger;
 import com.jenetics.smocker.util.RessourceLoader;
+import com.jenetics.smocker.util.TransformerUtility;
 import com.jenetics.smocker.util.network.SmockerServer;
 
 /**
@@ -25,7 +27,8 @@ public class MainTransformer implements ClassFileTransformer {
 	
 	public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
 			ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
-		// TODO Auto-generated method stub
+		
+		//String callerApp = TransformerUtility.getCallerApp();
 		
 		
 		byte[] byteCode = classfileBuffer;
@@ -38,33 +41,16 @@ public class MainTransformer implements ClassFileTransformer {
 				byteCode = new SocketTransformer().transform(classfileBuffer);
 			}
 			
-//			if (className != null && className.equals("java/net/SocketInputStream")) {
-//				byteCode = new SocketInputStreamtTransformer().transform(classfileBuffer);
-//			}
-			
-//			if (className != null && className.startsWith("java/net/SocksSocketImpl")) {
-//				byteCode = new SocketImplTransformer().transform(classfileBuffer);
-//			}
-//			
-//			if (className != null && className.startsWith("sun/nio/ch/SocketAdaptor")) {
-//				//System.out.println();
-//				byteCode = new SocketAdaptorImplTransformer().transform(classfileBuffer);
-//			}
-			
 			if (className != null && className.equals("sun/nio/ch/SocketChannelImpl")) {
-				//System.out.println();
 				byteCode = new SocketChannelImplTransformer().transform(classfileBuffer);
 			}
 			
 			if (className != null && className.equals("java/nio/channels/spi/AbstractInterruptibleChannel")) {
-				//System.out.println();
 				byteCode = new AbstractInterruptibleChannelTransformer().transform(classfileBuffer);
 			}
-			
-			
-			
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			MessageLogger.logErrorWithMessage("Unable to insrument", ex, MainTransformer.class);
+
 		}
 		return byteCode;
 	}

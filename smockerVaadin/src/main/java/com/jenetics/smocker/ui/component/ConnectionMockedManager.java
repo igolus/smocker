@@ -2,7 +2,6 @@ package com.jenetics.smocker.ui.component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,8 +12,6 @@ import javax.inject.Inject;
 
 import org.jboss.logging.Logger;
 import org.vaadin.easyapp.util.ActionContainer;
-import org.vaadin.easyapp.util.ActionContainer.InsertPosition;
-import org.vaadin.easyapp.util.ActionContainer.Position;
 import org.vaadin.easyapp.util.ActionContainerBuilder;
 import org.vaadin.easyapp.util.EasyAppLayout;
 import org.vaadin.teemu.switchui.Switch;
@@ -90,8 +87,7 @@ public class ConnectionMockedManager extends EasyAppLayout {
 
 		comboBox = new ComboBox<>();
 		comboBox.addSelectionListener(this::comboSelected);
-		//comboBox.addValueChangeListener(this::comboSelected);
-		
+	
 		ActionContainerBuilder builder = new ActionContainerBuilder(null)
 				.withSingleComponent(comboBox);
 		
@@ -163,7 +159,7 @@ public class ConnectionMockedManager extends EasyAppLayout {
 	}
 
 	private TreeGridMockedItem addScenarioToRootExceptUndifined(Scenario scenario) {
-		//undeifined scenario allready added
+		//undefined scenario already added
 		if (!scenario.equals(DaoManagerByModel.getUNDEFINED_SCENARIO())) {
 			return addScenarioToRoot(scenario);
 		}
@@ -312,9 +308,9 @@ public class ConnectionMockedManager extends EasyAppLayout {
 
 	
 	public void scenarioMovSelected(String scenarioName) {
-		List<Scenario> listScenarios = getScenarioByName(scenarioName);
-		if (!listScenarios.isEmpty()) {
-			Scenario targetScenario = listScenarios.get(0);
+		List<Scenario> listScenariosToReturn = getScenarioByName(scenarioName);
+		if (!listScenariosToReturn.isEmpty()) {
+			Scenario targetScenario = listScenariosToReturn.get(0);
 			CommunicationMocked communication = selectedTreeItem.getCommunication();
 			moveCommToScenario(targetScenario, communication);
 			treeDataProvider.refreshAll();
@@ -325,9 +321,9 @@ public class ConnectionMockedManager extends EasyAppLayout {
 	}
 
 	private List<Scenario> getScenarioByName(String scenarioName) {
-		List<Scenario> listScenarios = 
+		List<Scenario> listScenariosRet = 
 				scenarioDaoManager.queryList("SELECT s FROM Scenario s WHERE s.name = '" + scenarioName +"'");
-		return listScenarios;
+		return listScenariosRet;
 	}
 	
 	public void moveAllComms(String scenarioName) {

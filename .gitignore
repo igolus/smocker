@@ -1,5 +1,5 @@
 *target*
-target/**/*.jar
+target/**/*
 *.ear
 *.class
 
@@ -28,7 +28,6 @@ local.properties
 
 # Package Files #
 *.ear
-*.zip
 *.tar.gz
 *.rar
 

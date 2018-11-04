@@ -43,6 +43,7 @@
 		<easyApp.version>0.1</easyApp.version>
 		<apache.commons.version>3.7</apache.commons.version>
 		<commons-collections4.version>4.1</commons-collections4.version>
+		<lucene.version>7.4.0</lucene.version>
 
 	</properties>
 
@@ -127,7 +128,7 @@
 			<artifactId>javax.ejb-api</artifactId>
 			<version>3.2</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
@@ -474,7 +475,17 @@
 			<version>4.6.0</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-queryparser</artifactId>
+			<version>${lucene.version}</version>
+		</dependency>
 
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-queries</artifactId>
+			<version>${lucene.version}</version>
+		</dependency>
 	</dependencies>
 
 	<build>

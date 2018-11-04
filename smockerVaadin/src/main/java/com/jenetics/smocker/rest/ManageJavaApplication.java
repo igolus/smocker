@@ -21,6 +21,7 @@ import org.jboss.logging.Logger;
 
 import com.jenetics.smocker.dao.IDaoManager;
 import com.jenetics.smocker.injector.Dao;
+import com.jenetics.smocker.lucene.LuceneIndexer;
 import com.jenetics.smocker.model.Communication;
 import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.JavaApplication;

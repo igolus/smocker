@@ -16,9 +16,11 @@ import org.vaadin.easyapp.util.ActionContainerBuilder;
 import org.vaadin.easyapp.util.MessageBuilder;
 import org.vaadin.easyapp.util.ActionContainer.Position;
 
+import com.jenetics.smocker.lucene.LuceneIndexer;
 import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.rest.AliveEndPoint;
 import com.jenetics.smocker.ui.util.RefreshableView;
+import com.jenetics.smocker.ui.util.SearcheableView;
 import com.jenetics.smocker.ui.view.LogView;
 import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
@@ -62,6 +64,8 @@ public class SmockerUI extends UI {
 	protected static final String MAINVIEW = "main";
 
 	private static SmockerUI instance = null;
+	
+	private ActionContainerBuilder actionContainerBuilder = null;
 	
 	public static ResourceBundle getBundle() {
 		return bundle;
@@ -130,7 +134,7 @@ public class SmockerUI extends UI {
 		
 		easyAppBuilder.withMenuCollapsable();
 		
-		ActionContainerBuilder actionContainerBuilder = new ActionContainerBuilder(null);
+		actionContainerBuilder = new ActionContainerBuilder(null);
 		actionContainerBuilder.addImageIcon(image,  Position.LEFT, null);
 		actionContainerBuilder.addSearch(this::searchTriggered, Position.RIGHT, null);
 		
@@ -237,8 +241,36 @@ public class SmockerUI extends UI {
 			});
 	}
 	
-	public void searchTriggered(String search) {
-		Notification.show("Search to be implemented");
+	public void searchTriggered(String searchQuery) {
+		SearcheableView searcheableView = getSearcheableView();
+		if (searcheableView != null) {
+			searcheableView.search(searchQuery);
+		}
+	}
+	
+	public void enableSearch(boolean value) {
+		actionContainerBuilder.enableSearchButton(value);
+	}
+	
+	public void checkEnableSearch() {
+		SearcheableView searcheableView = getSearcheableView();
+		if (searcheableView == null || !searcheableView.canSearch()) {
+			enableSearch(false);
+		}
+		else {
+			enableSearch(true);
+		}
+	}
+	
+	private SearcheableView getSearcheableView() {
+		Class<?> currentViewClass =  easyAppMainView.getNavigator().getCurrentView().getClass();
+		if (ViewWithToolBar.class.isAssignableFrom(currentViewClass)) {
+			ViewWithToolBar viewWithToolBar =  (ViewWithToolBar)easyAppMainView.getNavigator().getCurrentView();
+			if (SearcheableView.class.isAssignableFrom(viewWithToolBar.getInnerComponent().getClass())) {
+				return (SearcheableView) viewWithToolBar.getInnerComponent();
+			}
+		}
+		return null;
 	}
 
 }

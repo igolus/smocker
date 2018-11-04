@@ -19,12 +19,14 @@ import com.jenetics.smocker.dao.IDaoManager;
 import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.component.AbstractConnectionDetails;
+import com.jenetics.smocker.ui.util.SearcheableView;
 import com.jenetics.smocker.ui.util.TreeGridConnectionData;
 import com.vaadin.addon.jpacontainer.JPAContainer;
 import com.vaadin.addon.jpacontainer.JPAContainerFactory;
 import com.vaadin.data.TreeData;
 import com.vaadin.data.provider.TreeDataProvider;
 import com.vaadin.event.selection.SelectionEvent;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.shared.Position;
@@ -48,7 +50,7 @@ import com.vaadin.ui.VerticalLayout;
  * @param <W> Connection details view Details
  */
 public abstract class AbstractConnectionTreeView<T extends EntityWithId, U extends EntityWithId, V extends Serializable, W extends AbstractConnectionDetails> 
-	extends EasyAppLayout  {
+	extends EasyAppLayout implements SearcheableView  {
 
 	/**
 	 * Tree Item object by javaApplication id used to find the associated UI
@@ -63,6 +65,7 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 	protected static final String PORT = bundle.getString("Port");
 	protected static final String ADRESS = bundle.getString("Adress");
 	protected static final String APPLICATION = bundle.getString("Application");
+	protected static final String WATCH = bundle.getString("Watch_Button");
 	protected static final String ALL = "all";
 	protected static final String SEP_CONN = ":";
 
@@ -86,6 +89,7 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 	protected Hashtable<String, Tab> tabByConnectionKey = new Hashtable<>();
 	
 	protected Hashtable<Tab, W> detailsViewByTab = new Hashtable<>();
+	protected Hashtable<U, Tab> tabByConnection = new Hashtable<>();
 	
 	protected W selectedDetailView = null;
 
@@ -109,9 +113,7 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 		setMargin(true);
 		buildTreeTable();
 		fillTreeTable();
-		
-		TabSheet tabSheet = new TabSheet();
-		tabSheet.setSizeFull();
+
 		setSizeFull();
 		addComponent(getInnerComponent());
 		
@@ -146,6 +148,7 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 	}
 	
 	public void tabChanged(SelectedTabChangeEvent event) {
+		SmockerUI.getInstance().checkEnableSearch();
 		refreshClickable();
 	}
 	
@@ -166,6 +169,7 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 			else {
 				tabForConnection = addTabConnectionDetails(connectionWithDetail, conn);
 				detailsViewByTab.put(tabForConnection, connectionWithDetail);
+				tabByConnection.put(conn, tabForConnection);
 			}
 			selectedDetailView = detailsViewByTab.get(tabForConnection);
 		}
@@ -207,6 +211,8 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 		tabsheet.removeTab(tab);
 		refreshClickable();
 	}
+	
+	
 
 
 	/**
@@ -320,10 +326,17 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 		}
 	}
 	
-//	protected void refreshDetailView() {
-//		if (isMainTabSelected()) {
-//			
-//		}
-//	}
-
+	@Override
+	public void enterInView(ViewChangeEvent event) {
+		SmockerUI.getInstance().checkEnableSearch();
+	}
+	
+	
+	@Override
+	public boolean canSearch() {
+		if (isMainTabSelected()) {
+			return false;
+		}
+		return true;
+	}
 }

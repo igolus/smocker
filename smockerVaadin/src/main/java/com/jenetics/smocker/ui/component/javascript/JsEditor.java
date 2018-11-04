@@ -42,6 +42,7 @@ public class JsEditor extends EasyAppLayout {
 		aceEditor.setMode(AceMode.javascript);
 		aceEditor.setTheme(AceTheme.eclipse);
 		aceEditor.setSizeFull();
+		//aceEditor.au
 		addComponent(aceEditor);
 		setSizeFull();
 	}

@@ -127,10 +127,7 @@
 		height: "100%";
 	}
 	
-//	.v-slot {
-//		height: 10%;
-//	}
-    
+   
     	    
     .v-gridlayout-TopBar {
     	background-color: $panelTopBarBackgroundColor;
@@ -153,6 +150,12 @@
 
 		    	
     }
+    
+    .layout-with-border {
+	    border: 1px solid black;
+	    margin: 5px;
+	    border-radius: 5px;
+	}
     
     
     .v-label-Contextual {

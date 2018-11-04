@@ -35,6 +35,7 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
+import com.vaadin.ui.TabSheet.Tab;
 import com.vaadin.ui.Window;
 
 @SuppressWarnings("serial")
@@ -53,6 +54,7 @@ public class MockSpaceView
 	
 	@Override
 	public void enterInView(ViewChangeEvent event) {
+		super.enterInView(event);
 		fillTreeTable();
 	}
 
@@ -138,13 +140,24 @@ public class MockSpaceView
 			if (treeGridConnectionData.isConnection()) {
 				ConnectionMocked selectedConnection = treeGridConnectionData.getConnection();
 				selectedConnection.getJavaApplication().getConnections().remove(selectedConnection);
+				removeTabConn(selectedConnection);
 				daoManagerJavaApplication.update(selectedConnection.getJavaApplication());
 			}
 			else if (treeGridConnectionData.isJavaApplication()) {
 				JavaApplicationMocked selectedJavaApplication = treeGridConnectionData.getJavaApplication();
+				selectedJavaApplication.getConnections().stream().forEach(this::removeTabConn);
 				daoManagerJavaApplication.deleteById(selectedJavaApplication.getId());
 			}
 			fillTreeTable();
+		}
+	}
+	
+	private void removeTabConn(ConnectionMocked selectedConnection) {
+		Tab tabForConn = tabByConnection.get(selectedConnection);
+		if (tabForConn != null) {
+			detailsViewByTab.remove(tabForConn);
+			tabByConnectionKey.remove(selectedConnection.getHost());
+			tabSheet.removeTab(tabForConn);
 		}
 	}
 	

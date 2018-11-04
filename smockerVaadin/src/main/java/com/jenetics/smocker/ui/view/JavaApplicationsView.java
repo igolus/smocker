@@ -8,8 +8,10 @@ import org.vaadin.easyapp.util.ActionContainer.InsertPosition;
 import org.vaadin.easyapp.util.ActionContainerBuilder;
 import org.vaadin.easyapp.util.EasyAppLayout;
 import org.vaadin.easyapp.util.annotations.ContentView;
+import org.vaadin.teemu.switchui.Switch;
 
 import com.jenetics.smocker.model.Communication;
+import com.jenetics.smocker.model.CommunicationMocked;
 import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.model.JavaApplication;
@@ -18,64 +20,41 @@ import com.jenetics.smocker.network.ClientCommunicator;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.component.AbstractConnectionDetails;
 import com.jenetics.smocker.ui.component.ConnectionDetailsView;
+import com.jenetics.smocker.ui.component.seach.CommunicationItemsResults;
 import com.jenetics.smocker.ui.dialog.Dialog;
 import com.jenetics.smocker.ui.util.ButtonWithIEntity;
 import com.jenetics.smocker.ui.util.RefreshableView;
+import com.jenetics.smocker.ui.util.SearcheableView;
 import com.jenetics.smocker.ui.util.StrandardTreeGridConnectionData;
+import com.jenetics.smocker.ui.util.SwitchWithEntity;
 import com.jenetics.smocker.ui.util.TreeGridConnectionData;
 import com.vaadin.annotations.Push;
+import com.vaadin.data.HasValue.ValueChangeEvent;
 import com.vaadin.event.selection.SelectionEvent;
 import com.vaadin.icons.VaadinIcons;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.TabSheet.Tab;
 
 @SuppressWarnings("serial")
 @Push
 @ViewScope
 @ContentView(sortingOrder = 1, viewName = "JavaAppView", icon = "icons/java-43-569305.png", 
 homeView = true, rootViewParent = ConnectionsRoot.class, bundle=SmockerUI.BUNDLE_NAME)
-public class JavaApplicationsView extends AbstractConnectionTreeView<JavaApplication, Connection, Communication, ConnectionDetailsView> implements RefreshableView {
+public class JavaApplicationsView extends AbstractConnectionTreeView<JavaApplication, Connection, Communication, ConnectionDetailsView> 
+implements RefreshableView, SearcheableView {
 
 	
 	public JavaApplicationsView() {
 		super(JavaApplication.class, Connection.class, Communication.class);
 		treeGrid.addSelectionListener(this::treeSelectionChange);
 		setSizeFull();
+		tabSheet.addSelectedTabChangeListener(this::tabChanged);
 	}
-	
-	
-//	@Override
-//	protected Component getInnerComponent() {
-//		treeGrid.setSizeFull();
-//		VerticalLayout tabmainlayout = new VerticalLayout();
-//		tabmainlayout.setSizeFull();
-//		tabmainlayout.setCaption("Main");
-//		tabmainlayout.addComponent(treeGrid);
-//		tabSheet.setSizeFull();
-//		tabSheet.addTab(tabmainlayout);
-//		tabSheet.addSelectedTabChangeListener(this::tabChanged);
-//		
-//		tabSheet.setCloseHandler(this::tabClosed);
-//		//tabSheet.add
-//		return tabSheet;
-//	}
-//	public void tabClosed(TabSheet tabsheet, Component tabContent) {
-//		Tab tab = tabsheet.getTab(tabContent);
-//		Map<Tab, String> connectionByTab = 
-//				tabByConnectionKey.entrySet()
-//			       .stream()
-//			       .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
-//		
-//		String connKey = connectionByTab.get(tab);
-//		tabByConnectionKey.remove(connKey);
-//		
-//		tabsheet.removeTab(tab);
-//		refreshClickable();
-//	}
-
-
 	@Override
 	protected Set<Connection> getJavaAppConnections(JavaApplication javaApplication) {
 		return javaApplication.getConnections();
@@ -108,10 +87,10 @@ public class JavaApplicationsView extends AbstractConnectionTreeView<JavaApplica
 		treeGrid.addColumn(item -> item.getAdress()).setCaption(ADRESS);
 		treeGrid.addColumn(item -> item.getPort()).setCaption(PORT);
 		treeGrid.addColumn(item -> item.getConnectionType()).setCaption(CONNECTION_TYPE);
-		treeGrid.addComponentColumn(this::buildWatchButton);
+		treeGrid.addComponentColumn(this::buildWatchButton).setCaption(WATCH);
 	}
 	
-	private Button buildWatchButton(TreeGridConnectionData<JavaApplication, Connection> item) {
+	private Switch buildWatchButton(TreeGridConnectionData<JavaApplication, Connection> item) {
 		if (item.isConnection()) {
 			String buttonString;
 			Connection connection = item.getConnection();
@@ -120,32 +99,23 @@ public class JavaApplicationsView extends AbstractConnectionTreeView<JavaApplica
 			} else {
 				buttonString = bundle.getString("Watch_Button");
 			}
-			ButtonWithIEntity<Connection> buttonWithId = new ButtonWithIEntity<Connection>(connection);
-			buttonWithId.setCaption(buttonString);
-			buttonWithId.addClickListener(this::watchButtonClicked);
-			//buttonByUiId.put(buttonWithId.getUiId(), buttonWithId);
-			return buttonWithId;
+			SwitchWithEntity<Connection> switchConnection = new SwitchWithEntity<>(connection);
+			switchConnection.setValue(true);
+			switchConnection.addValueChangeListener(this::watchButtonClicked);
+			return switchConnection;
 		}
 		return null;
     }
 	
-	public void watchButtonClicked(ClickEvent event) {
-		ButtonWithIEntity<Connection> buttonWithEntity = (ButtonWithIEntity<Connection>) event.getSource();
-		if (buttonWithEntity.getEntity().getWatched() == null || !buttonWithEntity.getEntity().getWatched()) {
-			buttonWithEntity.setCaption(bundle.getString("Mute_Button"));
-			buttonWithEntity.getEntity().setWatched(true);
-			buttonWithEntity.setEnabled(false);
-			daoManagerConnection.update(buttonWithEntity.getEntity());
-			ClientCommunicator.sendWatched(buttonWithEntity.getEntity());
-			buttonWithEntity.setEnabled(true);
-		} else {
-			buttonWithEntity.setCaption(bundle.getString("Watch_Button"));
-			buttonWithEntity.getEntity().setWatched(false);
-			buttonWithEntity.setEnabled(false);
-			daoManagerConnection.update(buttonWithEntity.getEntity());
-			ClientCommunicator.sendUnWatched(buttonWithEntity.getEntity());
-			buttonWithEntity.setEnabled(true);
+	public void watchButtonClicked(ValueChangeEvent<Boolean> event) {
+		SwitchWithEntity<Connection> switchWithEntity = (SwitchWithEntity<Connection>) event.getSource();
+		if (event.getValue()) {
+			switchWithEntity.getEntity().setWatched(true);
 		}
+		else {
+			switchWithEntity.getEntity().setWatched(false);
+		}
+		daoManagerConnection.update(switchWithEntity.getEntity());	
 	}
 	
 	
@@ -187,7 +157,6 @@ public class JavaApplicationsView extends AbstractConnectionTreeView<JavaApplica
 	public void addToMock(ClickEvent event) {
 		ConnectionDetailsView connectionDetailsView = getSelectedDetailView();
 		MockConverter.convertcommunication(connectionDetailsView.getSelectedCommunication());
-		//SmockerUI.getInstance().getEasyAppMainView().getScanner().navigateTo(MockSpaceView.class);
 	}
 	
 	public boolean canAddToMock() {
@@ -209,12 +178,24 @@ public class JavaApplicationsView extends AbstractConnectionTreeView<JavaApplica
 				Connection selectedConnection = treeGridConnectionData.getConnection();
 				selectedConnection.getJavaApplication().getConnections().remove(selectedConnection);
 				daoManagerJavaApplication.update(selectedConnection.getJavaApplication());
+				removeTabConn(selectedConnection);
+				refreshClickable();
 			}
 			else if (treeGridConnectionData.isJavaApplication()) {
 				JavaApplication selectedJavaApplication = treeGridConnectionData.getJavaApplication();
+				selectedJavaApplication.getConnections().stream().forEach(this::removeTabConn);
 				daoManagerJavaApplication.deleteById(selectedJavaApplication.getId());
 			}
 			fillTreeTable();
+		}
+	}
+	
+	private void removeTabConn(Connection selectedConnection) {
+		Tab tabForConn = tabByConnection.get(selectedConnection);
+		if (tabForConn != null) {
+			detailsViewByTab.remove(tabForConn);
+			tabByConnectionKey.remove(selectedConnection.getHost());
+			tabSheet.removeTab(tabForConn);
 		}
 	}
 	
@@ -244,10 +225,6 @@ public class JavaApplicationsView extends AbstractConnectionTreeView<JavaApplica
 				treeGrid.getSelectedItems().iterator().next().isConnection();
 	}
 	
-	public void search(String searchValue) {
-		Notification.show("Search for:" + searchValue);
-	}
-
 	
 	@Override
 	protected String getConnectionKey(Connection conn) {
@@ -261,13 +238,14 @@ public class JavaApplicationsView extends AbstractConnectionTreeView<JavaApplica
 		connectionDetailsView.setRefreshClickableAction(this::refreshClickable);
 		return connectionDetailsView;
 	}
-
-
-//	@Override
-//	protected void refreshDetailView() {
-//		get
-//		System.out.println();
-//		
-//	}
-
+	
+	
+	@Override
+	public void search(String searchQuery) {
+		Component selectedComponent = tabSheet.getSelectedTab();
+		if (selectedComponent instanceof ConnectionDetailsView) {
+			ConnectionDetailsView selectedView = (ConnectionDetailsView) selectedComponent;
+			selectedView.search(searchQuery);
+		}
+	}
 }

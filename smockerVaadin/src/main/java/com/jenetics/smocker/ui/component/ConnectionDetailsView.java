@@ -1,5 +1,6 @@
 package com.jenetics.smocker.ui.component;
 
+import java.util.List;
 import java.util.Set;
 
 import org.vaadin.easyapp.util.ActionContainer;
@@ -10,10 +11,12 @@ import org.vaadin.easyapp.util.EasyAppLayout;
 import com.jenetics.smocker.dao.DaoManager;
 import com.jenetics.smocker.dao.DaoManagerByModel;
 import com.jenetics.smocker.dao.IDaoManager;
+import com.jenetics.smocker.lucene.LuceneIndexer;
 import com.jenetics.smocker.model.Communication;
 import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.converter.MockConverter;
 import com.jenetics.smocker.ui.SmockerUI;
+import com.jenetics.smocker.ui.component.seach.CommunicationItemsResults;
 import com.jenetics.smocker.ui.dialog.Dialog;
 import com.jenetics.smocker.ui.netdisplayer.ComponentWithDisplayChange;
 import com.jenetics.smocker.ui.netdisplayer.NetDisplayerFactoryInput;
@@ -46,7 +49,6 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 	private TreeData<CommunicationDateDisplay> treeData;
 	private TreeDataProvider<CommunicationDateDisplay> treeDataProvider;
 	private Communication selectedCommunication = null;;
-
 
 	protected IDaoManager<Connection> daoManagerConnection = DaoManagerByModel.getDaoManager(Connection.class);
 
@@ -89,6 +91,10 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 	
 	public Communication getSelectedCommunication() {
 		return selectedCommunication;
+	}
+	
+	public Set<Communication> getCommunications () {
+		return connection.getCommunications();
 	}
 
 	private void fillCommunication() {
@@ -156,8 +162,20 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 		return treeData.getRootItems().size() > 1;
 	}
 	
-	public void search(String searchValue) {
-		Notification.show("Search for:" + searchValue);
+	public void search(String searchQuery) {
+		Set<Communication> communnications = getCommunications();
+		LuceneIndexer lucenIndexer = new LuceneIndexer();
+		communnications.stream().forEach( comm -> lucenIndexer.addEntity(comm));
+		List<Communication> foundComms = lucenIndexer.search(searchQuery);
+		
+		if (foundComms != null) {
+			CommunicationItemsResults commResult = new CommunicationItemsResults(foundComms, searchQuery);
+			SmockerUI.displayInSubWindowMidSize(SmockerUI.getBundleValue("search_result"), commResult);
+		}
+		else {
+			Notification.show(SmockerUI.getBundleValue("nothing_Found"));
+		}
+
 	}
 
 	public void displayStack() {

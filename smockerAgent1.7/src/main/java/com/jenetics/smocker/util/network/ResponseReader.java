@@ -114,26 +114,26 @@ public class ResponseReader {
 	 * @param allResponse
 	 * @return
 	 */
-	public static  Map<String, ConnectionBehavior> getConnections(String allResponse) {
-		String[] connections = SimpleJsonReader.readSubResources(allResponse, "connections");
-		for (int i = 0; connections != null && i < connections.length; i++) {
-			String connectionString = connections[i];
-			String host = SimpleJsonReader.readValue(connectionString, "host");
-			String port = SimpleJsonReader.readValue(connectionString, "port");
-			String watched = SimpleJsonReader.readValue(connectionString, "watched");
-			
-			int portInt = Integer.valueOf(port).intValue();
-			boolean watchedBool = Boolean.valueOf(watched).booleanValue();
-			
-			if (watchedBool) {
-				MemoryConfiguration.setConnecctionWatched(host, portInt);
-			}
-			else {
-				MemoryConfiguration.setConnecctionMute(host, portInt);
-			}
-		}
-		return null;
-	}
+//	public static  Map<String, ConnectionBehavior> getConnections(String allResponse) {
+//		String[] connections = SimpleJsonReader.readSubResources(allResponse, "connections");
+//		for (int i = 0; connections != null && i < connections.length; i++) {
+//			String connectionString = connections[i];
+//			String host = SimpleJsonReader.readValue(connectionString, "host");
+//			String port = SimpleJsonReader.readValue(connectionString, "port");
+//			String watched = SimpleJsonReader.readValue(connectionString, "watched");
+//			
+//			int portInt = Integer.valueOf(port).intValue();
+//			boolean watchedBool = Boolean.valueOf(watched).booleanValue();
+//			
+//			if (watchedBool) {
+//				MemoryConfiguration.setConnecctionWatched(host, portInt);
+//			}
+//			else {
+//				MemoryConfiguration.setConnecctionMute(host, portInt);
+//			}
+//		}
+//		return null;
+//	}
 
 	public static String findExistingConnectionId(String allResponse, String host, int port) {
 		int indexApp =  allResponse.indexOf("\"host\":\"" + host +  "\",\"port\":" + port);

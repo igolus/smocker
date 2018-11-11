@@ -47,36 +47,34 @@ public class TransformerUtility {
 			Map<Thread,StackTraceElement[]> stackTraceMap = Thread.getAllStackTraces();
 			for (Thread t : stackTraceMap.keySet())
 			{
-			    if ("main".equals(t.getName()))
-			    {
-			        StackTraceElement[] mainStackTrace = stackTraceMap.get(t);
-			        callerApp = mainStackTrace[mainStackTrace.length - 1].getClassName();
-			    }
+				if ("main".equals(t.getName()))
+				{
+					StackTraceElement[] mainStackTrace = stackTraceMap.get(t);
+					callerApp = mainStackTrace[mainStackTrace.length - 1].getClassName();
+				}
 			}
 		}
 		return callerApp;
 	}
 
-	public synchronized static void socketChannelWrite (SocketChannel socketChannel, ByteBuffer buffer) 
+	public synchronized static int socketChannelWrite (SocketChannel socketChannel, ByteBuffer buffer) 
 			throws IOException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-		if (socketChannel != null && !filterSmockerBehavior()) {
-			if (RemoteServerChecker.isRemoteServerAlive()) {
-
-				SmockerContainer smockerContainer = smockerContainerBySocket.get(socketChannel);
-				if (smockerContainer == null) {
-					InetSocketAddress remoteAddress = (InetSocketAddress) socketChannel.getRemoteAddress();
-					smockerContainer = addSmockerContainer(socketChannel, remoteAddress.getHostName(), remoteAddress.getPort());
-					SmockerSocketOutputStream smockerOutputStream = new SmockerSocketOutputStream();
-					smockerContainer.setSmockerSocketOutputStream(smockerOutputStream);
-				}
-				if (!smockerContainer.isApplyMock()) {
-					writeSocketChannel(buffer, 	socketChannel);
-				}
-				smockerContainer.getSmockerSocketOutputStream().write(buffer.array());
+		if (socketChannel != null && !filterSmockerBehavior() && RemoteServerChecker.isRemoteServerAlive()) {
+			SmockerContainer smockerContainer = smockerContainerBySocket.get(socketChannel);
+			if (smockerContainer == null) {
+				InetSocketAddress remoteAddress = (InetSocketAddress) socketChannel.getRemoteAddress();
+				smockerContainer = addSmockerContainer(socketChannel, remoteAddress.getHostName(), remoteAddress.getPort());
+				SmockerSocketOutputStream smockerOutputStream = new SmockerSocketOutputStream();
+				smockerContainer.setSmockerSocketOutputStream(smockerOutputStream);
 			}
-			else {
+			if (!smockerContainer.isApplyMock()) {
 				writeSocketChannel(buffer, 	socketChannel);
 			}
+			smockerContainer.getSmockerSocketOutputStream().write(buffer.array());
+			return buffer.capacity();
+		}
+		else {
+			return writeSocketChannel(buffer, socketChannel);
 		}
 	}
 

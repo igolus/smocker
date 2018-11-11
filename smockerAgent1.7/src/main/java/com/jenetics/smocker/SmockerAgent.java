@@ -25,16 +25,16 @@ public class SmockerAgent {
 	public static void premain(String agentArgs, Instrumentation inst) {
 		
 		try {
-			if (smockerServer == null) {
-				smockerServer = new SmockerServer();
-				smockerServer.startServer();
-			}
+//			if (smockerServer == null) {
+//				smockerServer = new SmockerServer();
+//				smockerServer.startServer();
+//			}
 			
 			RemoteServerChecker.getInstance();
 			
-			Runtime.getRuntime().addShutdownHook(new Thread(){public void run(){
-			    smockerServer.release();
-			}});
+//			Runtime.getRuntime().addShutdownHook(new Thread(){public void run(){
+//			    smockerServer.release();
+//			}});
 			
 			
 			String smockerAscii = RessourceLoader.readFile(SMOCKER_ASCII_TXT);

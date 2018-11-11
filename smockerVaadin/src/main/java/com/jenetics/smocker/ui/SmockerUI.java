@@ -104,6 +104,8 @@ public class SmockerUI extends UI {
 	
 	private EasyAppMainView easyAppMainView;
 
+	private ViewWithToolBar mainViewWithToolBar;
+
 	public EasyAppMainView getEasyAppMainView() {
 		return easyAppMainView;
 	}
@@ -140,7 +142,9 @@ public class SmockerUI extends UI {
 		
 		easyAppBuilder.withActionContainer(actionContainerBuilder.build());
 		
-		layout.addComponents(easyAppBuilder.build(this));
+		
+		mainViewWithToolBar = easyAppBuilder.build(this);
+		layout.addComponents(mainViewWithToolBar);
 		easyAppMainView = easyAppBuilder.getMainView();
 
 		setContent(layout);
@@ -156,6 +160,10 @@ public class SmockerUI extends UI {
 		return null;
 	}
 	
+	public ViewWithToolBar getMainViewWithToolBar() {
+		return mainViewWithToolBar;
+	}
+
 	/**
 	 * Display a subwindow from any component
 	 * @param component
@@ -224,7 +232,7 @@ public class SmockerUI extends UI {
 					RefreshableView targetView = null;
 					if (ViewWithToolBar.class.isAssignableFrom(currentViewClass)) {
 						ViewWithToolBar viewWithToolBar =  (ViewWithToolBar)easyAppMainView.getNavigator().getCurrentView();
-						if (RefreshableView.class.isAssignableFrom(viewWithToolBar.getInnerComponent().getClass())) {
+						if (viewWithToolBar.getInnerComponent() != null && RefreshableView.class.isAssignableFrom(viewWithToolBar.getInnerComponent().getClass())) {
 							targetView = (RefreshableView) viewWithToolBar.getInnerComponent();
 						}
 					}
@@ -266,7 +274,7 @@ public class SmockerUI extends UI {
 		Class<?> currentViewClass =  easyAppMainView.getNavigator().getCurrentView().getClass();
 		if (ViewWithToolBar.class.isAssignableFrom(currentViewClass)) {
 			ViewWithToolBar viewWithToolBar =  (ViewWithToolBar)easyAppMainView.getNavigator().getCurrentView();
-			if (SearcheableView.class.isAssignableFrom(viewWithToolBar.getInnerComponent().getClass())) {
+			if (viewWithToolBar.getInnerComponent() != null && SearcheableView.class.isAssignableFrom(viewWithToolBar.getInnerComponent().getClass())) {
 				return (SearcheableView) viewWithToolBar.getInnerComponent();
 			}
 		}

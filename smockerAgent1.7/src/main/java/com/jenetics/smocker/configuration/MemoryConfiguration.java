@@ -47,18 +47,18 @@ public class MemoryConfiguration {
 		return host + SEP_CONNECTION + port;
 	} 
 	
-	public static boolean isConnecctionThere(String host, int port) {
-		String key = getKey(host, port);
-		return connectionsWatched.get(key) != null;
-	}
-
-	
-	public static boolean isConnecctionWatched(String host, int port) {
-		String key = getKey(host, port);
-		if (connectionsWatched.get(key) != null) {
-			return connectionsWatched.get(key).isWatched(); 
-		}
-		return false;
-	} 
+//	public static boolean isConnecctionThere(String host, int port) {
+//		String key = getKey(host, port);
+//		return connectionsWatched.get(key) != null;
+//	}
+//
+//	
+//	public static boolean isConnecctionWatched(String host, int port) {
+//		String key = getKey(host, port);
+//		if (connectionsWatched.get(key) != null) {
+//			return connectionsWatched.get(key).isWatched(); 
+//		}
+//		return false;
+//	} 
 	
   }

@@ -3,6 +3,7 @@ package com.jenetics.smocker.lucene;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -31,6 +32,8 @@ import com.vaadin.ui.Notification;
 
 public class LuceneIndexer {
 	
+	private static final int MAX_ITEMS = 20;
+
 	private static final String ID = "id";
 
 	@Inject
@@ -39,7 +42,6 @@ public class LuceneIndexer {
 	private StandardAnalyzer analyzer;
 	private Directory index;
 	private IndexWriterConfig config;
-	private LuceneIndexer instance;
 	private IndexWriter writer;
 	private List<Communication> entities = new ArrayList<>(); 
 	
@@ -77,11 +79,12 @@ public class LuceneIndexer {
 		List<Communication> ret = new ArrayList();
 		ret.addAll(search(queryStr, "request"));
 		ret.addAll(search(queryStr, "response"));
+		ret = ret.stream().distinct().collect(Collectors.toList());
 		return ret;
 	}
 	
-	public synchronized List<Communication> search(String queryStr, String field) {
-		int hitsPerPage = 10;
+	private synchronized List<Communication> search(String queryStr, String field) {
+		int hitsPerPage = MAX_ITEMS;
         IndexReader reader;
 		try {
 			reader = DirectoryReader.open(index);

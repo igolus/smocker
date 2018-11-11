@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.jboss.logging.Logger;
+import org.vaadin.easyapp.ui.ViewWithToolBar;
+import org.vaadin.easyapp.util.AnnotationScanner;
 import org.vaadin.easyapp.util.EasyAppLayout;
 
 import com.jenetics.smocker.dao.DaoManager;
@@ -149,6 +151,18 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 	
 	public void tabChanged(SelectedTabChangeEvent event) {
 		SmockerUI.getInstance().checkEnableSearch();
+		ViewWithToolBar currentView = AnnotationScanner.getViewWithToolBarFromLayout(this);
+		//detailsViewByTab = detailsViewByTab.get(event.getSource())
+		Component selectedTab = tabSheet.getSelectedTab();
+		if (selectedTab != tabmainlayout ) {
+			selectedDetailView = (W) selectedTab;
+		}
+		else {
+			selectedDetailView = null;
+		}
+		if (currentView != null) {
+			currentView.refreshViewToolBar();
+		}
 		refreshClickable();
 	}
 	

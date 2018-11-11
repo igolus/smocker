@@ -1,5 +1,7 @@
 package com.jenetics.smocker.ui.component;
 
+import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
@@ -49,7 +51,8 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 	private TreeData<CommunicationDateDisplay> treeData;
 	private TreeDataProvider<CommunicationDateDisplay> treeDataProvider;
 	private Communication selectedCommunication = null;;
-
+	private Hashtable<Communication, CommunicationDateDisplay> commDisplayByComm = new Hashtable<>();
+	
 	protected IDaoManager<Connection> daoManagerConnection = DaoManagerByModel.getDaoManager(Connection.class);
 
 	public ConnectionDetailsView(Connection connection) {
@@ -83,6 +86,12 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 		setSizeFull();
 	}
 	
+	public Connection getConnection() {
+		return connection;
+	}
+
+
+
 	public void menuSelectionChange(SelectionEvent<CommunicationDateDisplay> event) {
 		if (refreshClickable != null) {
 			refreshClickable.run();
@@ -101,14 +110,19 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 		treeData.clear();
 		Set<Communication> communications = connection.getCommunications();
 		for (Communication communication : communications) {
-			treeData.addItem(null, new CommunicationDateDisplay(communication));
+			CommunicationDateDisplay commDateDisplay = new CommunicationDateDisplay(communication);
+			commDisplayByComm.put(communication, commDateDisplay);
+			treeData.addItem(null, commDateDisplay);
 		}
 		treeDataProvider.refreshAll();
 	}
 	
 	public void treeItemClick(ItemClick<CommunicationDateDisplay> event) {
 		Communication comm = event.getItem().getCommunication();
-		
+		selectCommunication(comm);
+	}
+
+	private void selectCommunication(Communication comm) {
 		String request = NetworkReaderUtility.decode(comm.getRequest());
 		ComponentWithDisplayChange componentWithDisplayChangeInput = NetDisplayerFactoryInput.getComponent(request);
 		Component inputComponent = componentWithDisplayChangeInput.getComponent();
@@ -130,16 +144,44 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 		refreshClickable();
 	}
 	
-	public void clean(ClickEvent event) {
+	public void cleanGrid() {
+		grid.removeComponent(0, 0);
+		grid.removeComponent(1, 0);
+	}
+	
+	public void clean() {
 		if (isSelected()) {
 			Dialog.ask(SmockerUI.getBundle().getString("RemoveQuestion"), null, this::delete, null);
 		}
 	}
 	
+	public void cleanAll() {
+		Dialog.ask(SmockerUI.getBundle().getString("RemoveAllQuestion"), null, this::deleteAll, null);
+	}
+	
 	public void delete() {
-		selectedCommunication.getConnection().getCommunications().remove(selectedCommunication);
-		daoManagerConnection.update(selectedCommunication.getConnection());
+		deleteCommunication(selectedCommunication);
+		commDisplayByComm.remove(selectedCommunication);
+		postDeleteUiUpdate();
+	}
+	
+
+	private void postDeleteUiUpdate() {
+		cleanGrid();
 		fillCommunication();
+		refreshClickable();
+	}
+
+	private void deleteCommunication(Communication communication) {
+		communication.getConnection().getCommunications().remove(communication);
+		daoManagerConnection.update(communication.getConnection());
+	}
+	
+	private void deleteAll() {
+		commDisplayByComm.clear();
+		connection.getCommunications().clear();
+		daoManagerConnection.update(connection);
+		postDeleteUiUpdate();
 	}
 	
 	public void cleanAll(ClickEvent event) {
@@ -148,10 +190,16 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 	
 	public void refresh() {
 		fillCommunication();
+		resetSelected();
+		refreshClickable();
 	}
 	
 	public boolean isSelected() {
 		return selectedCommunication != null;
+	}
+	
+	public void resetSelected() {
+		selectedCommunication = null;
 	}
 	
 	public boolean always() {
@@ -167,21 +215,26 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 		LuceneIndexer lucenIndexer = new LuceneIndexer();
 		communnications.stream().forEach( comm -> lucenIndexer.addEntity(comm));
 		List<Communication> foundComms = lucenIndexer.search(searchQuery);
-		
 		if (foundComms != null) {
-			CommunicationItemsResults commResult = new CommunicationItemsResults(foundComms, searchQuery);
-			SmockerUI.displayInSubWindowMidSize(SmockerUI.getBundleValue("search_result"), commResult);
+			CommunicationItemsResults commResult = new CommunicationItemsResults(foundComms, searchQuery, 
+					this::selectedCommFromSearch);
+			Window searchWindow = SmockerUI.displayInSubWindowMidSize(SmockerUI.getBundleValue("search_result"), commResult);
+			commResult.setWindowContainer(searchWindow);
 		}
 		else {
 			Notification.show(SmockerUI.getBundleValue("nothing_Found"));
 		}
-
 	}
-
+	
+	private void selectedCommFromSearch(Communication comm) {
+		menu.select(commDisplayByComm.get(comm));
+		selectCommunication(comm);
+	}
+	
 	public void displayStack() {
 		Communication selectedCommunication = getSelectedCommunication();
 		if (selectedCommunication != null) {
-			SmockerUI.displayInSubWindow(SmockerUI.getBundle().getString("StackTrace"), 
+			SmockerUI.displayInSubWindowMidSize(SmockerUI.getBundle().getString("StackTrace"), 
 					new TextPanel(NetworkReaderUtility.decode(selectedCommunication.getCallerStack()), true));
 		}
 	}

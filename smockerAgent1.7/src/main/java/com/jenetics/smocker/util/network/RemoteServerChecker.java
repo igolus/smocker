@@ -9,16 +9,22 @@ import com.jenetics.smocker.util.SimpleJsonReader;
 
 public class RemoteServerChecker {
 
+	private static final String SEP = ":";
 	private static final int CHECKER_PERIOD = 3000;
 	private static RemoteServerChecker instance;
 	private static boolean remoteServerAlive = false;
 	private static List<String> mockedHost = new ArrayList<>();
+	private static List<String> unWatchedHost = new ArrayList<>();
 	
 	private RemoteServerChecker() {
 	}
 	
 	public static List<String> getMockedHost() {
 		return mockedHost;
+	}
+
+	public static List<String> getUnWatchedHost() {
+		return unWatchedHost;
 	}
 
 	public static boolean isRemoteServerAlive() {
@@ -31,6 +37,10 @@ public class RemoteServerChecker {
 			instance.startChecker();
 		}
 		return instance;
+	}
+	
+	public static boolean isConnectionWatched(String host, int port) {
+		return !unWatchedHost.contains(host + SEP + port);
 	}
 
 
@@ -59,6 +69,10 @@ public class RemoteServerChecker {
 							else {
 								remoteServerAlive = false;
 							}
+							String listHostWatched = RestClientSmocker.getInstance().getAllUnWachedConnections();
+							if (listHostWatched != null) {
+								unWatchedHost = SimpleJsonReader.readValues(listHostWatched, "activatedHosts");
+							}
 						}
 					} catch (Exception e) {
 						MessageLogger.logErrorWithMessage("Unable to check remote server", e, RemoteServerChecker.class);
@@ -69,4 +83,6 @@ public class RemoteServerChecker {
 		Thread checkerThread = new Thread(checkerTask);
 		checkerThread.start();
 	}
+
+
 }

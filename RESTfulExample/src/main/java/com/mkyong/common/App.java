@@ -33,9 +33,9 @@ public class App
 				String line = bufferedReader.readLine();
 
 				line = bufferedReader.readLine();
-				callGoogle();
-				//callGoogleSocketChannell();
-				//callYahoo();
+				//callGoogle();
+				callGoogleSocketChannell();
+				callYahoo();
 			}
 
 			catch (Exception ex) {

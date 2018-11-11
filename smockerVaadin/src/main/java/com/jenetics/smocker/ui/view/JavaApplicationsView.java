@@ -3,6 +3,7 @@ package com.jenetics.smocker.ui.view;
 import java.util.Set;
 
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.vaadin.easyapp.util.ActionContainer;
 import org.vaadin.easyapp.util.ActionContainer.InsertPosition;
 import org.vaadin.easyapp.util.ActionContainerBuilder;
@@ -100,7 +101,7 @@ implements RefreshableView, SearcheableView {
 				buttonString = bundle.getString("Watch_Button");
 			}
 			SwitchWithEntity<Connection> switchConnection = new SwitchWithEntity<>(connection);
-			switchConnection.setValue(true);
+			switchConnection.setValue(connection.getWatched());
 			switchConnection.addValueChangeListener(this::watchButtonClicked);
 			return switchConnection;
 		}
@@ -136,21 +137,20 @@ implements RefreshableView, SearcheableView {
 	@Override
 	public ActionContainer buildActionContainer() {
 		ActionContainerBuilder builder = new ActionContainerBuilder(SmockerUI.BUNDLE_NAME)
-				
 				.addButton("ViewDetails_Button", VaadinIcons.EYE, null,  this::isConnectionSelected			
 						, this::details, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
 				.addButton("Refresh_Button", VaadinIcons.REFRESH, null,  this::always			
 						, this::refresh, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
-				.addButton("AddToMock_Button", VaadinIcons.PLUS, "AddToMock_ToolTip",  this::canAddToMock			
-						, this::addToMock, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
 				.addButton("Clean_Button", VaadinIcons.MINUS, "Clean_ToolTip",  this::isSelected			
-						, this::clean, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
-				.addButton("CleanAll_Button", VaadinIcons.MINUS, "CleanAll_ToolTip",  this::canCleanAll			
-						, this::cleanAll, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
-				.addButton("StackTrace", VaadinIcons.ALIGN_JUSTIFY, "StackTraceToolTip",  this::canDisplayStack		
-						, this::displayStack, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
-				;
-
+						, this::clean, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER);
+		if (!isMainTabSelected()) {
+			builder.addButton("AddToMock_Button", VaadinIcons.PLUS, "AddToMock_ToolTip",  this::canAddToMock			
+					, this::addToMock, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
+			.addButton("CleanAll_Button", VaadinIcons.MINUS, "CleanAll_ToolTip",  this::canCleanAll			
+					, this::cleanAll, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
+			.addButton("StackTrace", VaadinIcons.ALIGN_JUSTIFY, "StackTraceToolTip",  this::canDisplayStack		
+					, this::displayStack, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER);
+		}
 		return builder.build();
 	}
 	
@@ -166,27 +166,36 @@ implements RefreshableView, SearcheableView {
 	
 	
 	public void clean(ClickEvent event) {
-		if (isSelected()) {
+		if (isMainTabSelected()) {
 			Dialog.ask(SmockerUI.getBundle().getString("RemoveQuestion"), null, this::delete, null);
+		}
+		else {
+			delete();
 		}
 	}
 	
 	public void delete() {
-		Set<TreeGridConnectionData<JavaApplication, Connection>> selectedItems = treeGrid.getSelectedItems();
-		for (TreeGridConnectionData<JavaApplication, Connection> treeGridConnectionData : selectedItems) {
-			if (treeGridConnectionData.isConnection()) {
-				Connection selectedConnection = treeGridConnectionData.getConnection();
-				selectedConnection.getJavaApplication().getConnections().remove(selectedConnection);
-				daoManagerJavaApplication.update(selectedConnection.getJavaApplication());
-				removeTabConn(selectedConnection);
-				refreshClickable();
+		if (isMainTabSelected()) {
+			Set<TreeGridConnectionData<JavaApplication, Connection>> selectedItems = treeGrid.getSelectedItems();
+			for (TreeGridConnectionData<JavaApplication, Connection> treeGridConnectionData : selectedItems) {
+				if (treeGridConnectionData.isConnection()) {
+					Connection selectedConnection = treeGridConnectionData.getConnection();
+					selectedConnection.getJavaApplication().getConnections().remove(selectedConnection);
+					daoManagerJavaApplication.update(selectedConnection.getJavaApplication());
+					removeTabConn(selectedConnection);
+					refreshClickable();
+				}
+				else if (treeGridConnectionData.isJavaApplication()) {
+					JavaApplication selectedJavaApplication = treeGridConnectionData.getJavaApplication();
+					selectedJavaApplication.getConnections().stream().forEach(this::removeTabConn);
+					daoManagerJavaApplication.deleteById(selectedJavaApplication.getId());
+				}
+				fillTreeTable();
 			}
-			else if (treeGridConnectionData.isJavaApplication()) {
-				JavaApplication selectedJavaApplication = treeGridConnectionData.getJavaApplication();
-				selectedJavaApplication.getConnections().stream().forEach(this::removeTabConn);
-				daoManagerJavaApplication.deleteById(selectedJavaApplication.getId());
-			}
-			fillTreeTable();
+		}
+		else {
+			ConnectionDetailsView connectionDetailsView = getSelectedDetailView();
+			connectionDetailsView.clean();
 		}
 	}
 	
@@ -194,17 +203,20 @@ implements RefreshableView, SearcheableView {
 		Tab tabForConn = tabByConnection.get(selectedConnection);
 		if (tabForConn != null) {
 			detailsViewByTab.remove(tabForConn);
-			tabByConnectionKey.remove(selectedConnection.getHost());
+			tabByConnectionKey.remove(getConnectionKey(selectedConnection));
 			tabSheet.removeTab(tabForConn);
 		}
 	}
 	
 	public void cleanAll(ClickEvent event) {
-		Notification.show("CleanAll");
+		if (!isMainTabSelected()) {
+			ConnectionDetailsView connectionDetailsView = getSelectedDetailView();
+			connectionDetailsView.cleanAll();
+		}
 	}
 	
 	public boolean canCleanAll() {
-		return true;
+		return !isMainTabSelected() && getSelectedDetailView().getConnection().getCommunications().size() > 0;
 	}
 	
 	public void displayStack(ClickEvent event) {		
@@ -216,7 +228,13 @@ implements RefreshableView, SearcheableView {
 	}
 	
 	public boolean isSelected() {
-		return treeGrid.getSelectedItems().size() == 1;
+		if (isMainTabSelected()) {
+			return treeGrid.getSelectedItems().size() == 1;
+		}
+		else {
+			ConnectionDetailsView connectionDetailsView = getSelectedDetailView();
+			return connectionDetailsView.isSelected();
+		}
 	}
 	
 	public boolean isConnectionSelected() {
@@ -243,7 +261,7 @@ implements RefreshableView, SearcheableView {
 	@Override
 	public void search(String searchQuery) {
 		Component selectedComponent = tabSheet.getSelectedTab();
-		if (selectedComponent instanceof ConnectionDetailsView) {
+		if (selectedComponent instanceof ConnectionDetailsView && !StringUtils.isEmpty(searchQuery)) {
 			ConnectionDetailsView selectedView = (ConnectionDetailsView) selectedComponent;
 			selectedView.search(searchQuery);
 		}

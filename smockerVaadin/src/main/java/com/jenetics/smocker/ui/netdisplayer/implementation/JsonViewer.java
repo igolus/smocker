@@ -10,6 +10,7 @@ import com.jenetics.smocker.util.NetworkReaderUtility;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextArea;
+import com.vaadin.ui.VerticalLayout;
 
 public class JsonViewer implements ComponentWithDisplayChange {
 
@@ -36,10 +37,13 @@ public class JsonViewer implements ComponentWithDisplayChange {
 		areaOutput.setSizeFull();
 
 		areaOutputJson = new TextArea();
+		areaOutputJson.setWordWrap(false);
 		areaOutputJson.setReadOnly(true);
 		areaOutputJson.setSizeFull();
 
 		tabsheet.addTab(areaOutput, defaultTitle);
+		VerticalLayout vlayout = new VerticalLayout();
+		vlayout.addComponent(areaOutputJson);
 		tabsheet.addTab(areaOutputJson, bundle.getString("Json"));
 
 		tabsheet.setSizeFull();
@@ -49,11 +53,7 @@ public class JsonViewer implements ComponentWithDisplayChange {
 	@Override
 	public void selectionValue(String content) {
 
-		areaOutput.setReadOnly(false);
 		areaOutput.setValue(content);
-		areaOutput.setReadOnly(true);
-
-		areaOutputJson.setReadOnly(false);
 		String message = NetworkReaderUtility.readContentResponse(content);
 		String jsonContent = NetworkReaderUtility.getJsonContent(message);
 
@@ -68,7 +68,7 @@ public class JsonViewer implements ComponentWithDisplayChange {
 			logger.error("Unable to parse Json response", e);
 			areaOutputJson.setValue(bundle.getString("ParseError"));
 		}
-		areaOutputJson.setReadOnly(true);
+		//areaOutputJson.setReadOnly(true);
 	}
 
 }

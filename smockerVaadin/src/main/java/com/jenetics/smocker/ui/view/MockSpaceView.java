@@ -186,13 +186,8 @@ public class MockSpaceView
 		return connectionMockedDetailsView;
 	}
 
-//	@Override
-//	protected void refreshDetailView() {
-//		fillTreeTable();
-//		if (getSelectedDetailView() != null) {
-//			getSelectedDetailView().refresh();
-//		}
-//	}
-	
-	
+	@Override
+	public boolean canSearch() {
+		return false;
+	}
 }

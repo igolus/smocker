@@ -1,9 +1,10 @@
 package com.jenetics.smocker.util.network;
 
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import javax.xml.bind.DatatypeConverter;
 
-import java.util.Base64;
+//import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,6 +24,8 @@ public class RestClientSmocker extends RESTClient {
 	private static final String SMOCKER_GET_LIST_MOCKED_HOST= "/mocks/listHostActivated";
 	private static final String SMOCKER_CHECK_MATCH = "/mocks/checkMatch";
 	private static final String SMOCKER_ALIVE= "/alive";
+	private static final String SMOCKER_LIST_WATCHED_CONNECTIONS =  "/connections/listHostUnWatched";
+	
 	//"http://admin:admin@localhost:9990/management/deployment/smocker-1.0-SNAPSHOT.war?operation=attribute&name=status"
 	private static RestClientSmocker instance;
 
@@ -45,6 +48,10 @@ public class RestClientSmocker extends RESTClient {
 
 	public String getAllMockedConnection() {
 		return get(SMOCKER_REST_PATH + SMOCKER_GET_LIST_MOCKED_HOST);
+	}
+	
+	public String getAllUnWachedConnections() {
+		return get(SMOCKER_REST_PATH + SMOCKER_LIST_WATCHED_CONNECTIONS);
 	}
 
 	public String getMockedConnections() {
@@ -81,12 +88,7 @@ public class RestClientSmocker extends RESTClient {
 		
     	Long idConnection = TransformerUtility.getConnectionIdBySocket().get(smockerContainer.getSource());
 		Long javaAppId = TransformerUtility.getJavaAppId();
-
-		if (!MemoryConfiguration.isConnecctionThere(host, port)) {
-			MemoryConfiguration.setConnecctionWatched(host, port);	
-		}
-		//send only if the connection is watched
-		if (MemoryConfiguration.isConnecctionWatched(host, port)) {
+		if (RemoteServerChecker.isConnectionWatched(host, port)) {
 			StringBuffer buffer = new StringBuffer();
 			Map<String, String> headers = buildHeader();
 				try {
@@ -113,12 +115,12 @@ public class RestClientSmocker extends RESTClient {
 		String host = smockerContainer.getHost();
 		int port = smockerContainer.getPort();
 
-		if (!MemoryConfiguration.isConnecctionThere(host, port)) {
-			MemoryConfiguration.setConnecctionWatched(host, port);	
-		}
+//		if (!MemoryConfiguration.isConnecctionThere(host, port)) {
+//			MemoryConfiguration.setConnecctionWatched(host, port);	
+//		}
 		//send only if the connection is watched
 
-		if (MemoryConfiguration.isConnecctionWatched(host, port)) {
+		if (RemoteServerChecker.isConnectionWatched(host, port)) {
 			StringBuffer buffer = new StringBuffer();
 			Map<String, String> headers = buildHeader();
 				try {
@@ -144,11 +146,30 @@ public class RestClientSmocker extends RESTClient {
 
 
 	public static String encode(String source) {
-		return Base64.getEncoder().encodeToString(source.getBytes());
+		
+		byte[] message = null;
+		try {
+			message = source.getBytes("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String encoded = DatatypeConverter.printBase64Binary(message);
+		return encoded;
+		
+		//return Base64.getEncoder().encodeToString(source.getBytes());
 	}
 	
 	public static String decode(String source) {
-		return new String(Base64.getDecoder().decode(source));
+		//return new String(Base64.getDecoder().decode(source));
+		byte[] decoded = DatatypeConverter.parseBase64Binary(source);
+		try {
+			return new String(decoded, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	public String postCheckMatch(String content, String host) {

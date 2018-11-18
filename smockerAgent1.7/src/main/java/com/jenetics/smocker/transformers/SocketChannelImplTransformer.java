@@ -32,7 +32,6 @@ public class SocketChannelImplTransformer {
 		//redefineClose(classPool, ctClass);
 		redefineWrite(classPool, ctClass);
 		redefineRead(classPool, ctClass);
-		//redefineClose(classPool, ctClass);
 
 		byteCode = ctClass.toBytecode();
 		ctClass.detach();
@@ -40,15 +39,7 @@ public class SocketChannelImplTransformer {
 		return byteCode;
 	}
 
-	private void redefineClose(ClassPool classPool, CtClass ctClass) throws NotFoundException, CannotCompileException {
-		String body = " try{"
-				+ " 	com.jenetics.smocker.util.TransformerUtility.socketChannelClosed( $0, $0.socket, $$ );"
-				+ "} catch (Throwable t) " + "{ " + "     throw t; " + "}";
-
-		CtMethod writeMethod = ctClass.getDeclaredMethod("close");
-		writeMethod.insertAfter(body.toString());
-
-	}
+	
 
 	private void redefineWrite(ClassPool classPool, CtClass ctClass) throws NotFoundException, CannotCompileException {
 		

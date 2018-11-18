@@ -137,6 +137,10 @@ public class TeeInputStream extends ProxyInputStream {
     @Override
     public int read() throws IOException {
     	initiateMockedResponse();
+    	
+    	resetAndPost();
+    	
+    	
     	final int ch = super.read();
         if (ch != EOF && mockBis == null) {
             branch.write(ch);
@@ -144,20 +148,23 @@ public class TeeInputStream extends ProxyInputStream {
         if (mockBis != null) {
         	return mockBis.read(); 
         }
-        if (ch == -1) {
-        	postCommunication();
-        }
+        getSmockerContainer().setPostAtNextWrite(true);
         return ch;
     }
 
-    private void postCommunication() throws UnsupportedEncodingException {
-		if (getSmockerContainer().isPostAtNextRead()) {
+	private void resetAndPost() throws UnsupportedEncodingException {
+		if (getSmockerContainer().isPostAtNextWrite()) {
 			getSmockerContainer().postCommunication();
-			getSmockerContainer().setPostAtNextRead(false);
+			getSmockerContainer().resetAll();
+			getSmockerContainer().setPostAtNextWrite(false);
+		}
+		if (getSmockerContainer().isResetMatchNextWrite()) {
+			smockerContainer.resetAll();
+			smockerContainer.setResetMatchNextWrite(false);
 		}
 	}
 
-	@Override
+    @Override
 	public int available() throws IOException {
     	initiateMockedResponse();
     	if (mockBis != null) {
@@ -179,16 +186,13 @@ public class TeeInputStream extends ProxyInputStream {
     @Override
     public int read(final byte[] bts, final int st, final int end) throws IOException {
     	initiateMockedResponse();
-    	
+    	resetAndPost();
     	if (mockBis != null) {
         	return mockBis.read(bts, st, end);
         }
     	final int n = super.read(bts, st, end);
         if (n != -1 && mockBis == null) {
             branch.write(bts, st, n);
-        }
-        if (n == -1) {
-        	postCommunication();
         }
         return n;
     }

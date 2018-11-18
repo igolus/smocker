@@ -197,12 +197,16 @@ public class SmockerUI extends UI {
 	
 	public static void log(Level level, String message) {
 		LogView logView = (LogView) getInstance().getEasyAppMainView().getScanner().getViewMap().get(LogView.class.toString());
-		logView.appendMessage(level, message);
+		if (logView != null) {
+			logView.appendMessage(level, message);
+		}
 	}
 	
 	public static void log(Level level, String message, Exception ex) {
 		LogView logView = (LogView) getInstance().getEasyAppMainView().getScanner().getViewMap().get(LogView.class.toString());
-		logView.appendMessage(level, message, ex);
+		if (logView != null) {
+			logView.appendMessage(level, message, ex);
+		}
 	}
 	
 	/**

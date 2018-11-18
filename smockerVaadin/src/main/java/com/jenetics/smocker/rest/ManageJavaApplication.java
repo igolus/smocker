@@ -2,6 +2,7 @@ package com.jenetics.smocker.rest;
 
 import java.util.Date;
 import java.util.Optional;
+import java.util.logging.Level;
 
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.event.Event;
@@ -134,8 +135,20 @@ public class ManageJavaApplication {
 
 			// notify the creation
 			communicationEventSrc.fire(comm);
+			
+			StringBuilder builder = new StringBuilder();
+			builder.append("Communication added to ")
+			.append(comm.getConnection().getHost())
+			.append(":")
+			.append(comm.getConnection().getPort());
+
+			SmockerUI.getInstance().log(Level.INFO, builder.toString());
+			
 			return Response.ok().entity(comm).build();
 		}
+		
+		
+		
 		return Response.status(Status.FORBIDDEN).build();
 
 	}

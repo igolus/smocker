@@ -27,13 +27,22 @@ public class SmockerContainer {
 	private String outputToBesend;
 	private String inputToBesend;
 	private Object source;
-	private boolean postAtNextRead = false;
+	//private boolean postAtNextRead = false;
+	private boolean postAtNextWrite = false;
 	private boolean applyMock;
 	private boolean streamResent = false;
 	private int indexForArrayCopy = 0;
 	
 	public int getIndexForArrayCopy() {
 		return indexForArrayCopy;
+	}
+
+	public boolean isPostAtNextWrite() {
+		return postAtNextWrite;
+	}
+
+	public void setPostAtNextWrite(boolean postAtNextWrite) {
+		this.postAtNextWrite = postAtNextWrite;
 	}
 
 	public void setIndexForArrayCopy(int indexForArrayCopy) {
@@ -50,6 +59,10 @@ public class SmockerContainer {
 
 	public boolean isApplyMock() {
 		return applyMock;
+	}
+
+	public void setApplyMock(boolean applyMock) {
+		this.applyMock = applyMock;
 	}
 
 	public String getOutputToBesend() {
@@ -152,6 +165,8 @@ public class SmockerContainer {
 		resetSmockerSocketInputStream();
 		resetSmockerSocketOutputStream();
 		matchOutput = null;
+		applyMock = RemoteServerChecker.getMockedHost().contains(host);
+		indexForArrayCopy = 0;
 	}
 
 	public boolean isSsl() {
@@ -189,15 +204,6 @@ public class SmockerContainer {
 		this.teeOutputStream.setSmockerContainer(this);
 	}
 	
-	public boolean isPostAtNextRead() {
-		return postAtNextRead;
-	}
-
-
-	public void setPostAtNextRead(boolean postAtNextRead) {
-		this.postAtNextRead = postAtNextRead;
-	}
-
 
 	public void postCommunication() throws UnsupportedEncodingException {
 		String lastReaden = null;
@@ -205,8 +211,8 @@ public class SmockerContainer {
 			lastReaden = getSmockerSocketInputStream().getSmockerOutputStreamData().getString();
 		}
 		
-		if (lastReaden != null && !lastReaden.isEmpty() &&  getOutputToBesend() != null) {
-			RestClientSmocker.getInstance().postCommunication(this, getOutputToBesend(), lastReaden);
+		if (lastReaden != null && !lastReaden.isEmpty() &&  getSmockerSocketOutputStream() != null) {
+			RestClientSmocker.getInstance().postCommunication(this);
 		}
 	}
 	
@@ -231,6 +237,16 @@ public class SmockerContainer {
     		matchOutput = RestClientSmocker.decode(matchResponse);
     		return matchOutput;
     	}
+	}
+	
+	private boolean resetMatchNextWrite = false;
+
+	public boolean isResetMatchNextWrite() {
+		return resetMatchNextWrite;
+	}
+
+	public void setResetMatchNextWrite(boolean resetMatchNextWrite) {
+		this.resetMatchNextWrite = resetMatchNextWrite;
 	}
 	
 	

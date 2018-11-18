@@ -20,9 +20,17 @@ public class SmockerConf implements EntityWithId {
 	@Version
 	@Column(name = "version")
 	private int version;
-
+	
 	@Column
-	private String mode;
+	private boolean autorefesh = true;
+
+	public boolean isAutorefesh() {
+		return autorefesh;
+	}
+
+	public void setAutorefesh(boolean autorefesh) {
+		this.autorefesh = autorefesh;
+	}
 
 	public Long getId() {
 		return this.id;
@@ -65,13 +73,6 @@ public class SmockerConf implements EntityWithId {
 		return result;
 	}
 
-	public String getMode() {
-		return mode;
-	}
-
-	public void setMode(String mode) {
-		this.mode = mode;
-	}
 
 	@Override
 	public String toString() {
@@ -79,8 +80,6 @@ public class SmockerConf implements EntityWithId {
 		if (id != null)
 			result += "id: " + id;
 		result += ", version: " + version;
-		if (mode != null && !mode.trim().isEmpty())
-			result += ", mode: " + mode;
 		return result;
 	}
 }

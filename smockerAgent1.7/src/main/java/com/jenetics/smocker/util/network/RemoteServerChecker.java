@@ -40,7 +40,7 @@ public class RemoteServerChecker {
 	}
 	
 	public static boolean isConnectionWatched(String host, int port) {
-		return !unWatchedHost.contains(host + SEP + port);
+		return unWatchedHost == null || !unWatchedHost.contains(host + SEP + port);
 	}
 
 

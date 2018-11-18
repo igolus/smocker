@@ -81,23 +81,30 @@ public class RestClientSmocker extends RESTClient {
 		return null;
 	}
 
-	public String postCommunication(SmockerContainer smockerContainer, String input, String output) {
+	public String postCommunication(SmockerContainer smockerContainer) {
 
 		String host = smockerContainer.getHost();
 		int port = smockerContainer.getPort();
 		
+		smockerContainer.getSmockerSocketOutputStream().getSmockerOutputStreamData().getBytes();
+		
+		
     	Long idConnection = TransformerUtility.getConnectionIdBySocket().get(smockerContainer.getSource());
 		Long javaAppId = TransformerUtility.getJavaAppId();
-		if (RemoteServerChecker.isConnectionWatched(host, port)) {
+		if (RemoteServerChecker.isConnectionWatched(host, port) && 
+				smockerContainer.getSmockerSocketOutputStream() != null && 
+				smockerContainer.getSmockerSocketInputStream()!= null ) {
+			
+			byte[] outputBytes = smockerContainer.getSmockerSocketOutputStream().getSmockerOutputStreamData().getBytes();
+			byte[] inputBytes = smockerContainer.getSmockerSocketInputStream().getSmockerOutputStreamData().getBytes();
+
 			StringBuffer buffer = new StringBuffer();
 			Map<String, String> headers = buildHeader();
 				try {
 					buffer.append("{\"id\": 0, \"request\":\"")
-					.append(encode(input))
-					//.append(encode(smockerContainer.getInputToBesend()))
+					.append(encode(outputBytes))
 					.append("\",  \"response\":\"")
-					.append(encode(output))
-					//.append(encode(smockerContainer.getOutputToBesend()))
+					.append(encode(inputBytes))
 					.append("\",  \"callerStack\":\"")
 					.append(encode(smockerContainer.getStackTrace()))
 					.append("\"}");
@@ -115,11 +122,6 @@ public class RestClientSmocker extends RESTClient {
 		String host = smockerContainer.getHost();
 		int port = smockerContainer.getPort();
 
-//		if (!MemoryConfiguration.isConnecctionThere(host, port)) {
-//			MemoryConfiguration.setConnecctionWatched(host, port);	
-//		}
-		//send only if the connection is watched
-
 		if (RemoteServerChecker.isConnectionWatched(host, port)) {
 			StringBuffer buffer = new StringBuffer();
 			Map<String, String> headers = buildHeader();
@@ -131,7 +133,7 @@ public class RestClientSmocker extends RESTClient {
 					buffer.append("{\"id\": 0, \"request\":\"")
 					.append(encode(input))
 					.append("\",  \"response\":\"")
-					.append(encode(smockerContainer.getTeeOutputStream().getBranch().getSmockerOutputStreamData().getString()))
+					.append(encode(smockerContainer.getTeeOutputStream().getBranch().getSmockerOutputStreamData().getBytes()))
 					.append("\",  \"callerStack\":\"")
 					.append(encode(smockerContainer.getStackTrace()))
 					.append("\"}");
@@ -146,30 +148,33 @@ public class RestClientSmocker extends RESTClient {
 
 
 	public static String encode(String source) {
-		
 		byte[] message = null;
 		try {
 			message = source.getBytes("UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			MessageLogger.logErrorWithMessage("Unable to encode ", e,RestClientSmocker.class);
 		}
 		String encoded = DatatypeConverter.printBase64Binary(message);
 		return encoded;
-		
-		//return Base64.getEncoder().encodeToString(source.getBytes());
 	}
 	
 	public static String decode(String source) {
-		//return new String(Base64.getDecoder().decode(source));
 		byte[] decoded = DatatypeConverter.parseBase64Binary(source);
 		try {
 			return new String(decoded, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			MessageLogger.logErrorWithMessage("Unable to decode ", e,RestClientSmocker.class);
 		}
 		return null;
+	}
+	
+	public static String encode(byte[] source) {
+		String encoded = DatatypeConverter.printBase64Binary(source);
+		return encoded;
+	}
+	
+	public static byte[] decodeByte(String source) {
+		return DatatypeConverter.parseBase64Binary(source);
 	}
 
 	public String postCheckMatch(String content, String host) {

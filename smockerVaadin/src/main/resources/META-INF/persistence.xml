@@ -35,6 +35,7 @@
 		<class>com.jenetics.smocker.model.ConnectionMocked</class> 
 		<class>com.jenetics.smocker.model.CommunicationMocked</class>
 		<class>com.jenetics.smocker.model.Scenario</class>
+		<class>com.jenetics.smocker.model.config.SmockerConf</class>
 		
 		<properties>
 			<property name="hibernate.dialect"

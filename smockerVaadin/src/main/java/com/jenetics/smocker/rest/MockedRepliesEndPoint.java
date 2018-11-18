@@ -92,11 +92,13 @@ public class MockedRepliesEndPoint  {
 			try {
 				String requestInput = NetworkReaderUtility.decode(request.getRequest());
 				String[] result = JSEvaluator.runScript(requestInput, communicationMocked, null, null, null);
-				if (result[0] != null) {
-					SmockerUI.log(Level.INFO, result[0]);
-				}
+//				if (result[0] != null) {
+//					SmockerUI.log(Level.INFO, result[0]);
+//				}
 				if (result[1] != null) {
 					MatchMockResponse response = new MatchMockResponse(NetworkReaderUtility.encode(result[1]));
+					SmockerUI.log(Level.INFO, "Found mock match for " + 
+							communicationMocked.getConnection().getHost() + ":" + communicationMocked.getConnection().getPort());
 					return Response.ok(response).build();
 				}
 			} catch (SmockerException e) {

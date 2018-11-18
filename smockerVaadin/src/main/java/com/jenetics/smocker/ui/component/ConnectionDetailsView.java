@@ -52,13 +52,14 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 	private TreeDataProvider<CommunicationDateDisplay> treeDataProvider;
 	private Communication selectedCommunication = null;;
 	private Hashtable<Communication, CommunicationDateDisplay> commDisplayByComm = new Hashtable<>();
-	
+	private Hashtable<Communication, String[]> decodedCommunications = new Hashtable<>();
+
 	protected IDaoManager<Connection> daoManagerConnection = DaoManagerByModel.getDaoManager(Connection.class);
 
 	public ConnectionDetailsView(Connection connection) {
 		super();
 		HorizontalSplitPanel mainLayout = new HorizontalSplitPanel();
-		
+
 		this.connection = connection;
 
 		menu = new Tree<>();
@@ -67,14 +68,14 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 		treeDataProvider = new TreeDataProvider<>(treeData);
 		menu.setDataProvider(treeDataProvider);
 		menu.addSelectionListener(this::menuSelectionChange);
-		
+
 		fillCommunication();
-		
+
 		menu.addItemClickListener(this::treeItemClick);
 		treeDataProvider.refreshAll();
 
 		menu.setSizeFull();
-		
+
 		grid = new GridLayout(2, 1);
 		grid.setSizeFull();
 
@@ -85,23 +86,32 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 		addComponent(mainLayout);
 		setSizeFull();
 	}
-	
+
+	private String[] getDecodedCommunication(Communication comm) {
+		return decodedCommunications.computeIfAbsent(comm, ConnectionDetailsView::decodeCommunication);
+	}
+
+	private static String[] decodeCommunication(Communication comm) {
+		return new String[] {
+				NetworkReaderUtility.decode(comm.getRequest()),
+				NetworkReaderUtility.decode(comm.getResponse())		
+		};
+	}
+
 	public Connection getConnection() {
 		return connection;
 	}
-
-
 
 	public void menuSelectionChange(SelectionEvent<CommunicationDateDisplay> event) {
 		if (refreshClickable != null) {
 			refreshClickable.run();
 		}
 	}
-	
+
 	public Communication getSelectedCommunication() {
 		return selectedCommunication;
 	}
-	
+
 	public Set<Communication> getCommunications () {
 		return connection.getCommunications();
 	}
@@ -116,55 +126,58 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 		}
 		treeDataProvider.refreshAll();
 	}
-	
+
 	public void treeItemClick(ItemClick<CommunicationDateDisplay> event) {
 		Communication comm = event.getItem().getCommunication();
 		selectCommunication(comm);
 	}
 
 	private void selectCommunication(Communication comm) {
+		String[] decodedCommunication = getDecodedCommunication(comm);
+		
+		
 		String request = NetworkReaderUtility.decode(comm.getRequest());
 		ComponentWithDisplayChange componentWithDisplayChangeInput = NetDisplayerFactoryInput.getComponent(request);
 		Component inputComponent = componentWithDisplayChangeInput.getComponent();
 		inputComponent.setSizeFull();
 		grid.removeComponent(0, 0);
 		grid.addComponent(inputComponent, 0, 0);
-		componentWithDisplayChangeInput.selectionValue(request);
-		
-		
+		componentWithDisplayChangeInput.selectionValue(decodedCommunication[0]);
+
+
 		String response = NetworkReaderUtility.decode(comm.getResponse());
 		ComponentWithDisplayChange componentWithDisplayChangeOutput = NetDisplayerFactoryOutput.getComponent(response);
 		Component outputComponent = componentWithDisplayChangeOutput.getComponent();
 		outputComponent.setSizeFull();
 		grid.removeComponent(1, 0);
 		grid.addComponent(outputComponent, 1, 0);
-		componentWithDisplayChangeOutput.selectionValue(response);
-		
+		componentWithDisplayChangeOutput.selectionValue(decodedCommunication[1]);
+
 		selectedCommunication = comm;
 		refreshClickable();
 	}
-	
+
 	public void cleanGrid() {
 		grid.removeComponent(0, 0);
 		grid.removeComponent(1, 0);
 	}
-	
+
 	public void clean() {
 		if (isSelected()) {
 			Dialog.ask(SmockerUI.getBundle().getString("RemoveQuestion"), null, this::delete, null);
 		}
 	}
-	
+
 	public void cleanAll() {
 		Dialog.ask(SmockerUI.getBundle().getString("RemoveAllQuestion"), null, this::deleteAll, null);
 	}
-	
+
 	public void delete() {
 		deleteCommunication(selectedCommunication);
 		commDisplayByComm.remove(selectedCommunication);
 		postDeleteUiUpdate();
 	}
-	
+
 
 	private void postDeleteUiUpdate() {
 		cleanGrid();
@@ -176,40 +189,40 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 		communication.getConnection().getCommunications().remove(communication);
 		daoManagerConnection.update(communication.getConnection());
 	}
-	
+
 	private void deleteAll() {
 		commDisplayByComm.clear();
 		connection.getCommunications().clear();
 		daoManagerConnection.update(connection);
 		postDeleteUiUpdate();
 	}
-	
+
 	public void cleanAll(ClickEvent event) {
 		Notification.show("Clean");
 	}
-	
+
 	public void refresh() {
 		fillCommunication();
 		resetSelected();
 		refreshClickable();
 	}
-	
+
 	public boolean isSelected() {
 		return selectedCommunication != null;
 	}
-	
+
 	public void resetSelected() {
 		selectedCommunication = null;
 	}
-	
+
 	public boolean always() {
 		return true;
 	}
-	
+
 	public boolean atLeastOneItem() {
 		return treeData.getRootItems().size() > 1;
 	}
-	
+
 	public void search(String searchQuery) {
 		Set<Communication> communnications = getCommunications();
 		LuceneIndexer lucenIndexer = new LuceneIndexer();
@@ -225,12 +238,12 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 			Notification.show(SmockerUI.getBundleValue("nothing_Found"));
 		}
 	}
-	
+
 	private void selectedCommFromSearch(Communication comm) {
 		menu.select(commDisplayByComm.get(comm));
 		selectCommunication(comm);
 	}
-	
+
 	public void displayStack() {
 		Communication selectedCommunication = getSelectedCommunication();
 		if (selectedCommunication != null) {
@@ -238,5 +251,5 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 					new TextPanel(NetworkReaderUtility.decode(selectedCommunication.getCallerStack()), true));
 		}
 	}
-	
+
 }

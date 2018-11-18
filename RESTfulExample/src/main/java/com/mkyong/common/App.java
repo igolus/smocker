@@ -33,9 +33,9 @@ public class App
 				String line = bufferedReader.readLine();
 
 				line = bufferedReader.readLine();
-				//callGoogle();
-				callGoogleSocketChannell();
-				callYahoo();
+				callGoogle();
+				//callGoogleSocketChannell();
+				//callYahoo();
 			}
 
 			catch (Exception ex) {
@@ -71,85 +71,96 @@ public class App
 
 	private static void callGoogleSocketChannell() throws UnknownHostException, IOException {
 
-		SocketChannel socketChannel = SocketChannel.open(new InetSocketAddress("www.google.com", 80));
+
 		StringBuffer bf = new StringBuffer();
 
 		String lineSeparator = System.getProperty("line.separator");
 		bf.append("GET / HTTP/1.1").append(lineSeparator);
 		bf.append("Host: www.google.com:80").append(lineSeparator);
 		bf.append("Connection: Close").append(lineSeparator);
+		//bf.append("Connection: keep-alive").append(lineSeparator);
 		bf.append(lineSeparator);
 		//bf.append(lineSeparator);
 
-		ByteBuffer buf = ByteBuffer.wrap(bf.toString().getBytes());
-		socketChannel.write(buf);
-		buf.clear();
-		StringBuffer bfOut = new StringBuffer();
-		
-		int nbRead = 0;
-		while (nbRead != -1) {
-			nbRead = socketChannel.read(buf);
-			bfOut.append(new String(buf.array()));
+		for (int i = 0; i < 4; i++) {
+			SocketChannel socketChannel = SocketChannel.open(new InetSocketAddress("www.google.com", 80));
+			ByteBuffer buf = ByteBuffer.wrap(bf.toString().getBytes());
+			socketChannel.write(buf);
 			buf.clear();
+			StringBuffer bfOut = new StringBuffer();
+
+			int nbRead = 0;
+			while (nbRead != -1) {
+				nbRead = socketChannel.read(buf);
+				bfOut.append(new String(buf.array()));
+				buf.clear();
+			}
+			System.out.println(bfOut.toString());
+			socketChannel.close();
 		}
-		System.out.println(bfOut.toString());
+
+
+
 
 	}
-	
-//	private static void callGoogleSocketChannellMulti() throws UnknownHostException, IOException {
-//
-//		SocketChannel socketChannel = SocketChannel.open(new InetSocketAddress("www.google.com", 80));
-//		StringBuffer bf = new StringBuffer();
-//
-//		String lineSeparator = System.getProperty("line.separator");
-//		bf.append("GET / HTTP/1.1").append(lineSeparator);
-//		bf.append("Host: www.google.com:80").append(lineSeparator);
-//		bf.append("Connection: Close").append(lineSeparator);
-//		bf.append(lineSeparator);
-//		//bf.append(lineSeparator);
-//		
-//		ByteBuffer buf = ByteBuffer.wrap(bf.toString().getBytes());
-//		socketChannel.write(buf);
-//		buf.clear();
-//		//buf.flip();
-//		StringBuffer bfOut = new StringBuffer();
-//		
-//		int nbRead = 0;
-//		while (nbRead != -1) {
-//			nbRead = socketChannel.read(buf);
-//			bfOut.append(new String(buf.array()));
-//			buf.clear();
-//		}
-//		System.out.println(bfOut.toString());
-//
-//	}
+
+	//	private static void callGoogleSocketChannellMulti() throws UnknownHostException, IOException {
+	//
+	//		SocketChannel socketChannel = SocketChannel.open(new InetSocketAddress("www.google.com", 80));
+	//		StringBuffer bf = new StringBuffer();
+	//
+	//		String lineSeparator = System.getProperty("line.separator");
+	//		bf.append("GET / HTTP/1.1").append(lineSeparator);
+	//		bf.append("Host: www.google.com:80").append(lineSeparator);
+	//		bf.append("Connection: Close").append(lineSeparator);
+	//		bf.append(lineSeparator);
+	//		//bf.append(lineSeparator);
+	//		
+	//		ByteBuffer buf = ByteBuffer.wrap(bf.toString().getBytes());
+	//		socketChannel.write(buf);
+	//		buf.clear();
+	//		//buf.flip();
+	//		StringBuffer bfOut = new StringBuffer();
+	//		
+	//		int nbRead = 0;
+	//		while (nbRead != -1) {
+	//			nbRead = socketChannel.read(buf);
+	//			bfOut.append(new String(buf.array()));
+	//			buf.clear();
+	//		}
+	//		System.out.println(bfOut.toString());
+	//
+	//	}
 
 	private static void callGoogle() throws UnknownHostException, IOException {
 		InetAddress addr = InetAddress.getByName("www.google.com");
-		Socket socket = new Socket(addr, 80);
-		boolean autoflush = true;
-		PrintWriter out = new PrintWriter(socket.getOutputStream(), autoflush);
-		BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		// send an HTTP request to the web server
-		out.println("GET / HTTP/1.1");
-		out.println("Host: www.google.com:80");
-		out.println("Connection: Close");
-		out.println();
 
-		// read the response
-		boolean loop = true;
-		StringBuilder sb = new StringBuilder(8096);
-		while (loop) {
-			if (in.ready()) {
-				int i = 0;
-				while (i != -1) {
-					i = in.read();
-					sb.append((char) i);
+		for (int i = 0; i < 4; i ++) {
+			Socket socket = new Socket(addr, 80);
+			boolean autoflush = true;
+			PrintWriter out = new PrintWriter(socket.getOutputStream(), autoflush);
+			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			// send an HTTP request to the web server
+			out.println("GET / HTTP/1.1");
+			out.println("Host: www.google.com:80");
+			out.println("Connection: Close");
+			out.println();
+
+			// read the response
+			boolean loop = true;
+			StringBuilder sb = new StringBuilder(8096);
+			while (loop) {
+				if (in.ready()) {
+					int j = 0;
+					while (j != -1) {
+						j = in.read();
+						sb.append((char) j);
+					}
+					loop = false;
 				}
-				loop = false;
 			}
+			System.out.println(sb.toString());
+			socket.close();
 		}
-		System.out.println(sb.toString());
-		socket.close();
 	}
 }

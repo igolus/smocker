@@ -60,18 +60,35 @@ public class TransformerUtility {
 	public synchronized static int socketChannelWrite (SocketChannel socketChannel, ByteBuffer buffer) 
 			throws IOException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 		if (socketChannel != null && !filterSmockerBehavior() && RemoteServerChecker.isRemoteServerAlive()) {
+			int write = buffer.capacity();
+			
+			ByteBuffer bufferDup = buffer.duplicate();
+			byte[] array = new byte[bufferDup.capacity()];
+			bufferDup.get(array);
+			
 			SmockerContainer smockerContainer = smockerContainerBySocket.get(socketChannel);
 			if (smockerContainer == null) {
 				InetSocketAddress remoteAddress = (InetSocketAddress) socketChannel.getRemoteAddress();
 				smockerContainer = addSmockerContainer(socketChannel, remoteAddress.getHostName(), remoteAddress.getPort());
-				SmockerSocketOutputStream smockerOutputStream = new SmockerSocketOutputStream();
-				smockerContainer.setSmockerSocketOutputStream(smockerOutputStream);
+				smockerContainer.resetAll();
+			}
+			if (smockerContainer.isResetMatchNextWrite()) {
+				smockerContainer.resetAll();
+				smockerContainer.setResetMatchNextWrite(false);
+			}
+			
+			if (smockerContainer.isPostAtNextWrite()) {
+				smockerContainer.postCommunication();
+				smockerContainer.resetAll();
+				smockerContainer.setPostAtNextWrite(false);
 			}
 			if (!smockerContainer.isApplyMock()) {
-				writeSocketChannel(buffer, 	socketChannel);
+				write = writeSocketChannel(buffer, 	socketChannel);
 			}
-			smockerContainer.getSmockerSocketOutputStream().write(buffer.array());
-			return buffer.capacity();
+			
+			
+			smockerContainer.getSmockerSocketOutputStream().write(array);
+			return write;
 		}
 		else {
 			return writeSocketChannel(buffer, socketChannel);
@@ -80,13 +97,14 @@ public class TransformerUtility {
 
 	public synchronized static int socketChannelRead (SocketChannel socketChannel,  ByteBuffer bytebuffer) 
 			throws IOException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		if (socketChannel != null && !filterSmockerBehavior() && RemoteServerChecker.isRemoteServerAlive()) {
-			bytebuffer.clear();
-			SmockerContainer smockerContainer = smockerContainerBySocket.get(socketChannel);
+		SmockerContainer smockerContainer = smockerContainerBySocket.get(socketChannel);
+		
+		if (smockerContainer != null && socketChannel != null && !filterSmockerBehavior() && RemoteServerChecker.isRemoteServerAlive()) {
 			if (smockerContainer.isApplyMock()) {
 				String matchMock = smockerContainer.getMatchMock();
 				//match applied
 				if (matchMock != null) {
+					smockerContainer.setResetMatchNextWrite(true);
 					int index = smockerContainer.getIndexForArrayCopy();
 					byte[] bytesMock = matchMock.getBytes();
 					byte[] targetBytes = new byte[bytebuffer.limit()];
@@ -107,10 +125,13 @@ public class TransformerUtility {
 					writeSocketChannel(buffer, socketChannel);
 					smockerContainer.setStreamResent(true);
 				}
+				return readSocketChannel(bytebuffer, socketChannel);
 			}
-
+			smockerContainer.setApplyMock(false);
 			int readen = readSocketChannel(bytebuffer, socketChannel);
-			managePostCommunication(bytebuffer, smockerContainer, readen);
+			smockerContainer.getSmockerSocketInputStream().write(bytebuffer.array());
+			
+			smockerContainer.setPostAtNextWrite(true);
 			return readen;
 		}
 		if (bytebuffer != null && socketChannel != null) {
@@ -119,6 +140,7 @@ public class TransformerUtility {
 		return -1;
 
 	}
+	
 
 	private static void managePostCommunication(ByteBuffer bytebuffer, SmockerContainer smockerContainer, int readen)
 			throws IOException {
@@ -187,7 +209,7 @@ public class TransformerUtility {
 			if (container.isApplyMock()) {
 				teeOutputStream.setForwardToRealStream(false);
 			}
-
+			
 			return container.getTeeOutputStream();
 		}
 		return os;
@@ -200,7 +222,6 @@ public class TransformerUtility {
 			}
 			smockerContainerBySocket.remove(source);
 		}
-
 	}
 
 

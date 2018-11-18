@@ -44,6 +44,9 @@ public class ConnectionMockedManager extends EasyAppLayout {
 	private static final String TURN_OFF_ALL = "turnOffAll";
 	private static final String TURN_ON_ALL = "turnOnAll";
 	private static final String RENAME_SCENARIO = "renameScenario";
+	private static final String MOVE_UP = "moveUp";
+	private static final String MOVE_DOWN = "moveDown";
+	
 	private TreeGrid<TreeGridMockedItem> treeGrid;
 	private TreeData<TreeGridMockedItem> treeData;
 	private TreeDataProvider<TreeGridMockedItem> treeDataProvider;
@@ -234,7 +237,9 @@ public class ConnectionMockedManager extends EasyAppLayout {
 		}
 		else if (treeItem.isCommunication()) {
 			comboBox.setItems(SmockerUI.getBundleValue(MOVE_COMM), 
-					SmockerUI.getBundleValue(RENAME_COMM));
+					SmockerUI.getBundleValue(RENAME_COMM), 
+					SmockerUI.getBundleValue(MOVE_UP),
+					SmockerUI.getBundleValue(MOVE_DOWN));
 		}
 	}
 
@@ -251,6 +256,18 @@ public class ConnectionMockedManager extends EasyAppLayout {
 				listScenarioName.remove(selectedComm.getScenario().getName());
 			}
 			Dialog.displaySelectableListBox(SmockerUI.getBundleValue(MOVE_COMM), listScenarioName, this::scenarioMovSelected);
+		}
+		else if (event.getValue() != null && event.getValue().equals(SmockerUI.getBundleValue(MOVE_UP))){
+			CommunicationMocked selectedComm = selectedTreeItem.getCommunication();
+			if (selectedComm != null) {
+				moveUp(selectedComm);
+			}
+		}
+		else if (event.getValue() != null && event.getValue().equals(SmockerUI.getBundleValue(MOVE_DOWN))){
+			CommunicationMocked selectedComm = selectedTreeItem.getCommunication();
+			if (selectedComm != null) {
+				moveDown(selectedComm);
+			}
 		}
 		else if (event.getValue() != null && event.getValue().equals(SmockerUI.getBundleValue(CREATE_SCENARIO))){
 			Dialog.displayCreateStringBox(SmockerUI.getBundleValue(CREATE_SCENARIO), this::scenarioCreated);
@@ -284,6 +301,15 @@ public class ConnectionMockedManager extends EasyAppLayout {
 		}
 	}
 	
+	private void moveDown(CommunicationMocked selectedComm) {
+		//selectedComm.getConnection().		
+	}
+
+	private void moveUp(CommunicationMocked selectedComm) {
+		//qsdkjqsnd
+		
+	}
+
 	public void switchAllCommunicationInsideScenario(boolean value) {
 		if (selectedTreeItem != null && selectedTreeItem.isScenario()) {
 			Scenario scenario = selectedTreeItem.getScenario();

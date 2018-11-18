@@ -41,7 +41,6 @@ public class TeeOutputStream extends ProxyOutputStream {
 	private String host;
 	private SmockerContainer smockerContainer;
 	private boolean forwardToRealStream = true;
-	//ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
 	/** the second OutputStream to write to */
 	private SmockerSocketOutputStream branch;
@@ -94,16 +93,10 @@ public class TeeOutputStream extends ProxyOutputStream {
 	 */
 	@Override
 	public synchronized void write(final byte[] b, final int off, final int len) throws IOException {
-		//    	if (applyMock) {
-		//    		getSmockerContainer().getBosforMock().write(b, off, len);
-		//        }
-		//    	else {
 		if (forwardToRealStream) {
 			super.write(b, off, len);
 		}
 		this.branch.write(b, off, len);	
-		//    	}
-
 	}
 
 	/**
@@ -113,15 +106,10 @@ public class TeeOutputStream extends ProxyOutputStream {
 	 */
 	@Override
 	public synchronized void write(final int b) throws IOException {
-		//    	if (applyMock) {
-		//    		getSmockerContainer().getBosforMock().write(b);
-		//        }
-		//        else {
 		if (forwardToRealStream) {
 			super.write(b);
 		}
 		this.branch.write(b);
-		//        }
 	}
 
 	/**
@@ -135,6 +123,7 @@ public class TeeOutputStream extends ProxyOutputStream {
 		{
 			String matchMock = getSmockerContainer().getMatchMock();
 			if (matchMock != null) {
+				getSmockerContainer().setResetMatchNextWrite(true);
 				getSmockerContainer().setResponseMocked(matchMock);
 				return;
 			}
@@ -143,8 +132,11 @@ public class TeeOutputStream extends ProxyOutputStream {
 				out.write(getSmockerContainer().getSmockerSocketOutputStream().getBytes());
 				out.flush();
 			}
+			
 		}
-		getSmockerContainer().setPostAtNextRead(true);
+		else {
+			getSmockerContainer().setApplyMock(false);
+		}
 		this.branch.flush();
 		super.flush();
 		
@@ -153,31 +145,6 @@ public class TeeOutputStream extends ProxyOutputStream {
 				!getSmockerContainer().getSmockerSocketInputStream().getSmockerOutputStreamData().getString().isEmpty()) {
 			resetBranch();
 		}
-		
-//		
-//		boolean matchApplied = false;
-//		if (applyMock) {
-//			String match = RestClientSmocker.getInstance().postCheckMatch(
-//					new String(getSmockerContainer().getBosforMock().toByteArray()), host);
-//			String matchOutput = ResponseReader.readValueFromResponse(match, "outputResponse");
-//			matchApplied = !matchOutput.equals("NO_MATCH");
-//			if (matchApplied) {
-//				getSmockerContainer().setResponseMocked(RestClientSmocker.decode(matchOutput));
-//				if (getSmockerContainer().getTeeInputStream() != null) {
-//					getSmockerContainer().getTeeInputStream().resetMockBis();
-//				}
-//				getSmockerContainer().resetBosforMock();
-//			}
-//		}
-//		if (!matchApplied && !getSmockerContainer().isPostAtNextRead()) {
-//			getSmockerContainer().setPostAtNextRead(true);
-//			this.branch.flush();
-//			getSmockerContainer().setOutputToBesend(getSmockerContainer().getSmockerSocketOutputStream().getSmockerOutputStreamData().getString());
-//			if (getSmockerContainer().getSmockerSocketInputStream() != null && 
-//					!getSmockerContainer().getSmockerSocketInputStream().getSmockerOutputStreamData().getString().isEmpty()) {
-//				resetBranch();
-//			}
-//		}
 	}
 
 	private void postCommunication() throws UnsupportedEncodingException {
@@ -187,8 +154,7 @@ public class TeeOutputStream extends ProxyOutputStream {
 		}
 
 		if (lastReaden != null && getSmockerContainer().getOutputToBesend() != null) {
-			RestClientSmocker.getInstance().postCommunication(getSmockerContainer(), lastReaden, 
-					getSmockerContainer().getOutputToBesend());
+			RestClientSmocker.getInstance().postCommunication(getSmockerContainer());
 		}
 	}
 

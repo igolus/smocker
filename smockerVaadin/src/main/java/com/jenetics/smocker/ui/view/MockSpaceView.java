@@ -1,5 +1,7 @@
 package com.jenetics.smocker.ui.view;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.Set;
 
 import org.vaadin.easyapp.ui.ViewWithToolBar;
@@ -10,6 +12,9 @@ import org.vaadin.easyapp.util.EasyAppView;
 import org.vaadin.easyapp.util.ActionContainer.InsertPosition;
 import org.vaadin.easyapp.util.annotations.ContentView;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jenetics.smocker.dao.DaoManagerByModel;
 import com.jenetics.smocker.dao.IDaoManager;
 import com.jenetics.smocker.model.CommunicationMocked;
@@ -115,9 +120,34 @@ public class MockSpaceView
 						, this::refresh, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
 				.addButton("Save_Button", VaadinIcons.DISC, null,  this::canSave			
 						, this::save, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
+				.addButton("Export_Button", VaadinIcons.MINUS, null,  this::canExport			
+						, this::export, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
 				;
 
 		return builder.build();
+	}
+	
+	public boolean canExport() {
+		return true;
+	}
+	
+	public void export(ClickEvent event) {
+		JavaApplicationMocked javaApplicationMocked = daoManagerJavaApplication.listAll().get(0);
+		ObjectMapper mapper = new ObjectMapper();
+		StringWriter writter = new StringWriter();
+		try {
+			mapper.writeValue(writter, javaApplicationMocked);
+			System.out.println(writter.toString());
+		} catch (JsonGenerationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public boolean canSave() {

@@ -38,7 +38,7 @@ public class JavaApplicationMocked implements EntityWithId {
 
 	@Column
 	private String sourceIp;
-
+	
 	@Override
 	public Long getId() {
 		return this.id;
@@ -55,7 +55,7 @@ public class JavaApplicationMocked implements EntityWithId {
 	public void setVersion(final int version) {
 		this.version = version;
 	}
-
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {

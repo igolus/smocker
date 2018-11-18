@@ -48,6 +48,7 @@ public class MainTransformer implements ClassFileTransformer {
 			if (className != null && className.equals("java/nio/channels/spi/AbstractInterruptibleChannel")) {
 				byteCode = new AbstractInterruptibleChannelTransformer().transform(classfileBuffer);
 			}
+
 		} catch (Exception ex) {
 			MessageLogger.logErrorWithMessage("Unable to insrument", ex, MainTransformer.class);
 

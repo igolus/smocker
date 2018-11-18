@@ -2,6 +2,7 @@ package com.jenetics.smocker.rest;
 
 import java.util.Date;
 import java.util.Optional;
+import java.util.logging.Level;
 
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.event.Event;

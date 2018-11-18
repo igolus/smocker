@@ -127,7 +127,10 @@
 		height: "100%";
 	}
 	
-   
+   .v-gridlayout-Config {
+	    margin: 5px;
+	    width: "100%";
+   }
     	    
     .v-gridlayout-TopBar {
     	background-color: $panelTopBarBackgroundColor;
@@ -147,8 +150,6 @@
     		font-weight: bold;
     		font-family: "Impact";
     	}
-
-		    	
     }
     
     .layout-with-border {
@@ -156,9 +157,6 @@
 	    margin: 5px;
 	    border-radius: 5px;
 	}
-	
-	
-    
     
     .v-label-Contextual {
     	background: $panelTopBarBackgroundColor;
@@ -166,8 +164,6 @@
         font-weight: bold;
         font-family: "Impact";
     }
-    
-    
     
     .v-gridlayout-Container {
     	margin: 0px 0px 5px 0px;

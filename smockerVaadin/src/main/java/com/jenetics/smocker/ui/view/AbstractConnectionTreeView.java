@@ -307,12 +307,9 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 
 	protected void buildTreeTable() {
 		treeGrid = new TreeGrid<TreeGridConnectionData<T, U>>();
-
 		treeData = new TreeData<>();
 		treeDataProvider = new TreeDataProvider<>(treeData);
-		
 		addTreeMapping();
-
 		treeGrid.setDataProvider(treeDataProvider);
 	}
 

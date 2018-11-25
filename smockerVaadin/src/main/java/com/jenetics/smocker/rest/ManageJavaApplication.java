@@ -2,6 +2,8 @@ package com.jenetics.smocker.rest;
 
 import java.util.Date;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 
 import javax.enterprise.context.RequestScoped;
@@ -18,15 +20,22 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jboss.logging.Logger;
 
+import com.jenetics.smocker.dao.DaoConfig;
 import com.jenetics.smocker.dao.IDaoManager;
 import com.jenetics.smocker.injector.Dao;
+import com.jenetics.smocker.jseval.JSEvaluator;
 import com.jenetics.smocker.lucene.LuceneIndexer;
 import com.jenetics.smocker.model.Communication;
 import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.JavaApplication;
+import com.jenetics.smocker.model.config.JsFilterAndDisplay;
+import com.jenetics.smocker.rest.container.AddCommunicationContainer;
 import com.jenetics.smocker.ui.SmockerUI;
+import com.jenetics.smocker.util.NetworkReaderUtility;
+import com.jenetics.smocker.util.SmockerException;
 
 @RequestScoped
 @Path("/manageJavaApplication/")
@@ -108,11 +117,25 @@ public class ManageJavaApplication {
 		javaApplicationEventSrc.fire(target);
 		return Response.ok().build();
 	}
-
+	
 	@PUT
 	@Path("/addCommunication/{javaApplicationId}/{connectionId}")
 	public Response create(@PathParam("javaApplicationId") Long javaApplicationId,
 			@PathParam("connectionId") Long connectionId, Communication comm) {
+		CompletableFuture.supplyAsync(() -> new AddCommunicationContainer(javaApplicationId,  
+				connectionId, comm))
+		.thenAccept(this::createAsync);
+		return Response.ok().build();
+	}
+	
+	public Response createAsync(AddCommunicationContainer addCommunicationContainer) {
+		Communication comm = addCommunicationContainer.getComm();
+		Long connectionId = addCommunicationContainer.getConnectionId();
+		Long javaApplicationId = addCommunicationContainer.getJavaApplicationId();
+		
+		
+		
+		
 		// set the dateTime to now
 		comm.setDateTime(new Date());
 
@@ -127,7 +150,26 @@ public class ManageJavaApplication {
 		if (!connection.isPresent()) {
 			return Response.status(Status.NOT_FOUND).build();
 		}
+		
+		
+		
 		if (connection.get().getWatched() != null && connection.get().getWatched()) {
+			
+			//check filter
+			JsFilterAndDisplay jsDisplayAndFilter = DaoConfig.findJsDisplayAndFilter(connection.get());
+			String input = NetworkReaderUtility.decode(comm.getRequest());
+			String filterJsFunction = jsDisplayAndFilter.getFunctionFilter();
+			
+			if (!StringUtils.isEmpty(filterJsFunction)) {
+				try {
+					if (JSEvaluator.filter(filterJsFunction, input)) {
+						return Response.ok().build();
+					}
+				} catch (SmockerException e) {
+					//continue
+				}
+			}
+			
 			comm.setConnection(connection.get());
 			comm = daoManagerCommunication.create(comm);
 			connection.get().getCommunications().add(comm);
@@ -144,11 +186,8 @@ public class ManageJavaApplication {
 
 			SmockerUI.getInstance().log(Level.INFO, builder.toString());
 			
-			return Response.ok().entity(comm).build();
+			return Response.ok().build();
 		}
-		
-		
-		
 		return Response.status(Status.FORBIDDEN).build();
 
 	}

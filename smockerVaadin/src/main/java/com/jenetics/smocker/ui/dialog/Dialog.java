@@ -98,10 +98,24 @@ public class Dialog {
 		box.open();
 		
 	}
+	
+	public static void displayCreateStringBox(String caption, Consumer<String> selected, String initialValue) {
+		TextField textField = new TextField();
+		textField.setValue(initialValue);
+		MessageBox box = MessageBox.create();
+		box.withCaption(caption).withMessage(textField).withCancelButton();
+		box.withOkButton(() -> {
+			selected.accept(textField.getValue());
+		});
+		
+		box.open();
+		
+	}
 
 
 	public static void warning(String value) {
-		MessageBox.createInfo().withMessage(value);
+		MessageBox box = MessageBox.createInfo().withMessage(value);
+		box.open();
 		
 	}
 	

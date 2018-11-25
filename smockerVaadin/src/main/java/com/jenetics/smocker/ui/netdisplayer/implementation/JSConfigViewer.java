@@ -1,0 +1,73 @@
+package com.jenetics.smocker.ui.netdisplayer.implementation;
+
+import java.util.ResourceBundle;
+
+import org.jboss.logging.Logger;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jenetics.smocker.jseval.JSEvaluator;
+import com.jenetics.smocker.model.config.JsFilterAndDisplay;
+import com.jenetics.smocker.ui.SmockerUI;
+import com.jenetics.smocker.ui.netdisplayer.ComponentWithDisplayChange;
+import com.jenetics.smocker.util.NetworkReaderUtility;
+import com.jenetics.smocker.util.SmockerException;
+import com.jenetics.smocker.util.SmockerUtility;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.VerticalLayout;
+
+public class JSConfigViewer implements ComponentWithDisplayChange {
+
+	private String defaultTitle;
+
+	private TabSheet tabsheet = new TabSheet();
+	private TextArea areaOutput;
+	private TextArea areaOutputJsDisplay;
+
+	private JsFilterAndDisplay jsDisplayAndFilter;
+
+	public JSConfigViewer(String defaultTitle, JsFilterAndDisplay jsDisplayAndFilter) {
+		super();
+		this.jsDisplayAndFilter = jsDisplayAndFilter;
+		this.defaultTitle = defaultTitle;
+	}
+
+
+	@Override
+	public Component getComponent() {
+		areaOutput = new TextArea();
+		areaOutput.setWordWrap(false);
+		areaOutput.setReadOnly(true);
+		areaOutput.setSizeFull();
+
+		areaOutputJsDisplay = new TextArea();
+		areaOutputJsDisplay.setWordWrap(false);
+		areaOutputJsDisplay.setReadOnly(true);
+		areaOutputJsDisplay.setSizeFull();
+
+		tabsheet.addTab(areaOutput, defaultTitle);
+		VerticalLayout vlayout = new VerticalLayout();
+		vlayout.addComponent(areaOutputJsDisplay);
+		tabsheet.addTab(areaOutputJsDisplay, SmockerUI.getBundleValue("jsDisplay"));
+
+		tabsheet.setSizeFull();
+		return tabsheet;
+	}
+
+	@Override
+	public void selectionValue(String content) {
+
+		areaOutput.setValue(content);
+		String functionDisplay = jsDisplayAndFilter.getFunctionDisplay();
+		String formattedDisplay;
+		try {
+			formattedDisplay = JSEvaluator.formatAndDisplay(functionDisplay, content);
+			areaOutputJsDisplay.setValue(formattedDisplay);
+		} catch (SmockerException e) {
+			areaOutputJsDisplay.setValue(SmockerUtility.getStackTrace(e));
+		}
+		
+	}
+
+}

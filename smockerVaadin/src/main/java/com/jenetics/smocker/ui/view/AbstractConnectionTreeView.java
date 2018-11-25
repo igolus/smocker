@@ -68,6 +68,9 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 	protected static final String ADRESS = bundle.getString("Adress");
 	protected static final String APPLICATION = bundle.getString("Application");
 	protected static final String WATCH = bundle.getString("Watch_Button");
+	protected static final String FITLER = bundle.getString("Filter_Button");
+	protected static final String FORMAT_DISPLAY = bundle.getString("Format_Display_Button");
+	
 	protected static final String ALL = "all";
 	protected static final String SEP_CONN = ":";
 

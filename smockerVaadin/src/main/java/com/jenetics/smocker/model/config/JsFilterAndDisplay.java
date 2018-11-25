@@ -10,7 +10,7 @@ import javax.persistence.Version;
 import com.jenetics.smocker.model.EntityWithId;
 
 @Entity
-public class SmockerConf implements EntityWithId {
+public class JsFilterAndDisplay implements EntityWithId {
 
 	private static final long serialVersionUID = 1L;
 	@Id
@@ -21,49 +21,48 @@ public class SmockerConf implements EntityWithId {
 	@Column(name = "version")
 	private int version;
 	
-	@Column
-	private boolean autorefesh = true;
+	@Column(nullable = false)
+	private String host;
 
-	public boolean isAutorefesh() {
-		return autorefesh;
-	}
-
-	public void setAutorefesh(boolean autorefesh) {
-		this.autorefesh = autorefesh;
-	}
+	@Column(nullable = false)
+	private Integer port;
 	
-	@Column(columnDefinition = "TEXT")
-	private String globalJsFunction;
+	@Column(nullable = false)
+	private String functionFilter;
 	
-	@Column(columnDefinition = "TEXT")
-	private String filterJsFunction;
-
-	@Column(columnDefinition = "TEXT")
-	private String FormatDisplayJsFunction;
-
+	@Column(nullable = false)
+	private String functionDisplay;	
 	
-	public String getGlobalJsFunction() {
-		return globalJsFunction;
+	public String getHost() {
+		return host;
 	}
 
-	public void setGlobalJsFunction(String globalJsFunction) {
-		this.globalJsFunction = globalJsFunction;
+	public void setHost(String host) {
+		this.host = host;
 	}
 
-	public String getFilterJsFunction() {
-		return filterJsFunction;
+	public Integer getPort() {
+		return port;
 	}
 
-	public void setFilterJsFunction(String filterJsFunction) {
-		this.filterJsFunction = filterJsFunction;
+	public void setPort(Integer port) {
+		this.port = port;
 	}
 
-	public String getFormatDisplayJsFunction() {
-		return FormatDisplayJsFunction;
+	public String getFunctionFilter() {
+		return functionFilter;
 	}
 
-	public void setFormatDisplayJsFunction(String formatDisplayJsFunction) {
-		FormatDisplayJsFunction = formatDisplayJsFunction;
+	public void setFunctionFilter(String functionFilter) {
+		this.functionFilter = functionFilter;
+	}
+
+	public String getFunctionDisplay() {
+		return functionDisplay;
+	}
+
+	public void setFunctionDisplay(String functionDisplay) {
+		this.functionDisplay = functionDisplay;
 	}
 
 	public Long getId() {
@@ -87,10 +86,10 @@ public class SmockerConf implements EntityWithId {
 		if (this == obj) {
 			return true;
 		}
-		if (!(obj instanceof SmockerConf)) {
+		if (!(obj instanceof JsFilterAndDisplay)) {
 			return false;
 		}
-		SmockerConf other = (SmockerConf) obj;
+		JsFilterAndDisplay other = (JsFilterAndDisplay) obj;
 		if (id != null) {
 			if (!id.equals(other.id)) {
 				return false;

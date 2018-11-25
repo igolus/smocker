@@ -137,16 +137,15 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 		
 		
 		String request = NetworkReaderUtility.decode(comm.getRequest());
-		ComponentWithDisplayChange componentWithDisplayChangeInput = NetDisplayerFactoryInput.getComponent(request);
+		ComponentWithDisplayChange componentWithDisplayChangeInput = NetDisplayerFactoryInput.getComponent(request, comm);
 		Component inputComponent = componentWithDisplayChangeInput.getComponent();
 		inputComponent.setSizeFull();
 		grid.removeComponent(0, 0);
 		grid.addComponent(inputComponent, 0, 0);
 		componentWithDisplayChangeInput.selectionValue(decodedCommunication[0]);
 
-
 		String response = NetworkReaderUtility.decode(comm.getResponse());
-		ComponentWithDisplayChange componentWithDisplayChangeOutput = NetDisplayerFactoryOutput.getComponent(response);
+		ComponentWithDisplayChange componentWithDisplayChangeOutput = NetDisplayerFactoryOutput.getComponent(response, comm);
 		Component outputComponent = componentWithDisplayChangeOutput.getComponent();
 		outputComponent.setSizeFull();
 		grid.removeComponent(1, 0);

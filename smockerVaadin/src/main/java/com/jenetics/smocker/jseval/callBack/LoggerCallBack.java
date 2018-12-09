@@ -1,21 +1,26 @@
-package com.jenetics.smocker.ui.component.javascript;
+package com.jenetics.smocker.jseval.callBack;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.eclipsesource.v8.JavaVoidCallback;
 import com.eclipsesource.v8.V8Array;
 import com.eclipsesource.v8.V8Object;
 
-public class Logger implements JavaVoidCallback {
+public class LoggerCallBack implements JavaVoidCallback {
 	
 	private StringBuffer sb = new StringBuffer();
 	
-	public Logger() {
+	public LoggerCallBack() {
 		super();
 	}
 
 	@Override
 	public void invoke(V8Object receiver, V8Array parameters) {
 		if (parameters.length() > 0) {
-			sb.append(parameters.get(0)).append(System.lineSeparator());
+			if (!StringUtils.isEmpty(sb.toString())) {
+				sb.append(System.lineSeparator());
+			}
+			sb.append(parameters.get(0));
 		}
 	}
 

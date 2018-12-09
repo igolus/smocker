@@ -75,18 +75,18 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 	private JsTesterPanel jsTesterPanel;
 	private ConnectionMockedManager connectionMockedManager;
 
-	public ConnectionMockedDetailsView(ConnectionMocked connectionMocked) {
+	public ConnectionMockedDetailsView(ConnectionMocked connectionMocked,  Runnable refreshClickable ) {
 		super();
+		this.refreshClickable = refreshClickable;
 		mainLayout = new HorizontalSplitPanel();
 		
 		this.connectionMocked = connectionMocked;
 	
-		connectionMockedManager = new ConnectionMockedManager(connectionMocked, this::commSelected);
+		connectionMockedManager = new ConnectionMockedManager(
+				connectionMocked, this::commSelected, this.refreshClickable);
+		//connectionMockedManager.setRefreshClickableAction(refreshClickable);
 		
 		ViewWithToolBar view = new ViewWithToolBar(connectionMockedManager);
-		//view.get
-		//view.getRightLayout().setExpandRatio(connectionMockedManager.getComboBox(), 1.0f);
-		//view.setExpandRatio(connectionMockedManager.getComboBox(), 1.0f);
 		
 		mainLayout.setFirstComponent(view);
 		mainLayout.setSplitPosition(23);
@@ -97,6 +97,10 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 		setSizeFull();
 	}
 	
+	public ConnectionMockedManager getConnectionMockedManager() {
+		return connectionMockedManager;
+	}
+
 	public TextPanel getSelectedResponsePane() {
 		return selectedResponsePane;
 	}
@@ -243,7 +247,5 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 				tabSheet.getSelectedTab() != null && 
 				tabSheet.getSelectedTab() == tabJs;
 	}
-
-
 	
 }

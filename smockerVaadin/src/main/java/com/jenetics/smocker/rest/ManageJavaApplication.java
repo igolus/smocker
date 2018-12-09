@@ -133,11 +133,10 @@ public class ManageJavaApplication {
 		Long connectionId = addCommunicationContainer.getConnectionId();
 		Long javaApplicationId = addCommunicationContainer.getJavaApplicationId();
 		
-		
-		
-		
 		// set the dateTime to now
-		comm.setDateTime(new Date());
+		if (comm.getDateTime() == null) {
+			comm.setDateTime(new Date());
+		}
 
 		JavaApplication target = daoManager.findById(javaApplicationId);
 		if (target == null) {

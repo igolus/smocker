@@ -15090,6 +15090,14 @@ div.v-layout.v-horizontal.v-widget {
 	height: "100%";
 }
 
+.mytheme .v-gridlayout-Config {
+	margin: 5px;
+	padding: 5px;
+	width: "100%";
+	border: 1px solid black;
+	border-radius: 5px;
+}
+
 .mytheme .v-gridlayout-TopBar {
 	background-color: #5F6C72;
 	margin: none;
@@ -15135,6 +15143,12 @@ div.v-layout.v-horizontal.v-widget {
 	color: white;
 	font-weight: bold;
 	font-family: "Impact";
+}
+
+.mytheme .layout-with-border {
+	border: 1px solid black;
+	margin: 5px;
+	border-radius: 5px;
 }
 
 .mytheme .v-label-Contextual {

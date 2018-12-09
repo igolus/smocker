@@ -2,7 +2,9 @@ package com.jenetics.smocker.ui.view;
 
 import org.vaadin.easyapp.util.annotations.RootView;
 
-@RootView(viewName = "Connections", icon = "GLOBE")
+import com.jenetics.smocker.ui.SmockerUI;
+
+@RootView(viewName = "", icon = "GLOBE", bundle=SmockerUI.BUNDLE_NAME)
 public class ConnectionsRoot {
 
 }

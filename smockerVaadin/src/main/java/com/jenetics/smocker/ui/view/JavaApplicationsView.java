@@ -1,34 +1,30 @@
 package com.jenetics.smocker.ui.view;
 
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.vaadin.easyapp.util.ActionContainer;
 import org.vaadin.easyapp.util.ActionContainer.InsertPosition;
 import org.vaadin.easyapp.util.ActionContainerBuilder;
-import org.vaadin.easyapp.util.EasyAppLayout;
 import org.vaadin.easyapp.util.annotations.ContentView;
 import org.vaadin.teemu.switchui.Switch;
 
 import com.jenetics.smocker.dao.DaoConfig;
+import com.jenetics.smocker.dao.DaoConfigUpdaterThread;
 import com.jenetics.smocker.dao.DaoManager;
 import com.jenetics.smocker.dao.DaoManagerByModel;
 import com.jenetics.smocker.jseval.JSEvaluator;
 import com.jenetics.smocker.model.Communication;
-import com.jenetics.smocker.model.CommunicationMocked;
 import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.model.config.JsFilterAndDisplay;
-import com.jenetics.smocker.model.config.SmockerConf;
 import com.jenetics.smocker.model.converter.MockConverter;
-import com.jenetics.smocker.network.ClientCommunicator;
 import com.jenetics.smocker.ui.SmockerUI;
-import com.jenetics.smocker.ui.component.AbstractConnectionDetails;
 import com.jenetics.smocker.ui.component.ConnectionDetailsView;
-import com.jenetics.smocker.ui.component.seach.CommunicationItemsResults;
 import com.jenetics.smocker.ui.dialog.Dialog;
 import com.jenetics.smocker.ui.util.ButtonWithIEntity;
 import com.jenetics.smocker.ui.util.RefreshableView;
@@ -42,12 +38,9 @@ import com.vaadin.annotations.Push;
 import com.vaadin.data.HasValue.ValueChangeEvent;
 import com.vaadin.event.selection.SelectionEvent;
 import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.TabSheet.Tab;
 
 @SuppressWarnings("serial")
@@ -99,8 +92,11 @@ implements RefreshableView, SearcheableView {
 		treeGrid.addColumn(item -> item.getPort()).setCaption(PORT);
 		treeGrid.addComponentColumn(this::buildWatchButton).setCaption(WATCH);
 		treeGrid.addComponentColumn(this::buildFilterButton).setCaption(FITLER);
-		treeGrid.addComponentColumn(this::buildFormatButton).setCaption(FORMAT_DISPLAY);
+		treeGrid.addComponentColumn(this::buildFormatInputButton).setCaption(FORMAT_DISPLAY_INPUT);
+		treeGrid.addComponentColumn(this::buildFormatOutputButton).setCaption(FORMAT_DISPLAY_OUTPUT);
 	}
+	
+	private HashMap<JavaApplication, List<SwitchWithEntity<Connection>>> switchButtinsByJavaApp = new HashMap<>();
 
 	private Switch buildWatchButton(TreeGridConnectionData<JavaApplication, Connection> item) {
 		if (item.isConnection()) {
@@ -108,6 +104,15 @@ implements RefreshableView, SearcheableView {
 			SwitchWithEntity<Connection> switchConnection = new SwitchWithEntity<>(connection);
 			switchConnection.setValue(connection.getWatched());
 			switchConnection.addValueChangeListener(this::watchButtonClicked);
+			switchButtinsByJavaApp.computeIfAbsent(connection.getJavaApplication(), key -> new ArrayList<SwitchWithEntity<Connection>>())
+				.add(switchConnection);
+			return switchConnection;
+		}
+		else if (item.isJavaApplication()) {
+			JavaApplication javaApplication = item.getJavaApplication();
+			SwitchWithEntity<JavaApplication> switchConnection = new SwitchWithEntity<>(javaApplication);
+			switchConnection.setValue(javaApplication.getWatched());
+			switchConnection.addValueChangeListener(this::watchButtonJavaAppClicked);
 			return switchConnection;
 		}
 		return null;
@@ -126,14 +131,28 @@ implements RefreshableView, SearcheableView {
 		return null;
 	}
 
-	private Component buildFormatButton(TreeGridConnectionData<JavaApplication, Connection> item) {
+	private Component buildFormatInputButton(TreeGridConnectionData<JavaApplication, Connection> item) {
 		if (item.isConnection()) {
 			Connection connection = item.getConnection();
 			ButtonWithIEntity<Connection> formatButton = new ButtonWithIEntity<>(connection);
-			formatButton.setCaption(SmockerUI.getBundleValue(FORMAT_DISPLAY));
+			formatButton.setCaption(SmockerUI.getBundleValue(FORMAT_DISPLAY_INPUT));
 			formatButton.setHeight("100%");
-			formatButton.setDescription(SmockerUI.getBundleValue("Format_Display_TootTip"));
-			formatButton.addClickListener(this::formatClicked);
+			formatButton.setDescription(SmockerUI.getBundleValue("Format_Display_Input_TootTip"));
+			formatButton.addClickListener(this::formatInputClicked);
+			return formatButton;
+		}
+		return null;
+	}
+	
+	
+	private Component buildFormatOutputButton(TreeGridConnectionData<JavaApplication, Connection> item) {
+		if (item.isConnection()) {
+			Connection connection = item.getConnection();
+			ButtonWithIEntity<Connection> formatButton = new ButtonWithIEntity<>(connection);
+			formatButton.setCaption(SmockerUI.getBundleValue(FORMAT_DISPLAY_OUTPUT));
+			formatButton.setHeight("100%");
+			formatButton.setDescription(SmockerUI.getBundleValue("Format_Display_Output_TootTip"));
+			formatButton.addClickListener(this::formatOutputClicked);
 			return formatButton;
 		}
 		return null;
@@ -160,23 +179,42 @@ implements RefreshableView, SearcheableView {
 
 
 
-	public void formatClicked(ClickEvent event) {
+	public void formatInputClicked(ClickEvent event) {
 		ButtonWithIEntity<Connection>  button = (ButtonWithIEntity<Connection>) event.getButton();
 		Connection conn = button.getEntity();
 		final JsFilterAndDisplay first = DaoConfig.findJsDisplayAndFilter(conn);
-		Dialog.displayCreateStringBox(SmockerUI.getBundleValue("format_function_display"), 
+		Dialog.displayCreateStringBox(SmockerUI.getBundleValue("format_function_input_display"), 
 				selectedFunction -> {
-					first.setFunctionDisplay(selectedFunction);
+					first.setFunctionInputDisplay(selectedFunction);
 					String checkValue = checkValidFunctionDisplay(selectedFunction);
 					if (checkValue == null) {
 						daoManagerJsFilterAndDisplay.update(first);
 					}
 					else {
-						first.setFunctionDisplay("");
+						first.setFunctionInputDisplay("");
 						Dialog.warning("Bad Javascript function should be of "
 								+ "function(string) returning boolean " + checkValue);
 					}
-				}, first.getFunctionDisplay());
+				}, first.getFunctionInputDisplay());
+	}
+	
+	public void formatOutputClicked(ClickEvent event) {
+		ButtonWithIEntity<Connection>  button = (ButtonWithIEntity<Connection>) event.getButton();
+		Connection conn = button.getEntity();
+		final JsFilterAndDisplay first = DaoConfig.findJsDisplayAndFilter(conn);
+		Dialog.displayCreateStringBox(SmockerUI.getBundleValue("format_function_output_display"), 
+				selectedFunction -> {
+					first.setFunctionOutputDisplay(selectedFunction);
+					String checkValue = checkValidFunctionDisplay(selectedFunction);
+					if (checkValue == null) {
+						daoManagerJsFilterAndDisplay.update(first);
+					}
+					else {
+						first.setFunctionOutputDisplay("");
+						Dialog.warning("Bad Javascript function should be of "
+								+ "function(string) returning boolean " + checkValue);
+					}
+				}, first.getFunctionOutputDisplay());
 	}
 
 	private String checkValidFunctionFilter(String selectedFunction) {
@@ -215,7 +253,13 @@ implements RefreshableView, SearcheableView {
 		}
 		daoManagerConnection.update(switchWithEntity.getEntity());	
 	}
-
+	
+	public void watchButtonJavaAppClicked(ValueChangeEvent<Boolean> event) {
+		SwitchWithEntity<JavaApplication> switchWithEntity = (SwitchWithEntity<JavaApplication>) event.getSource();
+		switchButtinsByJavaApp.get(switchWithEntity.getEntity()).stream()
+			.forEach( switchButton -> switchButton.setValue(switchWithEntity.getValue()));
+	}
+	
 
 	public void treeSelectionChange(SelectionEvent<TreeGridConnectionData<JavaApplication, Connection>> event) {
 		refreshClickable();
@@ -223,6 +267,9 @@ implements RefreshableView, SearcheableView {
 
 	@Override
 	public void refresh(EntityWithId entityWithId) {
+		
+//		if (DaoConfigUpdaterThread.getSingleConf().isAutorefesh()
+//		DaoConfig.getSingleConfig().isAutorefesh();
 		if (isMainTabSelected()) {
 			refreshEntity(entityWithId);
 		}
@@ -245,6 +292,8 @@ implements RefreshableView, SearcheableView {
 					, this::addToMock, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
 			.addButton("CleanAll_Button", VaadinIcons.MINUS, "CleanAll_ToolTip",  this::canCleanAll			
 					, this::cleanAll, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
+			.addButton("Sort_Button", VaadinIcons.SORT, "Sort_ToolTip",  this::canSort			
+					, this::sort, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
 			.addButton("StackTrace", VaadinIcons.ALIGN_JUSTIFY, "StackTraceToolTip",  this::canDisplayStack		
 					, this::displayStack, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER);
 		}
@@ -260,7 +309,7 @@ implements RefreshableView, SearcheableView {
 		ConnectionDetailsView connectionDetailsView = getSelectedDetailView();
 		return (connectionDetailsView != null && !isMainTabSelected() && connectionDetailsView.isSelected());
 	}
-
+	
 
 	public void clean(ClickEvent event) {
 		if (isMainTabSelected()) {
@@ -280,12 +329,14 @@ implements RefreshableView, SearcheableView {
 					selectedConnection.getJavaApplication().getConnections().remove(selectedConnection);
 					daoManagerJavaApplication.update(selectedConnection.getJavaApplication());
 					removeTabConn(selectedConnection);
+					switchButtinsByJavaApp.get(selectedConnection.getJavaApplication()).remove(selectedConnection);
 					refreshClickable();
 				}
 				else if (treeGridConnectionData.isJavaApplication()) {
 					JavaApplication selectedJavaApplication = treeGridConnectionData.getJavaApplication();
 					selectedJavaApplication.getConnections().stream().forEach(this::removeTabConn);
 					daoManagerJavaApplication.deleteById(selectedJavaApplication.getId());
+					switchButtinsByJavaApp.remove(selectedJavaApplication);
 				}
 				fillTreeTable();
 			}
@@ -311,9 +362,19 @@ implements RefreshableView, SearcheableView {
 			connectionDetailsView.cleanAll();
 		}
 	}
+	
+	public void sort(ClickEvent event) {
+		if (!isMainTabSelected()) {
+			getSelectedDetailView().sort();
+		}
+	}
 
 	public boolean canCleanAll() {
 		return !isMainTabSelected() && getSelectedDetailView().getConnection().getCommunications().size() > 0;
+	}
+	
+	public boolean canSort() {
+		return true;
 	}
 
 	public void displayStack(ClickEvent event) {		

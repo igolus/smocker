@@ -2,8 +2,11 @@ package com.jenetics.smocker.util.network;
 
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.text.SimpleDateFormat;
+
 import javax.xml.bind.DatatypeConverter;
 
+import java.util.Date;
 //import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -87,8 +90,6 @@ public class RestClientSmocker extends RESTClient {
 		int port = smockerContainer.getPort();
 		
 		smockerContainer.getSmockerSocketOutputStream().getSmockerOutputStreamData().getBytes();
-		
-		
     	Long idConnection = TransformerUtility.getConnectionIdBySocket().get(smockerContainer.getSource());
 		Long javaAppId = TransformerUtility.getJavaAppId();
 		if (RemoteServerChecker.isConnectionWatched(host, port) && 
@@ -107,6 +108,8 @@ public class RestClientSmocker extends RESTClient {
 					.append(encode(inputBytes))
 					.append("\",  \"callerStack\":\"")
 					.append(encode(smockerContainer.getStackTrace()))
+					.append("\",  \"dateTime\":\"")
+					.append(getCurrentDate())
 					.append("\"}");
 					String path = SMOCKER_REST_PATH + SMOCKER_ADDCOMM + "/" + javaAppId + "/" + idConnection;
 					return put(buffer.toString(), path, headers);
@@ -117,6 +120,11 @@ public class RestClientSmocker extends RESTClient {
 		return null;
 	}
 	
+	private String getCurrentDate() {
+		//DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
+		return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(new Date());
+	}
+
 	public String postCommunication(SmockerContainer smockerContainer, Long javaAppId, Long connectionId) {
 
 		String host = smockerContainer.getHost();

@@ -25,8 +25,9 @@ public class NetDisplayerFactoryOutput {
 		
 		//check if we get a mapper for the display 
 		JsFilterAndDisplay jsDisplayAndFilter = DaoConfig.findJsDisplayAndFilter(comm.getConnection());
-		if (!StringUtils.isEmpty(jsDisplayAndFilter.getFunctionDisplay())) {
-			return new JSConfigViewer(bundle.getString("Output"), jsDisplayAndFilter);
+		String functionOutputDisplay = jsDisplayAndFilter.getFunctionOutputDisplay();
+		if (!StringUtils.isEmpty(functionOutputDisplay) ) {
+			return new JSConfigViewer(bundle.getString("Output"), jsDisplayAndFilter, false);
 		}
 		
 		if (NetworkReaderUtility.readHeaderValue(socketOutput, NetworkReaderUtility.HEADER_CONTENT_TYPE) != null && 

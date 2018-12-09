@@ -27,11 +27,14 @@ public class JsFilterAndDisplay implements EntityWithId {
 	@Column(nullable = false)
 	private Integer port;
 	
-	@Column(nullable = false)
+	@Column(nullable = true)
 	private String functionFilter;
 	
-	@Column(nullable = false)
-	private String functionDisplay;	
+	@Column(nullable = true)
+	private String functionInputDisplay;	
+	
+	@Column(nullable = true)
+	private String functionOutputDisplay;	
 	
 	public String getHost() {
 		return host;
@@ -57,12 +60,20 @@ public class JsFilterAndDisplay implements EntityWithId {
 		this.functionFilter = functionFilter;
 	}
 
-	public String getFunctionDisplay() {
-		return functionDisplay;
+	public String getFunctionInputDisplay() {
+		return functionInputDisplay;
 	}
 
-	public void setFunctionDisplay(String functionDisplay) {
-		this.functionDisplay = functionDisplay;
+	public void setFunctionInputDisplay(String functionInputDisplay) {
+		this.functionInputDisplay = functionInputDisplay;
+	}
+
+	public String getFunctionOutputDisplay() {
+		return functionOutputDisplay;
+	}
+
+	public void setFunctionOutputDisplay(String functionOutputDisplay) {
+		this.functionOutputDisplay = functionOutputDisplay;
 	}
 
 	public Long getId() {

@@ -2,6 +2,7 @@ package com.jenetics.smocker.ui.util;
 
 import javax.enterprise.event.Observes;
 
+import com.jenetics.smocker.dao.DaoConfigUpdaterThread;
 import com.jenetics.smocker.model.Communication;
 import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.EntityWithId;
@@ -14,15 +15,21 @@ public class EventManager {
 	public static final String JAVA_APPLICATIONS = "Java Applications";
 
 	public void newConnection(@Observes Connection conn) {
-		refreshView(conn);
+		if (DaoConfigUpdaterThread.getSingleConf().isAutorefesh()) {
+			refreshView(conn);
+		}
 	}
 
 	public void newJavaApplication(@Observes JavaApplication application) {
-		refreshView(application);
+		if (DaoConfigUpdaterThread.getSingleConf().isAutorefesh()) {
+			refreshView(application);
+		}
 	}
 
 	public void newCommunication(@Observes Communication comm) {
-		//refreshView(comm);
+		if (DaoConfigUpdaterThread.getSingleConf().isAutorefesh()) {
+			refreshView(comm);
+		}
 	}
 
 	private void refreshView(EntityWithId entityWithId) {

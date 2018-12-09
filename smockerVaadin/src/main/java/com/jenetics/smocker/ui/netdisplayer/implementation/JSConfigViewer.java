@@ -27,10 +27,13 @@ public class JSConfigViewer implements ComponentWithDisplayChange {
 
 	private JsFilterAndDisplay jsDisplayAndFilter;
 
-	public JSConfigViewer(String defaultTitle, JsFilterAndDisplay jsDisplayAndFilter) {
+	private boolean input;
+
+	public JSConfigViewer(String defaultTitle, JsFilterAndDisplay jsDisplayAndFilter, boolean input) {
 		super();
 		this.jsDisplayAndFilter = jsDisplayAndFilter;
 		this.defaultTitle = defaultTitle;
+		this.input = input;
 	}
 
 
@@ -59,7 +62,14 @@ public class JSConfigViewer implements ComponentWithDisplayChange {
 	public void selectionValue(String content) {
 
 		areaOutput.setValue(content);
-		String functionDisplay = jsDisplayAndFilter.getFunctionDisplay();
+		String functionDisplay = null;
+		if (input) {
+			functionDisplay = jsDisplayAndFilter.getFunctionInputDisplay();
+		}
+		else {
+			functionDisplay = jsDisplayAndFilter.getFunctionOutputDisplay();
+		}
+		
 		String formattedDisplay;
 		try {
 			formattedDisplay = JSEvaluator.formatAndDisplay(functionDisplay, content);

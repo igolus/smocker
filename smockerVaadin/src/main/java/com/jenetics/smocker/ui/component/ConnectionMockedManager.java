@@ -62,8 +62,10 @@ public class ConnectionMockedManager extends EasyAppLayout {
 	@Inject
 	private Logger logger;
 
-	public ConnectionMockedManager(ConnectionMocked connectionMocked, Consumer<CommunicationMocked> itemClicked) {
+	public ConnectionMockedManager(ConnectionMocked connectionMocked, 
+			Consumer<CommunicationMocked> itemClicked, Runnable refreshClickable ) {
 		super();
+		this.refreshClickable = refreshClickable;
 		this.itemClicked = itemClicked;
 		this.connectionMocked = connectionMocked;
 		treeGrid = new TreeGrid<>();
@@ -208,8 +210,17 @@ public class ConnectionMockedManager extends EasyAppLayout {
 		itemClicked.accept(comm);
 		updateComboBoxValues(event.getItem());
 	}
+	
+	private TreeGridMockedItem selectedItem;
+	private Runnable refreshClickable;
+
+	public TreeGridMockedItem getSelectedItem() {
+		return selectedItem;
+	}
 
 	private void updateComboBoxValues(TreeGridMockedItem treeItem) {
+		selectedItem = treeItem;
+		this.refreshClickable.run();
 		comboBox.clear();
 		comboBox.setEmptySelectionCaption("...");
 		if (treeItem.isRoot()) {
@@ -406,6 +417,9 @@ public class ConnectionMockedManager extends EasyAppLayout {
 		}
 		Scenario scenario = new Scenario();
 		scenario.setName(scenarioName);
+		scenario.setHost(connectionMocked.getHost());
+		scenario.setPort(connectionMocked.getPort());
+		scenario.setClassQualifiedName(connectionMocked.getJavaApplication().getClassQualifiedName());
 		scenario = scenarioDaoManager.create(scenario);
 		listScenarios.add(scenario);
 		addScenarioToRootExceptUndifined(scenario);

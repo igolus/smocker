@@ -16,6 +16,7 @@ import org.vaadin.easyapp.util.ActionContainerBuilder;
 import org.vaadin.easyapp.util.MessageBuilder;
 import org.vaadin.easyapp.util.ActionContainer.Position;
 
+import com.jenetics.smocker.dao.DaoConfigUpdaterThread;
 import com.jenetics.smocker.lucene.LuceneIndexer;
 import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.rest.AliveEndPoint;
@@ -150,6 +151,7 @@ public class SmockerUI extends UI {
 		setContent(layout);
 		instance = this;
 		AliveEndPoint.setInitialized(true);
+		DaoConfigUpdaterThread.getInstance();
 	}
 
 	public enum EnumButton {
@@ -169,25 +171,36 @@ public class SmockerUI extends UI {
 	 * @param component
 	 */
 	public static Window displayInSubWindow(String title, Component component) {
-		return displayInSubWindow(title, component, true);
+		return displayInSubWindow(title, component, 
+				SUB_WINDOW_DEFAULT_WIDTH, SUB_WINDOW_DEFAULT_HEIGHT, true);
 	}
 	
 	public static Window displayInSubWindowMidSize(String title, Component component) {
-		return displayInSubWindow(title, component, false);
+		return displayInSubWindow(title, component, 
+				SUB_WINDOW_DEFAULT_WIDTH, SUB_WINDOW_DEFAULT_HEIGHT, false);
+	}
+	
+	public static Window displayInSubWindowCustomSize(String title, Component component, 
+			String width, String height) {
+		return displayInSubWindow(title, component, 
+				width, height, false);
 	}
 	
 	/**
 	 * Display a subwindow from any component
 	 * @param component
 	 */
-	private static Window displayInSubWindow(String title, Component component, boolean fullSize) {
+	private static Window displayInSubWindow(String title, Component component, 
+			String width, String height, boolean fullSize) {
 		Window subWindow = new Window(title);
 		subWindow.setModal(true);
 		subWindow.setContent(component);
 		subWindow.center();
 		
-		subWindow.setHeight(SUB_WINDOW_DEFAULT_HEIGHT);
-		subWindow.setWidth(SUB_WINDOW_DEFAULT_WIDTH);
+
+		subWindow.setHeight(height);
+		subWindow.setWidth(width);
+		
 		if (fullSize) {
 			subWindow.setSizeFull();
 		}

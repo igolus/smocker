@@ -63,13 +63,14 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 	protected final TabSheet tabSheet = new TabSheet();
 
 	static ResourceBundle bundle = ResourceBundle.getBundle("BundleUI");
-	protected static final String CONNECTION_TYPE = bundle.getString("ConnectionType");
-	protected static final String PORT = bundle.getString("Port");
-	protected static final String ADRESS = bundle.getString("Adress");
-	protected static final String APPLICATION = bundle.getString("Application");
-	protected static final String WATCH = bundle.getString("Watch_Button");
-	protected static final String FITLER = bundle.getString("Filter_Button");
-	protected static final String FORMAT_DISPLAY = bundle.getString("Format_Display_Button");
+	protected static final String CONNECTION_TYPE =SmockerUI.getBundleValue("ConnectionType");
+	protected static final String PORT = SmockerUI.getBundleValue("Port");
+	protected static final String ADRESS = SmockerUI.getBundleValue("Adress");
+	protected static final String APPLICATION = SmockerUI.getBundleValue("Application");
+	protected static final String WATCH = SmockerUI.getBundleValue("Watch_Button");
+	protected static final String FITLER = SmockerUI.getBundleValue("Filter_Button");
+	protected static final String FORMAT_DISPLAY_INPUT = SmockerUI.getBundleValue("Format_Display_Input_Button");
+	protected static final String FORMAT_DISPLAY_OUTPUT = SmockerUI.getBundleValue("Format_Display_Output_Button");
 	
 	protected static final String ALL = "all";
 	protected static final String SEP_CONN = ":";
@@ -150,6 +151,10 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 	
 	public boolean isMainTabSelected () {
 		return tabSheet.getSelectedTab() == tabmainlayout;
+	}
+	
+	public Component getSelectedTab () {
+		return tabSheet.getSelectedTab();
 	}
 	
 	public void tabChanged(SelectedTabChangeEvent event) {

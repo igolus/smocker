@@ -114,7 +114,7 @@ implements RefreshableView {
 				.addButton("ViewDetails_Button", VaadinIcons.EYE, null,  this::isConnectionSelected			
 						, this::details, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
 				.addButton("Refresh_Button", VaadinIcons.REFRESH, null,  this::always
-						, this::refresh, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
+						, this::details, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
 				.addButton("Save_Button", VaadinIcons.DISC, null,  this::canSave			
 						, this::save, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
 				.addButton("Import_Button", VaadinIcons.REPLY, "ImportToolTip",  () -> true			

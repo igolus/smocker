@@ -48,10 +48,19 @@ public class JSEvaluator {
 		SmockerJsEnvCallBackRemove smockerJsEnvCallBackRemove = new SmockerJsEnvCallBackRemove();
 		runtimeAndLogger.getRuntime().registerJavaMethod(smockerJsEnvCallBackRemove, "smockerRemFromEnv");
 		
+		SmockerJsEnvCallBackGet smockerJsEnvCallBackGet = new SmockerJsEnvCallBackGet();
+		runtimeAndLogger.getRuntime().registerJavaMethod(smockerJsEnvCallBackGet, "smockerGetFromEnv");
+		
+		SmockerJsEnvCallBackRemove smockerJsEnvCallBackRemove = new SmockerJsEnvCallBackRemove();
+		runtimeAndLogger.getRuntime().registerJavaMethod(smockerJsEnvCallBackRemove, "smockerRemFromEnv");
+		
 		String script = "var output = matchAndReturnOutput(recordDate, realInput, bas64Input,"
 				+ "providedInput, providedOutput);\n";
 		
 		runtimeAndLogger.getRuntime().add("recordDate", comm.getDateTime().toString());
+		runtime.add("realInput", input);
+		runtime.add("providedInput", providedInput == null ? NetworkReaderUtility.decode(comm.getRequest()) : providedInput);
+		runtime.add("providedOutput", providedOutput== null ? NetworkReaderUtility.decode(comm.getResponse()) : providedOutput);
 		runtimeAndLogger.getRuntime().add("realInput", realInput);
 		if (base64Input == null) {
 			base64Input = NetworkReaderUtility.encode(realInput);

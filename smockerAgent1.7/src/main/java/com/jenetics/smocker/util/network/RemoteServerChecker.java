@@ -73,6 +73,7 @@ public class RemoteServerChecker {
 							if (listHostWatched != null) {
 								unWatchedHost = SimpleJsonReader.readValues(listHostWatched, "activatedHosts");
 							}
+							//List<String> listConnectionsReferenced = RestClientSmocker.getInstance().getListConnection(javaAppId);
 						}
 					} catch (Exception e) {
 						MessageLogger.logErrorWithMessage("Unable to check remote server", e, RemoteServerChecker.class);

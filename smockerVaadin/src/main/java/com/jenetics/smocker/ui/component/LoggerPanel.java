@@ -52,7 +52,9 @@ public class LoggerPanel extends VerticalLayout {
 	}
 
 	public void appendMessage(Level level, String message) {
-		String formattedMessage = new SimpleFormatter().format(new LogRecord(level, message));
+		LogRecord record = new LogRecord(level, message);
+		record.setLoggerName("Smocker");
+		String formattedMessage = new SimpleFormatter().format(record);
 
 		if (level == Level.SEVERE) {
 			formattedMessage = "<font color=\"red\">" + formattedMessage + "</font>";
@@ -73,7 +75,7 @@ public class LoggerPanel extends VerticalLayout {
 		}
 		logTextArea.setValue(null);
 		logTextArea.setValue(buffer.toString());
-		SmockerUI.getInstance().push();
+		//SmockerUI.getInstance().push();
 	}
 
 	public void appendMessage(Level level, String message, Exception ex) {

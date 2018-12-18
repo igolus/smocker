@@ -28,9 +28,15 @@ public class Scenario implements EntityWithId {
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "scenario")
 	private Set<CommunicationMocked> communicationsMocked = new HashSet<>();
 	
-//	@OneToOne(cascade = CascadeType.ALL, optional = true, mappedBy = "scenario")
-//	private ConnectionMocked connectionMocked;
-
+	@Column(nullable = false)
+	private String host;
+	
+	@Column(nullable = false)
+	private Integer port;
+	
+	@Column(nullable = false)
+	private String classQualifiedName;
+	
 	@Column
 	private String name;
 
@@ -97,8 +103,30 @@ public class Scenario implements EntityWithId {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
-	
+
+	public String getHost() {
+		return host;
+	}
+
+	public void setHost(String host) {
+		this.host = host;
+	}
+
+	public Integer getPort() {
+		return port;
+	}
+
+	public void setPort(Integer port) {
+		this.port = port;
+	}
+
+	public String getClassQualifiedName() {
+		return classQualifiedName;
+	}
+
+	public void setClassQualifiedName(String classQualifiedName) {
+		this.classQualifiedName = classQualifiedName;
+	}
 
 	@Override
 	public String toString() {

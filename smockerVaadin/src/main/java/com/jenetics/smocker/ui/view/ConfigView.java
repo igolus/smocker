@@ -50,6 +50,7 @@ public class ConfigView extends EasyAppLayout {
 	private AceEditor aceEditorGlobalFunctions = new AceEditor();
 	private AceEditor aceEditorFilter = new AceEditor();
 	private AceEditor aceEditorFormatDisplay = new AceEditor();
+	private AceEditor aceEditorDefaultMockFunction = new AceEditor();
 	
 	public ConfigView() {
 		singleConfig = DaoConfig.getSingleConfig();
@@ -71,6 +72,10 @@ public class ConfigView extends EasyAppLayout {
 		jsFormatDisplayPane.setCaption(SmockerUI.getBundleValue("jsFormatDisplayPane"));
 		tabSheet.addTab(jsFormatDisplayPane);
 		
+		Component jsDefaultMockFunctionPane = buildJSDefaultMockFunctionPanel();
+		jsDefaultMockFunctionPane.setCaption(SmockerUI.getBundleValue("jsDefaultMockFunctionPane"));
+		tabSheet.addTab(jsDefaultMockFunctionPane);
+		
 		addComponent(tabSheet);
 		setMargin(true);
 		
@@ -89,6 +94,7 @@ public class ConfigView extends EasyAppLayout {
 		singleConfig.setGlobalJsFunction(aceEditorGlobalFunctions.getValue());
 		singleConfig.setFilterJsFunction(aceEditorFilter.getValue());
 		singleConfig.setFormatDisplayJsFunction(aceEditorFormatDisplay.getValue());
+		singleConfig.setDefaultMockFunction(aceEditorDefaultMockFunction.getValue());
 		DaoConfig.saveConfig();
 	}
 	
@@ -118,8 +124,17 @@ public class ConfigView extends EasyAppLayout {
 		return aceEditorFilter;
 	}
 	
+	private Component buildJSDefaultMockFunctionPanel() {
+		aceEditorDefaultMockFunction.setMode(AceMode.javascript);
+		aceEditorDefaultMockFunction.setTheme(AceTheme.eclipse);
+		aceEditorDefaultMockFunction.setSizeFull();
+		if (singleConfig.getDefaultMockFunction() != null) {
+			aceEditorDefaultMockFunction.setValue(singleConfig.getDefaultMockFunction());
+		}
+		return aceEditorDefaultMockFunction;
+	}
+	
 	private Component buildJSFormatDisplayPanel() {
-		aceEditorFormatDisplay = new AceEditor();
 		aceEditorFormatDisplay.setMode(AceMode.javascript);
 		aceEditorFormatDisplay.setTheme(AceTheme.eclipse);
 		aceEditorFormatDisplay.setSizeFull();

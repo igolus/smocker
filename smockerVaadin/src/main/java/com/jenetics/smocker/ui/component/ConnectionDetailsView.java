@@ -1,9 +1,12 @@
 package com.jenetics.smocker.ui.component;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.vaadin.easyapp.util.ActionContainer;
 import org.vaadin.easyapp.util.ActionContainer.InsertPosition;
@@ -249,6 +252,19 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 			SmockerUI.displayInSubWindowMidSize(SmockerUI.getBundle().getString("StackTrace"), 
 					new TextPanel(NetworkReaderUtility.decode(selectedCommunication.getCallerStack()), true));
 		}
+	}
+
+	public void sort() {
+		treeData.clear();
+		Set<Communication> communications = connection.getCommunications();
+		List<Communication> sortedList = communications.stream().sorted(
+				Comparator.comparing(Communication::getDateTime)).collect(Collectors.toList());
+		for (Communication communication : sortedList) {
+			CommunicationDateDisplay commDateDisplay = new CommunicationDateDisplay(communication);
+			commDisplayByComm.put(communication, commDateDisplay);
+			treeData.addItem(null, commDateDisplay);
+		}
+		treeDataProvider.refreshAll();
 	}
 
 }

@@ -96,9 +96,6 @@ public class MockConverter {
 		communicationMocked.setDateTime(communication.getDateTime());
 		communicationMocked.setConnection(targetConnectionMocked);
 		
-		
-		
-		
 		targetConnectionMocked.getCommunications().add(communicationMocked);
 		
 		if (updateIdBb) {

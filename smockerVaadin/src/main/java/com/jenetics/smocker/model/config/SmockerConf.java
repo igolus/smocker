@@ -40,6 +40,9 @@ public class SmockerConf implements EntityWithId {
 
 	@Column(columnDefinition = "TEXT")
 	private String FormatDisplayJsFunction;
+	
+	@Column(columnDefinition = "TEXT")
+	private String defaultMockFunction;
 
 	
 	public String getGlobalJsFunction() {
@@ -64,6 +67,14 @@ public class SmockerConf implements EntityWithId {
 
 	public void setFormatDisplayJsFunction(String formatDisplayJsFunction) {
 		FormatDisplayJsFunction = formatDisplayJsFunction;
+	}
+
+	public String getDefaultMockFunction() {
+		return defaultMockFunction;
+	}
+
+	public void setDefaultMockFunction(String defaultMockFunction) {
+		this.defaultMockFunction = defaultMockFunction;
 	}
 
 	public Long getId() {

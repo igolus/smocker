@@ -39,6 +39,7 @@ public class ResponseReader {
 		return null;
 	}
 	
+
 	public static String readValuesFromResponse(String response, String key)  {
 		try {
 			String status = readStatusCodeFromResponse(response);

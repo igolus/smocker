@@ -39,7 +39,8 @@ public class DaoConfig {
 			first.setHost(conn.getHost());
 			first.setPort(conn.getPort());
 			first.setFunctionFilter("");
-			first.setFunctionDisplay("");
+			first.setFunctionInputDisplay("");
+			first.setFunctionOutputDisplay("");
 			first = JavaApplicationsView.daoManagerJsFilterAndDisplay.create(first);
 		}
 		return first;

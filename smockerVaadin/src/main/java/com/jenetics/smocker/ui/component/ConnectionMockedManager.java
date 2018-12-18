@@ -2,6 +2,7 @@ package com.jenetics.smocker.ui.component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,6 +22,7 @@ import com.jenetics.smocker.dao.DaoManagerByModel;
 import com.jenetics.smocker.model.CommunicationMocked;
 import com.jenetics.smocker.model.ConnectionMocked;
 import com.jenetics.smocker.model.Scenario;
+import com.jenetics.smocker.model.util.Cloner;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.dialog.Dialog;
 import com.jenetics.smocker.ui.util.SwitchWithEntity;
@@ -38,6 +40,7 @@ public class ConnectionMockedManager extends EasyAppLayout {
 	private static final String CREATE_SCENARIO = "createScenario";
 	private static final String RENAME_COMM = "renameComm";
 	private static final String MOVE_COMM = "moveComm";
+	private static final String DELETE_COMM = "deleteComm";
 	private static final String DELETE_SCENARIO = "deleteScenario";
 	private static final String MOVE_ALL_COMMS = "moveAllComms";
 	private static final String REMOVE_COMMS = "removeComms";
@@ -62,8 +65,10 @@ public class ConnectionMockedManager extends EasyAppLayout {
 	@Inject
 	private Logger logger;
 
-	public ConnectionMockedManager(ConnectionMocked connectionMocked, Consumer<CommunicationMocked> itemClicked) {
+	public ConnectionMockedManager(ConnectionMocked connectionMocked, 
+			Consumer<CommunicationMocked> itemClicked, Runnable refreshClickable ) {
 		super();
+		this.refreshClickable = refreshClickable;
 		this.itemClicked = itemClicked;
 		this.connectionMocked = connectionMocked;
 		treeGrid = new TreeGrid<>();
@@ -122,8 +127,8 @@ public class ConnectionMockedManager extends EasyAppLayout {
 
 		Scenario undefinedScenario = DaoManagerByModel.getUNDEFINED_SCENARIO();
 		undefinedScenarioItem = addScenarioToRoot(undefinedScenario);
-		addScenarioToRootExceptUndifined(undefinedScenario);
-		
+		connectionMocked = connectionDaoManager.findById(connectionMocked.getId());
+		connectionDaoManager.findById(connectionMocked.getId());
 		Set<CommunicationMocked> communications = connectionMocked.getCommunications();
 		//fill the map
 		for (CommunicationMocked communication : communications) {
@@ -159,6 +164,11 @@ public class ConnectionMockedManager extends EasyAppLayout {
 		treeScenarioItemByComm.put(communicationMocked, scenarioItem);
 		treeCommItemByComm.put(communicationMocked, commItem);
 		treeData.addItem(scenarioItem, commItem);
+	}
+	
+	private void removeCommunicationItemFromScenario(CommunicationMocked communicationMocked) {
+		TreeGridMockedItem commItem = treeScenarioItemByComm.get(communicationMocked);
+		treeData.removeItem(commItem);
 	}
 
 	private TreeGridMockedItem addScenarioToRootExceptUndifined(Scenario scenario) {
@@ -208,8 +218,17 @@ public class ConnectionMockedManager extends EasyAppLayout {
 		itemClicked.accept(comm);
 		updateComboBoxValues(event.getItem());
 	}
+	
+	private TreeGridMockedItem selectedItem;
+	private Runnable refreshClickable;
+
+	public TreeGridMockedItem getSelectedItem() {
+		return selectedItem;
+	}
 
 	private void updateComboBoxValues(TreeGridMockedItem treeItem) {
+		selectedItem = treeItem;
+		this.refreshClickable.run();
 		comboBox.clear();
 		comboBox.setEmptySelectionCaption("...");
 		if (treeItem.isRoot()) {
@@ -239,6 +258,7 @@ public class ConnectionMockedManager extends EasyAppLayout {
 			comboBox.setItems(SmockerUI.getBundleValue(MOVE_COMM), 
 					SmockerUI.getBundleValue(RENAME_COMM), 
 					SmockerUI.getBundleValue(MOVE_UP),
+					SmockerUI.getBundleValue(DELETE_COMM),
 					SmockerUI.getBundleValue(MOVE_DOWN));
 		}
 	}
@@ -293,6 +313,10 @@ public class ConnectionMockedManager extends EasyAppLayout {
 		else if (event.getValue() != null && event.getValue().equals(SmockerUI.getBundleValue(RENAME_COMM))){
 			Dialog.displayCreateStringBox(SmockerUI.getBundleValue(RENAME_COMM), this::commRenamed);
 		}
+		else if (event.getValue() != null && event.getValue().equals(SmockerUI.getBundleValue(DELETE_COMM))){
+			Dialog.ask(SmockerUI.getBundleValue("deleteCommunicationQuestion"), 
+					SmockerUI.getBundleValue(DELETE_COMM), this::commDeleted, null);
+		}
 		else if (event.getValue() != null && event.getValue().equals(SmockerUI.getBundleValue(TURN_ON_ALL))){
 			switchAllCommunicationInsideScenario(true);
 		}
@@ -302,12 +326,53 @@ public class ConnectionMockedManager extends EasyAppLayout {
 	}
 	
 	private void moveDown(CommunicationMocked selectedComm) {
-		//selectedComm.getConnection().		
+		refreshConnectionMocked();
+		Set<CommunicationMocked> initialCommunications = connectionMocked.getCommunications();
+		List<CommunicationMocked> sortedList = new LinkedList<>();
+		CommunicationMocked[] commArray = new CommunicationMocked[initialCommunications.size()];
+		initialCommunications.toArray(commArray);
+		
+		for (int index = 0; index < commArray.length; index++) {
+			if (commArray[index].equals(selectedComm)) {
+				if (index != initialCommunications.size() - 1) {
+					sortedList.add(commArray[index+1]);
+					sortedList.add(selectedComm);
+					index++;
+				}
+			}
+			else {
+				sortedList.add(commArray[index]);
+			}
+		}
+		connectionMocked.getCommunications().clear();
+		connectionDaoManager.update(connectionMocked);
+		for (CommunicationMocked communicationMocked : sortedList) {
+			connectionMocked.getCommunications().add(Cloner.clone(communicationMocked, CommunicationMocked.class));
+		}
+		//connectionMocked.getCommunications().addAll(sortedList);
+		connectionDaoManager.update(connectionMocked);
+	}
+
+	private void refreshConnectionMocked() {
+		connectionMocked = connectionDaoManager.findById(connectionMocked.getId());
 	}
 
 	private void moveUp(CommunicationMocked selectedComm) {
-		//qsdkjqsnd
+		refreshConnectionMocked();
+		Set<CommunicationMocked> initialCommunications = connectionMocked.getCommunications();
+		CommunicationMocked[] commArray = new CommunicationMocked[initialCommunications.size()];
+		initialCommunications.toArray(commArray);
 		
+		for (int index = 0; index < commArray.length; index++) {
+			if (connectionMocked.equals(selectedComm)) {
+				if (index != initialCommunications.size() - 1) {
+					connectionMocked.getCommunications().add(selectedComm);
+					connectionMocked.getCommunications().add(commArray[index+1]);
+					index++;
+				}
+			}
+		}
+		connectionDaoManager.update(connectionMocked);
 	}
 
 	public void switchAllCommunicationInsideScenario(boolean value) {
@@ -393,9 +458,7 @@ public class ConnectionMockedManager extends EasyAppLayout {
 			if (commItem != null && scenarioItemTarget != null) {
 				treeData.removeItem(commItem);
 				addCommunicationItemToScenario(scenarioItemTarget, communication);
-
 			}
-
 		}
 	}
 
@@ -406,6 +469,9 @@ public class ConnectionMockedManager extends EasyAppLayout {
 		}
 		Scenario scenario = new Scenario();
 		scenario.setName(scenarioName);
+		scenario.setHost(connectionMocked.getHost());
+		scenario.setPort(connectionMocked.getPort());
+		scenario.setClassQualifiedName(connectionMocked.getJavaApplication().getClassQualifiedName());
 		scenario = scenarioDaoManager.create(scenario);
 		listScenarios.add(scenario);
 		addScenarioToRootExceptUndifined(scenario);
@@ -427,13 +493,10 @@ public class ConnectionMockedManager extends EasyAppLayout {
 			for (CommunicationMocked communicationMocked : communicationsMocked) {
 				moveCommToScenario(DaoManagerByModel.getUNDEFINED_SCENARIO(), communicationMocked);
 			}
-			
 			scenarioDaoManager.deleteById(scenarioSelected.getId());
-			
 			TreeGridMockedItem scenarioItemTarget = treeScenarioItemByScenario.get(scenarioSelected);
 			treeData.removeItem(scenarioItemTarget);
 			treeDataProvider.refreshAll();
-			
 			listScenarios = scenarioDaoManager.listAll();
 		}
 	}
@@ -468,6 +531,18 @@ public class ConnectionMockedManager extends EasyAppLayout {
 			selectedTreeItem.getCommunication().setName(commName);
 			communicationDaoManager.update(selectedTreeItem.getCommunication());
 			treeDataProvider.refreshAll();
+		}
+	}
+	
+	public void commDeleted () {
+		if (selectedTreeItem != null && selectedTreeItem.isCommunication()) {
+			refreshConnectionMocked();
+			CommunicationMocked communication = selectedTreeItem.getCommunication();
+			communication = communicationDaoManager.findById(communication.getId());
+			connectionMocked.getCommunications().remove(communication);
+			connectionDaoManager.update(connectionMocked);
+			removeCommunicationItemFromScenario(communication);
+			fillCommunication();
 		}
 	}
 }

@@ -24,6 +24,7 @@ import java.io.UnsupportedEncodingException;
 
 import com.jenetics.smocker.util.SmockerContainer;
 import com.jenetics.smocker.util.SmockerSocketInputStream;
+import com.jenetics.smocker.util.network.RestClientSmocker;
 
 /**
  * InputStream proxy that transparently writes a copy of all bytes read
@@ -119,7 +120,8 @@ public class TeeInputStream extends ProxyInputStream {
     
     public void initiateMockedResponse() {
     	if (smockerContainer != null && smockerContainer.getResponseMocked() != null && mockBis == null) {
-    		this.mockBis = new ByteArrayInputStream(smockerContainer.getResponseMocked().getBytes());
+    		this.mockBis = new ByteArrayInputStream(
+    				RestClientSmocker.decodeByte(smockerContainer.getResponseMocked()));
     	}
     }
     

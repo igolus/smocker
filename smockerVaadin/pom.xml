@@ -122,6 +122,12 @@
 	</dependencyManagement>
 
 	<dependencies>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-text</artifactId>
+			<version>1.6</version>
+		</dependency>
 		<!-- https://mvnrepository.com/artifact/javax.ejb/javax.ejb-api -->
 		<dependency>
 			<groupId>javax.ejb</groupId>
@@ -492,13 +498,13 @@
 			<artifactId>jackson-mapper-asl</artifactId>
 			<version>1.9.13</version>
 		</dependency>
-		
+
 		<dependency>
-		   <groupId>org.vaadin</groupId>
-		   <artifactId>easybinder</artifactId>
-		   <version>0.5</version>
+			<groupId>org.vaadin</groupId>
+			<artifactId>easybinder</artifactId>
+			<version>0.5</version>
 		</dependency>
-		
+
 	</dependencies>
 
 	<build>

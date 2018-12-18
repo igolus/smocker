@@ -14,9 +14,8 @@ public class SystemPropertyConfiguration {
 	private static final String SMOCKER_COMM_PORT = "SMOCKER_COMM_PORT";
 	
 	private static final String SMOCKER_DEFAULT_TARGET_HOST = "localhost";
-	private static final int SMOCKER_DEFAULT_TARGET_PORT = 8080;
 	private static final int SMOCKER_DEFAULT_TARGET_ADMIN_PORT = 9990;
-	private static final int SMOCKER_DEFAULT_COMM_PORT = 2024;
+	private static final int SMOCKER_DEFAULT_COMM_PORT = 8080;
 
 	public static String getTargetHost() {
 		String targetHost = System.getProperty(SMOCKER_TARGET_HOST);

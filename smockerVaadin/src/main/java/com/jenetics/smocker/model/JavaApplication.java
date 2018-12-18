@@ -38,6 +38,9 @@ public class JavaApplication implements EntityWithId {
 
 	@Column
 	private String sourceIp;
+	
+	@Column
+	private Boolean watched = true;
 
 	@Override
 	public Long getId() {
@@ -117,6 +120,14 @@ public class JavaApplication implements EntityWithId {
 
 	public void setSourceIp(String ip) {
 		this.sourceIp = ip;
+	}
+
+	public Boolean getWatched() {
+		return watched;
+	}
+
+	public void setWatched(Boolean watched) {
+		this.watched = watched;
 	}
 
 	@Override

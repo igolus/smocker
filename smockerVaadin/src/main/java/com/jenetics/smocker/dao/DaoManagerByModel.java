@@ -25,7 +25,8 @@ public class DaoManagerByModel {
 	private static Scenario UNDEFINED_SCENARIO;
 
 	public static Scenario getUNDEFINED_SCENARIO() {
-		return UNDEFINED_SCENARIO;
+		DaoManager<Scenario> daoManagerScenario = getDaoManager(Scenario.class);
+		return daoManagerScenario.findById(UNDEFINED_SCENARIO.getId());
 	}
 
 	public static <T extends EntityWithId> DaoManager<T> getDaoManager(Class<T> typeParameterClass) {
@@ -51,6 +52,9 @@ public class DaoManagerByModel {
 			if (daoManagerScenario.listAll().isEmpty()) {
 				Scenario scenario = new Scenario();
 				scenario.setName(SmockerUI.getBundleValue("undefined"));
+				scenario.setHost(SmockerUI.getBundleValue("undefined"));
+				scenario.setPort(0);
+				scenario.setClassQualifiedName("");
 				scenario = daoManagerScenario.create(scenario);
 				DaoManagerByModel.UNDEFINED_SCENARIO = scenario;
 			}

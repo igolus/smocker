@@ -11,5 +11,4 @@ public abstract class AbstractConnectionDetails extends EasyAppLayout {
 	}
 
 	public abstract void refresh();
-
 }

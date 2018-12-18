@@ -13,6 +13,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -33,6 +34,7 @@ import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.model.config.JsFilterAndDisplay;
 import com.jenetics.smocker.rest.container.AddCommunicationContainer;
+import com.jenetics.smocker.rest.model.ListConnections;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.util.NetworkReaderUtility;
 import com.jenetics.smocker.util.SmockerException;
@@ -69,7 +71,16 @@ public class ManageJavaApplication {
 
 	@Inject
 	private Logger logger;
-
+	
+	@GET
+	@Path("/{javaApplicationId}/listConnections")
+	public Response listConnection(@PathParam("javaApplicationId") Long javaApplicationId) {
+		JavaApplication target = daoManager.findById(javaApplicationId);
+		ListConnections listConn = new ListConnections();
+		target.getConnections().stream().forEach( item -> listConn.addConnection(item.getHost(), item.getPort()));
+		return Response.ok().entity(listConn).build();
+	}
+	
 	@PUT
 	@Path("/addConnection/{javaApplicationId}")
 	public Response create(@PathParam("javaApplicationId") Long javaApplicationId, Connection conn) {
@@ -133,11 +144,10 @@ public class ManageJavaApplication {
 		Long connectionId = addCommunicationContainer.getConnectionId();
 		Long javaApplicationId = addCommunicationContainer.getJavaApplicationId();
 		
-		
-		
-		
 		// set the dateTime to now
-		comm.setDateTime(new Date());
+		if (comm.getDateTime() == null) {
+			comm.setDateTime(new Date());
+		}
 
 		JavaApplication target = daoManager.findById(javaApplicationId);
 		if (target == null) {

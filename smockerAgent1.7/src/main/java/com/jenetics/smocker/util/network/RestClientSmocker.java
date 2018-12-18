@@ -2,15 +2,20 @@ package com.jenetics.smocker.util.network;
 
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.text.SimpleDateFormat;
+
 import javax.xml.bind.DatatypeConverter;
 
+import java.util.Date;
 //import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.jenetics.smocker.configuration.MemoryConfiguration;
 import com.jenetics.smocker.configuration.SystemPropertyConfiguration;
 import com.jenetics.smocker.util.MessageLogger;
+import com.jenetics.smocker.util.SimpleJsonReader;
 import com.jenetics.smocker.util.SmockerContainer;
 import com.jenetics.smocker.util.TransformerUtility;
 
@@ -25,6 +30,8 @@ public class RestClientSmocker extends RESTClient {
 	private static final String SMOCKER_CHECK_MATCH = "/mocks/checkMatch";
 	private static final String SMOCKER_ALIVE= "/alive";
 	private static final String SMOCKER_LIST_WATCHED_CONNECTIONS =  "/connections/listHostUnWatched";
+	private static final String MANAGE_JAVA_APP =  "/manageJavaApplication/";
+	private static final String LIST_CONNECTIONS =  "/listConnections";
 	
 	//"http://admin:admin@localhost:9990/management/deployment/smocker-1.0-SNAPSHOT.war?operation=attribute&name=status"
 	private static RestClientSmocker instance;
@@ -63,6 +70,11 @@ public class RestClientSmocker extends RESTClient {
 		String value = ResponseReader.readValueFromResponse(resp, "response");
 		return Boolean.parseBoolean(value);
 	}
+	
+	public List<String> getListConnection(Long javaAppId) {
+		String resp = get(MANAGE_JAVA_APP + javaAppId + LIST_CONNECTIONS);
+		return SimpleJsonReader.readValues(resp, "listConnections");
+	}
 
 	public String postConnection(SmockerContainer smockerContainer, Long javaAppId) {
 		StringBuffer buffer = new StringBuffer();
@@ -87,8 +99,6 @@ public class RestClientSmocker extends RESTClient {
 		int port = smockerContainer.getPort();
 		
 		smockerContainer.getSmockerSocketOutputStream().getSmockerOutputStreamData().getBytes();
-		
-		
     	Long idConnection = TransformerUtility.getConnectionIdBySocket().get(smockerContainer.getSource());
 		Long javaAppId = TransformerUtility.getJavaAppId();
 		if (RemoteServerChecker.isConnectionWatched(host, port) && 
@@ -107,6 +117,8 @@ public class RestClientSmocker extends RESTClient {
 					.append(encode(inputBytes))
 					.append("\",  \"callerStack\":\"")
 					.append(encode(smockerContainer.getStackTrace()))
+					.append("\",  \"dateTime\":\"")
+					.append(getCurrentDate())
 					.append("\"}");
 					String path = SMOCKER_REST_PATH + SMOCKER_ADDCOMM + "/" + javaAppId + "/" + idConnection;
 					return put(buffer.toString(), path, headers);
@@ -117,6 +129,11 @@ public class RestClientSmocker extends RESTClient {
 		return null;
 	}
 	
+	private String getCurrentDate() {
+		//DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
+		return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(new Date());
+	}
+
 	public String postCommunication(SmockerContainer smockerContainer, Long javaAppId, Long connectionId) {
 
 		String host = smockerContainer.getHost();

@@ -45,33 +45,6 @@ public class Dialog {
 		}).open();
 	}
 	
-//	public static void askThreeOption(String question, String caption, DialogProcess yesProcess, DialogProcess noProcess) {
-//		MessageBox.createQuestion().withCaption(caption).withMessage(question).withButton(buttonType, runOnClick, options)
-//		
-//		
-//		
-//		MessageBox.createQuestion().withCaption(caption).withMessage(question).withYesButton(() -> {
-//			if (yesProcess != null) {
-//				try {
-//					yesProcess.process();
-//				} catch (Exception e) {
-//					logger.error("Unable to process yes", e);
-//				}
-//			}
-//		}).withNoButton(() -> {
-//			if (noProcess != null) {
-//				try {
-//					noProcess.process();
-//				} catch (Exception e) {
-//					logger.error("Unable to process no", e);
-//				}
-//			}
-//		}).open();
-//	}
-	
-	
-	
-	
 	public static void displaySelectableListBox(String caption, List<String> options, Consumer<String> selected) {
 		ComboBox<String> comboBox = new ComboBox<>();
 		comboBox.setEmptySelectionAllowed(false);
@@ -101,6 +74,9 @@ public class Dialog {
 	
 	public static void displayCreateStringBox(String caption, Consumer<String> selected, String initialValue) {
 		TextField textField = new TextField();
+		if (initialValue == null) {
+			initialValue = "";
+		}
 		textField.setValue(initialValue);
 		MessageBox box = MessageBox.create();
 		box.withCaption(caption).withMessage(textField).withCancelButton();

@@ -90,8 +90,9 @@ public class MockedRepliesEndPoint  {
 					
 		for (CommunicationMocked communicationMocked : listComms) {
 			try {
-				String requestInput = NetworkReaderUtility.decode(request.getRequest());
-				String[] result = JSEvaluator.runScript(requestInput, communicationMocked, null, null, null);
+				String decodedInput = NetworkReaderUtility.decode(request.getRequest());
+				//String requestInput = new String(bytesInput);
+				String[] result = JSEvaluator.runScript(request.getRequest(), decodedInput, communicationMocked, null, null, null);
 //				if (result[0] != null) {
 //					SmockerUI.log(Level.INFO, result[0]);
 //				}

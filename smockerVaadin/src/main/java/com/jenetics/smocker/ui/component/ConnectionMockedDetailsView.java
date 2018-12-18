@@ -75,18 +75,18 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 	private JsTesterPanel jsTesterPanel;
 	private ConnectionMockedManager connectionMockedManager;
 
-	public ConnectionMockedDetailsView(ConnectionMocked connectionMocked) {
+	public ConnectionMockedDetailsView(ConnectionMocked connectionMocked,  Runnable refreshClickable ) {
 		super();
+		this.refreshClickable = refreshClickable;
 		mainLayout = new HorizontalSplitPanel();
 		
 		this.connectionMocked = connectionMocked;
 	
-		connectionMockedManager = new ConnectionMockedManager(connectionMocked, this::commSelected);
+		connectionMockedManager = new ConnectionMockedManager(
+				connectionMocked, this::commSelected, this.refreshClickable);
+		//connectionMockedManager.setRefreshClickableAction(refreshClickable);
 		
 		ViewWithToolBar view = new ViewWithToolBar(connectionMockedManager);
-		//view.get
-		//view.getRightLayout().setExpandRatio(connectionMockedManager.getComboBox(), 1.0f);
-		//view.setExpandRatio(connectionMockedManager.getComboBox(), 1.0f);
 		
 		mainLayout.setFirstComponent(view);
 		mainLayout.setSplitPosition(23);
@@ -97,6 +97,10 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 		setSizeFull();
 	}
 	
+	public ConnectionMockedManager getConnectionMockedManager() {
+		return connectionMockedManager;
+	}
+
 	public TextPanel getSelectedResponsePane() {
 		return selectedResponsePane;
 	}
@@ -187,21 +191,6 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 		return textPanel;
 	}
 	
-	public void clean(ClickEvent event) {
-		if (isSelected()) {
-			Dialog.ask(SmockerUI.getBundle().getString("RemoveQuestion"), null, this::delete, null);
-		}
-	}
-	
-	public void delete() {
-		selectedCommunication.getConnection().getCommunications().remove(selectedCommunication);
-		daoManagerConnection.update(selectedCommunication.getConnection());
-
-		if (CollectionUtils.isEmpty(selectedCommunication.getConnection().getCommunications())) {
-			clearTabs();
-		}
-		connectionMockedManager.fillCommunication();
-	}
 	
 	private void clearTabs() {
 		mainLayout.setSecondComponent(null);
@@ -243,7 +232,5 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 				tabSheet.getSelectedTab() != null && 
 				tabSheet.getSelectedTab() == tabJs;
 	}
-
-
 	
 }

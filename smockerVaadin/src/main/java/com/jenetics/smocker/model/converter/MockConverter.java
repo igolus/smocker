@@ -96,7 +96,7 @@ public class MockConverter {
 		communicationMocked.setResponse(communication.getResponse());
 		communicationMocked.setDateTime(communication.getDateTime());
 		communicationMocked.setConnection(targetConnectionMocked);
-		communicationMocked.setSourceJs(JsEditor.DEFAULT_JS);
+		//communicationMocked.setSourceJs(JsEditor.DEFAULT_JS);
 		
 		targetConnectionMocked.getCommunications().add(communicationMocked);
 		

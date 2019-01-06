@@ -82,20 +82,16 @@ public class MockedRepliesEndPoint  {
 	@POST
 	@Path("/checkMatch") 
 	public Response create(final MatchMockRequest request) {
-		
 		List<CommunicationMocked> listComms = daoManagerCommunications.listAll().stream().filter(Objects::nonNull)
 			.filter( CommunicationMocked::isActivated)
 			.filter( comm -> comm.getConnection().getHost().equals(request.getHost()) )
+			.sorted( (a, b) -> Long.compare(a.getIndex(), b.getIndex()))
 			.collect(Collectors.toList());
 					
 		for (CommunicationMocked communicationMocked : listComms) {
 			try {
 				String decodedInput = NetworkReaderUtility.decode(request.getRequest());
-				//String requestInput = new String(bytesInput);
 				String[] result = JSEvaluator.runScript(request.getRequest(), decodedInput, communicationMocked, null, null, null);
-//				if (result[0] != null) {
-//					SmockerUI.log(Level.INFO, result[0]);
-//				}
 				if (result != null && result[1] != null) {
 					MatchMockResponse response = new MatchMockResponse(NetworkReaderUtility.encode(result[1]));
 					SmockerUI.log(Level.INFO, "Found mock match for " + 

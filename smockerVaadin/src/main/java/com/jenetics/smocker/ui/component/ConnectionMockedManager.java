@@ -78,14 +78,14 @@ public class ConnectionMockedManager extends EasyAppLayout {
 		treeGrid.setSelectionMode(SelectionMode.SINGLE);
 		treeGrid.setSizeFull();
 
-		treeData = new TreeData<>();
-		treeDataProvider = new TreeDataProvider<>(treeData);
-		treeGrid.setDataProvider(treeDataProvider);
-
 		treeGrid.addItemClickListener(this::treeItemClick);
 		treeGrid.removeHeaderRow(0);
 		treeGrid.setSizeFull();
-
+		
+		treeData = new TreeData<>();
+		treeDataProvider = new TreeDataProvider<>(treeData);
+		treeGrid.setDataProvider(treeDataProvider);
+		
 		fillCommunication();
 		addTreeMapping();
 
@@ -125,7 +125,6 @@ public class ConnectionMockedManager extends EasyAppLayout {
 	
 	public void fillCommunication() {
 		treeData.clear();
-		//commsByScenario.clear();
 		root = new TreeGridMockedItem();
 		treeData.addItem(null, root);
 
@@ -147,36 +146,20 @@ public class ConnectionMockedManager extends EasyAppLayout {
 				}
 			}
 		}
-		
-//		connectionMocked = connectionDaoManager.findById(connectionMocked.getId());
-//		connectionDaoManager.findById(connectionMocked.getId());
-//		Set<CommunicationMocked> communications = connectionMocked.getCommunications();
-//		//fill the map
-//		for (CommunicationMocked communication : communications) {
-//			Scenario scenario = communication.getScenario();
-//			if (!commsByScenario.containsKey(scenario)) {
-//				commsByScenario.put(scenario, new ArrayList<>());
-//			}
-//			commsByScenario.get(scenario).add(communication);
-//		}
-//
-//		for (Map.Entry<Scenario, List<CommunicationMocked>> entry : commsByScenario.entrySet()) {
-//			Scenario scenario = entry.getKey();
-//			List<CommunicationMocked> associatedComms = entry.getValue();
-//			TreeGridMockedItem scenarioItem = addScenarioToRootExceptUndifined(scenario);
-//			for (CommunicationMocked communicationMocked : associatedComms) {
-//				addCommunicationItemToScenario(scenarioItem, communicationMocked);
-//			}
-//		}
-//
-//		//add remaining scenario
-//		listScenarios = scenarioDaoManager.listAll();
-//		for (Scenario scenario : listScenarios) {
-//			if (!commsByScenario.containsKey(scenario)) {
-//				addScenarioToRootExceptUndifined(scenario);
-//			}
-//		}
+		treeGrid.setDataProvider(new TreeDataProvider<>(treeData));
 		treeDataProvider.refreshAll();
+	}
+
+	private void removeItemInScenario(Scenario scenario) {
+		TreeGridMockedItem treeGridMockedScenarioItem = treeScenarioItemByComm.get(scenario);
+		List<TreeGridMockedItem> childrenOfScenario = treeData.getChildren(treeGridMockedScenarioItem);
+		List<TreeGridMockedItem> itemsToRemove = new ArrayList<>();
+		for (TreeGridMockedItem treeGridMockedItem : childrenOfScenario) {
+			itemsToRemove.add(treeGridMockedItem);
+		}
+		for (TreeGridMockedItem treeGridMockedItem : itemsToRemove) {
+			treeData.removeItem(treeGridMockedItem);
+		}
 	}
 
 	private void addCommunicationItemToScenario(TreeGridMockedItem scenarioItem,
@@ -185,11 +168,15 @@ public class ConnectionMockedManager extends EasyAppLayout {
 		treeScenarioItemByComm.put(communicationMocked, scenarioItem);
 		treeCommItemByComm.put(communicationMocked, commItem);
 		treeData.addItem(scenarioItem, commItem);
+		treeDataProvider.refreshItem(scenarioItem);
+		treeDataProvider.refreshItem(commItem);
 	}
 	
 	private void removeCommunicationItemFromScenario(CommunicationMocked communicationMocked) {
 		TreeGridMockedItem commItem = treeScenarioItemByComm.get(communicationMocked);
 		treeData.removeItem(commItem);
+		communicationMocked.getScenario().getCommunicationsMocked().remove(communicationMocked);
+		scenarioDaoManager.update(communicationMocked.getScenario());
 	}
 
 	private TreeGridMockedItem addScenarioToRootExceptUndifined(Scenario scenario) {
@@ -546,8 +533,7 @@ public class ConnectionMockedManager extends EasyAppLayout {
 			scenarioDaoManager.deleteById(scenarioSelected.getId());
 			TreeGridMockedItem scenarioItemTarget = treeScenarioItemByScenario.get(scenarioSelected);
 			treeData.removeItem(scenarioItemTarget);
-			treeDataProvider.refreshAll();
-			listScenarios = scenarioDaoManager.listAll();
+			fillCommunication();
 		}
 	}
 	
@@ -589,9 +575,10 @@ public class ConnectionMockedManager extends EasyAppLayout {
 			refreshConnectionMocked();
 			CommunicationMocked communication = selectedTreeItem.getCommunication();
 			communication = communicationDaoManager.findById(communication.getId());
+			removeCommunicationItemFromScenario(communication);
 			connectionMocked.getCommunications().remove(communication);
 			connectionDaoManager.update(connectionMocked);
-			removeCommunicationItemFromScenario(communication);
+			
 			fillCommunication();
 		}
 	}

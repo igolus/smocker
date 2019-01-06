@@ -41,16 +41,19 @@ public class JsEditor extends EasyAppLayout {
 		this.selectedResponsePane = selectedResponsePane;
 		
 		aceEditor = new AceEditor();
-		setDefaultCodeJsEditor(aceEditor);
+		setSource(aceEditor, communicationMocked);
 		aceEditor.setMode(AceMode.javascript);
 		aceEditor.setTheme(AceTheme.eclipse);
 		aceEditor.setSizeFull();
-		//aceEditor.au
 		addComponent(aceEditor);
 		setSizeFull();
 	}
 
-	private void setDefaultCodeJsEditor(AceEditor aceEditor) {
+	private void setSource(AceEditor aceEditor, CommunicationMocked communicationMocked) {
+		if (communicationMocked.getSourceJs() != null) {
+			aceEditor.setValue(communicationMocked.getSourceJs());
+			return;
+		}
 		SmockerConf singleConfig = DaoConfig.getSingleConfig();
 		if (!StringUtils.isEmpty(singleConfig.getDefaultMockFunction())) {
 			aceEditor.setValue(singleConfig.getDefaultMockFunction());

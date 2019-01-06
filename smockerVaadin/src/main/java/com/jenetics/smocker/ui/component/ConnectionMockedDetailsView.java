@@ -138,7 +138,7 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 		if (comm != null) {
 			String request = NetworkReaderUtility.decode(comm.getRequest());
 			String response = NetworkReaderUtility.decode(comm.getResponse());
-			String sourceJS = comm.getSourceJs();
+			//String sourceJS = comm.getSourceJs();
 			
 			tabSheet = new TabSheet();
 			tabSheet.setSizeFull();
@@ -147,10 +147,6 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 			selectedResponsePane = addTextAreaToTabSheet(response, "Output", tabSheet);	
 			
 			tabJs = new JsEditor(comm, selectedRequestPane, selectedResponsePane);
-			if (sourceJS != null) {
-				tabJs.setJSSource(sourceJS);
-			}
-			
 			tabJs.setSizeFull();
 			tabSheet.addTab(tabJs, SmockerUI.getBundleValue("NodeEditor"));
 			
@@ -163,12 +159,8 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 			ViewWithToolBar jsView = new ViewWithToolBar(jsTesterPanel);
 			jsView.setSizeFull();
 			tabSheet.addTab(jsView, SmockerUI.getBundleValue("TesterPanel"));
-			
-			
 			tabSheet.addSelectedTabChangeListener(this::tabChanged);
-			
 			mainLayout.setSecondComponent(tabSheet);
-			
 			selectedCommunication = comm;
 		}
 		else {

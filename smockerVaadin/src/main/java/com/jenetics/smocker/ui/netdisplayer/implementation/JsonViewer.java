@@ -68,7 +68,6 @@ public class JsonViewer implements ComponentWithDisplayChange {
 			logger.error("Unable to parse Json response", e);
 			areaOutputJson.setValue(bundle.getString("ParseError"));
 		}
-		//areaOutputJson.setReadOnly(true);
 	}
 
 }

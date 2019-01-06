@@ -20,6 +20,8 @@ public interface IDaoManager<T extends Serializable> {
 	void deleteById(Long id);
 
 	T update(T entity);
+	
+	void delete(T entity);
 
 	void deleteAll();
 	

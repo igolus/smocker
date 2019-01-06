@@ -27,7 +27,7 @@ public class JavaApplication implements EntityWithId {
 	@Column(length = 1024)
 	private String classQualifiedName;
 
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "javaApplication")
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = false, mappedBy = "javaApplication")
 	private Set<Connection> connections = new HashSet<>();
 
 	@Column

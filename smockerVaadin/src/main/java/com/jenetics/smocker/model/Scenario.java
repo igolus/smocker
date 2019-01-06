@@ -1,16 +1,13 @@
 package com.jenetics.smocker.model;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Version;
 
 @Entity
@@ -25,8 +22,9 @@ public class Scenario implements EntityWithId {
 	@Column(name = "version")
 	private int version;
 
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "scenario")
-	private Set<CommunicationMocked> communicationsMocked = new HashSet<>();
+	@OneToMany
+	//@OrderColumn(name="INDEX")
+	private List<CommunicationMocked> communicationsMocked;
 	
 	@Column(nullable = false)
 	private String host;
@@ -80,11 +78,11 @@ public class Scenario implements EntityWithId {
 		return result;
 	}
 
-	public void setCommunicationsMocked(final Set<CommunicationMocked> communicationsMocked) {
+	public void setCommunicationsMocked(final List<CommunicationMocked> communicationsMocked) {
 		this.communicationsMocked = communicationsMocked;
 	}
 	
-	public Set<CommunicationMocked> getCommunicationsMocked() {
+	public List<CommunicationMocked> getCommunicationsMocked() {
 		return this.communicationsMocked;
 	}
 	

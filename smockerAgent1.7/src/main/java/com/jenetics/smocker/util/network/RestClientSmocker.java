@@ -32,7 +32,7 @@ public class RestClientSmocker extends RESTClient {
 	private static final String SMOCKER_LIST_WATCHED_CONNECTIONS =  "/connections/listHostUnWatched";
 	private static final String MANAGE_JAVA_APP =  "/manageJavaApplication/";
 	private static final String LIST_CONNECTIONS =  "/listConnections";
-	
+
 	//"http://admin:admin@localhost:9990/management/deployment/smocker-1.0-SNAPSHOT.war?operation=attribute&name=status"
 	private static RestClientSmocker instance;
 
@@ -56,7 +56,7 @@ public class RestClientSmocker extends RESTClient {
 	public String getAllMockedConnection() {
 		return get(SMOCKER_REST_PATH + SMOCKER_GET_LIST_MOCKED_HOST);
 	}
-	
+
 	public String getAllUnWachedConnections() {
 		return get(SMOCKER_REST_PATH + SMOCKER_LIST_WATCHED_CONNECTIONS);
 	}
@@ -70,10 +70,13 @@ public class RestClientSmocker extends RESTClient {
 		String value = ResponseReader.readValueFromResponse(resp, "response");
 		return Boolean.parseBoolean(value);
 	}
-	
-	public List<String> getListConnection(Long javaAppId) {
-		String resp = get(MANAGE_JAVA_APP + javaAppId + LIST_CONNECTIONS);
-		return SimpleJsonReader.readValues(resp, "listConnections");
+
+	public Map<String, String> getListConnection(Long javaAppId) {
+		String resp = get(SMOCKER_REST_PATH + MANAGE_JAVA_APP + javaAppId + LIST_CONNECTIONS);
+		if (resp != null) {
+			return SimpleJsonReader.readMap(resp, "listConnections");
+		}
+		return null;
 	}
 
 	public String postConnection(SmockerContainer smockerContainer, Long javaAppId) {
@@ -97,19 +100,37 @@ public class RestClientSmocker extends RESTClient {
 
 		String host = smockerContainer.getHost();
 		int port = smockerContainer.getPort();
-		
-		smockerContainer.getSmockerSocketOutputStream().getSmockerOutputStreamData().getBytes();
-    	Long idConnection = TransformerUtility.getConnectionIdBySocket().get(smockerContainer.getSource());
-		Long javaAppId = TransformerUtility.getJavaAppId();
+
+		//smockerContainer.getSmockerSocketOutputStream().getSmockerOutputStreamData().getBytes();
+		//Long idConnection = TransformerUtility.getConnectionIdBySocket().get(smockerContainer.getSource());
+		//		Long javaAppId = TransformerUtility.getJavaAppId();
+		Long javaAppId = RemoteServerChecker.getInstance().getJavaAppId();
+
+
 		if (RemoteServerChecker.isConnectionWatched(host, port) && 
 				smockerContainer.getSmockerSocketOutputStream() != null && 
-				smockerContainer.getSmockerSocketInputStream()!= null ) {
-			
-			byte[] outputBytes = smockerContainer.getSmockerSocketOutputStream().getSmockerOutputStreamData().getBytes();
-			byte[] inputBytes = smockerContainer.getSmockerSocketInputStream().getSmockerOutputStreamData().getBytes();
+				smockerContainer.getSmockerSocketInputStream()!= null && javaAppId != null) {
 
-			StringBuffer buffer = new StringBuffer();
-			Map<String, String> headers = buildHeader();
+			Long idConnection = 
+					RemoteServerChecker.getInstance().
+					idByConnectionRererenced(smockerContainer.getHost(), smockerContainer.getPort());
+
+			if (idConnection == null) {
+				String response = RestClientSmocker.getInstance().postConnection(smockerContainer, javaAppId);
+				String idConnectionSt = ResponseReader.readValueFromResponse(response, "id");
+				if (idConnectionSt != null) {
+					idConnection = Long.valueOf(idConnectionSt);
+				}
+				RemoteServerChecker.getInstance().addConnectionRef(idConnection,  
+						smockerContainer.getHost(), smockerContainer.getPort());
+			}
+
+			if (idConnection != null) {
+				byte[] outputBytes = smockerContainer.getSmockerSocketOutputStream().getSmockerOutputStreamData().getBytes();
+				byte[] inputBytes = smockerContainer.getSmockerSocketInputStream().getSmockerOutputStreamData().getBytes();
+
+				StringBuffer buffer = new StringBuffer();
+				Map<String, String> headers = buildHeader();
 				try {
 					buffer.append("{\"id\": 0, \"request\":\"")
 					.append(encode(outputBytes))
@@ -125,10 +146,11 @@ public class RestClientSmocker extends RESTClient {
 				} catch (Exception e) {
 					MessageLogger.logThrowable(e);
 				}
+			}
 		}
 		return null;
 	}
-	
+
 	private String getCurrentDate() {
 		//DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
 		return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(new Date());
@@ -142,23 +164,23 @@ public class RestClientSmocker extends RESTClient {
 		if (RemoteServerChecker.isConnectionWatched(host, port)) {
 			StringBuffer buffer = new StringBuffer();
 			Map<String, String> headers = buildHeader();
-				try {
-					String input = "";
-					if (smockerContainer.getTeeInputStream() != null) {
-						input = smockerContainer.getTeeInputStream().getBranch().getSmockerOutputStreamData().getString();
-					}
-					buffer.append("{\"id\": 0, \"request\":\"")
-					.append(encode(input))
-					.append("\",  \"response\":\"")
-					.append(encode(smockerContainer.getTeeOutputStream().getBranch().getSmockerOutputStreamData().getBytes()))
-					.append("\",  \"callerStack\":\"")
-					.append(encode(smockerContainer.getStackTrace()))
-					.append("\"}");
-					String path = SMOCKER_REST_PATH + SMOCKER_ADDCOMM + "/" + javaAppId + "/" + connectionId;
-					return put(buffer.toString(), path, headers);
-				} catch (Exception e) {
-					MessageLogger.logThrowable(e);
+			try {
+				String input = "";
+				if (smockerContainer.getTeeInputStream() != null) {
+					input = smockerContainer.getTeeInputStream().getBranch().getSmockerOutputStreamData().getString();
 				}
+				buffer.append("{\"id\": 0, \"request\":\"")
+				.append(encode(input))
+				.append("\",  \"response\":\"")
+				.append(encode(smockerContainer.getTeeOutputStream().getBranch().getSmockerOutputStreamData().getBytes()))
+				.append("\",  \"callerStack\":\"")
+				.append(encode(smockerContainer.getStackTrace()))
+				.append("\"}");
+				String path = SMOCKER_REST_PATH + SMOCKER_ADDCOMM + "/" + javaAppId + "/" + connectionId;
+				return put(buffer.toString(), path, headers);
+			} catch (Exception e) {
+				MessageLogger.logThrowable(e);
+			}
 		}
 		return null;
 	}
@@ -174,7 +196,7 @@ public class RestClientSmocker extends RESTClient {
 		String encoded = DatatypeConverter.printBase64Binary(message);
 		return encoded;
 	}
-	
+
 	public static String decode(String source) {
 		byte[] decoded = DatatypeConverter.parseBase64Binary(source);
 		try {
@@ -184,12 +206,12 @@ public class RestClientSmocker extends RESTClient {
 		}
 		return null;
 	}
-	
+
 	public static String encode(byte[] source) {
 		String encoded = DatatypeConverter.printBase64Binary(source);
 		return encoded;
 	}
-	
+
 	public static byte[] decodeByte(String source) {
 		return DatatypeConverter.parseBase64Binary(source);
 	}

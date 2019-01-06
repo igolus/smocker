@@ -26,6 +26,7 @@ import com.jenetics.smocker.ui.view.LogView;
 import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
 import com.vaadin.navigator.Navigator;
+import com.vaadin.navigator.View;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
@@ -245,16 +246,21 @@ public class SmockerUI extends UI {
 			{
 				try {
 					Thread.sleep(SLEEP_TIME);
-					Class<?> currentViewClass =  easyAppMainView.getNavigator().getCurrentView().getClass();
+					
+					View selectedView = easyAppMainView.getCurrentView();
+					if (selectedView == null) {
+						selectedView =  easyAppMainView.getNavigator().getCurrentView();
+					}
+					Class<?> currentViewClass =  selectedView.getClass();
 					RefreshableView targetView = null;
 					if (ViewWithToolBar.class.isAssignableFrom(currentViewClass)) {
-						ViewWithToolBar viewWithToolBar =  (ViewWithToolBar)easyAppMainView.getNavigator().getCurrentView();
+						ViewWithToolBar viewWithToolBar =  (ViewWithToolBar)selectedView;
 						if (viewWithToolBar.getInnerComponent() != null && RefreshableView.class.isAssignableFrom(viewWithToolBar.getInnerComponent().getClass())) {
 							targetView = (RefreshableView) viewWithToolBar.getInnerComponent();
 						}
 					}
 					else if (RefreshableView.class.isAssignableFrom(currentViewClass)) {
-						targetView = ((RefreshableView) easyAppMainView.getNavigator().getCurrentView());
+						targetView = ((RefreshableView) selectedView);
 					}
 					if (targetView != null) {
 						targetView.refresh(entityWithId);

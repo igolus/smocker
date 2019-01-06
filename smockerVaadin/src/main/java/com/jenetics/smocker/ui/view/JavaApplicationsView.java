@@ -16,6 +16,7 @@ import com.jenetics.smocker.dao.DaoConfig;
 import com.jenetics.smocker.dao.DaoConfigUpdaterThread;
 import com.jenetics.smocker.dao.DaoManager;
 import com.jenetics.smocker.dao.DaoManagerByModel;
+import com.jenetics.smocker.dao.DaoSingletonLock;
 import com.jenetics.smocker.jseval.JSEvaluator;
 import com.jenetics.smocker.model.Communication;
 import com.jenetics.smocker.model.Connection;
@@ -328,6 +329,7 @@ implements RefreshableView, SearcheableView {
 					Connection selectedConnection = treeGridConnectionData.getConnection();
 					selectedConnection.getJavaApplication().getConnections().remove(selectedConnection);
 					daoManagerJavaApplication.update(selectedConnection.getJavaApplication());
+					//daoManagerConnection.deleteById(selectedConnection.getId());
 					removeTabConn(selectedConnection);
 					switchButtinsByJavaApp.get(selectedConnection.getJavaApplication()).remove(selectedConnection);
 					refreshClickable();
@@ -335,8 +337,18 @@ implements RefreshableView, SearcheableView {
 				else if (treeGridConnectionData.isJavaApplication()) {
 					JavaApplication selectedJavaApplication = treeGridConnectionData.getJavaApplication();
 					selectedJavaApplication.getConnections().stream().forEach(this::removeTabConn);
-					daoManagerJavaApplication.deleteById(selectedJavaApplication.getId());
+//					List<Connection> listConnection = daoManagerConnection.listAll();
+//					List<Connection> listConnectionRef = 
+//							daoManagerConnection.queryList("SELECT conn FROM Connection conn WHERE conn.javaApplication.id = " 
+//					+ selectedJavaApplication.getId());
+//					for (Connection conn : listConnectionRef) {
+//						daoManagerConnection.delete(conn);
+//					} 
+					
+					//DaoSingletonLock.lock();
+					daoManagerJavaApplication.delete(selectedJavaApplication);
 					switchButtinsByJavaApp.remove(selectedJavaApplication);
+					//DaoSingletonLock.unlock();
 				}
 				fillTreeTable();
 			}

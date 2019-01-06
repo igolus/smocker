@@ -77,7 +77,7 @@ public class UploadPanel extends VerticalLayout {
 			//System.out.println(content);
 		}
 		
-		private List<CommunicationMocked> clone(Set<CommunicationMocked> source) {
+		private List<CommunicationMocked> clone(List<CommunicationMocked> source) {
 			List<CommunicationMocked> clonedList = new ArrayList<>();
 			for (CommunicationMocked commSource : source) {
 				

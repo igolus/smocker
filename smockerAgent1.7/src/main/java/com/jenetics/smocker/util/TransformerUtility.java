@@ -27,19 +27,19 @@ public class TransformerUtility {
 	private static Long javaAppId = null;
 
 	private static Hashtable<Object, SmockerContainer> smockerContainerBySocket = new Hashtable<Object, SmockerContainer>();
-	private static Hashtable<Object, Long> connectionIdBySocket = new Hashtable<Object, Long>();
+	//private static Hashtable<Object, Long> connectionIdBySocket = new Hashtable<Object, Long>();
 
 	private TransformerUtility() {
 		super();
 	}
 
-	public static Hashtable<Object, Long> getConnectionIdBySocket() {
-		return connectionIdBySocket;
-	}
+//	public static Hashtable<Object, Long> getConnectionIdBySocket() {
+//		return connectionIdBySocket;
+//	}
 
-	public static Long getJavaAppId() {
-		return javaAppId;
-	}
+//	public static Long getJavaAppId() {
+//		return javaAppId;
+//	}
 
 	public static String getCallerApp() {
 		if (callerApp == null) {
@@ -244,44 +244,47 @@ public class TransformerUtility {
 	private static SmockerContainer addSmockerContainer(Object source, String host, int port) throws IOException {
 		String stackTrace = getStackTrace();
 		SmockerContainer smockerContainer = new SmockerContainer(host,port, stackTrace, source);
-		String allResponse = RestClientSmocker.getInstance().getAll();
-		String existingId = ResponseReader.findExistingAppId(allResponse);
+		//String allResponse = RestClientSmocker.getInstance().getAll();
+		//String existingId = ResponseReader.findExistingAppId(allResponse);
+		//Long javaAppId = RemoteServerChecker.getInstance().getJavaAppId();
+		
+		
 		// only if the javaAppId was not found
-		if ((javaAppId == null || existingId == null) && allResponse != null) {
-			if (existingId != null) {
-				javaAppId = Long.valueOf(existingId);
-			} else {
-				String response = RestClientSmocker.getInstance().postJavaApp();
-				updateJavaAppId(response);
-			}
-		}
-		if (javaAppId != null) {
-			String response = RestClientSmocker.getInstance().postConnection(smockerContainer, javaAppId);
-			// check the status
-			String status = ResponseReader.readStatusCodeFromResponse(response);
-			if (status.equals(ResponseReader.CONFLICT)) {
-				allResponse = RestClientSmocker.getInstance().getAll();
-				String existingConnectionId = ResponseReader.findExistingConnectionId(allResponse,
-						smockerContainer.getHost(), smockerContainer.getPort());
-				connectionIdBySocket.put(source, Long.valueOf(existingConnectionId));
-			} else {
-				String idConnection = ResponseReader.readValueFromResponse(response, "id");
-				if (idConnection != null) {
-					connectionIdBySocket.put(source, Long.valueOf(idConnection));
-				}
-			}
-		}
-
+//		if ((javaAppId == null || existingId == null) && allResponse != null) {
+//			if (existingId != null) {
+//				javaAppId = Long.valueOf(existingId);
+//			} else {
+//				String response = RestClientSmocker.getInstance().postJavaApp();
+//				updateJavaAppId(response);
+//			}
+//		}
+//		if (javaAppId != null) {
+//			String response = RestClientSmocker.getInstance().postConnection(smockerContainer, javaAppId);
+//			// check the status
+//			String status = ResponseReader.readStatusCodeFromResponse(response);
+//			if (status.equals(ResponseReader.CONFLICT)) {
+//				allResponse = RestClientSmocker.getInstance().getAll();
+//				String existingConnectionId = ResponseReader.findExistingConnectionId(allResponse,
+//						smockerContainer.getHost(), smockerContainer.getPort());
+//				connectionIdBySocket.put(source, Long.valueOf(existingConnectionId));
+//			} else {
+//				String idConnection = ResponseReader.readValueFromResponse(response, "id");
+//				if (idConnection != null) {
+//					connectionIdBySocket.put(source, Long.valueOf(idConnection));
+//				}
+//			}
+//		}
+//
 		smockerContainerBySocket.put(source, smockerContainer);
 		return smockerContainer;
 	}
 
-	private synchronized static void updateJavaAppId(String response) throws IOException {
-		String id = ResponseReader.readValueFromResponse(response, "id");
-		if (id != null) {
-			javaAppId = Long.parseLong(id);
-		}
-	}
+//	private synchronized static void updateJavaAppId(String response) throws IOException {
+//		String id = ResponseReader.readValueFromResponse(response, "id");
+//		if (id != null) {
+//			javaAppId = Long.parseLong(id);
+//		}
+//	}
 
 	private static String getStackTrace() {
 		StringBuilder sb = new StringBuilder();

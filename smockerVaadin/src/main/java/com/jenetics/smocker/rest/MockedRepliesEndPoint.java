@@ -96,7 +96,7 @@ public class MockedRepliesEndPoint  {
 //				if (result[0] != null) {
 //					SmockerUI.log(Level.INFO, result[0]);
 //				}
-				if (result[1] != null) {
+				if (result != null && result[1] != null) {
 					MatchMockResponse response = new MatchMockResponse(NetworkReaderUtility.encode(result[1]));
 					SmockerUI.log(Level.INFO, "Found mock match for " + 
 							communicationMocked.getConnection().getHost() + ":" + communicationMocked.getConnection().getPort());

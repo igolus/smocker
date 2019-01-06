@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jboss.logging.Logger;
 
 import com.jenetics.smocker.dao.DaoConfig;
+import com.jenetics.smocker.dao.DaoSingletonLock;
 import com.jenetics.smocker.dao.IDaoManager;
 import com.jenetics.smocker.injector.Dao;
 import com.jenetics.smocker.jseval.JSEvaluator;
@@ -77,19 +78,25 @@ public class ManageJavaApplication {
 	public Response listConnection(@PathParam("javaApplicationId") Long javaApplicationId) {
 		JavaApplication target = daoManager.findById(javaApplicationId);
 		ListConnections listConn = new ListConnections();
-		target.getConnections().stream().forEach( item -> listConn.addConnection(item.getHost(), item.getPort()));
-		return Response.ok().entity(listConn).build();
+		if (target != null) {
+			target.getConnections().stream().forEach( item -> listConn.addConnection(item.getHost(), item.getPort(), item.getId()));
+			return Response.ok().entity(listConn).build();
+		}
+		return Response.ok().build();
 	}
 	
 	@PUT
 	@Path("/addConnection/{javaApplicationId}")
 	public Response create(@PathParam("javaApplicationId") Long javaApplicationId, Connection conn) {
+		DaoSingletonLock.lock();
 		JavaApplication target = daoManager.findById(javaApplicationId);
 		if (target == null) {
+			DaoSingletonLock.unlock();
 			return Response.status(Status.NOT_FOUND).build();
 		}
 		for (Connection connIte : target.getConnections()) {
 			if (connIte.getHost().equals(conn.getHost()) && connIte.getPort().equals(conn.getPort())) {
+				DaoSingletonLock.unlock();
 				return Response.status(Status.CONFLICT).build();
 			}
 		}
@@ -103,6 +110,7 @@ public class ManageJavaApplication {
 		target.getConnections().toArray(conns);
 		Connection connUpdated = conns[conns.length - 1];
 		connectionEventSrc.fire(connUpdated);
+		DaoSingletonLock.unlock();
 		return Response.ok().entity(connUpdated).build();
 	}
 
@@ -140,6 +148,7 @@ public class ManageJavaApplication {
 	}
 	
 	public Response createAsync(AddCommunicationContainer addCommunicationContainer) {
+		DaoSingletonLock.lock();
 		Communication comm = addCommunicationContainer.getComm();
 		Long connectionId = addCommunicationContainer.getConnectionId();
 		Long javaApplicationId = addCommunicationContainer.getJavaApplicationId();
@@ -151,6 +160,7 @@ public class ManageJavaApplication {
 
 		JavaApplication target = daoManager.findById(javaApplicationId);
 		if (target == null) {
+			DaoSingletonLock.unlock();
 			return Response.status(Status.NOT_FOUND).build();
 		}
 
@@ -158,10 +168,9 @@ public class ManageJavaApplication {
 				.findFirst();
 
 		if (!connection.isPresent()) {
+			DaoSingletonLock.unlock();
 			return Response.status(Status.NOT_FOUND).build();
 		}
-		
-		
 		
 		if (connection.get().getWatched() != null && connection.get().getWatched()) {
 			
@@ -195,9 +204,10 @@ public class ManageJavaApplication {
 			.append(comm.getConnection().getPort());
 
 			SmockerUI.getInstance().log(Level.INFO, builder.toString());
-			
+			DaoSingletonLock.unlock();
 			return Response.ok().build();
 		}
+		DaoSingletonLock.unlock();
 		return Response.status(Status.FORBIDDEN).build();
 
 	}

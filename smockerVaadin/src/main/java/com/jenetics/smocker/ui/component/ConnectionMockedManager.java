@@ -1,12 +1,15 @@
 package com.jenetics.smocker.ui.component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -94,6 +97,7 @@ public class ConnectionMockedManager extends EasyAppLayout {
 	public ActionContainer buildActionContainer() {
 
 		comboBox = new ComboBox<>();
+		comboBox.setTextInputAllowed(false);
 		comboBox.addSelectionListener(this::comboSelected);
 	
 		ActionContainerBuilder builder = new ActionContainerBuilder(null)
@@ -103,7 +107,7 @@ public class ConnectionMockedManager extends EasyAppLayout {
 		return actionContainer;
 	}
 
-	private Map<Scenario, List<CommunicationMocked>> commsByScenario = new HashMap<>();
+	//private Map<Scenario, List<CommunicationMocked>> commsByScenario = new HashMap<>();
 	private List<Scenario> listScenarios;
 	private TreeGridMockedItem selectedTreeItem;
 	private TreeGridMockedItem root;
@@ -121,40 +125,57 @@ public class ConnectionMockedManager extends EasyAppLayout {
 	
 	public void fillCommunication() {
 		treeData.clear();
-		commsByScenario.clear();
+		//commsByScenario.clear();
 		root = new TreeGridMockedItem();
 		treeData.addItem(null, root);
 
 		Scenario undefinedScenario = DaoManagerByModel.getUNDEFINED_SCENARIO();
 		undefinedScenarioItem = addScenarioToRoot(undefinedScenario);
-		connectionMocked = connectionDaoManager.findById(connectionMocked.getId());
-		connectionDaoManager.findById(connectionMocked.getId());
-		Set<CommunicationMocked> communications = connectionMocked.getCommunications();
-		//fill the map
-		for (CommunicationMocked communication : communications) {
-			Scenario scenario = communication.getScenario();
-			if (!commsByScenario.containsKey(scenario)) {
-				commsByScenario.put(scenario, new ArrayList<>());
-			}
-			commsByScenario.get(scenario).add(communication);
+		
+		List<CommunicationMocked> communicationsMocked = getListCommOrdered(undefinedScenario);
+		for (CommunicationMocked communicationMocked : communicationsMocked) {
+			addCommunicationItemToScenario(undefinedScenarioItem, communicationMocked);
 		}
-
-		for (Map.Entry<Scenario, List<CommunicationMocked>> entry : commsByScenario.entrySet()) {
-			Scenario scenario = entry.getKey();
-			List<CommunicationMocked> associatedComms = entry.getValue();
-			TreeGridMockedItem scenarioItem = addScenarioToRootExceptUndifined(scenario);
-			for (CommunicationMocked communicationMocked : associatedComms) {
-				addCommunicationItemToScenario(scenarioItem, communicationMocked);
-			}
-		}
-
-		//add remaining scenario
+		
 		listScenarios = scenarioDaoManager.listAll();
 		for (Scenario scenario : listScenarios) {
-			if (!commsByScenario.containsKey(scenario)) {
-				addScenarioToRootExceptUndifined(scenario);
+			if (!scenario.equals(DaoManagerByModel.getUNDEFINED_SCENARIO())) {
+				TreeGridMockedItem scenarioItem = addScenarioToRootExceptUndifined(scenario);
+				List<CommunicationMocked> communicationsMockedScenario = getListCommOrdered(scenario);
+				for (CommunicationMocked communicationMocked : communicationsMockedScenario) {
+					addCommunicationItemToScenario(scenarioItem, communicationMocked);
+				}
 			}
 		}
+		
+//		connectionMocked = connectionDaoManager.findById(connectionMocked.getId());
+//		connectionDaoManager.findById(connectionMocked.getId());
+//		Set<CommunicationMocked> communications = connectionMocked.getCommunications();
+//		//fill the map
+//		for (CommunicationMocked communication : communications) {
+//			Scenario scenario = communication.getScenario();
+//			if (!commsByScenario.containsKey(scenario)) {
+//				commsByScenario.put(scenario, new ArrayList<>());
+//			}
+//			commsByScenario.get(scenario).add(communication);
+//		}
+//
+//		for (Map.Entry<Scenario, List<CommunicationMocked>> entry : commsByScenario.entrySet()) {
+//			Scenario scenario = entry.getKey();
+//			List<CommunicationMocked> associatedComms = entry.getValue();
+//			TreeGridMockedItem scenarioItem = addScenarioToRootExceptUndifined(scenario);
+//			for (CommunicationMocked communicationMocked : associatedComms) {
+//				addCommunicationItemToScenario(scenarioItem, communicationMocked);
+//			}
+//		}
+//
+//		//add remaining scenario
+//		listScenarios = scenarioDaoManager.listAll();
+//		for (Scenario scenario : listScenarios) {
+//			if (!commsByScenario.containsKey(scenario)) {
+//				addScenarioToRootExceptUndifined(scenario);
+//			}
+//		}
 		treeDataProvider.refreshAll();
 	}
 
@@ -255,11 +276,21 @@ public class ConnectionMockedManager extends EasyAppLayout {
 			comboBox.setItems(lisItems);
 		}
 		else if (treeItem.isCommunication()) {
-			comboBox.setItems(SmockerUI.getBundleValue(MOVE_COMM), 
+			List<String> listItems = new ArrayList<>(); 
+			listItems.addAll( Arrays.asList(new String[] {
+					SmockerUI.getBundleValue(MOVE_COMM), 
 					SmockerUI.getBundleValue(RENAME_COMM), 
-					SmockerUI.getBundleValue(MOVE_UP),
-					SmockerUI.getBundleValue(DELETE_COMM),
-					SmockerUI.getBundleValue(MOVE_DOWN));
+					SmockerUI.getBundleValue(DELETE_COMM)
+			}));
+			List<CommunicationMocked> commsOfScenario = getListCommOrdered(treeItem.getCommunication().getScenario());
+			int indeoxOfComm = commsOfScenario.indexOf(treeItem.getCommunication());
+			if (indeoxOfComm < commsOfScenario.size() - 1) {
+				listItems.add(SmockerUI.getBundleValue(MOVE_DOWN));
+			}
+			if (indeoxOfComm > 0) {
+				listItems.add(SmockerUI.getBundleValue(MOVE_UP));
+			}
+			comboBox.setItems(listItems);
 		}
 	}
 
@@ -327,30 +358,46 @@ public class ConnectionMockedManager extends EasyAppLayout {
 	
 	private void moveDown(CommunicationMocked selectedComm) {
 		refreshConnectionMocked();
-		Set<CommunicationMocked> initialCommunications = connectionMocked.getCommunications();
-		List<CommunicationMocked> sortedList = new LinkedList<>();
-		CommunicationMocked[] commArray = new CommunicationMocked[initialCommunications.size()];
-		initialCommunications.toArray(commArray);
 		
-		for (int index = 0; index < commArray.length; index++) {
-			if (commArray[index].equals(selectedComm)) {
-				if (index != initialCommunications.size() - 1) {
-					sortedList.add(commArray[index+1]);
-					sortedList.add(selectedComm);
-					index++;
-				}
-			}
-			else {
-				sortedList.add(commArray[index]);
+		List<CommunicationMocked> commsOfScenario = getListCommOrdered(selectedComm.getScenario());
+		if (commsOfScenario.size() >= 2) {
+			int indexOfSelected = commsOfScenario.indexOf(selectedComm);
+			if (indexOfSelected < commsOfScenario.size()) {
+				//swap index 
+				CommunicationMocked nextComm = commsOfScenario.get(indexOfSelected + 1);
+				long indexNext = nextComm.getIndex();
+				nextComm.setIndex(selectedComm.getIndex());
+				selectedComm.setIndex(indexNext);
+				communicationDaoManager.update(selectedComm);
+				communicationDaoManager.update(nextComm);
+				
+				reorderScenarioItem(selectedComm, selectedComm.getScenario());	
 			}
 		}
-		connectionMocked.getCommunications().clear();
-		connectionDaoManager.update(connectionMocked);
-		for (CommunicationMocked communicationMocked : sortedList) {
-			connectionMocked.getCommunications().add(Cloner.clone(communicationMocked, CommunicationMocked.class));
+		treeDataProvider.refreshAll();
+	}
+
+	private void reorderScenarioItem(CommunicationMocked selectedComm, Scenario scenario) {
+		TreeGridMockedItem treeGridMockedScenarioItem = treeScenarioItemByScenario.get(scenario);
+		List<TreeGridMockedItem> children = treeData.getChildren(treeGridMockedScenarioItem);
+		List<TreeGridMockedItem> itemsToRemove = new ArrayList<>();
+		for (TreeGridMockedItem treeGridMockedItem : children) {
+			itemsToRemove.add(treeGridMockedItem);
 		}
-		//connectionMocked.getCommunications().addAll(sortedList);
-		connectionDaoManager.update(connectionMocked);
+		for (TreeGridMockedItem treeGridMockedItem : itemsToRemove) {
+			treeData.removeItem(treeGridMockedItem);
+		}
+		List<CommunicationMocked> listCommOrdered = getListCommOrdered(selectedComm.getScenario());
+		for (CommunicationMocked communicationMocked : listCommOrdered) {
+			addCommunicationItemToScenario(treeGridMockedScenarioItem, communicationMocked);
+		}
+	}
+	
+	
+	private List<CommunicationMocked> getListCommOrdered(Scenario scenario) {
+		return scenario.getCommunicationsMocked()
+				.stream().sorted( 
+						(a, b) -> Long.compare(a.getIndex(), b.getIndex())).collect(Collectors.toList());
 	}
 
 	private void refreshConnectionMocked() {
@@ -359,26 +406,29 @@ public class ConnectionMockedManager extends EasyAppLayout {
 
 	private void moveUp(CommunicationMocked selectedComm) {
 		refreshConnectionMocked();
-		Set<CommunicationMocked> initialCommunications = connectionMocked.getCommunications();
-		CommunicationMocked[] commArray = new CommunicationMocked[initialCommunications.size()];
-		initialCommunications.toArray(commArray);
-		
-		for (int index = 0; index < commArray.length; index++) {
-			if (connectionMocked.equals(selectedComm)) {
-				if (index != initialCommunications.size() - 1) {
-					connectionMocked.getCommunications().add(selectedComm);
-					connectionMocked.getCommunications().add(commArray[index+1]);
-					index++;
-				}
+
+		List<CommunicationMocked> commsOfScenario = getListCommOrdered(selectedComm.getScenario());
+		if (commsOfScenario.size() >= 2) {
+			int indexOfSelected = commsOfScenario.indexOf(selectedComm);
+			if (indexOfSelected > 0) {
+				//swap index 
+				CommunicationMocked previousComm = commsOfScenario.get(indexOfSelected - 1);
+				long indexPrevious = previousComm.getIndex();
+				previousComm.setIndex(selectedComm.getIndex());
+				selectedComm.setIndex(indexPrevious);
+				communicationDaoManager.update(selectedComm);
+				communicationDaoManager.update(previousComm);
+
+				reorderScenarioItem(selectedComm, selectedComm.getScenario());	
 			}
 		}
-		connectionDaoManager.update(connectionMocked);
+		treeDataProvider.refreshAll();
 	}
 
 	public void switchAllCommunicationInsideScenario(boolean value) {
 		if (selectedTreeItem != null && selectedTreeItem.isScenario()) {
 			Scenario scenario = selectedTreeItem.getScenario();
-			Set<CommunicationMocked> communicationsMocked = scenario.getCommunicationsMocked();
+			List<CommunicationMocked> communicationsMocked = scenario.getCommunicationsMocked();
 			for (CommunicationMocked communicationMocked : communicationsMocked) {
 				switchCommActivation(value, communicationMocked);
 				SwitchWithEntity<CommunicationMocked> switchWithEntity = switchByCommunicationMap.get(communicationMocked);
@@ -422,7 +472,7 @@ public class ConnectionMockedManager extends EasyAppLayout {
 		if (!listScenariosFromQuery.isEmpty()) {
 			Scenario targetScenario = listScenariosFromQuery.get(0);
 			Scenario actualScenario = selectedTreeItem.getScenario();
-			Set<CommunicationMocked> communicationsMocked = actualScenario.getCommunicationsMocked();
+			List<CommunicationMocked> communicationsMocked = actualScenario.getCommunicationsMocked();
 			for (CommunicationMocked communicationMocked : communicationsMocked) {
 				moveCommToScenario(targetScenario, communicationMocked);
 			}
@@ -437,12 +487,12 @@ public class ConnectionMockedManager extends EasyAppLayout {
 		//remove previous assoc
 		Scenario initialScenario = communication.getScenario();
 		if (initialScenario != targetScenario) {
-			Set<CommunicationMocked> communicationsMockedInOldScenario = initialScenario.getCommunicationsMocked();
+			List<CommunicationMocked> communicationsMockedInOldScenario = initialScenario.getCommunicationsMocked();
 			if (communicationsMockedInOldScenario.contains(communication)) {
 				communicationsMockedInOldScenario.remove(communication);
 			}
 			
-			Set<CommunicationMocked> communicationsMocked = targetScenario.getCommunicationsMocked();
+			List<CommunicationMocked> communicationsMocked = targetScenario.getCommunicationsMocked();
 			if (!communicationsMocked.contains(communication)) {
 				communicationsMocked.add(communication);
 				targetScenario.setCommunicationsMocked(communicationsMocked);
@@ -489,7 +539,7 @@ public class ConnectionMockedManager extends EasyAppLayout {
 	public void scenarioDeleted() {
 		if (selectedTreeItem != null && selectedTreeItem.isScenario()) {
 			Scenario scenarioSelected = selectedTreeItem.getScenario();
-			Set<CommunicationMocked> communicationsMocked = scenarioSelected.getCommunicationsMocked();
+			List<CommunicationMocked> communicationsMocked = scenarioSelected.getCommunicationsMocked();
 			for (CommunicationMocked communicationMocked : communicationsMocked) {
 				moveCommToScenario(DaoManagerByModel.getUNDEFINED_SCENARIO(), communicationMocked);
 			}
@@ -503,7 +553,7 @@ public class ConnectionMockedManager extends EasyAppLayout {
 	
 	public void removeComms() {
 		if (selectedTreeItem != null && selectedTreeItem.isScenario()) {
-			Set<CommunicationMocked> communicationsMocked = selectedTreeItem.getScenario().getCommunicationsMocked();
+			List<CommunicationMocked> communicationsMocked = selectedTreeItem.getScenario().getCommunicationsMocked();
 			List<CommunicationMocked> listCommsToRemove = new ArrayList<>();
 			
 			for (CommunicationMocked communicationMocked : communicationsMocked) {

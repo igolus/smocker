@@ -18,6 +18,13 @@ import com.jenetics.smocker.util.SmockerException;
 
 @Entity
 public class CommunicationMocked implements EntityWithId {
+	
+	private static long maxIndex = 0;
+	
+	public CommunicationMocked() {
+		super();
+		this.index = maxIndex++;
+	}
 
 	private static final long serialVersionUID = 1L;
 	@Id
@@ -28,6 +35,16 @@ public class CommunicationMocked implements EntityWithId {
 	@Column(name = "version")
 	private int version;
 	
+	private long index = 0;
+	
+	public long getIndex() {
+		return index;
+	}
+
+	public void setIndex(long index) {
+		this.index = index;
+	}
+
 	@Column(columnDefinition = "TEXT")
 	private String request;
 

@@ -10,6 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Version;
@@ -37,9 +38,10 @@ public class Connection implements EntityWithId {
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "connection")
 	private Set<Communication> communications = new HashSet<>();
 
-	@JoinColumn(nullable = false)
+	@JoinColumn(nullable = true)
 	@OneToOne
 	@JsonIgnore
+	//@ManyToOne(cascade = CascadeType.ALL)
 	private JavaApplication javaApplication;
 
 	@Column

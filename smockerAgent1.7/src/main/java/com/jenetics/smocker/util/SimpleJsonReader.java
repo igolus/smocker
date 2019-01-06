@@ -2,7 +2,9 @@ package com.jenetics.smocker.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 
@@ -41,6 +43,39 @@ public class SimpleJsonReader {
 		return null;
 	}
 	
+	public static Map<String, String> readMap(String json, String rootKey) {
+		Map<String, String> ret = new HashMap<>();
+		int startIndex = json.indexOf(rootKey);
+		if (startIndex != -1) {
+			String after = json.substring(startIndex);
+			int afterDoubleDot = after.indexOf(":");
+			String afterSecond = after.substring(afterDoubleDot + 1);
+			String values = afterSecond.substring(afterSecond.indexOf("{") + 1, afterSecond.indexOf("}}"));
+			if (values.equals("")) {
+				return ret;
+			}
+			String[] allValues = values.split(",");
+			for (int i = 0; i < allValues.length; i++) {
+				String[] valuesArray = allValues[i].split("\":");
+				if (valuesArray.length == 2) {
+					String key = valuesArray[0];
+					String value = valuesArray[1];
+					
+					if (key.length() >= 2) {
+						key = key.substring(1, key.length());
+					}
+					//if (value.length() >= 2) {
+					//	value = value.substring(1, value.length() - 1);
+					//}
+					ret.put(key, value);
+				}
+			}
+			
+			
+		}
+		return ret;
+	}
+	
 	/**
 	 * Read first value from key in one json string
 	 * @param json
@@ -49,20 +84,20 @@ public class SimpleJsonReader {
 	 */
 	public static List<String> readValues(String json, String key) {
 		int startIndex = json.indexOf(key);
-		List<String> reValues = new ArrayList<>();
+		List<String> retValues = new ArrayList<>();
 		if (startIndex != -1) {
 			String after = json.substring(startIndex);
 			int afterDoubleDot = after.indexOf(":");
 			String afterSecond = after.substring(afterDoubleDot + 1);
 			String values = afterSecond.substring(afterSecond.indexOf("[") + 1, afterSecond.indexOf("]"));
 			if (values.equals("")) {
-				return reValues;
+				return retValues;
 			}
 			String[] valuesArray = values.split(",");
 			for (int i = 0; i < valuesArray.length; i++) {
-				reValues.add(valuesArray[i].substring(1, valuesArray[i].length() - 1));
+				retValues.add(valuesArray[i].substring(1, valuesArray[i].length() - 1));
 			}
-			return reValues;
+			return retValues;
 		}
 		return null;
 	}

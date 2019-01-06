@@ -14,6 +14,7 @@ import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.model.JavaApplicationMocked;
 import com.jenetics.smocker.model.Scenario;
 import com.jenetics.smocker.ui.SmockerUI;
+import com.jenetics.smocker.ui.component.javascript.JsEditor;
 
 public class MockConverter {
 
@@ -95,6 +96,7 @@ public class MockConverter {
 		communicationMocked.setResponse(communication.getResponse());
 		communicationMocked.setDateTime(communication.getDateTime());
 		communicationMocked.setConnection(targetConnectionMocked);
+		communicationMocked.setSourceJs(JsEditor.DEFAULT_JS);
 		
 		targetConnectionMocked.getCommunications().add(communicationMocked);
 		

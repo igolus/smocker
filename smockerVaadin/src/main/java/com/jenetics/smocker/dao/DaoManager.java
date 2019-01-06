@@ -14,9 +14,9 @@ import com.jenetics.smocker.model.EntityWithId;
 public class DaoManager<T extends EntityWithId> implements IDaoManager<T> {
 
 	private Logger logger = Logger.getLogger(DaoManager.class);
-	
-	private static Object lock = new Object();
-	
+
+	//private static Object lock = new Object();
+
 	private EntityManager entityManager;
 
 	Class<T> typeParameterClass = null;
@@ -33,58 +33,86 @@ public class DaoManager<T extends EntityWithId> implements IDaoManager<T> {
 
 	@Override
 	public T findById(final Long id) {
-		synchronized (lock) {
-			return entityManager.find(typeParameterClass, id);
-		}		
+		DaoSingletonLock.lock();
+		T entity = entityManager.find(typeParameterClass, id);
+		DaoSingletonLock.unlock();
+		return entity;
+
 	}
 
 	@Override
 	public T create(T entity) {
-		synchronized (lock) {
-			EntityTransaction entityTransaction = entityManager.getTransaction();
-			if(!entityTransaction.isActive()) {
-				entityTransaction.begin();
-			}
-			try {
-				entityManager.persist(entity);
-				entityTransaction.commit();
-			} catch (Exception ex) {
-				logger.error("Unable to persist entity", ex);
-				entityTransaction.rollback();
-			}
-			return entity;
+		DaoSingletonLock.lock();
+		EntityTransaction entityTransaction = entityManager.getTransaction();
+		if(!entityTransaction.isActive()) {
+			entityTransaction.begin();
 		}
+		try {
+			entityManager.persist(entity);
+			entityTransaction.commit();
+		} catch (Exception ex) {
+			logger.error("Unable to persist entity", ex);
+			entityTransaction.rollback();
+		}
+		finally {
+			DaoSingletonLock.unlock();
+		}
+		return entity;
 	}
 
 	@Override
 	public T update(T entity) {
-		synchronized (lock) {
-			EntityTransaction entityTransaction = entityManager.getTransaction();
-			if(!entityTransaction.isActive()) {
-				entityTransaction.begin();
-			}
-			try {
-				T lastEntity = findById(entity.getId());
-				entity.setVersion(lastEntity.getVersion());
-				entityManager.merge(entity);
-				entityTransaction.commit();
-				
-			} catch (Exception ex) {
-				logger.error("Unable to persist entity", ex);
-				entityTransaction.rollback();
-			}
-
-			return entity;
+		DaoSingletonLock.lock();
+		EntityTransaction entityTransaction = entityManager.getTransaction();
+		if(!entityTransaction.isActive()) {
+			entityTransaction.begin();
 		}
+		try {
+			T lastEntity = findById(entity.getId());
+			entity.setVersion(lastEntity.getVersion());
+			entityManager.merge(entity);
+			entityTransaction.commit();
+
+		} catch (Exception ex) {
+			logger.error("Unable to persist entity", ex);
+			entityTransaction.rollback();
+		}
+		finally {
+			DaoSingletonLock.unlock();
+		}
+		return entity;
 	}
 
 	@Override
-	public List<T> listAll(Integer startPosition, Integer maxResult) {
-		synchronized (lock) {
-			String entityName = typeParameterClass.getSimpleName();
-			Query query = entityManager.createQuery("SELECT e FROM " + entityName + " e");
-			return query.getResultList();
+	public void delete(T entity) {
+		DaoSingletonLock.lock();
+		EntityTransaction entityTransaction = entityManager.getTransaction();
+		if(!entityTransaction.isActive()) {
+			entityTransaction.begin();
 		}
+		try {
+			T lastEntity = findById(entity.getId());
+			entity.setVersion(lastEntity.getVersion());
+			entityManager.remove(lastEntity);
+			entityTransaction.commit();
+		} catch (Exception ex) {
+			logger.error("Unable to delete entity", ex);
+			entityTransaction.rollback();
+		}
+		finally {
+			DaoSingletonLock.unlock();
+		}
+	}
+
+
+	@Override
+	public List<T> listAll(Integer startPosition, Integer maxResult) {
+		DaoSingletonLock.lock();
+		String entityName = typeParameterClass.getSimpleName();
+		Query query = entityManager.createQuery("SELECT e FROM " + entityName + " e");
+		List result = query.getResultList();
+		DaoSingletonLock.unlock();
+		return result;
 	}
 
 	@Override
@@ -94,20 +122,27 @@ public class DaoManager<T extends EntityWithId> implements IDaoManager<T> {
 
 	@Override
 	public void deleteById(Long id) {
+		DaoSingletonLock.lock();
 		T entity = findById(id);
-		EntityTransaction entityTransaction = entityManager.getTransaction();
-		entityTransaction.begin();
-		try {
-			entityManager.remove(entity);
-			entityTransaction.commit();
-		} catch (Exception ex) {
-			logger.error("Unable to delete entity", ex);
-			entityTransaction.rollback();
+		if (entity != null) {
+			EntityTransaction entityTransaction = entityManager.getTransaction();
+			entityTransaction.begin();
+			try {
+				entityManager.remove(entity);
+				entityTransaction.commit();
+			} catch (Exception ex) {
+				logger.error("Unable to delete entity", ex);
+				entityTransaction.rollback();
+			}
+			finally {
+				DaoSingletonLock.unlock();
+			}
 		}
 	}
 
 	@Override
 	public void deleteAll() {
+		DaoSingletonLock.lock();
 		String entityName = typeParameterClass.getSimpleName();
 		Query query = entityManager.createQuery("DELETE FROM " + entityName + " e");
 		EntityTransaction entityTransaction = entityManager.getTransaction();
@@ -119,8 +154,11 @@ public class DaoManager<T extends EntityWithId> implements IDaoManager<T> {
 			logger.error("Unable to delete entity", ex);
 			entityTransaction.rollback();
 		}
+		finally {
+			DaoSingletonLock.unlock();
+		}
 	}
-	
+
 	@Override
 	public List<T> queryList(String querySql) {
 		String entityName = typeParameterClass.getSimpleName();

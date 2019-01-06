@@ -21,7 +21,7 @@ import com.jenetics.smocker.util.SmockerUtility;
 @SuppressWarnings("serial")
 public class JsEditor extends EasyAppLayout {
 
-	private String DEFAULT_JS = "function matchAndReturnOutput(recordDate, realInput, bas64Input, providedInput, providedOutput)" + System.lineSeparator()
+	public static String DEFAULT_JS = "function matchAndReturnOutput(recordDate, realInput, bas64Input, providedInput, providedOutput)" + System.lineSeparator()
 		+ "{" + System.lineSeparator()
 		+ "  if (realInput == providedInput)" + System.lineSeparator()
 		+ "  {" + System.lineSeparator()

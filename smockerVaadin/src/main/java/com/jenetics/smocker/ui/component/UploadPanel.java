@@ -106,31 +106,40 @@ public class UploadPanel extends VerticalLayout {
 					daoManagerConnectionMocked.queryList("SELECT conn FROM ConnectionMocked conn WHERE conn.host = '" + host 
 					+ "' and conn.port = '" + port + "'");
 			
+			//JavaApplicationMocked first daoManagerJavaApplicationMocked.listAll().stream().findFirst().orElse(null);
+			
 			ConnectionMocked targetConnectionMocked = null;
 			JavaApplicationMocked targetJavaApplicationMocked = null;
+			
+//			if (targetJavaApplicationMocked == null) {
+//				targetJavaApplicationMocked = new JavaApplicationMocked();
+//				targetJavaApplicationMocked.setClassQualifiedName(classQualifiedName);
+//				targetJavaApplicationMocked = daoManagerJavaApplicationMocked.create(targetJavaApplicationMocked);
+//			}
+			
 			if (listConnectionMocked.size() == 0) {
 				targetConnectionMocked = new ConnectionMocked();
 				targetConnectionMocked.setHost(host);
 				targetConnectionMocked.setPort(port);
 				targetConnectionMocked.setScenario(scenarioImported);
+				targetJavaApplicationMocked.getConnections().add(targetConnectionMocked);
+				daoManagerConnectionMocked.create(targetConnectionMocked);
 			}
 			else {
 				targetConnectionMocked = listConnectionMocked.get(0);
 				targetJavaApplicationMocked = targetConnectionMocked.getJavaApplication();
 			}
-			if (targetJavaApplicationMocked == null) {
-				targetJavaApplicationMocked = new JavaApplicationMocked();
-				targetJavaApplicationMocked.setClassQualifiedName(classQualifiedName);
-				targetConnectionMocked.setJavaApplication(targetJavaApplicationMocked);
-				targetJavaApplicationMocked.getConnections().add(targetConnectionMocked);
-				daoManagerJavaApplicationMocked.create(targetJavaApplicationMocked);
-			}
+
 			
 			
 			for (CommunicationMocked comm : communicationsMocked) {
+				targetConnectionMocked.getCommunications().add(comm);
+				scenarioImported.getCommunicationsMocked().add(comm);
 				comm.setConnection(targetConnectionMocked);
 				comm.setScenario(scenarioImported);
 			}
+			
+			daoManagerConnectionMocked.update(targetConnectionMocked);
 			daoManagerScenario.update(scenarioImported);
 		}
 

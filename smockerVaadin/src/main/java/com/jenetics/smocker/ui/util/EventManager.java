@@ -34,7 +34,6 @@ public class EventManager {
 
 	private void refreshView(EntityWithId entityWithId) {
 		if (SmockerUI.getInstance() != null) {
-		//if (SmockerUI.getInstance() != null && SmockerUI.getInstance().getSession() != null) {
 			SmockerUI.getInstance().refreshView(entityWithId);
 		}
 	}

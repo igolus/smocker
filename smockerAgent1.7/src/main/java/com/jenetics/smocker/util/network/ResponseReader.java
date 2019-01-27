@@ -80,7 +80,7 @@ public class ResponseReader {
 				BufferedReader reader = new BufferedReader(new StringReader(response));
 				String line = reader.readLine();
 
-				if (!line.isEmpty() && line.split(" ").length >= 3) {
+				if (line != null && !line.isEmpty() && line.split(" ").length >= 3) {
 					status = line.split(" ")[1];
 				}
 				return status;

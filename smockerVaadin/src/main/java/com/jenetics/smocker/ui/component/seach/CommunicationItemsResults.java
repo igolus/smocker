@@ -17,7 +17,7 @@ import com.vaadin.ui.Window;
 public class CommunicationItemsResults extends VerticalLayout {
 
 	private String searchQuery;
-	private Consumer<Communication> selected;
+	private transient Consumer<Communication> selected;
 	private Window searchWindow;
 
 	public CommunicationItemsResults(List<Communication> foundComms, String searchQuery, 
@@ -53,7 +53,7 @@ public class CommunicationItemsResults extends VerticalLayout {
 		}
 
 		grid.addComponent(new Label("Date : " + comm.getDateTime()), 0, 1);
-		ButtonWithIEntity<Communication> buttonSelect = new ButtonWithIEntity<Communication>(comm);
+		ButtonWithIEntity<Communication> buttonSelect = new ButtonWithIEntity<>(comm);
 		buttonSelect.setCaption(SmockerUI.getBundleValue("select"));
 		buttonSelect.addClickListener( clickEvent -> {
 			ButtonWithIEntity<Communication> buttonWithComm = 

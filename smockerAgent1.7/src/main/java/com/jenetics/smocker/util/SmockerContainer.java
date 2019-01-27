@@ -28,7 +28,7 @@ public class SmockerContainer {
 	private String inputToBesend;
 	private Object source;
 	//private boolean postAtNextRead = false;
-	private boolean postAtNextWrite = false;
+	//private boolean postAtNextWrite = false;
 	private boolean applyMock;
 	private boolean streamResent = false;
 	private int indexForArrayCopy = 0;
@@ -37,13 +37,13 @@ public class SmockerContainer {
 		return indexForArrayCopy;
 	}
 
-	public boolean isPostAtNextWrite() {
-		return postAtNextWrite;
-	}
-
-	public void setPostAtNextWrite(boolean postAtNextWrite) {
-		this.postAtNextWrite = postAtNextWrite;
-	}
+//	public boolean isPostAtNextWrite() {
+//		return postAtNextWrite;
+//	}
+//
+//	public void setPostAtNextWrite(boolean postAtNextWrite) {
+//		this.postAtNextWrite = postAtNextWrite;
+//	}
 
 	public void setIndexForArrayCopy(int indexForArrayCopy) {
 		this.indexForArrayCopy = indexForArrayCopy;
@@ -164,6 +164,9 @@ public class SmockerContainer {
 	public void resetAll() {
 		resetSmockerSocketInputStream();
 		resetSmockerSocketOutputStream();
+		applyMock = false;
+		reseNextWrite = false;
+		streamResent = false;
 		matchOutput = null;
 		applyMock = RemoteServerChecker.getMockedHost().contains(host);
 		indexForArrayCopy = 0;
@@ -239,15 +242,24 @@ public class SmockerContainer {
     	}
 	}
 	
-	private boolean resetMatchNextWrite = false;
-
-	public boolean isResetMatchNextWrite() {
-		return resetMatchNextWrite;
-	}
-
-	public void setResetMatchNextWrite(boolean resetMatchNextWrite) {
-		this.resetMatchNextWrite = resetMatchNextWrite;
-	}
+//	private boolean resetMatchNextWrite = false;
+//
+//	public boolean isResetMatchNextWrite() {
+//		return resetMatchNextWrite;
+//	}
+//
+//	public void setResetMatchNextWrite(boolean resetMatchNextWrite) {
+//		this.resetMatchNextWrite = resetMatchNextWrite;
+//	}
 	
+	private boolean reseNextWrite = false;
+
+	public boolean isReseNextWrite() {
+		return reseNextWrite;
+	}
+
+	public void setReseNextWrite(boolean reseNextWrite) {
+		this.reseNextWrite = reseNextWrite;
+	}
 	
 }

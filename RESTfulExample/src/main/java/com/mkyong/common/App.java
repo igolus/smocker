@@ -13,6 +13,7 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.SocketChannel;
+import java.util.Arrays;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -33,9 +34,9 @@ public class App
 				String line = bufferedReader.readLine();
 
 				line = bufferedReader.readLine();
-				callGoogle();
-				//callGoogleSocketChannell();
-				callYahoo();
+				//callGoogle();
+				callGoogleSocketChannell();
+				//callYahoo();
 			}
 
 			catch (Exception ex) {
@@ -80,24 +81,57 @@ public class App
 		bf.append("Connection: Close").append(lineSeparator);
 		//bf.append("Connection: keep-alive").append(lineSeparator);
 		bf.append(lineSeparator);
+		byte[] bytesToSend = bf.toString().getBytes();
 		//bf.append(lineSeparator);
-
-		for (int i = 0; i < 4; i++) {
-			SocketChannel socketChannel = SocketChannel.open(new InetSocketAddress("www.google.com", 80));
-			ByteBuffer buf = ByteBuffer.wrap(bf.toString().getBytes());
-			socketChannel.write(buf);
-			buf.clear();
+		
+		
+		int capacity = 10;
+		//ByteBuffer buffer = ByteBuffer.allocate(capacity);
+		int indexBuffer = 0;
+		
+		SocketChannel socketChannel = SocketChannel.open(new InetSocketAddress("www.google.com", 80));
+		for (int i = 0; i < 1; i++) {
+			
+			//buffer.clear();
+			while (indexBuffer < bytesToSend.length) {
+				byte[] destArray = new byte[Math.min(capacity, bytesToSend.length - indexBuffer)];
+				
+				
+				System.arraycopy(bytesToSend, indexBuffer, destArray, 0, destArray.length);
+				
+				
+				ByteBuffer buffer = ByteBuffer.wrap(destArray);
+				indexBuffer += destArray.length;
+				
+				System.out.print(new String(destArray));
+				//buffer.rewind();
+//				for (int j = 0; j < capacity && indexBuffer < bytesToSend.length; j++) {
+//					buffer.put(bytesToSend[indexBuffer++]);
+//				}
+				//buffer.rewind();
+				int write = socketChannel.write(buffer);
+				buffer.rewind();
+				//System.out.println("write " + write);
+				//System.out.print(new String( buffer.compact().array() ));
+				//buffer.clear();
+			}
+			//buffer.flip();
 			StringBuffer bfOut = new StringBuffer();
-
+			
+			ByteBuffer buffer = ByteBuffer.allocate(10);
 			int nbRead = 0;
 			while (nbRead != -1) {
-				nbRead = socketChannel.read(buf);
-				bfOut.append(new String(buf.array()));
-				buf.clear();
+				nbRead = socketChannel.read(buffer);
+				bfOut.append(new String(buffer.array()));
+				if (buffer.hasRemaining()) {
+					break;
+				}
+				buffer.clear();
 			}
 			System.out.println(bfOut.toString());
-			socketChannel.close();
+			
 		}
+		socketChannel.close();
 
 
 

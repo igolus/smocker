@@ -1,72 +1,35 @@
 package com.jenetics.smocker.ui.component;
 
-import java.util.Set;
-import java.util.logging.Level;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.vaadin.aceeditor.AceEditor;
-import org.vaadin.aceeditor.AceMode;
-import org.vaadin.aceeditor.AceTheme;
 import org.vaadin.easyapp.ui.ViewWithToolBar;
-import org.vaadin.easyapp.util.ActionContainer;
-import org.vaadin.easyapp.util.ActionContainer.InsertPosition;
-import org.vaadin.easyapp.util.ActionContainerBuilder;
-import org.vaadin.easyapp.util.EasyAppLayout;
 
-import com.jenetics.smocker.dao.DaoManager;
 import com.jenetics.smocker.dao.DaoManagerByModel;
 import com.jenetics.smocker.dao.IDaoManager;
-import com.jenetics.smocker.injector.BundleUI;
 import com.jenetics.smocker.model.CommunicationMocked;
-import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.ConnectionMocked;
-import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.component.javascript.JsEditor;
 import com.jenetics.smocker.ui.component.javascript.JsTesterPanel;
-import com.jenetics.smocker.ui.dialog.Dialog;
 import com.jenetics.smocker.ui.util.ButtonWithIEntity;
-import com.jenetics.smocker.ui.util.CommunicationMockedDateDisplay;
-import com.jenetics.smocker.ui.util.TreeGridConnectionData;
 import com.jenetics.smocker.ui.util.TreeGridMockedItem;
 import com.jenetics.smocker.util.NetworkReaderUtility;
-import com.jenetics.smocker.util.SmockerUtility;
-import com.vaadin.data.TreeData;
-import com.vaadin.data.provider.TreeDataProvider;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Grid.SelectionMode;
-import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.TabSheet;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.Tree;
-import com.vaadin.ui.Tree.ItemClick;
-import com.vaadin.ui.components.grid.ItemClickListener;
+import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
 import com.vaadin.ui.TreeGrid;
-import com.vaadin.ui.VerticalSplitPanel;
-import com.vaadin.ui.Window;
-
-import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
 
 
 @SuppressWarnings("serial")
 public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 	
-	private ConnectionMocked connectionMocked;
 	private TreeGrid<TreeGridMockedItem> treeGrid;
-	private TreeDataProvider<TreeGridMockedItem> treeDataProvider;
 	private CommunicationMocked selectedCommunication = null;
 	private HorizontalSplitPanel mainLayout = null;
 	
-	protected IDaoManager<ConnectionMocked> daoManagerConnection =  DaoManagerByModel.getDaoManager(ConnectionMocked.class);
-	protected IDaoManager<CommunicationMocked> daoManagerCommunicationMocked = DaoManagerByModel.getDaoManager(CommunicationMocked.class);
+	protected transient IDaoManager<ConnectionMocked> daoManagerConnection =  DaoManagerByModel.getDaoManager(ConnectionMocked.class);
+	protected transient IDaoManager<CommunicationMocked> daoManagerCommunicationMocked = DaoManagerByModel.getDaoManager(CommunicationMocked.class);
 
 	private TabSheet tabSheet;
 	private JsEditor tabJs;
@@ -80,11 +43,10 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 		this.refreshClickable = refreshClickable;
 		mainLayout = new HorizontalSplitPanel();
 		
-		this.connectionMocked = connectionMocked;
+		//this.connectionMocked = connectionMocked;
 	
 		connectionMockedManager = new ConnectionMockedManager(
 				connectionMocked, this::commSelected, this.refreshClickable);
-		//connectionMockedManager.setRefreshClickableAction(refreshClickable);
 		
 		ViewWithToolBar view = new ViewWithToolBar(connectionMockedManager);
 		
@@ -130,15 +92,14 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
     }
 	
 	public void enableButtonClicked(ClickEvent event) {
-		ButtonWithIEntity<CommunicationMocked> buttonWithEntity = (ButtonWithIEntity<CommunicationMocked>) event.getSource();
-		CommunicationMocked communicationMockedSelected = buttonWithEntity.getEntity();
+		ButtonWithIEntity<CommunicationMocked> buttonWithEntity = 
+				(ButtonWithIEntity<CommunicationMocked>) event.getSource();
 	}
 
 	public void commSelected(CommunicationMocked comm) {
 		if (comm != null) {
 			String request = NetworkReaderUtility.decode(comm.getRequest());
 			String response = NetworkReaderUtility.decode(comm.getResponse());
-			//String sourceJS = comm.getSourceJs();
 			
 			tabSheet = new TabSheet();
 			tabSheet.setSizeFull();
@@ -171,7 +132,6 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 	}
 	
 	public void tabChanged(SelectedTabChangeEvent event) {
-		Object selectedTabComponent = event.getSource();
 		if (refreshClickable != null) {
 			refreshClickable.run();
 		}
@@ -223,6 +183,10 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 		return  tabSheet != null &&
 				tabSheet.getSelectedTab() != null && 
 				tabSheet.getSelectedTab() == tabJs;
+	}
+
+	public void communicationMockedCreated(CommunicationMocked communicationMocked) {
+		connectionMockedManager.communicationMockedCreated(communicationMocked);
 	}
 	
 }

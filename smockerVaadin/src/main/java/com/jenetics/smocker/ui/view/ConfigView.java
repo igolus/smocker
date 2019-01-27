@@ -1,34 +1,23 @@
 package com.jenetics.smocker.ui.view;
 
-import java.util.List;
-import java.util.logging.Level;
-
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
 import org.vaadin.aceeditor.AceTheme;
 import org.vaadin.easyapp.util.ActionContainer;
+import org.vaadin.easyapp.util.ActionContainer.InsertPosition;
 import org.vaadin.easyapp.util.ActionContainerBuilder;
 import org.vaadin.easyapp.util.EasyAppLayout;
-import org.vaadin.easyapp.util.ActionContainer.InsertPosition;
 import org.vaadin.easyapp.util.annotations.ContentView;
-import org.vaadin.easybinder.data.AutoBinder;
 
 import com.jenetics.smocker.dao.DaoConfig;
 import com.jenetics.smocker.dao.IDaoManager;
-import com.jenetics.smocker.model.Communication;
-import com.jenetics.smocker.model.config.ConfigBean;
-import com.jenetics.smocker.model.config.FormConfig;
 import com.jenetics.smocker.model.config.SmockerConf;
 import com.jenetics.smocker.ui.SmockerUI;
-import com.jenetics.smocker.ui.component.LoggerPanel;
-import com.jenetics.smocker.ui.dialog.Dialog;
 import com.vaadin.annotations.Push;
 import com.vaadin.data.HasValue.ValueChangeEvent;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
@@ -36,6 +25,7 @@ import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
 @Push
@@ -43,9 +33,8 @@ import com.vaadin.ui.TabSheet;
 @ContentView(sortingOrder = 4, viewName = "ConfigView", icon = "icons/Settings-icon.png", homeView = true, rootViewParent = ConnectionsRoot.class)
 public class ConfigView extends EasyAppLayout {
 
-	protected IDaoManager<SmockerConf> daoManagerSmockerConf = null;
+	protected transient IDaoManager<SmockerConf> daoManagerSmockerConf = null;
 	private SmockerConf singleConfig;
-	private static SmockerConf smockerConfSingleItem = null;
 	protected final TabSheet tabSheet = new TabSheet();
 	private AceEditor aceEditorGlobalFunctions = new AceEditor();
 	private AceEditor aceEditorFilter = new AceEditor();
@@ -152,7 +141,6 @@ public class ConfigView extends EasyAppLayout {
 		fillerRight.setWidth(0, Unit.PIXELS);
 		
 		Label label = new Label("<b>UI Conf</b>", ContentMode.HTML);
-		//addComponent(label);
 		
 		GridLayout grid = new GridLayout(1, 2);
 		grid.setWidth("100%");

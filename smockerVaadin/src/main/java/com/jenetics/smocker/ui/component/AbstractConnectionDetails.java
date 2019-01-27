@@ -4,7 +4,7 @@ import org.vaadin.easyapp.util.EasyAppLayout;
 
 public abstract class AbstractConnectionDetails extends EasyAppLayout {
 
-	protected Runnable refreshClickable;
+	protected transient Runnable refreshClickable;
 
 	public void setRefreshClickableAction(Runnable refreshClickable) {
 		this.refreshClickable = refreshClickable;

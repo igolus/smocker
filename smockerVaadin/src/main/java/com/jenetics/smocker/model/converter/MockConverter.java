@@ -3,6 +3,8 @@ package com.jenetics.smocker.model.converter;
 import java.util.List;
 import java.util.Set;
 
+import org.vaadin.easyapp.util.AnnotationScanner;
+
 import com.jenetics.smocker.dao.DaoManager;
 import com.jenetics.smocker.dao.DaoManagerByModel;
 import com.jenetics.smocker.dao.IDaoManager;
@@ -15,6 +17,8 @@ import com.jenetics.smocker.model.JavaApplicationMocked;
 import com.jenetics.smocker.model.Scenario;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.component.javascript.JsEditor;
+import com.jenetics.smocker.ui.view.LogView;
+import com.jenetics.smocker.ui.view.MockSpaceView;
 
 public class MockConverter {
 
@@ -96,17 +100,22 @@ public class MockConverter {
 		communicationMocked.setResponse(communication.getResponse());
 		communicationMocked.setDateTime(communication.getDateTime());
 		communicationMocked.setConnection(targetConnectionMocked);
-		//communicationMocked.setSourceJs(JsEditor.DEFAULT_JS);
 		
 		targetConnectionMocked.getCommunications().add(communicationMocked);
 		
 		if (updateIdBb) {
 			CommunicationMocked communicationMockedUpdated = 
 					daoManagerCommuncationMocked.create(communicationMocked);
-			//communicationMockedUpdated = daoManagerConnectionMocked.update(targetConnectionMocked);
 			DaoManagerByModel.getUNDEFINED_SCENARIO().getCommunicationsMocked().add(communicationMockedUpdated);
 			daoManagerScenario.update(DaoManagerByModel.getUNDEFINED_SCENARIO());
+			
+			
+			MockSpaceView mockSpaceView = (MockSpaceView) 
+					SmockerUI.getInstance().getEasyAppMainView().getScanner().getViewMap().get(MockSpaceView.class.toString());
+			mockSpaceView.communicationMockedCreated(communicationMocked);
 		}
+		
+		
 		//
 	}
 

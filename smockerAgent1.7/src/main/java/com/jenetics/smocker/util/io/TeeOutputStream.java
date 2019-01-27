@@ -16,16 +16,12 @@
  */
 package com.jenetics.smocker.util.io;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
 import com.jenetics.smocker.util.SmockerContainer;
-import com.jenetics.smocker.util.SmockerSocketInputStream;
 import com.jenetics.smocker.util.SmockerSocketOutputStream;
-import com.jenetics.smocker.util.TransformerUtility;
-import com.jenetics.smocker.util.network.ResponseReader;
 import com.jenetics.smocker.util.network.RestClientSmocker;
 
 /**
@@ -123,7 +119,6 @@ public class TeeOutputStream extends ProxyOutputStream {
 		{
 			String matchMock = getSmockerContainer().getMatchMock();
 			if (matchMock != null) {
-				getSmockerContainer().setResetMatchNextWrite(true);
 				getSmockerContainer().setResponseMocked(matchMock);
 				return;
 			}
@@ -132,7 +127,6 @@ public class TeeOutputStream extends ProxyOutputStream {
 				out.write(getSmockerContainer().getSmockerSocketOutputStream().getBytes());
 				out.flush();
 			}
-			
 		}
 		else {
 			getSmockerContainer().setApplyMock(false);

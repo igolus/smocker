@@ -93,10 +93,8 @@ public class ConnectionMocked implements EntityWithId {
 			return false;
 		}
 		ConnectionMocked other = (ConnectionMocked) obj;
-		if (id != null) {
-			if (!id.equals(other.id)) {
-				return false;
-			}
+		if (id != null && !id.equals(other.id)) {
+			return false;
 		}
 		return true;
 	}

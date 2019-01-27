@@ -2,24 +2,16 @@ package com.jenetics.smocker.ui.component;
 
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import org.vaadin.easyapp.util.ActionContainer;
-import org.vaadin.easyapp.util.ActionContainer.InsertPosition;
-import org.vaadin.easyapp.util.ActionContainerBuilder;
-import org.vaadin.easyapp.util.EasyAppLayout;
-
-import com.jenetics.smocker.dao.DaoManager;
 import com.jenetics.smocker.dao.DaoManagerByModel;
 import com.jenetics.smocker.dao.IDaoManager;
 import com.jenetics.smocker.lucene.LuceneIndexer;
 import com.jenetics.smocker.model.Communication;
 import com.jenetics.smocker.model.Connection;
-import com.jenetics.smocker.model.converter.MockConverter;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.component.seach.CommunicationItemsResults;
 import com.jenetics.smocker.ui.dialog.Dialog;
@@ -27,13 +19,10 @@ import com.jenetics.smocker.ui.netdisplayer.ComponentWithDisplayChange;
 import com.jenetics.smocker.ui.netdisplayer.NetDisplayerFactoryInput;
 import com.jenetics.smocker.ui.netdisplayer.NetDisplayerFactoryOutput;
 import com.jenetics.smocker.ui.util.CommunicationDateDisplay;
-import com.jenetics.smocker.ui.view.MockSpaceView;
 import com.jenetics.smocker.util.NetworkReaderUtility;
 import com.vaadin.data.TreeData;
 import com.vaadin.data.provider.TreeDataProvider;
 import com.vaadin.event.selection.SelectionEvent;
-import com.vaadin.event.selection.SelectionListener;
-import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Grid.SelectionMode;
@@ -53,11 +42,11 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 	private Tree<CommunicationDateDisplay> menu;
 	private TreeData<CommunicationDateDisplay> treeData;
 	private TreeDataProvider<CommunicationDateDisplay> treeDataProvider;
-	private Communication selectedCommunication = null;;
-	private Hashtable<Communication, CommunicationDateDisplay> commDisplayByComm = new Hashtable<>();
-	private Hashtable<Communication, String[]> decodedCommunications = new Hashtable<>();
+	private Communication selectedCommunication = null;
+	private Map<Communication, CommunicationDateDisplay> commDisplayByComm = new HashMap<>();
+	private Map<Communication, String[]> decodedCommunications = new HashMap<>();
 
-	protected IDaoManager<Connection> daoManagerConnection = DaoManagerByModel.getDaoManager(Connection.class);
+	protected transient IDaoManager<Connection> daoManagerConnection = DaoManagerByModel.getDaoManager(Connection.class);
 
 	public ConnectionDetailsView(Connection connection) {
 		super();
@@ -247,7 +236,6 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 	}
 
 	public void displayStack() {
-		Communication selectedCommunication = getSelectedCommunication();
 		if (selectedCommunication != null) {
 			SmockerUI.displayInSubWindowMidSize(SmockerUI.getBundle().getString("StackTrace"), 
 					new TextPanel(NetworkReaderUtility.decode(selectedCommunication.getCallerStack()), true));

@@ -14,7 +14,6 @@ import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.jenetics.smocker.util.SmockerException;
 
 @Entity
 public class CommunicationMocked implements EntityWithId {
@@ -67,7 +66,7 @@ public class CommunicationMocked implements EntityWithId {
 	private String sourceJs;
 
 	@Column(columnDefinition = "TEXT")
-	private String InputForTest;
+	private String inputForTest;
 	
 	@Column(columnDefinition = "TEXT")
 	private String name;
@@ -140,10 +139,12 @@ public class CommunicationMocked implements EntityWithId {
 			return false;
 		}
 		CommunicationMocked other = (CommunicationMocked) obj;
-		if (id != null && !id.equals(other.id)) {
-			return false;
-		}
-		return true;
+		return (id == null || id.equals(other.id));
+		
+//		if (id != null && !id.equals(other.id)) {
+//			return false;
+//		}
+//		return true;
 	}
 
 	@Override
@@ -195,11 +196,11 @@ public class CommunicationMocked implements EntityWithId {
 	}
 
 	public String getInputForTest() {
-		return InputForTest;
+		return inputForTest;
 	}
 
-	public void setInputForTest(String InputForTest) {
-		this.InputForTest = InputForTest;
+	public void setInputForTest(String inputForTest) {
+		this.inputForTest = inputForTest;
 	}
 
 	@Override
@@ -213,8 +214,8 @@ public class CommunicationMocked implements EntityWithId {
 			result += ", callerStack: " + callerStack;
 		if (sourceJs != null && !sourceJs.trim().isEmpty())
 			result += ", sourceJs: " + sourceJs;
-		if (InputForTest != null && !InputForTest.trim().isEmpty())
-			result += ", InputForTest: " + InputForTest;
+		if (inputForTest != null && !inputForTest.trim().isEmpty())
+			result += ", InputForTest: " + inputForTest;
 		if (name != null && !name.trim().isEmpty())
 			result += ", name: " + name;
 		if (scenario != null)

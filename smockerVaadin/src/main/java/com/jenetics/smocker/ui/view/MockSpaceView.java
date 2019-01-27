@@ -6,16 +6,22 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
+import org.jboss.logging.Logger;
 import org.vaadin.easyapp.util.ActionContainer;
 import org.vaadin.easyapp.util.ActionContainer.InsertPosition;
 import org.vaadin.easyapp.util.ActionContainerBuilder;
 import org.vaadin.easyapp.util.ButtonWithCheck;
 import org.vaadin.easyapp.util.annotations.ContentView;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.jenetics.smocker.dao.DaoManagerByModel;
+import com.jenetics.smocker.dao.IDaoManager;
 import com.jenetics.smocker.model.CommunicationMocked;
 import com.jenetics.smocker.model.ConnectionMocked;
 import com.jenetics.smocker.model.EntityWithId;
@@ -35,6 +41,9 @@ import com.vaadin.annotations.Push;
 import com.vaadin.event.selection.SelectionEvent;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.FileDownloader;
+import com.vaadin.server.Resource;
+import com.vaadin.server.StreamResource;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Notification;
@@ -47,6 +56,12 @@ import com.vaadin.ui.TabSheet.Tab;
 public class MockSpaceView 
 extends AbstractConnectionTreeView<JavaApplicationMocked, ConnectionMocked, CommunicationMocked, ConnectionMockedDetailsView> 
 implements RefreshableView {
+	
+	
+	private IDaoManager<Scenario> daoManagerScenario = DaoManagerByModel.getDaoManager(Scenario.class);
+	
+	@Inject
+	private Logger logger;
 
 	public MockSpaceView() {
 		super(JavaApplicationMocked.class, ConnectionMocked.class, CommunicationMocked.class);
@@ -126,8 +141,8 @@ implements RefreshableView {
 		List<ButtonWithCheck> listButtonWithCheck = actionContainer.getListButtonWithCheck();
 		ButtonWithCheck exportButton = listButtonWithCheck.get(listButtonWithCheck.size() - 1);
 
-		OnDemandStreamResource myResource = createResource();
-		
+		//OnDemandStreamResource myResource = createResource();
+
 		JsonFileDownloader downloader = new JsonFileDownloader(createResource());
 		downloader.extend(exportButton);
 
@@ -147,30 +162,6 @@ implements RefreshableView {
 		return false;
 	}
 
-	//	public void export(ClickEvent event) {
-	//		
-	//		StreamResource myResource = createResource();
-	//        FileDownloader fileDownloader = new FileDownloader(myResource);
-	//        fileDownloader.extend(downloadButton);
-	//		//qsdqsd
-	//		
-	//		
-	//		
-	//		try {
-	//			mapper.writeValue(writter, javaApplicationMocked);
-	//			System.out.println(writter.toString());
-	//		} catch (JsonGenerationException e) {
-	//			// TODO Auto-generated catch block
-	//			e.printStackTrace();
-	//		} catch (JsonMappingException e) {
-	//			// TODO Auto-generated catch block
-	//			e.printStackTrace();
-	//		} catch (IOException e) {
-	//			// TODO Auto-generated catch block
-	//			e.printStackTrace();
-	//		}
-	//	}
-	//	
 	private OnDemandStreamResource createResource() {
 
 		return new OnDemandStreamResource() {
@@ -180,15 +171,15 @@ implements RefreshableView {
 					Scenario scenario = getSelectedScenario();
 					if (scenario != null) {
 						ObjectMapper mapper = new ObjectMapper();
+						mapper.enable(SerializationFeature.INDENT_OUTPUT);
 						mapper.configure(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE, false);
 						mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-						//mapper.configure(SerializationFeature.LE, true);
 						String jsonObjSTring = 
 								mapper.writerWithDefaultPrettyPrinter().writeValueAsString(scenario);
 						return new ByteArrayInputStream(jsonObjSTring.getBytes("UTF-8"));
 					}
 				} catch (IOException e) {
-					e.printStackTrace();
+					logger.error("Unable to export scenario", e);
 				}
 				return null;
 			}
@@ -197,26 +188,8 @@ implements RefreshableView {
 			public String getFilename() {
 				return getSelectedScenario().getName() + ".json";
 			}
-			
+
 		};
-//		return new StreamResource(new StreamSource() {
-//			@Override
-//			public InputStream getStream() {
-//				try {
-//					Scenario scenario = getSelectedScenario();
-//					if (scenario != null) {
-//						ObjectMapper mapper = new ObjectMapper();
-//						StringWriter writter = new StringWriter();
-//						mapper.writeValue(writter, scenario);
-//						return new ByteArrayInputStream(writter.toString().getBytes("UTF-8"));
-//
-//					}
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//				}
-//				return null;
-//			}
-//		}, "scenario" + ".json");
 	}
 
 	private Scenario getSelectedScenario() {
@@ -255,11 +228,13 @@ implements RefreshableView {
 					ConnectionMocked selectedConnection = treeGridConnectionData.getConnection();
 					selectedConnection.getJavaApplication().getConnections().remove(selectedConnection);
 					removeTabConn(selectedConnection);
+					cleanScenario(selectedConnection);
 					daoManagerJavaApplication.update(selectedConnection.getJavaApplication());
 				}
 				else if (treeGridConnectionData.isJavaApplication()) {
 					JavaApplicationMocked selectedJavaApplication = treeGridConnectionData.getJavaApplication();
 					selectedJavaApplication.getConnections().stream().forEach(this::removeTabConn);
+					cleanScenario(selectedJavaApplication);
 					daoManagerJavaApplication.deleteById(selectedJavaApplication.getId());
 				}
 				fillTreeTable();
@@ -267,11 +242,24 @@ implements RefreshableView {
 		}
 	}
 
+	private void cleanScenario(JavaApplicationMocked javaApplication) {
+		for (ConnectionMocked conn : javaApplication.getConnections()) {
+			cleanScenario(conn);
+		}
+	}
+
+	private void cleanScenario(ConnectionMocked connection) {
+		for (CommunicationMocked comm : connection.getCommunications()) {
+			comm.getScenario().getCommunicationsMocked().remove(comm);
+			daoManagerScenario.update(comm.getScenario());
+		}
+	}
+
 	private void removeTabConn(ConnectionMocked selectedConnection) {
 		Tab tabForConn = tabByConnection.get(selectedConnection);
 		if (tabForConn != null) {
 			detailsViewByTab.remove(tabForConn);
-			tabByConnectionKey.remove(selectedConnection.getHost());
+			tabByConnectionKey.remove( getConnectionKey(selectedConnection));
 			tabSheet.removeTab(tabForConn);
 		}
 	}
@@ -297,12 +285,21 @@ implements RefreshableView {
 	@Override
 	protected ConnectionMockedDetailsView getConnectionDetailsLayout(ConnectionMocked conn) {
 		ConnectionMockedDetailsView connectionMockedDetailsView = new ConnectionMockedDetailsView(conn, this::refreshClickable);
-		//connectionMockedDetailsView.setRefreshClickableAction(this::refreshClickable);
 		return connectionMockedDetailsView;
 	}
 
 	@Override
 	public boolean canSearch() {
 		return false;
+	}
+
+	public void communicationMockedCreated(CommunicationMocked communicationMocked) {
+		String connectionKey = getConnectionKey(communicationMocked.getConnection());
+		Tab tabForConnection = tabByConnectionKey.get(connectionKey);
+		if (tabForConnection != null) {
+			ConnectionMockedDetailsView detailsView = (ConnectionMockedDetailsView) tabForConnection.getComponent();
+			detailsView.communicationMockedCreated(communicationMocked);
+		}
+
 	}
 }

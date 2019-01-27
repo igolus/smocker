@@ -1,6 +1,7 @@
 package com.jenetics.smocker.ui.view;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +16,6 @@ import org.vaadin.easyapp.ui.ViewWithToolBar;
 import org.vaadin.easyapp.util.AnnotationScanner;
 import org.vaadin.easyapp.util.EasyAppLayout;
 
-import com.jenetics.smocker.dao.DaoManager;
 import com.jenetics.smocker.dao.DaoManagerByModel;
 import com.jenetics.smocker.dao.IDaoManager;
 import com.jenetics.smocker.model.EntityWithId;
@@ -28,8 +28,8 @@ import com.vaadin.addon.jpacontainer.JPAContainerFactory;
 import com.vaadin.data.TreeData;
 import com.vaadin.data.provider.TreeDataProvider;
 import com.vaadin.event.selection.SelectionEvent;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.shared.Position;
 import com.vaadin.ui.Button.ClickEvent;
@@ -81,21 +81,22 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 	protected boolean allSelected;
 
 	protected IDaoManager<T> daoManagerJavaApplication = null;
-	protected IDaoManager<U> daoManagerConnection = null;
+	protected transient IDaoManager<U> daoManagerConnection = null;
 
 	private Class<T> tParameterClass = null;
 	private Class<U> uParameterClass = null;
 	private Class<V> vParameterClass = null;
+	
 	protected JPAContainer<T> jpaJavaApplication;
 
 
 	protected TreeData<TreeGridConnectionData<T, U>> treeData = null;
 	protected TreeDataProvider<TreeGridConnectionData<T, U>> treeDataProvider = null;
 	
-	protected Hashtable<String, Tab> tabByConnectionKey = new Hashtable<>();
+	protected Map<String, Tab> tabByConnectionKey = new HashMap<>();
 	
-	protected Hashtable<Tab, W> detailsViewByTab = new Hashtable<>();
-	protected Hashtable<U, Tab> tabByConnection = new Hashtable<>();
+	protected Map<Tab, W> detailsViewByTab = new HashMap<>();
+	protected Map<U, Tab> tabByConnection = new HashMap<>();
 	
 	protected W selectedDetailView = null;
 
@@ -267,7 +268,7 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 		// Customize it
 		notif.setDelayMsec(100);
 		notif.setPosition(Position.BOTTOM_RIGHT);
-		notif.setIcon(FontAwesome.SPINNER);
+		notif.setIcon(VaadinIcons.SPINNER);
 
 		// Show it in the page
 		notif.show(Page.getCurrent());
@@ -290,7 +291,7 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 		treeDataProvider.refreshAll();
 	}
 	
-	Map<T, TreeGridConnectionData<T, U>> treeItemByJavaApplication = new Hashtable<T, TreeGridConnectionData<T, U>>();
+	Map<T, TreeGridConnectionData<T, U>> treeItemByJavaApplication = new Hashtable<>();
 	/**
 	 * Add a Java application item to the tree
 	 * @param javaApplication
@@ -314,7 +315,7 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 	}
 
 	protected void buildTreeTable() {
-		treeGrid = new TreeGrid<TreeGridConnectionData<T, U>>();
+		treeGrid = new TreeGrid<>();
 		treeData = new TreeData<>();
 		treeDataProvider = new TreeDataProvider<>(treeData);
 		addTreeMapping();

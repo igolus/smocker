@@ -150,19 +150,15 @@ public class TeeInputStream extends ProxyInputStream {
         if (mockBis != null) {
         	return mockBis.read(); 
         }
-        getSmockerContainer().setPostAtNextWrite(true);
+        getSmockerContainer().setReseNextWrite(true);
         return ch;
     }
 
 	private void resetAndPost() throws UnsupportedEncodingException {
-		if (getSmockerContainer().isPostAtNextWrite()) {
+		if (getSmockerContainer().isReseNextWrite()) {
 			getSmockerContainer().postCommunication();
 			getSmockerContainer().resetAll();
-			getSmockerContainer().setPostAtNextWrite(false);
-		}
-		if (getSmockerContainer().isResetMatchNextWrite()) {
-			smockerContainer.resetAll();
-			smockerContainer.setResetMatchNextWrite(false);
+			getSmockerContainer().setReseNextWrite(false);
 		}
 	}
 

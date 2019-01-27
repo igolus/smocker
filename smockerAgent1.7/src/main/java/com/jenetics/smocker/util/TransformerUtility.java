@@ -11,6 +11,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -33,13 +34,13 @@ public class TransformerUtility {
 		super();
 	}
 
-//	public static Hashtable<Object, Long> getConnectionIdBySocket() {
-//		return connectionIdBySocket;
-//	}
+	// public static Hashtable<Object, Long> getConnectionIdBySocket() {
+	//  return connectionIdBySocket;
+	// }
 
-//	public static Long getJavaAppId() {
-//		return javaAppId;
-//	}
+	// public static Long getJavaAppId() {
+	//  return javaAppId;
+	// }
 
 	public static String getCallerApp() {
 		if (callerApp == null) {
@@ -62,34 +63,31 @@ public class TransformerUtility {
 		if (socketChannel != null && !filterSmockerBehavior() && RemoteServerChecker.isRemoteServerAlive() 
 				&& isConnectionWatched(socketChannel)) {
 			int write = buffer.capacity();
-			
+
 			ByteBuffer bufferDup = buffer.duplicate();
-			byte[] array = new byte[bufferDup.capacity()];
+			byte[] array = new byte[buffer.capacity()];
 			bufferDup.get(array);
-			
+
 			SmockerContainer smockerContainer = smockerContainerBySocket.get(socketChannel);
 			if (smockerContainer == null) {
 				InetSocketAddress remoteAddress = (InetSocketAddress) socketChannel.getRemoteAddress();
 				smockerContainer = addSmockerContainer(socketChannel, remoteAddress.getHostName(), remoteAddress.getPort());
 				smockerContainer.resetAll();
+				if (RemoteServerChecker.getMockedHost().contains(smockerContainer.getHost())) {
+					smockerContainer.setApplyMock(true);
+				}
 			}
-			
-			if (smockerContainer.isPostAtNextWrite()) {
+
+			if (smockerContainer.isReseNextWrite()) {
 				smockerContainer.postCommunication();
 				smockerContainer.resetAll();
-				smockerContainer.setPostAtNextWrite(false);
+				if (RemoteServerChecker.getMockedHost().contains(smockerContainer.getHost())) {
+					smockerContainer.setApplyMock(true);
+				}
 			}
-			
-			if (smockerContainer.isResetMatchNextWrite()) {
-				smockerContainer.resetAll();
-				smockerContainer.setResetMatchNextWrite(false);
-			}
-			
 			if (!smockerContainer.isApplyMock()) {
-				write = writeSocketChannel(buffer, 	socketChannel);
+				write = writeSocketChannel(buffer, socketChannel);
 			}
-			
-			
 			smockerContainer.getSmockerSocketOutputStream().write(array);
 			return write;
 		}
@@ -103,38 +101,42 @@ public class TransformerUtility {
 		SmockerContainer smockerContainer = smockerContainerBySocket.get(socketChannel);
 		if (smockerContainer != null && socketChannel != null && !filterSmockerBehavior() && RemoteServerChecker.isRemoteServerAlive() 
 				&& isConnectionWatched(socketChannel)) {
-			smockerContainer.setResetMatchNextWrite(true);
 			if (smockerContainer.isApplyMock()) {
 				String matchMock = smockerContainer.getMatchMock();
 				//match applied
 				if (matchMock != null) {
-					smockerContainer.setResetMatchNextWrite(true);
 					int index = smockerContainer.getIndexForArrayCopy();
-					byte[] bytesMock = RestClientSmocker.decodeByte(matchMock);
-					byte[] targetBytes = new byte[bytebuffer.limit()];
+					byte[] bytesMock = matchMock.getBytes();
+					
 					int lengthToCopy = Math.min(bytebuffer.limit(), bytesMock.length - index);
+					if (lengthToCopy == 0) {
+						return -1;
+					}
+					byte[] targetBytes = new byte[lengthToCopy];
 					System.arraycopy(bytesMock, index, targetBytes, 0, lengthToCopy);
 					smockerContainer.setIndexForArrayCopy(index + lengthToCopy);
 					bytebuffer.clear();
 					bytebuffer.put(targetBytes);
-					if (bytesMock.length - index <= bytebuffer.limit()) {
-						return -1;
-					}
-					else {
-						return lengthToCopy;
-					}
+					return lengthToCopy;
 				}
-				else if (!smockerContainer.isStreamResent()) {
-					ByteBuffer buffer = ByteBuffer.wrap(smockerContainer.getSmockerSocketOutputStream().getBytes());
-					writeSocketChannel(buffer, socketChannel);
-					smockerContainer.setStreamResent(true);
+				else {
+					//resend the buffer
+					if (!smockerContainer.isStreamResent()) {
+						ByteBuffer buffer = ByteBuffer.wrap(smockerContainer.getSmockerSocketOutputStream().getBytes());
+						writeSocketChannel(buffer, socketChannel);
+						smockerContainer.setStreamResent(true);
+					}
 				}
 				return readSocketChannel(bytebuffer, socketChannel);
 			}
-			smockerContainer.setApplyMock(false);
 			int readen = readSocketChannel(bytebuffer, socketChannel);
-			smockerContainer.getSmockerSocketInputStream().write(bytebuffer.array());
-			smockerContainer.setPostAtNextWrite(true);
+
+			byte[] outBytes = Arrays.copyOfRange(bytebuffer.array(), 0, bytebuffer.position());
+			if (outBytes.length > 0) {
+				smockerContainer.getSmockerSocketInputStream().write(outBytes);
+			}
+
+			smockerContainer.setReseNextWrite(true);
 			return readen;
 		}
 		if (bytebuffer != null && socketChannel != null) {
@@ -143,7 +145,7 @@ public class TransformerUtility {
 		return -1;
 
 	}
-	
+
 
 
 	private static void managePostCommunication(ByteBuffer bytebuffer, SmockerContainer smockerContainer, int readen)
@@ -177,6 +179,13 @@ public class TransformerUtility {
 	}
 
 	public synchronized static void socketChannelClosed (Object o) throws IOException {
+		SmockerContainer smockerContainer = smockerContainerBySocket.get(o);
+
+		if (smockerContainer != null && smockerContainer.isReseNextWrite()) {
+			smockerContainer.postCommunication();
+			smockerContainerBySocket.remove(o);
+		}
+
 		socketClosed(o);
 	}
 
@@ -213,7 +222,7 @@ public class TransformerUtility {
 			if (container.isApplyMock()) {
 				teeOutputStream.setForwardToRealStream(false);
 			}
-			
+
 			return container.getTeeOutputStream();
 		}
 		return os;
@@ -223,7 +232,7 @@ public class TransformerUtility {
 		return RemoteServerChecker.isConnectionWatched(source.getInetAddress().getHostName(),
 				source.getPort());
 	}
-	
+
 
 	private static boolean isConnectionWatched(SocketChannel socketChannel) throws IOException {
 		InetSocketAddress remoteAddress = (InetSocketAddress) socketChannel.getRemoteAddress();
@@ -247,44 +256,44 @@ public class TransformerUtility {
 		//String allResponse = RestClientSmocker.getInstance().getAll();
 		//String existingId = ResponseReader.findExistingAppId(allResponse);
 		//Long javaAppId = RemoteServerChecker.getInstance().getJavaAppId();
-		
-		
+
+
 		// only if the javaAppId was not found
-//		if ((javaAppId == null || existingId == null) && allResponse != null) {
-//			if (existingId != null) {
-//				javaAppId = Long.valueOf(existingId);
-//			} else {
-//				String response = RestClientSmocker.getInstance().postJavaApp();
-//				updateJavaAppId(response);
-//			}
-//		}
-//		if (javaAppId != null) {
-//			String response = RestClientSmocker.getInstance().postConnection(smockerContainer, javaAppId);
-//			// check the status
-//			String status = ResponseReader.readStatusCodeFromResponse(response);
-//			if (status.equals(ResponseReader.CONFLICT)) {
-//				allResponse = RestClientSmocker.getInstance().getAll();
-//				String existingConnectionId = ResponseReader.findExistingConnectionId(allResponse,
-//						smockerContainer.getHost(), smockerContainer.getPort());
-//				connectionIdBySocket.put(source, Long.valueOf(existingConnectionId));
-//			} else {
-//				String idConnection = ResponseReader.readValueFromResponse(response, "id");
-//				if (idConnection != null) {
-//					connectionIdBySocket.put(source, Long.valueOf(idConnection));
-//				}
-//			}
-//		}
-//
+		//  if ((javaAppId == null || existingId == null) && allResponse != null) {
+		//   if (existingId != null) {
+		//    javaAppId = Long.valueOf(existingId);
+		//   } else {
+		//    String response = RestClientSmocker.getInstance().postJavaApp();
+		//    updateJavaAppId(response);
+		//   }
+		//  }
+		//  if (javaAppId != null) {
+		//   String response = RestClientSmocker.getInstance().postConnection(smockerContainer, javaAppId);
+		//   // check the status
+		//   String status = ResponseReader.readStatusCodeFromResponse(response);
+		//   if (status.equals(ResponseReader.CONFLICT)) {
+		//    allResponse = RestClientSmocker.getInstance().getAll();
+		//    String existingConnectionId = ResponseReader.findExistingConnectionId(allResponse,
+		//      smockerContainer.getHost(), smockerContainer.getPort());
+		//    connectionIdBySocket.put(source, Long.valueOf(existingConnectionId));
+		//   } else {
+		//    String idConnection = ResponseReader.readValueFromResponse(response, "id");
+		//    if (idConnection != null) {
+		//     connectionIdBySocket.put(source, Long.valueOf(idConnection));
+		//    }
+		//   }
+		//  }
+		//
 		smockerContainerBySocket.put(source, smockerContainer);
 		return smockerContainer;
 	}
 
-//	private synchronized static void updateJavaAppId(String response) throws IOException {
-//		String id = ResponseReader.readValueFromResponse(response, "id");
-//		if (id != null) {
-//			javaAppId = Long.parseLong(id);
-//		}
-//	}
+	// private synchronized static void updateJavaAppId(String response) throws IOException {
+	//  String id = ResponseReader.readValueFromResponse(response, "id");
+	//  if (id != null) {
+	//   javaAppId = Long.parseLong(id);
+	//  }
+	// }
 
 	private static String getStackTrace() {
 		StringBuilder sb = new StringBuilder();

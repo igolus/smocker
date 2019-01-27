@@ -4,13 +4,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
-import com.jenetics.smocker.model.CommunicationMocked;
+import org.jboss.logging.Logger;
+
 import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.ListHostResponse;
 
@@ -19,6 +21,9 @@ import com.jenetics.smocker.model.ListHostResponse;
 @Produces("application/json")
 @Consumes("application/json")
 public class ConnectionEndpoint extends AbstractEndpoint<Connection> {
+	
+	@Inject
+	Logger logger;
 	
 	@GET
 	@Path("/listHostUnWatched")
@@ -35,8 +40,8 @@ public class ConnectionEndpoint extends AbstractEndpoint<Connection> {
 				
 				return Response.ok(hostResponses).build();
 		}
-		catch (Throwable e) {
-			e.printStackTrace();
+		catch (Exception e) {
+			logger.error("Unabel to get list of activated host", e);
 		}
 		return null;
 		

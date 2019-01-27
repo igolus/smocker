@@ -4,8 +4,6 @@ import java.util.List;
 
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -21,7 +19,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jenetics.smocker.dao.IDaoManager;
 import com.jenetics.smocker.injector.Dao;
 import com.jenetics.smocker.model.EntityWithId;
-import com.jenetics.smocker.ui.SmockerUI;
 
 public abstract class AbstractEndpoint<T extends EntityWithId> {
 

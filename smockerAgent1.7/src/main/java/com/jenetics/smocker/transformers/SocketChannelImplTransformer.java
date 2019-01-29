@@ -32,6 +32,7 @@ public class SocketChannelImplTransformer {
 		//redefineClose(classPool, ctClass);
 		redefineWrite(classPool, ctClass);
 		redefineRead(classPool, ctClass);
+		redefineImplCloseSelectableChannel(classPool, ctClass);
 
 		byteCode = ctClass.toBytecode();
 		ctClass.detach();
@@ -60,6 +61,30 @@ public class SocketChannelImplTransformer {
 		CtMethod writeMethod = CtNewMethod.make(body, ctClass);
 		ctClass.addMethod(writeMethod);
 	}
+	
+private void redefineImplCloseSelectableChannel(ClassPool classPool, CtClass ctClass) throws NotFoundException, CannotCompileException {
+		
+		CtMethod implCloseMethodInitial = ctClass.getDeclaredMethod("implCloseSelectableChannel", null);
+		implCloseMethodInitial.setName("implCloseSelectableChannelNew");	
+		implCloseMethodInitial.setModifiers(Modifier.PUBLIC);
+		ctClass.setModifiers(Modifier.PUBLIC);
+		
+		
+		final String body = "public void implCloseSelectableChannel () {"
+				+ " try{" 
+				+ " 	com.jenetics.smocker.util.TransformerUtility.socketChannelClosed( $0 );"
+				+ "} catch (Throwable t) "
+				+ "{ "
+				+ "     throw t; "
+				+ "}" 
+				+ "}";
+
+		
+			
+		CtMethod writeMethod = CtNewMethod.make(body, ctClass);
+		ctClass.addMethod(writeMethod);
+	}
+
 
 	private void redefineRead(ClassPool classPool, final CtClass ctClass) throws NotFoundException, CannotCompileException {
 

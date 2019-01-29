@@ -73,17 +73,17 @@ public class TransformerUtility {
 				InetSocketAddress remoteAddress = (InetSocketAddress) socketChannel.getRemoteAddress();
 				smockerContainer = addSmockerContainer(socketChannel, remoteAddress.getHostName(), remoteAddress.getPort());
 				smockerContainer.resetAll();
-				if (RemoteServerChecker.getMockedHost().contains(smockerContainer.getHost())) {
-					smockerContainer.setApplyMock(true);
-				}
+//				if (RemoteServerChecker.getMockedHost().contains(smockerContainer.getHost())) {
+//					smockerContainer.setApplyMock(true);
+//				}
 			}
 
 			if (smockerContainer.isReseNextWrite()) {
 				smockerContainer.postCommunication();
 				smockerContainer.resetAll();
-				if (RemoteServerChecker.getMockedHost().contains(smockerContainer.getHost())) {
-					smockerContainer.setApplyMock(true);
-				}
+//				if (RemoteServerChecker.getMockedHost().contains(smockerContainer.getHost())) {
+//					smockerContainer.setApplyMock(true);
+//				}
 			}
 			if (!smockerContainer.isApplyMock()) {
 				write = writeSocketChannel(buffer, socketChannel);
@@ -178,15 +178,18 @@ public class TransformerUtility {
 		return (int) writeNew.invoke(socketChannel, new Object[] {buffer});
 	}
 
-	public synchronized static void socketChannelClosed (Object o) throws IOException {
-		SmockerContainer smockerContainer = smockerContainerBySocket.get(o);
+	public synchronized static void socketChannelClosed (Object socketChannel) throws IOException, 
+	NoSuchMethodException, SecurityException, IllegalAccessException, 
+	IllegalArgumentException, InvocationTargetException {
+		SmockerContainer smockerContainer = smockerContainerBySocket.get(socketChannel);
 
 		if (smockerContainer != null && smockerContainer.isReseNextWrite()) {
 			smockerContainer.postCommunication();
-			smockerContainerBySocket.remove(o);
+			smockerContainerBySocket.remove(socketChannel); 
 		}
-
-		socketClosed(o);
+		
+		Method closeNew = socketChannel.getClass(). getMethod("implCloseSelectableChannelNew", null);
+		closeNew.invoke(socketChannel, null);
 	}
 
 	public synchronized static InputStream manageInputStream(InputStream is, Socket source) throws IOException {

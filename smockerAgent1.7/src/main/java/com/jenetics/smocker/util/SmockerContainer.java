@@ -12,6 +12,7 @@ import com.jenetics.smocker.util.network.ResponseReader;
 import com.jenetics.smocker.util.network.RestClientSmocker;
 
 public class SmockerContainer {
+	private static final String SEP = ":";
 	private SmockerSocketInputStream smockerSocketInputStream = null;
 	private SmockerSocketOutputStream smockerSocketOutputStream = null;
 	private ByteArrayOutputStream bosforMock = new ByteArrayOutputStream();
@@ -168,7 +169,7 @@ public class SmockerContainer {
 		reseNextWrite = false;
 		streamResent = false;
 		matchOutput = null;
-		applyMock = RemoteServerChecker.getMockedHost().contains(host);
+		applyMock = RemoteServerChecker.getMockedHost().contains(host + SEP + port);
 		indexForArrayCopy = 0;
 	}
 

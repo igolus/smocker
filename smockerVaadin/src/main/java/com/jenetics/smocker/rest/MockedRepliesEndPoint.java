@@ -36,6 +36,7 @@ import com.jenetics.smocker.util.SmockerException;
 @Consumes("application/json")
 public class MockedRepliesEndPoint  {
 	
+	private static final String SEP = ":";
 	private static final String NO_MATCH = "NO_MATCH";
 	@Inject
 	@Dao
@@ -63,7 +64,7 @@ public class MockedRepliesEndPoint  {
 		try {
 			List<String> listActivatedHost = daoManagerCommunications.listAll().stream()
 					.filter(CommunicationMocked::isActivated)
-					.map( comm -> comm.getConnection().getHost())
+					.map( comm -> comm.getConnection().getHost() + SEP + comm.getConnection().getPort())
 					.distinct()
 					.collect(Collectors.toList());
 				
@@ -95,7 +96,7 @@ public class MockedRepliesEndPoint  {
 				if (result != null && result[1] != null) {
 					MatchMockResponse response = new MatchMockResponse(NetworkReaderUtility.encode(result[1]));
 					SmockerUI.log(Level.INFO, "Found mock match for " + 
-							communicationMocked.getConnection().getHost() + ":" + communicationMocked.getConnection().getPort());
+							communicationMocked.getConnection().getHost() + SEP + communicationMocked.getConnection().getPort());
 					return Response.ok(response).build();
 				}
 			} catch (SmockerException e) {

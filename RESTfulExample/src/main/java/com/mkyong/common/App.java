@@ -132,10 +132,6 @@ public class App
 			
 		}
 		socketChannel.close();
-
-
-
-
 	}
 
 	//	private static void callGoogleSocketChannellMulti() throws UnknownHostException, IOException {

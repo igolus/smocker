@@ -13,7 +13,7 @@ public class SmockerJsEnvCallBackGet implements JavaVoidCallback {
 
 	@Override
 	public void invoke(V8Object receiver, V8Array parameters) {
-		String fromMap = SmockerJsEnv.getInstance().getFromMap(parameters.getString(0));
+		String fromMap = SmockerJsEnv.getInstance().getFromMap(parameters.get(0));
 		receiver.add("result", fromMap);
 	}
 }

@@ -135,7 +135,7 @@ public class MockConverter {
 		// otherwise create it
 		if (targetConnectionMocked == null) {
 			targetConnectionMocked = new ConnectionMocked();
-			targetConnectionMocked.setScenario(DaoManagerByModel.getUNDEFINED_SCENARIO());
+			//targetConnectionMocked.setScenario(DaoManagerByModel.getUNDEFINED_SCENARIO());
 			targetConnectionMocked.setHost(sourceConnection.getHost());
 			targetConnectionMocked.setPort(sourceConnection.getPort());
 			

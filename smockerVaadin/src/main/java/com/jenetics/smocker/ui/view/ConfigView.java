@@ -11,6 +11,7 @@ import org.vaadin.easyapp.util.annotations.ContentView;
 
 import com.jenetics.smocker.dao.DaoConfig;
 import com.jenetics.smocker.dao.IDaoManager;
+import com.jenetics.smocker.jseval.SmockerJsEnv;
 import com.jenetics.smocker.model.config.SmockerConf;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.vaadin.annotations.Push;
@@ -18,6 +19,7 @@ import com.vaadin.data.HasValue.ValueChangeEvent;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
@@ -140,8 +142,7 @@ public class ConfigView extends EasyAppLayout {
 		
 		fillerRight.setWidth(0, Unit.PIXELS);
 		
-		Label label = new Label("<b>UI Conf</b>", ContentMode.HTML);
-		
+		Label label = new Label("<b>" + SmockerUI.getBundleValue("UI_Conf") + "</b>", ContentMode.HTML);
 		GridLayout grid = new GridLayout(1, 2);
 		grid.setWidth("100%");
 		grid.setStyleName("Config");
@@ -149,14 +150,32 @@ public class ConfigView extends EasyAppLayout {
 		
 		CheckBox autoRefreshBox = createCheckBoxAutoRefresh();
 		grid.addComponent(autoRefreshBox, 0, 1);
-		
 		layout.addComponent(grid);
 		layout.setExpandRatio(grid, 1.0f);
+		
+		Label labelInteration = new Label("<b>" + SmockerUI.getBundleValue("UI_Conf") + "</b>", ContentMode.HTML);
+		GridLayout gridInteration  = new GridLayout(1, 2);
+		gridInteration.setWidth("100%");
+		gridInteration.setStyleName("Config");
+		gridInteration.addComponent(labelInteration, 0, 0);
+		
+		Button clearGlobalVar = new Button("Clear Global var");
+		clearGlobalVar.addClickListener(this::clearVar);
+		gridInteration.addComponent(clearGlobalVar, 0, 1);
+		layout.addComponent(gridInteration);
+		layout.setExpandRatio(gridInteration, 1.0f);
+		
+		
+		
 		layout.addComponent(fillerRight);
 		layout.setSizeFull();
 		layout.setSizeFull();
 		layout.setWidth("100%");
 		return layout;
+	}
+	
+	private void clearVar(ClickEvent event) {
+		SmockerJsEnv.getInstance().clear();
 	}
 
 	private CheckBox createCheckBoxAutoRefresh() {

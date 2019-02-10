@@ -50,6 +50,7 @@ public class ConnectionMockedManager extends EasyAppLayout {
 	private static final String RENAME_SCENARIO = "renameScenario";
 	private static final String MOVE_UP = "moveUp";
 	private static final String MOVE_DOWN = "moveDown";
+	private static final String DUPLICATE_COMM = "duplicateComm";
 	
 	private TreeGrid<TreeGridMockedItem> treeGrid;
 	private TreeData<TreeGridMockedItem> treeData;
@@ -271,12 +272,14 @@ public class ConnectionMockedManager extends EasyAppLayout {
 			List<String> listItems = new ArrayList<>(); 
 			listItems.addAll(Arrays.asList(SmockerUI.getBundleValue(MOVE_COMM), 
 					SmockerUI.getBundleValue(RENAME_COMM), 
-					SmockerUI.getBundleValue(DELETE_COMM)));
+					SmockerUI.getBundleValue(DELETE_COMM),
+					SmockerUI.getBundleValue(DUPLICATE_COMM)));
 			List<CommunicationMocked> commsOfScenario = getListCommOrdered(treeItem.getCommunication().getScenario());
 			int indeoxOfComm = commsOfScenario.indexOf(treeItem.getCommunication());
 			if (indeoxOfComm < commsOfScenario.size() - 1) {
 				listItems.add(SmockerUI.getBundleValue(MOVE_DOWN));
 			}
+			
 			if (indeoxOfComm > 0) {
 				listItems.add(SmockerUI.getBundleValue(MOVE_UP));
 			}
@@ -309,6 +312,10 @@ public class ConnectionMockedManager extends EasyAppLayout {
 			if (selectedComm != null) {
 				moveDown(selectedComm);
 			}
+		}
+		else if (event.getValue() != null && event.getValue().equals(SmockerUI.getBundleValue(DUPLICATE_COMM))){
+			CommunicationMocked selectedComm = selectedTreeItem.getCommunication();
+			duplicateComm(selectedComm);
 		}
 		else if (event.getValue() != null && event.getValue().equals(SmockerUI.getBundleValue(CREATE_SCENARIO))){
 			Dialog.displayCreateStringBox(SmockerUI.getBundleValue(CREATE_SCENARIO), this::scenarioCreated);
@@ -346,6 +353,21 @@ public class ConnectionMockedManager extends EasyAppLayout {
 		}
 	}
 	
+	private void duplicateComm(CommunicationMocked selectedComm) {
+		TreeGridMockedItem scenarioItem = treeScenarioItemByComm.get(selectedComm);
+		Scenario scenario = selectedComm.getScenario();
+		CommunicationMocked cloneCommunication = ScenarioUploader.cloneCommunication(selectedComm);
+		cloneCommunication.setScenario(scenario);
+		cloneCommunication.setConnection(selectedComm.getConnection());
+		cloneCommunication = communicationDaoManager.create(cloneCommunication);
+		selectedComm.getConnection().getCommunications().add(cloneCommunication);
+		connectionDaoManager.update(selectedComm.getConnection());
+		scenario.getCommunicationsMocked().add(cloneCommunication);
+		scenarioDaoManager.update(scenario);
+		addCommunicationItemToScenario(scenarioItem, cloneCommunication);
+		treeDataProvider.refreshAll();
+	}
+
 	private void moveDown(CommunicationMocked selectedComm) {
 		refreshConnectionMocked();
 		
@@ -533,10 +555,7 @@ public class ConnectionMockedManager extends EasyAppLayout {
 			
 			List<CommunicationMocked> communicationsMocked = scenarioSelected.getCommunicationsMocked();
 			List<CommunicationMocked> newList = new ArrayList<>(communicationsMocked);
-			for (CommunicationMocked communicationMocked : newList) {
-				communicationMocked.getConnection().getCommunications().remove(communicationMocked);
-				connectionDaoManager.update(communicationMocked.getConnection());
-			}
+
 			scenarioSelected.getCommunicationsMocked().clear();
 			scenarioDaoManager.update(scenarioSelected);
 			
@@ -548,8 +567,13 @@ public class ConnectionMockedManager extends EasyAppLayout {
 			scenarioDaoManager.delete(scenarioSelected);
 			
 			for (CommunicationMocked communicationMocked : newList) {
-				communicationDaoManager.delete(communicationMocked);
+				communicationMocked.getConnection().getCommunications().remove(communicationMocked);
+				connectionDaoManager.update(communicationMocked.getConnection());
 			}
+			
+//			for (CommunicationMocked communicationMocked : newList) {
+//				communicationDaoManager.delete(communicationMocked);
+//			}
 			
 			TreeGridMockedItem scenarioItemTarget = treeScenarioItemByScenario.get(scenarioSelected);
 			treeData.removeItem(scenarioItemTarget);

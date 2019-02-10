@@ -263,15 +263,15 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 
 
 	protected void refreshEntity(EntityWithId entityWithId) {
-		Notification notif = new Notification("Refreshing", Type.ASSISTIVE_NOTIFICATION);
+		//Notification notif = new Notification("Refreshing", Type.ASSISTIVE_NOTIFICATION);
 
 		// Customize it
-		notif.setDelayMsec(100);
-		notif.setPosition(Position.BOTTOM_RIGHT);
-		notif.setIcon(VaadinIcons.SPINNER);
+		//notif.setDelayMsec(100);
+		//notif.setPosition(Position.BOTTOM_RIGHT);
+		//notif.setIcon(VaadinIcons.SPINNER);
 
 		// Show it in the page
-		notif.show(Page.getCurrent());
+		//notif.show(Page.getCurrent());
 
 		treeGrid.setEnabled(true);
 

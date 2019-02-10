@@ -6,7 +6,7 @@ public class SmockerJsEnv {
 	
 	private static SmockerJsEnv instance = null;
 	
-	private HashMap<String, String> globalMap = new HashMap<>();
+	private HashMap<Object, String> globalMap = new HashMap<>();
 	
 	private SmockerJsEnv() {
 	}
@@ -18,11 +18,11 @@ public class SmockerJsEnv {
 		return instance;
 	}
 	
-	public void addToMap(String key, String value) {
+	public void addToMap(Object key, String value) {
 		globalMap.put(key, value);
 	}
 	
-	public String getFromMap(String key) {
+	public String getFromMap(Object key) {
 		return globalMap.get(key);
 	}
 	

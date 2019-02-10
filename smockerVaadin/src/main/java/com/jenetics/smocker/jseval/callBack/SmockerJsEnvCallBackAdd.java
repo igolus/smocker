@@ -13,7 +13,7 @@ public class SmockerJsEnvCallBackAdd implements JavaVoidCallback {
 
 	@Override
 	public void invoke(V8Object receiver, V8Array parameters) {
-		String key = parameters.getString(0);
+		Object key = parameters.get(0);
 		String value = parameters.getString(1);
 		SmockerJsEnv.getInstance().addToMap(key, value);
 	}

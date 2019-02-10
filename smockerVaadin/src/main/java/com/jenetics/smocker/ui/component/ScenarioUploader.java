@@ -36,7 +36,7 @@ public class ScenarioUploader implements Receiver, SucceededListener {
 	DaoManager<JavaApplicationMocked> daoManagerJavaApplicationMocked = DaoManagerByModel.getDaoManager(JavaApplicationMocked.class);
 
 	
-	private ObjectMapper mapper = new ObjectMapper();
+	private static ObjectMapper mapper = new ObjectMapper();
 	private static final String SEP = "_";
 	private ByteArrayOutputStream bos;
 
@@ -63,18 +63,26 @@ public class ScenarioUploader implements Receiver, SucceededListener {
 	private List<CommunicationMocked> clone(List<CommunicationMocked> source) {
 		List<CommunicationMocked> clonedList = new ArrayList<>();
 		for (CommunicationMocked commSource : source) {
-
-			try {
-				StringWriter pw = new StringWriter();
-				mapper.writeValue(pw, commSource);
-				CommunicationMocked clonedComm = mapper.readValue(pw.toString(), CommunicationMocked.class);
-				clonedComm.setId(null);
-				clonedList.add(clonedComm);
-			} catch (IOException e) {
-				SmockerUI.log(Level.SEVERE, SmockerUtility.getStackTrace(e));
-			} 
+			CommunicationMocked cloneCommunication = cloneCommunication(commSource);
+			if (cloneCommunication !=null) {
+				clonedList.add(cloneCommunication);
+			}
 		}
 		return clonedList;
+	}
+
+	public static CommunicationMocked cloneCommunication(CommunicationMocked commSource) {
+		try {
+			StringWriter pw = new StringWriter();
+			mapper.writeValue(pw, commSource);
+			CommunicationMocked clonedComm = mapper.readValue(pw.toString(), CommunicationMocked.class);
+			clonedComm.setId(null);
+			clonedComm.setActivated(false);
+			return clonedComm;
+		} catch (IOException e) {
+			SmockerUI.log(Level.SEVERE, SmockerUtility.getStackTrace(e));
+		}
+		return null;
 	}
 
 	private void createNewScenario(Scenario scenarioImported) {

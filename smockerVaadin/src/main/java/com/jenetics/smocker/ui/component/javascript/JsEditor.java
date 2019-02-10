@@ -21,11 +21,11 @@ import com.jenetics.smocker.util.SmockerUtility;
 @SuppressWarnings("serial")
 public class JsEditor extends EasyAppLayout {
 
-	public static String DEFAULT_JS = "function matchAndReturnOutput(recordDate, realInput, bas64Input, providedInput, providedOutput)" + System.lineSeparator()
+	public static String DEFAULT_JS = "function matchAndReturnOutput(recordDate, realInput, bas64Input, providedInput, providedOutput, index)" + System.lineSeparator()
 		+ "{" + System.lineSeparator()
 		+ "  if (realInput == providedInput)" + System.lineSeparator()
 		+ "  {" + System.lineSeparator()
-		+ "    return providedOutput;" + System.lineSeparator()
+		+ "    return btoa(providedOutput);" + System.lineSeparator()
 		+ "  }" + System.lineSeparator()
 		+ "  return null;" + System.lineSeparator()
 		+ "}";
@@ -67,7 +67,7 @@ public class JsEditor extends EasyAppLayout {
 		String[] output = null;
 		try {
 			output = JSEvaluator.runScript(null, input, comm, selectedRequestPane.getText(), 
-					selectedResponsePane.getText(), aceEditor.getValue());
+					selectedResponsePane.getText(), aceEditor.getValue(), comm.getIndex());
 		}
 		catch (SmockerException smockerEx) {
 			return new String[] {SmockerUtility.getStackTrace(smockerEx.getCause()), null};

@@ -90,7 +90,7 @@ public class App
 		int indexBuffer = 0;
 		
 		SocketChannel socketChannel = SocketChannel.open(new InetSocketAddress("www.google.com", 80));
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 2; i++) {
 			
 			//buffer.clear();
 			while (indexBuffer < bytesToSend.length) {

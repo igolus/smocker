@@ -40,10 +40,9 @@ public class MockConverter {
 		Connection sourceConnection = sourceCommunication.getConnection();
 		JavaApplication sourceJavaApplication = sourceConnection.getJavaApplication();
 		JavaApplicationMocked targetJavaApplicationMocked = null;
-		targetJavaApplicationMocked = findOrCreateTargetJavaApplication(sourceJavaApplication);
+		//targetJavaApplicationMocked = findOrCreateTargetJavaApplication(sourceJavaApplication);
 		
-		ConnectionMocked targetConnectionMocked = findOrCreateTargetConnection(sourceConnection,
-				targetJavaApplicationMocked);
+		ConnectionMocked targetConnectionMocked = findOrCreateTargetConnection(sourceConnection);
 		
 		addSingleCommunicationToConnection(targetConnectionMocked, sourceCommunication, true);
 	}
@@ -55,12 +54,11 @@ public class MockConverter {
 	 * @param sourceConnection
 	 */
 	public static void convertConnection(Connection sourceConnection) {
-		JavaApplication sourceJavaApplication = sourceConnection.getJavaApplication();
-		JavaApplicationMocked targetJavaApplicationMocked = null;
-		targetJavaApplicationMocked = findOrCreateTargetJavaApplication(sourceJavaApplication);
+//		JavaApplication sourceJavaApplication = sourceConnection.getJavaApplication();
+//		JavaApplicationMocked targetJavaApplicationMocked = null;
+//		targetJavaApplicationMocked = findOrCreateTargetJavaApplication(sourceJavaApplication);
 		
-		ConnectionMocked targetConnectionMocked = findOrCreateTargetConnection(sourceConnection,
-				targetJavaApplicationMocked);
+		ConnectionMocked targetConnectionMocked = findOrCreateTargetConnection(sourceConnection);
 		
 		addCommunications(sourceConnection, targetConnectionMocked);
 	}
@@ -70,18 +68,18 @@ public class MockConverter {
 	 * 
 	 * @param sourceConnection
 	 */
-	public static void convertJavaApplication(JavaApplication sourceJavaApplication) {
-		JavaApplicationMocked targetJavaApplicationMocked = findOrCreateTargetJavaApplication(sourceJavaApplication);
-
-		Set<Connection> connections = sourceJavaApplication.getConnections();	
-		
-		for (Connection sourceConnection : connections) {
-			ConnectionMocked targetConnectionMocked = findOrCreateTargetConnection(sourceConnection, targetJavaApplicationMocked);
-			Set<Communication> sourceCommunications = sourceConnection.getCommunications();
-			addCommunications(sourceConnection, targetConnectionMocked);
-		}
-		
-	}
+//	public static void convertJavaApplication(JavaApplication sourceJavaApplication) {
+//		JavaApplicationMocked targetJavaApplicationMocked = findOrCreateTargetJavaApplication(sourceJavaApplication);
+//
+//		Set<Connection> connections = sourceJavaApplication.getConnections();	
+//		
+//		for (Connection sourceConnection : connections) {
+//			ConnectionMocked targetConnectionMocked = findOrCreateTargetConnection(sourceConnection, targetJavaApplicationMocked);
+//			Set<Communication> sourceCommunications = sourceConnection.getCommunications();
+//			addCommunications(sourceConnection, targetConnectionMocked);
+//		}
+//		
+//	}
 
 
 	private static void addCommunications(Connection sourceConnection, ConnectionMocked targetConnectionMocked) {
@@ -119,18 +117,21 @@ public class MockConverter {
 		//
 	}
 
-	private static ConnectionMocked findOrCreateTargetConnection(Connection sourceConnection,
-			JavaApplicationMocked targetJavaApplicationMocked) {
+	private static ConnectionMocked findOrCreateTargetConnection(Connection sourceConnection) {
 		ConnectionMocked targetConnectionMocked = null;
 		// check if the connection is already defined
-		Set<ConnectionMocked> connectionsMocked = targetJavaApplicationMocked.getConnections();
-		for (ConnectionMocked connectionMocked : connectionsMocked) {
-			if (connectionMocked.getHost().equals(sourceConnection.getHost())
-					&& connectionMocked.getPort().equals(sourceConnection.getPort())) {
-				targetConnectionMocked = connectionMocked;
-				break;
-			}
-		}
+		
+		List<ConnectionMocked> queryList = daoManagerConnectionMocked.queryList("SELECT conn FROM ConnectionMocked conn WHERE conn.host = '" 
+				+ sourceConnection.getHost() + "' and conn.port = '" + sourceConnection.getPort().toString() + "'");
+		targetConnectionMocked = queryList.stream().findFirst().orElse(null);
+		
+//		for (ConnectionMocked connectionMocked : connectionsMocked) {
+//			if (connectionMocked.getHost().equals(sourceConnection.getHost())
+//					&& connectionMocked.getPort().equals(sourceConnection.getPort())) {
+//				targetConnectionMocked = connectionMocked;
+//				break;
+//			}
+//		}
 		// otherwise create it
 		if (targetConnectionMocked == null) {
 			targetConnectionMocked = new ConnectionMocked();
@@ -138,12 +139,12 @@ public class MockConverter {
 			targetConnectionMocked.setHost(sourceConnection.getHost());
 			targetConnectionMocked.setPort(sourceConnection.getPort());
 			
-			targetJavaApplicationMocked.getConnections().add(targetConnectionMocked);
-			targetConnectionMocked.setJavaApplication(targetJavaApplicationMocked);
+			//targetJavaApplicationMocked.getConnections().add(targetConnectionMocked);
+			//targetConnectionMocked.setJavaApplication(targetJavaApplicationMocked);
 			
 			daoManagerConnectionMocked.create(targetConnectionMocked);
 			//update javaapplication
-			daoManagerJavaApplicationMocked.update(targetJavaApplicationMocked);
+			//daoManagerJavaApplicationMocked.update(targetJavaApplicationMocked);
 		}
 		return targetConnectionMocked;
 	}

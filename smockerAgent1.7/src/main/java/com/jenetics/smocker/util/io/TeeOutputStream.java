@@ -117,9 +117,9 @@ public class TeeOutputStream extends ProxyOutputStream {
 		
 		if (getSmockerContainer().isApplyMock())
 		{
-			String matchMock = getSmockerContainer().getMatchMock();
+			byte[] matchMock = getSmockerContainer().getMatchMock();
 			if (matchMock != null) {
-				getSmockerContainer().setResponseMocked(matchMock);
+				//getSmockerContainer().setResponseMocked(matchMock);
 				return;
 			}
 			//send the initial flow to real stream

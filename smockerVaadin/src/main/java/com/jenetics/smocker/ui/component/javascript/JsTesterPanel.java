@@ -59,7 +59,7 @@ public class JsTesterPanel extends EasyAppLayout {
 		StringBuffer buff = new StringBuffer();
 		if (logs != null) {
 			buff.append(LOG_KEYWORD).append(System.lineSeparator());
-			buff.append(logs);
+			buff.append(logs).append(System.lineSeparator());
 		}
 		if (outputResult != null) {
 			buff.append(OUTPUT_KEYWORD).append(System.lineSeparator());

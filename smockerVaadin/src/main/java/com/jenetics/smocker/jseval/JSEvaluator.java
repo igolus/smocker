@@ -35,7 +35,7 @@ public class JSEvaluator {
 	 * @return
 	 */
 	public static String[] runScript(String base64Input, String realInput, CommunicationMocked comm, String providedInput, 
-			String providedOutput, String code) throws SmockerException {
+			String providedOutput, String code, long index) throws SmockerException {
 		//NodeJS nodeJS = NodeJS.createNodeJS();
 		RuntimeAndLogger runtimeAndLogger = getRuntimeAndLogger();
 		
@@ -49,12 +49,13 @@ public class JSEvaluator {
 		runtimeAndLogger.getRuntime().registerJavaMethod(smockerJsEnvCallBackRemove, "smockerRemFromEnv");
 		
 		String script = "var output = matchAndReturnOutput(recordDate, realInput, bas64Input,"
-				+ "providedInput, providedOutput);\n";
+				+ "providedInput, providedOutput, index);\n";
 		
 		runtimeAndLogger.getRuntime().add("recordDate", comm.getDateTime().toString());
 		runtimeAndLogger.getRuntime().add("providedInput", providedInput == null ? NetworkReaderUtility.decode(comm.getRequest()) : providedInput);
 		runtimeAndLogger.getRuntime().add("providedOutput", providedOutput== null ? NetworkReaderUtility.decode(comm.getResponse()) : providedOutput);
 		runtimeAndLogger.getRuntime().add("realInput", realInput);
+		runtimeAndLogger.getRuntime().add("index", index);
 		if (base64Input == null) {
 			base64Input = NetworkReaderUtility.encode(realInput);
 		}

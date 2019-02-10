@@ -23,7 +23,7 @@ public class SmockerContainer {
 	private TeeInputStream teeInputStream;
 	private TeeOutputStream teeOutputStream;
 	private String stackTrace;
-	private String responseMocked; 
+	//private String responseMocked; 
 	
 	private String outputToBesend;
 	private String inputToBesend;
@@ -168,6 +168,7 @@ public class SmockerContainer {
 		applyMock = false;
 		reseNextWrite = false;
 		streamResent = false;
+		noMatch = false;
 		matchOutput = null;
 		applyMock = RemoteServerChecker.getMockedHost().contains(host + SEP + port);
 		indexForArrayCopy = 0;
@@ -177,14 +178,14 @@ public class SmockerContainer {
 		return ssl;
 	}
 
-	public String getResponseMocked() {
-		return responseMocked;
-	}
-
-
-	public void setResponseMocked(String responseMocked) {
-		this.responseMocked = responseMocked;
-	}
+//	public String getResponseMocked() {
+//		return responseMocked;
+//	}
+//
+//
+//	public void setResponseMocked(String responseMocked) {
+//		this.responseMocked = responseMocked;
+//	}
 
 
 	public TeeInputStream getTeeInputStream() {
@@ -220,10 +221,11 @@ public class SmockerContainer {
 		}
 	}
 	
-	private String matchOutput = null;
+	private byte[] matchOutput = null;
+	private boolean noMatch = false;
 	
-	public String getMatchMock () throws UnsupportedEncodingException {
-		if (matchOutput != null && matchOutput.equals("NO_MATCH")) {
+	public byte[] getMatchMock () throws UnsupportedEncodingException {
+		if (noMatch) {
 			return null;
 		}
 		if (matchOutput != null) {
@@ -233,14 +235,12 @@ public class SmockerContainer {
 		String inputToCheck = getSmockerSocketOutputStream().getSmockerOutputStreamData().getString();
 		String match = RestClientSmocker.getInstance().postCheckMatch(inputToCheck, host);
     	String matchResponse = ResponseReader.readValueFromResponse(match, "outputResponse");
-    	matchOutput = matchResponse;
-    	if (matchOutput == null || matchResponse.equals("NO_MATCH")) {
+    	if ( matchResponse == null || matchResponse.equals("NO_MATCH")) {
+    		noMatch = true;
     		return null;
     	}
-    	else {
-    		matchOutput = RestClientSmocker.decode(matchResponse);
-    		return matchOutput;
-    	}
+    	matchOutput = RestClientSmocker.decodeByte(matchResponse);
+    	return matchOutput;
 	}
 	
 //	private boolean resetMatchNextWrite = false;

@@ -118,10 +118,9 @@ public class TeeInputStream extends ProxyInputStream {
         }
     }
     
-    public void initiateMockedResponse() {
-    	if (smockerContainer != null && smockerContainer.getResponseMocked() != null && mockBis == null) {
-    		this.mockBis = new ByteArrayInputStream(
-    				RestClientSmocker.decodeByte(smockerContainer.getResponseMocked()));
+    public void initiateMockedResponse() throws UnsupportedEncodingException {
+    	if (smockerContainer != null && smockerContainer.getMatchMock() != null && mockBis == null) {
+    		this.mockBis = new ByteArrayInputStream(smockerContainer.getMatchMock());
     	}
     }
     

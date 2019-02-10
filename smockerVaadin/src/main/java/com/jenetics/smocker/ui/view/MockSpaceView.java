@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import org.jboss.logging.Logger;
 import org.vaadin.easyapp.util.ActionContainer;
 import org.vaadin.easyapp.util.ActionContainer.InsertPosition;
+import org.vaadin.easyapp.util.ActionContainer.Position;
 import org.vaadin.easyapp.util.ActionContainerBuilder;
 import org.vaadin.easyapp.util.ButtonWithCheck;
 import org.vaadin.easyapp.util.annotations.ContentView;
@@ -30,6 +31,7 @@ import com.jenetics.smocker.model.Scenario;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.component.ConnectionMockedDetailsView;
 import com.jenetics.smocker.ui.component.ConnectionMockedManager;
+import com.jenetics.smocker.ui.component.ScenarioUploader;
 import com.jenetics.smocker.ui.component.UploadPanel;
 import com.jenetics.smocker.ui.dialog.Dialog;
 import com.jenetics.smocker.ui.util.JsonFileDownloader;
@@ -47,6 +49,7 @@ import com.vaadin.server.StreamResource;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Upload;
 import com.vaadin.ui.TabSheet.Tab;
 
 @SuppressWarnings("serial")
@@ -78,15 +81,15 @@ implements RefreshableView {
 	private static final String BUNDLE_NAME = "BundleUI";
 
 
-	@Override
-	protected Set<ConnectionMocked> getJavaAppConnections(JavaApplicationMocked javaApplication) {
-		return javaApplication.getConnections();
-	}
-
-	@Override
-	protected JavaApplicationMocked getJavaAppFromConnection(ConnectionMocked connection) {
-		return connection.getJavaApplication();
-	}
+//	@Override
+//	protected Set<ConnectionMocked> getJavaAppConnections(JavaApplicationMocked javaApplication) {
+//		return javaApplication.getConnections();
+//	}
+//
+//	@Override
+//	protected JavaApplicationMocked getJavaAppFromConnection(ConnectionMocked connection) {
+//		return connection.getJavaApplication();
+//	}
 
 	@Override
 	protected ConnectionMocked getConnectionFromCommunication(CommunicationMocked comm) {
@@ -106,7 +109,7 @@ implements RefreshableView {
 
 	@Override
 	protected void addTreeMapping() {
-		treeGrid.addColumn(item -> item.getApplication()).setCaption(APPLICATION);
+		//treeGrid.addColumn(item -> item.getApplication()).setCaption(APPLICATION);
 		treeGrid.addColumn(item -> item.getAdress()).setCaption(ADRESS);
 		treeGrid.addColumn(item -> item.getPort()).setCaption(PORT);
 		treeGrid.addColumn(item -> item.getConnectionType()).setCaption(CONNECTION_TYPE);
@@ -120,23 +123,40 @@ implements RefreshableView {
 	public void refresh(EntityWithId entityWithId) {
 		refreshEntity(entityWithId);
 	}
+	
+	/**
+	 * Rebuild the treeTable
+	 */
+	protected void fillTreeTable() {
+		treeData.clear();
+		List<ConnectionMocked> listConnections = daoManagerConnection.listAll();
+		for (ConnectionMocked connectionMocked : listConnections) {
+			addConnectionToTree(null, connectionMocked);
+		}
+		treeDataProvider.refreshAll();
+	}
 
 	@Override
 	public ActionContainer buildActionContainer() {
 		ActionContainerBuilder builder = new ActionContainerBuilder(BUNDLE_NAME)
 				.addButton("Clean_Button", VaadinIcons.MINUS, null,  this::isMainTabSelected			
 						, this::clean, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
-				.addButton("ViewDetails_Button", VaadinIcons.EYE, null,  this::isConnectionSelected			
+				.addButton("ViewDetails_Button", VaadinIcons.EYE, null,  this::canViewDetails			
 						, this::details, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
 				.addButton("Refresh_Button", VaadinIcons.REFRESH, null,  this::always
-						, this::details, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
+						, this::refresh, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
 				.addButton("Save_Button", VaadinIcons.DISC, null,  this::canSave			
 						, this::save, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
-				.addButton("Import_Button", VaadinIcons.REPLY, "ImportToolTip",  () -> true			
-						, this::importScenario, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
 				.addButton("Export_Button", VaadinIcons.SHARE, "ExportToolTip",  this::canExport			
 						, null, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER);
 
+		ScenarioUploader uploader = new ScenarioUploader();
+		Upload upload = new Upload(null, uploader);
+		upload.setButtonCaption(SmockerUI.getBundleValue("Import_Button"));
+		upload.setDescription(SmockerUI.getBundleValue("ImportToolTip"));
+		upload.addSucceededListener(uploader);
+		builder.addComponent(upload, Position.LEFT, InsertPosition.AFTER);
+		
 		ActionContainer actionContainer = builder.build();
 		List<ButtonWithCheck> listButtonWithCheck = actionContainer.getListButtonWithCheck();
 		ButtonWithCheck exportButton = listButtonWithCheck.get(listButtonWithCheck.size() - 1);
@@ -226,27 +246,28 @@ implements RefreshableView {
 			for (TreeGridConnectionData<JavaApplicationMocked, ConnectionMocked> treeGridConnectionData : selectedItems) {
 				if (treeGridConnectionData.isConnection()) {
 					ConnectionMocked selectedConnection = treeGridConnectionData.getConnection();
-					selectedConnection.getJavaApplication().getConnections().remove(selectedConnection);
+					//selectedConnection.getJavaApplication().getConnections().remove(selectedConnection);
 					removeTabConn(selectedConnection);
 					cleanScenario(selectedConnection);
-					daoManagerJavaApplication.update(selectedConnection.getJavaApplication());
+					daoManagerConnection.delete(selectedConnection);
+					//daoManagerJavaApplication.update(selectedConnection.getJavaApplication());
 				}
-				else if (treeGridConnectionData.isJavaApplication()) {
-					JavaApplicationMocked selectedJavaApplication = treeGridConnectionData.getJavaApplication();
-					selectedJavaApplication.getConnections().stream().forEach(this::removeTabConn);
-					cleanScenario(selectedJavaApplication);
-					daoManagerJavaApplication.deleteById(selectedJavaApplication.getId());
-				}
+//				else if (treeGridConnectionData.isJavaApplication()) {
+//					JavaApplicationMocked selectedJavaApplication = treeGridConnectionData.getJavaApplication();
+//					selectedJavaApplication.getConnections().stream().forEach(this::removeTabConn);
+//					cleanScenario(selectedJavaApplication);
+//					daoManagerJavaApplication.deleteById(selectedJavaApplication.getId());
+//				}
 				fillTreeTable();
 			}
 		}
 	}
 
-	private void cleanScenario(JavaApplicationMocked javaApplication) {
-		for (ConnectionMocked conn : javaApplication.getConnections()) {
-			cleanScenario(conn);
-		}
-	}
+//	private void cleanScenario(JavaApplicationMocked javaApplication) {
+//		for (ConnectionMocked conn : javaApplication.getConnections()) {
+//			cleanScenario(conn);
+//		}
+//	}
 
 	private void cleanScenario(ConnectionMocked connection) {
 		for (CommunicationMocked comm : connection.getCommunications()) {
@@ -266,6 +287,10 @@ implements RefreshableView {
 
 	public boolean isSelected() {
 		return treeGrid.getSelectedItems().size() == 1;
+	}
+	
+	public boolean canViewDetails() {
+		return isConnectionSelected() && isMainTabSelected();
 	}
 
 	public boolean isConnectionSelected() {
@@ -301,5 +326,16 @@ implements RefreshableView {
 			detailsView.communicationMockedCreated(communicationMocked);
 		}
 
+	}
+
+	@Override
+	protected Set<ConnectionMocked> getJavaAppConnections(JavaApplicationMocked javaApplication) {
+		return null;
+	}
+
+	@Override
+	protected JavaApplicationMocked getJavaAppFromConnection(ConnectionMocked connection) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

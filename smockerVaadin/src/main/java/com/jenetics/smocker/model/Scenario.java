@@ -2,6 +2,7 @@ package com.jenetics.smocker.model;
 
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -23,6 +24,7 @@ public class Scenario implements EntityWithId {
 	private int version;
 
 	@OneToMany
+	//@OneToMany(cascade = CascadeType.ALL, orphanRemoval = false, mappedBy = "scenario")
 	//@OrderColumn(name="INDEX")
 	private List<CommunicationMocked> communicationsMocked;
 	
@@ -32,8 +34,8 @@ public class Scenario implements EntityWithId {
 	@Column(nullable = false)
 	private Integer port;
 	
-	@Column(nullable = false)
-	private String classQualifiedName;
+//	@Column(nullable = true)
+//	private String classQualifiedName;
 	
 	@Column
 	private String name;
@@ -118,13 +120,13 @@ public class Scenario implements EntityWithId {
 		this.port = port;
 	}
 
-	public String getClassQualifiedName() {
-		return classQualifiedName;
-	}
-
-	public void setClassQualifiedName(String classQualifiedName) {
-		this.classQualifiedName = classQualifiedName;
-	}
+//	public String getClassQualifiedName() {
+//		return classQualifiedName;
+//	}
+//
+//	public void setClassQualifiedName(String classQualifiedName) {
+//		this.classQualifiedName = classQualifiedName;
+//	}
 
 	@Override
 	public String toString() {

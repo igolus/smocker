@@ -37,35 +37,35 @@ public class ConnectionMocked implements EntityWithId {
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "connection")
 	private Set<CommunicationMocked> communications = new HashSet<>();
 
-	@JoinColumn(nullable = false)
-	@OneToOne
-	@JsonIgnore
-	private JavaApplicationMocked javaApplication;
+//	@JoinColumn(nullable = true)
+//	@OneToOne
+//	@JsonIgnore
+//	private JavaApplicationMocked javaApplication;
 	
 	
-	@JoinColumn(nullable = false)
-	@OneToOne
-	@JsonIgnore
-	private Scenario scenario;
+//	@JoinColumn(nullable = false)
+//	@OneToOne
+//	@JsonIgnore
+//	private Scenario scenario;
 	
-	public Scenario getScenario() {
-		return scenario;
-	}
-
-	public void setScenario(Scenario scenario) {
-		this.scenario = scenario;
-	}
+//	public Scenario getScenario() {
+//		return scenario;
+//	}
+//
+//	public void setScenario(Scenario scenario) {
+//		this.scenario = scenario;
+//	}
 
 	@Column
 	private Boolean watched = true;
 
-	public JavaApplicationMocked getJavaApplication() {
-		return javaApplication;
-	}
-
-	public void setJavaApplication(JavaApplicationMocked javaApplication) {
-		this.javaApplication = javaApplication;
-	}
+//	public JavaApplicationMocked getJavaApplication() {
+//		return javaApplication;
+//	}
+//
+//	public void setJavaApplication(JavaApplicationMocked javaApplication) {
+//		this.javaApplication = javaApplication;
+//	}
 	
 	@Override
 	public Long getId() {
@@ -151,8 +151,8 @@ public class ConnectionMocked implements EntityWithId {
 			result += ", port: " + port;
 		if (communications != null)
 			result += ", Communications: " + communications;
-		if (javaApplication != null)
-			result += ", javaApplication: " + javaApplication.getId();
+//		if (javaApplication != null)
+//			result += ", javaApplication: " + javaApplication.getId();
 		if (watched != null)
 			result += ", watched: " + watched;
 		return result;

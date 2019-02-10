@@ -34,14 +34,6 @@ public class TransformerUtility {
 		super();
 	}
 
-	// public static Hashtable<Object, Long> getConnectionIdBySocket() {
-	//  return connectionIdBySocket;
-	// }
-
-	// public static Long getJavaAppId() {
-	//  return javaAppId;
-	// }
-
 	public static String getCallerApp() {
 		if (callerApp == null) {
 			callerApp = "unknown";
@@ -72,18 +64,10 @@ public class TransformerUtility {
 			if (smockerContainer == null) {
 				InetSocketAddress remoteAddress = (InetSocketAddress) socketChannel.getRemoteAddress();
 				smockerContainer = addSmockerContainer(socketChannel, remoteAddress.getHostName(), remoteAddress.getPort());
-				smockerContainer.resetAll();
-//				if (RemoteServerChecker.getMockedHost().contains(smockerContainer.getHost())) {
-//					smockerContainer.setApplyMock(true);
-//				}
 			}
-
 			if (smockerContainer.isReseNextWrite()) {
 				smockerContainer.postCommunication();
 				smockerContainer.resetAll();
-//				if (RemoteServerChecker.getMockedHost().contains(smockerContainer.getHost())) {
-//					smockerContainer.setApplyMock(true);
-//				}
 			}
 			if (!smockerContainer.isApplyMock()) {
 				write = writeSocketChannel(buffer, socketChannel);
@@ -101,19 +85,19 @@ public class TransformerUtility {
 		SmockerContainer smockerContainer = smockerContainerBySocket.get(socketChannel);
 		if (smockerContainer != null && socketChannel != null && !filterSmockerBehavior() && RemoteServerChecker.isRemoteServerAlive() 
 				&& isConnectionWatched(socketChannel)) {
+			smockerContainer.setReseNextWrite(true);
 			if (smockerContainer.isApplyMock()) {
-				String matchMock = smockerContainer.getMatchMock();
+				byte[] matchMock = smockerContainer.getMatchMock();
 				//match applied
 				if (matchMock != null) {
 					int index = smockerContainer.getIndexForArrayCopy();
-					byte[] bytesMock = matchMock.getBytes();
 					
-					int lengthToCopy = Math.min(bytebuffer.limit(), bytesMock.length - index);
+					int lengthToCopy = Math.min(bytebuffer.limit(), matchMock.length - index);
 					if (lengthToCopy == 0) {
 						return -1;
 					}
 					byte[] targetBytes = new byte[lengthToCopy];
-					System.arraycopy(bytesMock, index, targetBytes, 0, lengthToCopy);
+					System.arraycopy(matchMock, index, targetBytes, 0, lengthToCopy);
 					smockerContainer.setIndexForArrayCopy(index + lengthToCopy);
 					bytebuffer.clear();
 					bytebuffer.put(targetBytes);
@@ -136,7 +120,7 @@ public class TransformerUtility {
 				smockerContainer.getSmockerSocketInputStream().write(outBytes);
 			}
 
-			smockerContainer.setReseNextWrite(true);
+			
 			return readen;
 		}
 		if (bytebuffer != null && socketChannel != null) {
@@ -198,7 +182,7 @@ public class TransformerUtility {
 				addSmockerContainer(source, source.getInetAddress().getHostName(), source.getPort());
 			}
 			SmockerContainer smockerContainer = smockerContainerBySocket.get(source);
-			if (smockerContainer.getSmockerSocketInputStream() == null) {
+			if (smockerContainer.getTeeInputStream() == null) {
 				smockerContainer.resetSmockerSocketInputStream();
 				TeeInputStream teeInputStream = new TeeInputStream(is, smockerContainer.getSmockerSocketInputStream(), true, smockerContainer);
 				smockerContainer.setTeeInputStream(teeInputStream);
@@ -256,47 +240,10 @@ public class TransformerUtility {
 	private static SmockerContainer addSmockerContainer(Object source, String host, int port) throws IOException {
 		String stackTrace = getStackTrace();
 		SmockerContainer smockerContainer = new SmockerContainer(host,port, stackTrace, source);
-		//String allResponse = RestClientSmocker.getInstance().getAll();
-		//String existingId = ResponseReader.findExistingAppId(allResponse);
-		//Long javaAppId = RemoteServerChecker.getInstance().getJavaAppId();
-
-
-		// only if the javaAppId was not found
-		//  if ((javaAppId == null || existingId == null) && allResponse != null) {
-		//   if (existingId != null) {
-		//    javaAppId = Long.valueOf(existingId);
-		//   } else {
-		//    String response = RestClientSmocker.getInstance().postJavaApp();
-		//    updateJavaAppId(response);
-		//   }
-		//  }
-		//  if (javaAppId != null) {
-		//   String response = RestClientSmocker.getInstance().postConnection(smockerContainer, javaAppId);
-		//   // check the status
-		//   String status = ResponseReader.readStatusCodeFromResponse(response);
-		//   if (status.equals(ResponseReader.CONFLICT)) {
-		//    allResponse = RestClientSmocker.getInstance().getAll();
-		//    String existingConnectionId = ResponseReader.findExistingConnectionId(allResponse,
-		//      smockerContainer.getHost(), smockerContainer.getPort());
-		//    connectionIdBySocket.put(source, Long.valueOf(existingConnectionId));
-		//   } else {
-		//    String idConnection = ResponseReader.readValueFromResponse(response, "id");
-		//    if (idConnection != null) {
-		//     connectionIdBySocket.put(source, Long.valueOf(idConnection));
-		//    }
-		//   }
-		//  }
-		//
 		smockerContainerBySocket.put(source, smockerContainer);
+		smockerContainer.resetAll();
 		return smockerContainer;
 	}
-
-	// private synchronized static void updateJavaAppId(String response) throws IOException {
-	//  String id = ResponseReader.readValueFromResponse(response, "id");
-	//  if (id != null) {
-	//   javaAppId = Long.parseLong(id);
-	//  }
-	// }
 
 	private static String getStackTrace() {
 		StringBuilder sb = new StringBuilder();

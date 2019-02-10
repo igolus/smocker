@@ -50,7 +50,7 @@ public class CommunicationMocked implements EntityWithId {
 	@Column(columnDefinition = "TEXT")
 	private String response;
 
-	@JoinColumn(nullable = false)
+	@JoinColumn(nullable = true)
 	@OneToOne
 	@JsonIgnore
 	private ConnectionMocked connection;
@@ -71,7 +71,7 @@ public class CommunicationMocked implements EntityWithId {
 	@Column(columnDefinition = "TEXT")
 	private String name;
 	
-	@JoinColumn(nullable = false)
+	@JoinColumn(nullable = true)
 	@OneToOne
 	@JsonIgnore
 	private Scenario scenario;
@@ -218,8 +218,8 @@ public class CommunicationMocked implements EntityWithId {
 			result += ", InputForTest: " + inputForTest;
 		if (name != null && !name.trim().isEmpty())
 			result += ", name: " + name;
-		if (scenario != null)
-			result += ", scenario: " + scenario.getId();
+//		if (scenario != null)
+//			result += ", scenario: " + scenario.getId();
 		result += ", activated: " + activated;
 		return result;
 	}

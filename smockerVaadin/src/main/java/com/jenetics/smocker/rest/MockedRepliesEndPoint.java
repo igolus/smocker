@@ -92,9 +92,10 @@ public class MockedRepliesEndPoint  {
 		for (CommunicationMocked communicationMocked : listComms) {
 			try {
 				String decodedInput = NetworkReaderUtility.decode(request.getRequest());
-				String[] result = JSEvaluator.runScript(request.getRequest(), decodedInput, communicationMocked, null, null, null);
+				String[] result = JSEvaluator.runScript(request.getRequest(), decodedInput, communicationMocked, 
+						null, null, null, communicationMocked.getIndex());
 				if (result != null && result[1] != null) {
-					MatchMockResponse response = new MatchMockResponse(NetworkReaderUtility.encode(result[1]));
+					MatchMockResponse response = new MatchMockResponse(result[1]);
 					SmockerUI.log(Level.INFO, "Found mock match for " + 
 							communicationMocked.getConnection().getHost() + SEP + communicationMocked.getConnection().getPort());
 					return Response.ok(response).build();

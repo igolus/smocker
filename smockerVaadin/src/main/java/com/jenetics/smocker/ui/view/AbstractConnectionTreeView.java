@@ -296,7 +296,7 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 	 * Add a Java application item to the tree
 	 * @param javaApplication
 	 */
-	private void addJavaApplicationToTree(T javaApplication) {
+	protected void addJavaApplicationToTree(T javaApplication) {
 		TreeGridConnectionData<T, U> treeGridConnectionJavaApp = createTreeGridFromJavaApplication(javaApplication);
 		treeItemByJavaApplication.put(javaApplication, treeGridConnectionJavaApp);
 		treeData.addItem(null, treeGridConnectionJavaApp);
@@ -307,10 +307,13 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 	}
 
 
-	private void addConnectionToTree(T javaApplication, U connection) {
+	protected void addConnectionToTree(T javaApplication, U connection) {
 		TreeGridConnectionData<T, U> treeGridConnection = createTreeGridFromJConnection(connection);
-		if (treeItemByJavaApplication.containsKey(javaApplication)) {
+		if (javaApplication != null && treeItemByJavaApplication.containsKey(javaApplication)) {
 			treeData.addItem(treeItemByJavaApplication.get(javaApplication), treeGridConnection);
+		}
+		else {
+			treeData.addItem(null, treeGridConnection);
 		}
 	}
 

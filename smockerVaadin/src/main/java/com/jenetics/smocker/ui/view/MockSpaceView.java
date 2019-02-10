@@ -112,7 +112,6 @@ implements RefreshableView {
 		//treeGrid.addColumn(item -> item.getApplication()).setCaption(APPLICATION);
 		treeGrid.addColumn(item -> item.getAdress()).setCaption(ADRESS);
 		treeGrid.addColumn(item -> item.getPort()).setCaption(PORT);
-		treeGrid.addColumn(item -> item.getConnectionType()).setCaption(CONNECTION_TYPE);
 	}
 
 	public void treeSelectionChange(SelectionEvent<TreeGridConnectionData<JavaApplicationMocked, ConnectionMocked>> event) {

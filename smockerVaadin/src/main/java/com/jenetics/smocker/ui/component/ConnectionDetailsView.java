@@ -214,14 +214,14 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 		return treeData.getRootItems().size() > 1;
 	}
 
-	public void search(String searchQuery) {
+	public void search(String searchQuery, Runnable callBack) {
 		Set<Communication> communnications = getCommunications();
 		LuceneIndexer lucenIndexer = new LuceneIndexer();
 		communnications.stream().forEach( comm -> lucenIndexer.addEntity(comm));
 		List<Communication> foundComms = lucenIndexer.search(searchQuery);
 		if (foundComms != null) {
-			CommunicationItemsResults commResult = new CommunicationItemsResults(foundComms, searchQuery, 
-					this::selectedCommFromSearch);
+			CommunicationItemsResults commResult = 
+					new CommunicationItemsResults(callBack, foundComms, searchQuery, this::selectedCommFromSearch);
 			Window searchWindow = SmockerUI.displayInSubWindowMidSize(SmockerUI.getBundleValue("search_result"), commResult);
 			commResult.setWindowContainer(searchWindow);
 		}
@@ -233,6 +233,7 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 	private void selectedCommFromSearch(Communication comm) {
 		menu.select(commDisplayByComm.get(comm));
 		selectCommunication(comm);
+		//refreshClickable();
 	}
 
 	public void displayStack() {

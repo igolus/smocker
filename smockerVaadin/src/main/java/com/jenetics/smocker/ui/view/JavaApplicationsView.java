@@ -433,7 +433,7 @@ implements RefreshableView, SearcheableView {
 		Component selectedComponent = tabSheet.getSelectedTab();
 		if (selectedComponent instanceof ConnectionDetailsView && !StringUtils.isEmpty(searchQuery)) {
 			ConnectionDetailsView selectedView = (ConnectionDetailsView) selectedComponent;
-			selectedView.search(searchQuery);
+			selectedView.search(searchQuery, this::refreshClickable);
 		}
 	}
 }

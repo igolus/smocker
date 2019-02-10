@@ -95,7 +95,6 @@ public class ScenarioUploader implements Receiver, SucceededListener {
 			targetConnectionMocked = new ConnectionMocked();
 			targetConnectionMocked.setHost(host);
 			targetConnectionMocked.setPort(port);
-			//targetConnectionMocked.setScenario(scenarioImported);
 			daoManagerConnectionMocked.create(targetConnectionMocked);
 		}
 

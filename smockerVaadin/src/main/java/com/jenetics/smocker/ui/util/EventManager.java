@@ -7,6 +7,7 @@ import com.jenetics.smocker.model.Communication;
 import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.model.JavaApplication;
+import com.jenetics.smocker.model.event.CommunicationsRemoved;
 import com.jenetics.smocker.ui.SmockerUI;
 
 public class EventManager {
@@ -31,10 +32,19 @@ public class EventManager {
 			refreshView(comm);
 		}
 	}
+	
+	public void newCommunicationsRemoved(@Observes CommunicationsRemoved commsRemoved) {
+		if (DaoConfigUpdaterThread.getSingleConf().isAutorefesh() && SmockerUI.getInstance() != null) {
+			SmockerUI.getInstance().remove(commsRemoved, CommunicationsRemoved.class);
+		}
+	}
+	
 
 	private void refreshView(EntityWithId entityWithId) {
 		if (SmockerUI.getInstance() != null) {
 			SmockerUI.getInstance().refreshView(entityWithId);
 		}
 	}
+	
+	
 }

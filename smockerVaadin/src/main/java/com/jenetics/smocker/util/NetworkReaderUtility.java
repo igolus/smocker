@@ -11,7 +11,6 @@ public class NetworkReaderUtility {
 
 	private NetworkReaderUtility() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	private static Logger logger = Logger.getLogger(NetworkReaderUtility.class);

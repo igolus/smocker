@@ -24,6 +24,7 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
 import org.jboss.logging.Logger;
+import org.springframework.beans.factory.annotation.Configurable;
 
 import com.jenetics.smocker.model.Communication;
 import com.jenetics.smocker.model.EntityWithId;
@@ -37,7 +38,7 @@ public class LuceneIndexer {
 	private static final String ID = "id";
 
 	@Inject
-	private static Logger logger;
+	private static Logger logger = Logger.getLogger(LuceneIndexer.class);
 	
 	private StandardAnalyzer analyzer;
 	private Directory index;

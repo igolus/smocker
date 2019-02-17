@@ -1,6 +1,7 @@
 package com.jenetics.smocker.ui;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 
@@ -19,10 +20,13 @@ import org.vaadin.easyapp.util.ActionContainer.Position;
 import com.jenetics.smocker.dao.DaoConfigUpdaterThread;
 import com.jenetics.smocker.lucene.LuceneIndexer;
 import com.jenetics.smocker.model.EntityWithId;
+import com.jenetics.smocker.model.event.CommunicationsRemoved;
 import com.jenetics.smocker.rest.AliveEndPoint;
+import com.jenetics.smocker.ui.util.ItemRemovableView;
 import com.jenetics.smocker.ui.util.RefreshableView;
 import com.jenetics.smocker.ui.util.SearcheableView;
 import com.jenetics.smocker.ui.view.LogView;
+import com.jenetics.smocker.util.lang.ReflectionUtil;
 import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
 import com.vaadin.navigator.Navigator;
@@ -46,7 +50,7 @@ public class SmockerUI extends UI {
 
 	private static final String SUB_WINDOW_DEFAULT_HEIGHT = "800px";
 
-	private static final int SLEEP_TIME = 200;
+	private static final int SLEEP_TIME = 100;
 
 	private static EntityManager em;
 	
@@ -238,6 +242,26 @@ public class SmockerUI extends UI {
 		subWindow.setHeight(SUB_WINDOW_DEFAULT_HEIGHT);
 		subWindow.setWidth(SUB_WINDOW_DEFAULT_WIDTH);
 		subWindow.setSizeFull();
+	}
+	
+	public <T> void remove(T itemToRemove, Class<T> clazz) {
+		access( ()  -> 
+		{
+			try {
+				Thread.sleep(SLEEP_TIME);
+				
+				Map<String, Component> viewMap = getInstance().getEasyAppMainView().getScanner().getViewMap();
+				for (Component view : viewMap.values()) {
+					if (ReflectionUtil.findSuperClassParameterType(view, ItemRemovableView.class, 0).equals(clazz) ) {
+						ItemRemovableView<T> targetView = (ItemRemovableView<T>) view; 
+						targetView.remove(itemToRemove);
+					}
+				}
+			} catch (InterruptedException e) {
+				logger.error(MessageBuilder.getEasyAppMessage("Unable to remove item"), e);
+				Thread.currentThread().interrupt();
+			}
+		});
 	}
 	
 

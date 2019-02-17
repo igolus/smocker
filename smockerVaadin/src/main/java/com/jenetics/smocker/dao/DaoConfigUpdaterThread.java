@@ -5,6 +5,7 @@ import javax.inject.Inject;
 import org.jboss.logging.Logger;
 
 import com.jenetics.smocker.model.config.SmockerConf;
+import com.jenetics.smocker.threading.ExecutorBean;
 
 public class DaoConfigUpdaterThread {
 	
@@ -12,10 +13,11 @@ public class DaoConfigUpdaterThread {
 	private static final int SLEEP_TIME = 2000;
 	private static SmockerConf singleConf = null;
 	@Inject
-	private Logger logger;
+	private Logger logger = Logger.getLogger(DaoConfigUpdaterThread.class);
 	
 	private DaoConfigUpdaterThread() {
 		super();
+		singleConf = DaoConfig.getSingleConfig();
 	}
 	
 	public static synchronized DaoConfigUpdaterThread getInstance() {
@@ -31,8 +33,7 @@ public class DaoConfigUpdaterThread {
 	}
 
 	private void start() {
-		Thread thread = new Thread(this::run);
-		thread.start();
+		ExecutorBean.executeRunnable(this::run);
 	}
 	
 	private void run () {
@@ -43,7 +44,6 @@ public class DaoConfigUpdaterThread {
 			} catch (InterruptedException e) {
 				logger.error("Unable to update config", e);
 			}
-			
 		}
 	}
 	

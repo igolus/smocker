@@ -16,6 +16,8 @@ public interface IDaoManager<T extends Serializable> {
 	List<T> listAll(Integer startPosition, Integer maxResult);
 
 	List<T> listAll();
+	
+	long count();
 
 	void deleteById(Long id);
 

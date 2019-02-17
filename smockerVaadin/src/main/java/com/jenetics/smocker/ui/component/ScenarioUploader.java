@@ -28,8 +28,7 @@ import com.vaadin.ui.Upload.SucceededListener;
 
 public class ScenarioUploader implements Receiver, SucceededListener {
 	
-	@Inject
-	private Logger logger;
+	private Logger logger = Logger.getLogger(ScenarioUploader.class);
 	
 	DaoManager<Scenario> daoManagerScenario = DaoManagerByModel.getDaoManager(Scenario.class);
 	DaoManager<ConnectionMocked> daoManagerConnectionMocked = DaoManagerByModel.getDaoManager(ConnectionMocked.class);

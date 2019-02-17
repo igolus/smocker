@@ -35,7 +35,11 @@ public class App
 
 				line = bufferedReader.readLine();
 				//callGoogle();
-				callGoogleSocketChannell();
+				for (int i = 0; i < 20; i++) {
+					//callGoogleSocketChannell();
+					callGoogle();
+				}
+				
 				//callYahoo();
 			}
 
@@ -78,7 +82,7 @@ public class App
 		String lineSeparator = System.getProperty("line.separator");
 		bf.append("GET / HTTP/1.1").append(lineSeparator);
 		bf.append("Host: www.google.com:80").append(lineSeparator);
-		bf.append("Connection: Close").append(lineSeparator);
+		//bf.append("Connection: Close").append(lineSeparator);
 		//bf.append("Connection: keep-alive").append(lineSeparator);
 		bf.append(lineSeparator);
 		byte[] bytesToSend = bf.toString().getBytes();
@@ -90,8 +94,8 @@ public class App
 		int indexBuffer = 0;
 		
 		SocketChannel socketChannel = SocketChannel.open(new InetSocketAddress("www.google.com", 80));
-		for (int i = 0; i < 2; i++) {
-			
+		for (int i = 0; i < 1; i++) {
+			indexBuffer = 0;
 			//buffer.clear();
 			while (indexBuffer < bytesToSend.length) {
 				byte[] destArray = new byte[Math.min(capacity, bytesToSend.length - indexBuffer)];
@@ -102,20 +106,9 @@ public class App
 				
 				ByteBuffer buffer = ByteBuffer.wrap(destArray);
 				indexBuffer += destArray.length;
-				
-				System.out.print(new String(destArray));
-				//buffer.rewind();
-//				for (int j = 0; j < capacity && indexBuffer < bytesToSend.length; j++) {
-//					buffer.put(bytesToSend[indexBuffer++]);
-//				}
-				//buffer.rewind();
 				int write = socketChannel.write(buffer);
 				buffer.rewind();
-				//System.out.println("write " + write);
-				//System.out.print(new String( buffer.compact().array() ));
-				//buffer.clear();
 			}
-			//buffer.flip();
 			StringBuffer bfOut = new StringBuffer();
 			
 			ByteBuffer buffer = ByteBuffer.allocate(10);
@@ -129,7 +122,7 @@ public class App
 				buffer.clear();
 			}
 			System.out.println(bfOut.toString());
-			
+			buffer.flip();
 		}
 		socketChannel.close();
 	}

@@ -1,9 +1,11 @@
 package com.jenetics.smocker.rest;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 import java.util.logging.Level;
 
 import javax.enterprise.context.RequestScoped;
@@ -29,13 +31,14 @@ import com.jenetics.smocker.dao.DaoSingletonLock;
 import com.jenetics.smocker.dao.IDaoManager;
 import com.jenetics.smocker.injector.Dao;
 import com.jenetics.smocker.jseval.JSEvaluator;
-import com.jenetics.smocker.lucene.LuceneIndexer;
 import com.jenetics.smocker.model.Communication;
 import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.model.config.JsFilterAndDisplay;
+import com.jenetics.smocker.model.event.CommunicationsRemoved;
 import com.jenetics.smocker.rest.container.AddCommunicationContainer;
 import com.jenetics.smocker.rest.model.ListConnections;
+import com.jenetics.smocker.threading.ExecutorBean;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.util.NetworkReaderUtility;
 import com.jenetics.smocker.util.SmockerException;
@@ -57,22 +60,25 @@ public class ManageJavaApplication {
 
 	@Inject
 	protected Event<Connection> connectionEventSrc;
+	
+	@Inject
+	protected Event<CommunicationsRemoved> communicationsRemovedEventSrc;
 
 	@Inject
 	@Dao
 	protected IDaoManager<JavaApplication> daoManager;
-	
+
 	@Inject
 	@Dao
 	protected IDaoManager<Connection> daoManagerConnection;
-	
+
 	@Inject
 	@Dao
 	protected IDaoManager<Communication> daoManagerCommunication;
 
 	@Inject
 	private Logger logger;
-	
+
 	@GET
 	@Path("/{javaApplicationId}/listConnections")
 	public Response listConnection(@PathParam("javaApplicationId") Long javaApplicationId) {
@@ -84,7 +90,7 @@ public class ManageJavaApplication {
 		}
 		return Response.ok().build();
 	}
-	
+
 	@PUT
 	@Path("/addConnection/{javaApplicationId}")
 	public Response create(@PathParam("javaApplicationId") Long javaApplicationId, Connection conn) {
@@ -136,80 +142,101 @@ public class ManageJavaApplication {
 		javaApplicationEventSrc.fire(target);
 		return Response.ok().build();
 	}
-	
+
 	@PUT
 	@Path("/addCommunication/{javaApplicationId}/{connectionId}")
 	public Response create(@PathParam("javaApplicationId") Long javaApplicationId,
 			@PathParam("connectionId") Long connectionId, Communication comm) {
-		CompletableFuture.supplyAsync(() -> new AddCommunicationContainer(javaApplicationId,  
-				connectionId, comm))
-		.thenAccept(this::createAsync);
+
+		AddCommunicationContainer addCommunicationContainer = new AddCommunicationContainer(javaApplicationId,  
+				connectionId, comm);
+		ExecutorBean.executeAsync(addCommunicationContainer, this::createAsync);
 		return Response.ok().build();
 	}
 	
+	private static int countcreateComm;
+	
 	public Response createAsync(AddCommunicationContainer addCommunicationContainer) {
 		DaoSingletonLock.lock();
-		Communication comm = addCommunicationContainer.getComm();
-		Long connectionId = addCommunicationContainer.getConnectionId();
-		Long javaApplicationId = addCommunicationContainer.getJavaApplicationId();
-		
-		// set the dateTime to now
-		if (comm.getDateTime() == null) {
-			comm.setDateTime(new Date());
-		}
-
-		JavaApplication target = daoManager.findById(javaApplicationId);
-		if (target == null) {
-			DaoSingletonLock.unlock();
-			return Response.status(Status.NOT_FOUND).build();
-		}
-
-		Optional<Connection> connection = target.getConnections().stream().filter(x -> x.getId().equals(connectionId))
-				.findFirst();
-
-		if (!connection.isPresent()) {
-			DaoSingletonLock.unlock();
-			return Response.status(Status.NOT_FOUND).build();
-		}
-		
-		if (connection.get().getWatched() != null && connection.get().getWatched()) {
+		try {
+//			if (countcreateComm++ == 10) {
+//				countcreateComm = 0;
+//				long number = daoManagerCommunication.count();
+//				List<Communication> listAll = daoManagerCommunication.listAll();
+//				CommunicationsRemoved commRemoved = new CommunicationsRemoved(Arrays.asList(listAll.get(0)));
+//				communicationsRemovedEventSrc.fire(commRemoved);
+//			}
 			
-			//check filter
-			JsFilterAndDisplay jsDisplayAndFilter = DaoConfig.findJsDisplayAndFilter(connection.get());
-			String input = NetworkReaderUtility.decode(comm.getRequest());
-			String filterJsFunction = jsDisplayAndFilter.getFunctionFilter();
 			
-			if (!StringUtils.isEmpty(filterJsFunction)) {
-				try {
-					if (JSEvaluator.filter(filterJsFunction, input)) {
-						return Response.ok().build();
-					}
-				} catch (SmockerException e) {
-					//continue
-				}
+			
+			Communication comm = addCommunicationContainer.getComm();
+			Long connectionId = addCommunicationContainer.getConnectionId();
+			Long javaApplicationId = addCommunicationContainer.getJavaApplicationId();
+
+			// set the dateTime to now
+			if (comm.getDateTime() == null) {
+				comm.setDateTime(new Date());
 			}
-			
-			comm.setConnection(connection.get());
-			comm = daoManagerCommunication.create(comm);
-			connection.get().getCommunications().add(comm);
-			daoManager.update(target);
 
-			// notify the creation
-			communicationEventSrc.fire(comm);
-			
-			StringBuilder builder = new StringBuilder();
-			builder.append("Communication added to ")
-			.append(comm.getConnection().getHost())
-			.append(":")
-			.append(comm.getConnection().getPort());
+			JavaApplication target = daoManager.findById(javaApplicationId);
+			if (target == null) {
+				DaoSingletonLock.unlock();
+				return Response.status(Status.NOT_FOUND).build();
+			}
 
-			SmockerUI.getInstance().log(Level.INFO, builder.toString());
+			Optional<Connection> connection = target.getConnections().stream().filter(x -> x.getId().equals(connectionId))
+					.findFirst();
+
+			if (!connection.isPresent()) {
+				DaoSingletonLock.unlock();
+				return Response.status(Status.NOT_FOUND).build();
+			}
+
+			if (connection.get().getWatched() != null && connection.get().getWatched()) {
+
+				//check filter
+				JsFilterAndDisplay jsDisplayAndFilter = DaoConfig.findJsDisplayAndFilter(connection.get());
+				String input = NetworkReaderUtility.decode(comm.getRequest());
+				String filterJsFunction = jsDisplayAndFilter.getFunctionFilter();
+
+				if (!StringUtils.isEmpty(filterJsFunction)) {
+					try {
+						if (JSEvaluator.filter(filterJsFunction, input)) {
+							return Response.ok().build();
+						}
+					} catch (SmockerException e) {
+						//continue
+					}
+				}
+
+				comm.setConnection(connection.get());
+				comm = daoManagerCommunication.create(comm);
+				connection.get().getCommunications().add(comm);
+				daoManager.update(target);
+
+				// notify the creation
+				communicationEventSrc.fire(comm);
+
+				StringBuilder builder = new StringBuilder();
+				builder.append("Communication added to ")
+				.append(comm.getConnection().getHost())
+				.append(":")
+				.append(comm.getConnection().getPort());
+
+				SmockerUI.getInstance().log(Level.INFO, builder.toString());
+				DaoSingletonLock.unlock();
+				return Response.ok().build();
+			}
 			DaoSingletonLock.unlock();
-			return Response.ok().build();
+			return Response.status(Status.FORBIDDEN).build();
 		}
-		DaoSingletonLock.unlock();
-		return Response.status(Status.FORBIDDEN).build();
-
+		catch (Exception e) {
+			logger.error("unable to add communication");
+		}
+		finally {
+			DaoSingletonLock.unlock();
+		}
+		return null;
 	}
 
 	@DELETE

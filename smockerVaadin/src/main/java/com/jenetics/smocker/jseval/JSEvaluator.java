@@ -1,20 +1,16 @@
 package com.jenetics.smocker.jseval;
 
-import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
-import java.util.regex.Matcher;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
+import org.jboss.logging.Logger;
 
 import com.eclipsesource.v8.JavaCallback;
 import com.eclipsesource.v8.NodeJS;
 import com.eclipsesource.v8.V8;
-import com.eclipsesource.v8.V8Object;
-import com.eclipsesource.v8.V8Value;
 import com.jenetics.smocker.dao.DaoConfig;
 import com.jenetics.smocker.jseval.callBack.LoggerCallBack;
-import com.jenetics.smocker.jseval.callBack.PersonPrinter;
 import com.jenetics.smocker.jseval.callBack.SmockerJsEnvCallBackAdd;
 import com.jenetics.smocker.jseval.callBack.SmockerJsEnvCallBackGet;
 import com.jenetics.smocker.jseval.callBack.SmockerJsEnvCallBackRemove;
@@ -24,6 +20,8 @@ import com.jenetics.smocker.util.NetworkReaderUtility;
 import com.jenetics.smocker.util.SmockerException;
 
 public class JSEvaluator {
+	
+	private static Logger logger = Logger.getLogger(JSEvaluator.class); 
 	
 	/**
 	 * 
@@ -167,7 +165,7 @@ public class JSEvaluator {
 			}
 		}
 		catch (Exception e) {
-			// TODO: handle exception
+			logger.error("Unable to escape output", e);
 		}
 		return output;
 	}

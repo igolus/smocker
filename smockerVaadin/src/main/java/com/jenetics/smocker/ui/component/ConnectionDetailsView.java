@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.jenetics.smocker.dao.DaoManagerByModel;
+import com.jenetics.smocker.dao.DaoSingletonLock;
 import com.jenetics.smocker.dao.IDaoManager;
 import com.jenetics.smocker.lucene.LuceneIndexer;
 import com.jenetics.smocker.model.Communication;
@@ -110,13 +111,23 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 
 	private void fillCommunication() {
 		treeData.clear();
-		Set<Communication> communications = connection.getCommunications();
-		for (Communication communication : communications) {
-			CommunicationDateDisplay commDateDisplay = new CommunicationDateDisplay(communication);
-			commDisplayByComm.put(communication, commDateDisplay);
-			treeData.addItem(null, commDateDisplay);
+		DaoSingletonLock.lock();
+		try {
+			Set<Communication> communications = connection.getCommunications();
+			for (Communication communication : communications) {
+				CommunicationDateDisplay commDateDisplay = new CommunicationDateDisplay(communication);
+				commDisplayByComm.put(communication, commDateDisplay);
+				treeData.addItem(null, commDateDisplay);
+			}
+			treeDataProvider.refreshAll();
 		}
-		treeDataProvider.refreshAll();
+		catch (Exception ex) {
+			throw ex;
+		}
+		finally {
+			DaoSingletonLock.unlock();
+		}
+		
 	}
 
 	public void treeItemClick(ItemClick<CommunicationDateDisplay> event) {

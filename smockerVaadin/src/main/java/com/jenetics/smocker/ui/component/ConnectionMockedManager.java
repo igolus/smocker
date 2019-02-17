@@ -2,7 +2,6 @@ package com.jenetics.smocker.ui.component;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -29,7 +28,6 @@ import com.jenetics.smocker.ui.util.SwitchWithEntity;
 import com.jenetics.smocker.ui.util.TreeGridMockedItem;
 import com.vaadin.data.HasValue.ValueChangeEvent;
 import com.vaadin.data.TreeData;
-import com.vaadin.data.provider.DataProvider;
 import com.vaadin.data.provider.TreeDataProvider;
 import com.vaadin.event.selection.SingleSelectionEvent;
 import com.vaadin.ui.ComboBox;
@@ -38,6 +36,10 @@ import com.vaadin.ui.TreeGrid;
 
 public class ConnectionMockedManager extends EasyAppLayout {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private static final String CREATE_SCENARIO = "createScenario";
 	private static final String RENAME_COMM = "renameComm";
 	private static final String MOVE_COMM = "moveComm";
@@ -73,9 +75,7 @@ public class ConnectionMockedManager extends EasyAppLayout {
 	private Map<Scenario, TreeGridMockedItem> treeScenarioItemByScenario = new LinkedHashMap<>();
 	private List<TreeGridMockedItem> listItems = new ArrayList<>();
 
-
-	@Inject
-	private Logger logger;
+	private Logger logger = Logger.getLogger(ConnectionMockedManager.class);
 
 	public ConnectionMockedManager(ConnectionMocked connectionMocked, 
 			Consumer<CommunicationMocked> itemClicked, Runnable refreshClickable ) {

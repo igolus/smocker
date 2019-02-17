@@ -8,6 +8,7 @@ import java.util.logging.SimpleFormatter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
+import com.jenetics.smocker.threading.ExecutorBean;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Label;
@@ -43,8 +44,8 @@ public class LoggerPanel extends VerticalLayout {
 	}
 
 	public void asyncAppendMessage(Level level, String message) {
-		CompletableFuture.supplyAsync(() -> new Message(level, message))
-			.thenAccept(this::appendMessage);
+		Message source =  new Message(level, message);
+		ExecutorBean.executeAsync(source, this::appendMessage);
 	}
 
 	public void appendMessage(Message message) {

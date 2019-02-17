@@ -119,6 +119,16 @@ public class DaoManager<T extends EntityWithId> implements IDaoManager<T> {
 	public List<T> listAll() {
 		return listAll(0, -1);
 	}
+	
+	
+
+	@Override
+	public long count() {
+		String entityName = typeParameterClass.getSimpleName();
+		Query query = entityManager.createQuery("SELECT COUNT(e) FROM " + entityName + " e");
+		long count = (long)query.getSingleResult();
+		return count;
+	}
 
 	@Override
 	public void deleteById(Long id) {

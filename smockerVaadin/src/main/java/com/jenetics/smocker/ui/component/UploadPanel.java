@@ -35,9 +35,7 @@ import com.vaadin.ui.VerticalLayout;
 
 public class UploadPanel extends VerticalLayout {
 	
-
-	@Inject
-	private Logger logger;
+	private Logger logger = Logger.getLogger(UploadPanel.class);
 	
 	DaoManager<Scenario> daoManagerScenario = DaoManagerByModel.getDaoManager(Scenario.class);
 	DaoManager<ConnectionMocked> daoManagerConnectionMocked = DaoManagerByModel.getDaoManager(ConnectionMocked.class);

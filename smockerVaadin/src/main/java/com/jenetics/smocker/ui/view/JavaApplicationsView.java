@@ -24,10 +24,12 @@ import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.model.config.JsFilterAndDisplay;
 import com.jenetics.smocker.model.converter.MockConverter;
+import com.jenetics.smocker.model.event.CommunicationsRemoved;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.component.ConnectionDetailsView;
 import com.jenetics.smocker.ui.dialog.Dialog;
 import com.jenetics.smocker.ui.util.ButtonWithIEntity;
+import com.jenetics.smocker.ui.util.ItemRemovableView;
 import com.jenetics.smocker.ui.util.RefreshableView;
 import com.jenetics.smocker.ui.util.SearcheableView;
 import com.jenetics.smocker.ui.util.StrandardTreeGridConnectionData;
@@ -50,7 +52,7 @@ import com.vaadin.ui.TabSheet.Tab;
 @ContentView(sortingOrder = 1, viewName = "JavaAppView", icon = "icons/java-43-569305.png", 
 homeView = true, rootViewParent = ConnectionsRoot.class, bundle=SmockerUI.BUNDLE_NAME)
 public class JavaApplicationsView extends AbstractConnectionTreeView<JavaApplication, Connection, Communication, ConnectionDetailsView> 
-implements RefreshableView, SearcheableView {
+implements RefreshableView, SearcheableView, ItemRemovableView<CommunicationsRemoved> {
 
 	public static DaoManager<JsFilterAndDisplay> daoManagerJsFilterAndDisplay = DaoManagerByModel.getDaoManager(JsFilterAndDisplay.class);
 
@@ -436,4 +438,11 @@ implements RefreshableView, SearcheableView {
 			selectedView.search(searchQuery, this::refreshClickable);
 		}
 	}
+	@Override
+	public void remove(CommunicationsRemoved item) {
+		System.out.println(item);
+		
+	}
+	
+	
 }

@@ -28,8 +28,6 @@ public class TransformerUtility {
 	private static Long javaAppId = null;
 
 	private static Hashtable<Object, SmockerContainer> smockerContainerBySocket = new Hashtable<Object, SmockerContainer>();
-	//private static Hashtable<Object, Long> connectionIdBySocket = new Hashtable<Object, Long>();
-
 	private TransformerUtility() {
 		super();
 	}
@@ -63,7 +61,8 @@ public class TransformerUtility {
 			SmockerContainer smockerContainer = smockerContainerBySocket.get(socketChannel);
 			if (smockerContainer == null) {
 				InetSocketAddress remoteAddress = (InetSocketAddress) socketChannel.getRemoteAddress();
-				smockerContainer = addSmockerContainer(socketChannel, remoteAddress.getHostName(), remoteAddress.getPort());
+				smockerContainer = addSmockerContainer(
+						socketChannel, remoteAddress.getAddress().getHostAddress(), remoteAddress.getAddress().getHostName(), remoteAddress.getPort());
 			}
 			if (smockerContainer.isReseNextWrite()) {
 				smockerContainer.postCommunication();
@@ -87,7 +86,10 @@ public class TransformerUtility {
 				&& isConnectionWatched(socketChannel)) {
 			smockerContainer.setReseNextWrite(true);
 			if (smockerContainer.isApplyMock()) {
-				byte[] matchMock = smockerContainer.getMatchMock();
+				byte[] matchMock = null;
+				matchMock = smockerContainer.getMatchMock();
+				
+				//byte[] matchMock = smockerContainer.getMatchMock();
 				//match applied
 				if (matchMock != null) {
 					int index = smockerContainer.getIndexForArrayCopy();
@@ -179,7 +181,7 @@ public class TransformerUtility {
 	public synchronized static InputStream manageInputStream(InputStream is, Socket source) throws IOException {
 		if (!filterSmockerBehavior() && RemoteServerChecker.isRemoteServerAlive() && isConnectionWatched(source)) {
 			if (!smockerContainerBySocket.containsKey(source)) {
-				addSmockerContainer(source, source.getInetAddress().getHostName(), source.getPort());
+				addSmockerContainer(source, source.getInetAddress().getHostAddress(), source.getInetAddress().getHostName() ,source.getPort());
 			}
 			SmockerContainer smockerContainer = smockerContainerBySocket.get(source);
 			if (smockerContainer.getTeeInputStream() == null) {
@@ -196,7 +198,7 @@ public class TransformerUtility {
 		if (!filterSmockerBehavior() && RemoteServerChecker.isRemoteServerAlive() && isConnectionWatched(source)) {
 			SmockerContainer container = null;
 			if (!smockerContainerBySocket.containsKey(source)) {
-				container = addSmockerContainer(source, source.getInetAddress().getHostName(),
+				container = addSmockerContainer(source, source.getInetAddress().getHostAddress(), source.getInetAddress().getHostName(), 
 						source.getPort());
 			}
 			else {
@@ -237,9 +239,9 @@ public class TransformerUtility {
 	}
 
 
-	private static SmockerContainer addSmockerContainer(Object source, String host, int port) throws IOException {
+	private static SmockerContainer addSmockerContainer(Object source, String ip, String host, int port) throws IOException {
 		String stackTrace = getStackTrace();
-		SmockerContainer smockerContainer = new SmockerContainer(host,port, stackTrace, source);
+		SmockerContainer smockerContainer = new SmockerContainer(ip, host, port, stackTrace, source);
 		smockerContainerBySocket.put(source, smockerContainer);
 		smockerContainer.resetAll();
 		return smockerContainer;

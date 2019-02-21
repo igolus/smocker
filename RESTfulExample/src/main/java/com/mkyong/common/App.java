@@ -35,10 +35,10 @@ public class App
 
 				line = bufferedReader.readLine();
 				//callGoogle();
-				for (int i = 0; i < 20; i++) {
-					//callGoogleSocketChannell();
-					callGoogle();
-				}
+				//for (int i = 0; i < 20; i++) {
+					callGoogleSocketChannell();
+					//callGoogle();
+				//}
 				
 				//callYahoo();
 			}
@@ -67,9 +67,9 @@ public class App
 
 		String output;
 		System.out.println("Output from Server .... \n");
-		while ((output = br.readLine()) != null) {
-			System.out.println(output);
-		}
+//		while ((output = br.readLine()) != null) {
+//			System.out.println(output);
+//		}
 
 		httpClient.getConnectionManager().shutdown();
 	}

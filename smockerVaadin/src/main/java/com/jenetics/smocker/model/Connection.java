@@ -31,6 +31,9 @@ public class Connection implements EntityWithId {
 
 	@Column(nullable = false)
 	private String host;
+	
+	@Column(nullable = false)
+	private String ip;
 
 	@Column(nullable = false)
 	private Integer port;
@@ -103,6 +106,14 @@ public class Connection implements EntityWithId {
 		this.host = host;
 	}
 
+	public String getIp() {
+		return ip;
+	}
+
+	public void setIp(String ip) {
+		this.ip = ip;
+	}
+
 	public Integer getPort() {
 		return port;
 	}
@@ -135,6 +146,8 @@ public class Connection implements EntityWithId {
 		result += ", version: " + version;
 		if (host != null && !host.trim().isEmpty())
 			result += ", host: " + host;
+		if (ip != null && !ip.trim().isEmpty())
+			result += ", ip: " + ip;
 		if (port != null)
 			result += ", port: " + port;
 		if (communications != null)

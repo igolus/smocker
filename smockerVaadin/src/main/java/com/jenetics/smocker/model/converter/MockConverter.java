@@ -124,27 +124,13 @@ public class MockConverter {
 		List<ConnectionMocked> queryList = daoManagerConnectionMocked.queryList("SELECT conn FROM ConnectionMocked conn WHERE conn.host = '" 
 				+ sourceConnection.getHost() + "' and conn.port = '" + sourceConnection.getPort().toString() + "'");
 		targetConnectionMocked = queryList.stream().findFirst().orElse(null);
-		
-//		for (ConnectionMocked connectionMocked : connectionsMocked) {
-//			if (connectionMocked.getHost().equals(sourceConnection.getHost())
-//					&& connectionMocked.getPort().equals(sourceConnection.getPort())) {
-//				targetConnectionMocked = connectionMocked;
-//				break;
-//			}
-//		}
-		// otherwise create it
+
 		if (targetConnectionMocked == null) {
 			targetConnectionMocked = new ConnectionMocked();
-			//targetConnectionMocked.setScenario(DaoManagerByModel.getUNDEFINED_SCENARIO());
 			targetConnectionMocked.setHost(sourceConnection.getHost());
+			targetConnectionMocked.setIp(sourceConnection.getIp());
 			targetConnectionMocked.setPort(sourceConnection.getPort());
-			
-			//targetJavaApplicationMocked.getConnections().add(targetConnectionMocked);
-			//targetConnectionMocked.setJavaApplication(targetJavaApplicationMocked);
-			
 			daoManagerConnectionMocked.create(targetConnectionMocked);
-			//update javaapplication
-			//daoManagerJavaApplicationMocked.update(targetJavaApplicationMocked);
 		}
 		return targetConnectionMocked;
 	}

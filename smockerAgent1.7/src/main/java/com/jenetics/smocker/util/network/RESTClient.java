@@ -16,6 +16,7 @@ import java.util.logging.Logger;
  */
 public class RESTClient {
 
+	private static final int SIZE_BUFFER = 1024;
 	public static final String PATH = "/rest";
 	private InetAddress inetAddress;
 	private int port;
@@ -67,7 +68,8 @@ public class RESTClient {
 			socket = new Socket(inetAddress, port);
 			socket.setSoTimeout(timeout);
 			wr = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF8"));
-			is = new InputStreamReader(socket.getInputStream());
+			InputStream inputStream = socket.getInputStream();
+			is = new InputStreamReader(inputStream);
 			wr.write(method + " " + path + " HTTP/1.1\r\n");
 			if (content != null) {
 				wr.write(getFormattedHeader("Content-Length","" + content.length()));
@@ -93,11 +95,16 @@ public class RESTClient {
 				wr.write("\r\n");
 			}
 			wr.flush();
-			char[] buffer = new char[1024];
+			char[] buffer = new char[SIZE_BUFFER];
+			
 			StringWriter stringWriter = new StringWriter();
-			while(is.read(buffer)!=-1){
-				stringWriter.write(buffer);
-			}
+			
+			//byte[] buffer = new byte[0xFFFF];
+		    for (int len = is.read(buffer); len != -1; len = is.read(buffer)) { 
+		    	stringWriter.write(buffer, 0, len);
+		    }
+			//stringWriter.write(buffer);
+			
 			return stringWriter.toString();
 		} catch (Exception e) {
 			//logger.log(Level.SEVERE, "Problem communicating", e);

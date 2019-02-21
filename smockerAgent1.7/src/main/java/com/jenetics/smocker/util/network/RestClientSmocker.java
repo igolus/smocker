@@ -86,6 +86,9 @@ public class RestClientSmocker extends RESTClient {
 		.append(smockerContainer.getHost())
 		.append("\",  \"port\":")
 		.append(smockerContainer.getPort())
+		.append(",  \"ip\":\"")
+		.append(smockerContainer.getIp())
+		.append("\"")
 		.append("}");
 		String path = SMOCKER_REST_PATH + SMOCKER_ADDCONN + "/" + javaAppId;
 		try {
@@ -159,6 +162,7 @@ public class RestClientSmocker extends RESTClient {
 	public String postCommunication(SmockerContainer smockerContainer, Long javaAppId, Long connectionId) {
 
 		String host = smockerContainer.getHost();
+		String ip = smockerContainer.getIp();
 		int port = smockerContainer.getPort();
 
 		if (RemoteServerChecker.isConnectionWatched(host, port)) {

@@ -21,13 +21,12 @@ public class RemoteServerChecker {
 	private static List<String> mockedHost = new ArrayList<>();
 	private static List<String> unWatchedHost = new ArrayList<>();
 	private static Map<String, String> listConnectionsReferenced = new HashMap<>();
-	//private static ReentrantLock lock =  new ReentrantLock();
 	
 	private static long javaAppId = -1;
 	private static String existingId = null;
 	
 	private RemoteServerChecker() {
-		//updateJavaAppId();
+		super();
 	}
 	
 	public static List<String> getMockedHost() {
@@ -39,13 +38,10 @@ public class RemoteServerChecker {
 	}
 	
 	public static Long idByConnectionRererenced(String host, int port) {
-		//lock.lock();
 		if (listConnectionsReferenced != null) {
 			String value = listConnectionsReferenced.get(host + ":" + port);
-			//lock.unlock();
 			return value == null ? null : Long.valueOf(value);
 		}
-		//lock.unlock();
 		return null;
 	}
 	
@@ -106,10 +102,8 @@ public class RemoteServerChecker {
 							if (existingId == null || javaAppId == -1) {
 								updateJavaAppId();
 							}
-							//lock.lock();
 							listConnectionsReferenced = 
 									RestClientSmocker.getInstance().getListConnection(javaAppId);
-							//lock.unlock();
 						}
 						if (alive && !remoteServerAlive) {
 							MessageLogger.logMessage("Remote server alive", RemoteServerChecker.class);
@@ -141,12 +135,10 @@ public class RemoteServerChecker {
 	}
 
 	public synchronized void addConnectionRef(Long idConnection, String host, int port) {
-		//lock.lock();
 		if (listConnectionsReferenced == null) {
 			listConnectionsReferenced = new HashMap<>();
 		}
 		listConnectionsReferenced.put(host + ":" + port, idConnection.toString());	
-		//lock.unlock();
 	}
 
 }

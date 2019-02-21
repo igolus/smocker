@@ -30,6 +30,9 @@ public class ConnectionMocked implements EntityWithId {
 
 	@Column(nullable = false)
 	private String host;
+	
+	@Column(nullable = false)
+	private String ip;
 
 	@Column(nullable = false)
 	private Integer port;
@@ -113,6 +116,14 @@ public class ConnectionMocked implements EntityWithId {
 
 	public void setHost(String host) {
 		this.host = host;
+	}
+
+	public String getIp() {
+		return ip;
+	}
+
+	public void setIp(String ip) {
+		this.ip = ip;
 	}
 
 	public Integer getPort() {

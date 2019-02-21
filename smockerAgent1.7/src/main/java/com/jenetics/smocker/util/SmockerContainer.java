@@ -17,19 +17,17 @@ public class SmockerContainer {
 	private SmockerSocketOutputStream smockerSocketOutputStream = null;
 	private ByteArrayOutputStream bosforMock = new ByteArrayOutputStream();
 	
+	private String ip = null;
 	private String host = null;
 	private int port = 0;
 	private boolean ssl;
 	private TeeInputStream teeInputStream;
 	private TeeOutputStream teeOutputStream;
 	private String stackTrace;
-	//private String responseMocked; 
 	
 	private String outputToBesend;
 	private String inputToBesend;
 	private Object source;
-	//private boolean postAtNextRead = false;
-	//private boolean postAtNextWrite = false;
 	private boolean applyMock;
 	private boolean streamResent = false;
 	private int indexForArrayCopy = 0;
@@ -37,14 +35,6 @@ public class SmockerContainer {
 	public int getIndexForArrayCopy() {
 		return indexForArrayCopy;
 	}
-
-//	public boolean isPostAtNextWrite() {
-//		return postAtNextWrite;
-//	}
-//
-//	public void setPostAtNextWrite(boolean postAtNextWrite) {
-//		this.postAtNextWrite = postAtNextWrite;
-//	}
 
 	public void setIndexForArrayCopy(int indexForArrayCopy) {
 		this.indexForArrayCopy = indexForArrayCopy;
@@ -91,23 +81,27 @@ public class SmockerContainer {
 	}
 
 
+	public String getIp() {
+		return ip;
+	}
+	
 	public String getHost() {
 		return host;
 	}
-
 
 	public int getPort() {
 		return port;
 	}
 
 
-	public SmockerContainer(String host, int port, String stackTrace, Object source) {
+	public SmockerContainer(String ip, String host, int port, String stackTrace, Object source) {
+		this.ip = ip;
 		this.host = host;
 		this.port = port;
 		this.stackTrace = stackTrace;
 		this.source = source;
 		
-		this.applyMock = RemoteServerChecker.getMockedHost().contains(host);
+		this.applyMock = RemoteServerChecker.getMockedHost().contains(host + ":" + port);
 	}
 
 
@@ -178,16 +172,6 @@ public class SmockerContainer {
 		return ssl;
 	}
 
-//	public String getResponseMocked() {
-//		return responseMocked;
-//	}
-//
-//
-//	public void setResponseMocked(String responseMocked) {
-//		this.responseMocked = responseMocked;
-//	}
-
-
 	public TeeInputStream getTeeInputStream() {
 		return teeInputStream;
 	}
@@ -205,7 +189,7 @@ public class SmockerContainer {
 
 	public void setTeeOutputStream(TeeOutputStream teeOutputStream) {
 		this.teeOutputStream = teeOutputStream;
-		this.teeOutputStream.setHost(getHost());
+		this.teeOutputStream.setHost(getIp());
 		this.teeOutputStream.setSmockerContainer(this);
 	}
 	
@@ -239,8 +223,14 @@ public class SmockerContainer {
     		noMatch = true;
     		return null;
     	}
-    	matchOutput = RestClientSmocker.decodeByte(matchResponse);
-    	return matchOutput;
+    	try {
+    		matchOutput = RestClientSmocker.decodeByte(matchResponse); 
+        	return matchOutput;
+    	}
+    	catch (Exception e) {
+			e.printStackTrace();
+		}
+    	return null;
 	}
 	
 //	private boolean resetMatchNextWrite = false;

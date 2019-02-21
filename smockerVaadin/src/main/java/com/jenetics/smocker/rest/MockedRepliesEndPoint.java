@@ -98,6 +98,7 @@ public class MockedRepliesEndPoint  {
 					MatchMockResponse response = new MatchMockResponse(result[1]);
 					SmockerUI.log(Level.INFO, "Found mock match for " + 
 							communicationMocked.getConnection().getHost() + SEP + communicationMocked.getConnection().getPort());
+					
 					return Response.ok(response).build();
 				}
 			} catch (SmockerException e) {

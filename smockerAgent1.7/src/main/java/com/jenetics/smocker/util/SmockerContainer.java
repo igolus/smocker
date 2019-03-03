@@ -101,7 +101,7 @@ public class SmockerContainer {
 		this.stackTrace = stackTrace;
 		this.source = source;
 		
-		this.applyMock = RemoteServerChecker.getMockedHost().contains(host + ":" + port);
+		this.applyMock = RemoteServerChecker.getMockedHosts().contains(host + ":" + port);
 	}
 
 
@@ -164,7 +164,7 @@ public class SmockerContainer {
 		streamResent = false;
 		noMatch = false;
 		matchOutput = null;
-		applyMock = RemoteServerChecker.getMockedHost().contains(host + SEP + port);
+		applyMock = RemoteServerChecker.getMockedHosts().contains(host + SEP + port);
 		indexForArrayCopy = 0;
 	}
 

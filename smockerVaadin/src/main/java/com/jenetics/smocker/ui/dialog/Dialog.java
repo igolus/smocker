@@ -6,14 +6,17 @@ import java.util.function.Consumer;
 import org.jboss.logging.Logger;
 
 import com.jenetics.smocker.ui.SmockerUI;
+import com.jenetics.smocker.ui.component.BoxableItem;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.Button.ClickEvent;
 
+import de.steinwedel.messagebox.ButtonType;
 import de.steinwedel.messagebox.MessageBox;
 
 public class Dialog {
@@ -57,6 +60,17 @@ public class Dialog {
 		});
 		
 		box.open();
+	}
+	
+	public static <T> MessageBox displayComponentBox(String caption, Consumer<T> selected, 
+			BoxableItem<T> boxableItem) {
+		MessageBox box = MessageBox.create();
+		box.withCaption(caption).withMessage(boxableItem.getComponent()).withCancelButton();
+		box.withOkButton(() -> {
+			selected.accept(boxableItem.getItem());
+		});
+		box.open();
+		return box;
 	}
 
 	public static void displayCreateStringBox(String caption, Consumer<String> selected) {

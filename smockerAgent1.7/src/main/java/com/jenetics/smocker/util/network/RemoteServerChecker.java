@@ -18,7 +18,9 @@ public class RemoteServerChecker {
 	private static final int CHECKER_PERIOD = 1000;
 	private static RemoteServerChecker instance;
 	private static boolean remoteServerAlive = false;
-	private static List<String> mockedHost = new ArrayList<>();
+	private static List<String> mockedHosts = new ArrayList<>();
+	private static List<String>	ignoredHosts = new ArrayList<>();
+	private static List<List<String>> duplicatedHosts = new ArrayList<>();
 	private static List<String> unWatchedHost = new ArrayList<>();
 	private static Map<String, String> listConnectionsReferenced = new HashMap<>();
 	
@@ -29,10 +31,18 @@ public class RemoteServerChecker {
 		super();
 	}
 	
-	public static List<String> getMockedHost() {
-		return mockedHost;
+	public static List<String> getMockedHosts() {
+		return mockedHosts;
 	}
 	
+	public static List<String> getIgnoredHosts() {
+		return ignoredHosts;
+	}
+
+	public static List<List<String>> getDuplicatedHosts() {
+		return duplicatedHosts;
+	}
+
 	public static boolean isJavaAppIdentified() {
 		return javaAppId != -1;
 	}
@@ -66,7 +76,8 @@ public class RemoteServerChecker {
 	}
 	
 	public static boolean isConnectionWatched(String host, int port) {
-		return unWatchedHost == null || !unWatchedHost.contains(host + SEP + port);
+		boolean isHostIgnored = ignoredHosts == null ? false : ignoredHosts.contains(host);
+		return !isHostIgnored && (unWatchedHost == null || !unWatchedHost.contains(host + SEP + port));
 	}
 
 
@@ -80,11 +91,17 @@ public class RemoteServerChecker {
 						if (alive) {
 							String responseHost = RestClientSmocker.getInstance().getAllMockedConnection();
 							if (responseHost != null) {
-								mockedHost = SimpleJsonReader.readValues(responseHost, "activatedHosts");
+								mockedHosts = SimpleJsonReader.readValues(responseHost, "activatedHosts");
 							}
 							else {
 								remoteServerAlive = false;
 							}
+							
+							String responseIgnoreHost = RestClientSmocker.getInstance().getAllIgnoredHosts();
+							if (responseIgnoreHost != null) {
+								ignoredHosts = SimpleJsonReader.readValues(responseIgnoreHost, "listIgnoredList");
+							}
+							
 							String listHostWatched = RestClientSmocker.getInstance().getAllUnWachedConnections();
 							if (listHostWatched != null) {
 								unWatchedHost = SimpleJsonReader.readValues(listHostWatched, "activatedHosts");

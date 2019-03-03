@@ -15232,6 +15232,10 @@ div.v-layout.v-horizontal.v-widget {
 	outline: none;
 }
 
+.mytheme .v-vertical-no-space > .v-spacing {
+	height: 30px;
+}
+
 .mytheme .v-accordion-Nav .v-accordion-item {
 	background-color: #4D74C0;
 	display: block;

@@ -35,10 +35,12 @@ public class App
 
 				line = bufferedReader.readLine();
 				//callGoogle();
-				//for (int i = 0; i < 20; i++) {
-					callGoogleSocketChannell();
-					//callGoogle();
-				//}
+				for (int i = 0; i < 500; i++) {
+					//callGoogleSocketChannell();
+					callGoogle();
+					Thread.sleep(1000);
+					System.out.println("Call " + i);
+				}
 				
 				//callYahoo();
 			}
@@ -121,7 +123,7 @@ public class App
 				}
 				buffer.clear();
 			}
-			System.out.println(bfOut.toString());
+			//System.out.println(bfOut.toString());
 			buffer.flip();
 		}
 		socketChannel.close();

@@ -1,9 +1,11 @@
 package com.jenetics.smocker.rest;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -48,6 +50,10 @@ import com.jenetics.smocker.util.SmockerException;
 @Produces({ "application/json" })
 @Consumes({ "application/json" })
 public class ManageJavaApplication {
+
+	private static final int FREQUENCY_CLEAN = 50;
+
+	private static final int SIZE_FOR_CLEAN = 3500000;
 
 	@PersistenceContext(unitName = SmockerUI.PERSISTENCE_UNIT_MEMORY)
 	private EntityManager em;
@@ -159,15 +165,17 @@ public class ManageJavaApplication {
 	public Response createAsync(AddCommunicationContainer addCommunicationContainer) {
 		DaoSingletonLock.lock();
 		try {
-//			if (countcreateComm++ == 10) {
-//				countcreateComm = 0;
-//				long number = daoManagerCommunication.count();
-//				List<Communication> listAll = daoManagerCommunication.listAll();
-//				CommunicationsRemoved commRemoved = new CommunicationsRemoved(Arrays.asList(listAll.get(0)));
-//				communicationsRemovedEventSrc.fire(commRemoved);
-//			}
-			
-			
+			if (countcreateComm++ == FREQUENCY_CLEAN) {
+				countcreateComm = 0;
+				List<Communication> listAll = daoManagerCommunication.listAll();
+				Communication[] commToRemove = filterElementToRemoveForMemory(listAll);
+				if (commToRemove != null) {
+					deleteComms(commToRemove);
+					SmockerUI.getInstance().displayNotif(SmockerUI.getBundleValue("CleaningCommMemory"), 0);
+					CommunicationsRemoved commRemoved = new CommunicationsRemoved(Arrays.asList(commToRemove));
+					SmockerUI.getInstance().remove(commRemoved);
+				}
+			}
 			
 			Communication comm = addCommunicationContainer.getComm();
 			Long connectionId = addCommunicationContainer.getConnectionId();
@@ -193,7 +201,6 @@ public class ManageJavaApplication {
 			}
 
 			if (connection.get().getWatched() != null && connection.get().getWatched()) {
-
 				//check filter
 				JsFilterAndDisplay jsDisplayAndFilter = DaoConfig.findJsDisplayAndFilter(connection.get());
 				String input = NetworkReaderUtility.decode(comm.getRequest());
@@ -231,10 +238,53 @@ public class ManageJavaApplication {
 			return Response.status(Status.FORBIDDEN).build();
 		}
 		catch (Exception e) {
-			logger.error("unable to add communication");
+			logger.error("unable to add communication", e);
 		}
 		finally {
 			DaoSingletonLock.unlock();
+		}
+		return null;
+	}
+	
+	private void deleteComms(Communication[] commToRemove) {
+		List<Connection> listAllConn = new ArrayList<>();
+		for (Communication comm : commToRemove) {
+			if (!listAllConn.contains(comm.getConnection())) {
+				listAllConn.add(comm.getConnection());
+			}
+		}
+		
+		for (Connection conn : listAllConn) {
+			conn.getCommunications().removeAll(Arrays.asList(commToRemove));
+			DaoSingletonLock.lock();
+			try {
+				daoManagerConnection.update(conn);
+			}
+			catch (Exception e) {
+				logger.error("Unable to clean memory", e);
+			}
+			finally {
+				DaoSingletonLock.unlock();
+			}
+		}
+	}
+
+	/**
+	 * Filter element to remove for memory limit
+	 * @param listAll
+	 * @return null if nothing to clean
+	 */
+	private Communication[] filterElementToRemoveForMemory(List<Communication> listAll) {
+		int size = 0;
+		Communication[] communicationArr = new Communication[listAll.size()];
+		communicationArr = listAll.toArray(communicationArr);
+		for (int i = communicationArr.length - 1; i >= 0; i--) {
+			size += communicationArr[i].getRequest().length() + communicationArr[i].getResponse().length();
+			if (size > SIZE_FOR_CLEAN) {
+				Communication[] ret = new Communication[i + 1];
+				System.arraycopy(communicationArr, 0, ret, 0, i + 1);
+				return ret;
+			}
 		}
 		return null;
 	}

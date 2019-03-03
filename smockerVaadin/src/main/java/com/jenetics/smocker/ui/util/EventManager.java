@@ -34,9 +34,7 @@ public class EventManager {
 	}
 	
 	public void newCommunicationsRemoved(@Observes CommunicationsRemoved commsRemoved) {
-		if (DaoConfigUpdaterThread.getSingleConf().isAutorefesh() && SmockerUI.getInstance() != null) {
-			SmockerUI.getInstance().remove(commsRemoved, CommunicationsRemoved.class);
-		}
+		SmockerUI.getInstance().remove(commsRemoved);
 	}
 	
 

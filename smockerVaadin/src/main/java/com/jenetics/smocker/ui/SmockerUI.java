@@ -20,18 +20,22 @@ import org.vaadin.easyapp.util.ActionContainer.Position;
 import com.jenetics.smocker.dao.DaoConfigUpdaterThread;
 import com.jenetics.smocker.lucene.LuceneIndexer;
 import com.jenetics.smocker.model.EntityWithId;
+import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.model.event.CommunicationsRemoved;
 import com.jenetics.smocker.rest.AliveEndPoint;
 import com.jenetics.smocker.ui.util.ItemRemovableView;
 import com.jenetics.smocker.ui.util.RefreshableView;
 import com.jenetics.smocker.ui.util.SearcheableView;
+import com.jenetics.smocker.ui.view.JavaApplicationsView;
 import com.jenetics.smocker.ui.view.LogView;
 import com.jenetics.smocker.util.lang.ReflectionUtil;
 import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Page;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Component;
@@ -41,11 +45,15 @@ import com.vaadin.ui.TextArea;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.Notification.Type;
 
 @Push
 @Theme("mytheme")
 public class SmockerUI extends UI {
+	
 
+	private static final int DISPLAY_NOTIF_DELAY = 1000;
+	
 	private static final String SUB_WINDOW_DEFAULT_WIDTH = "600px";
 
 	private static final String SUB_WINDOW_DEFAULT_HEIGHT = "800px";
@@ -244,18 +252,17 @@ public class SmockerUI extends UI {
 		subWindow.setSizeFull();
 	}
 	
-	public <T> void remove(T itemToRemove, Class<T> clazz) {
+	public void remove(CommunicationsRemoved communicationsRemoved) {
 		access( ()  -> 
 		{
+			
 			try {
 				Thread.sleep(SLEEP_TIME);
-				
-				Map<String, Component> viewMap = getInstance().getEasyAppMainView().getScanner().getViewMap();
-				for (Component view : viewMap.values()) {
-					if (ReflectionUtil.findSuperClassParameterType(view, ItemRemovableView.class, 0).equals(clazz) ) {
-						ItemRemovableView<T> targetView = (ItemRemovableView<T>) view; 
-						targetView.remove(itemToRemove);
-					}
+				Component javaApp = 
+						getInstance().getEasyAppMainView().getScanner().getViewMap().get(JavaApplicationsView.class.toString());
+				if (javaApp != null) {
+					JavaApplicationsView javaAppView = (JavaApplicationsView)javaApp;
+					javaAppView.remove(communicationsRemoved);
 				}
 			} catch (InterruptedException e) {
 				logger.error(MessageBuilder.getEasyAppMessage("Unable to remove item"), e);
@@ -327,5 +334,20 @@ public class SmockerUI extends UI {
 		}
 		return null;
 	}
+	
+	public void displayNotif(String text, int delay) {
+		Notification notif = new Notification(text, Type.ASSISTIVE_NOTIFICATION);
+		// Customize it
+		notif.setDelayMsec(delay == 0 ? DISPLAY_NOTIF_DELAY : delay);
+		notif.setPosition(com.vaadin.shared.Position.BOTTOM_RIGHT);
+		notif.setIcon(VaadinIcons.SPINNER);
+
+		// Show it in the page
+		if (Page.getCurrent() != null) {
+			notif.show(Page.getCurrent());
+		}
+		
+	}
+
 
 }

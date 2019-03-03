@@ -2,6 +2,7 @@ package com.jenetics.smocker.ui.view;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -13,10 +14,8 @@ import org.vaadin.easyapp.util.annotations.ContentView;
 import org.vaadin.teemu.switchui.Switch;
 
 import com.jenetics.smocker.dao.DaoConfig;
-import com.jenetics.smocker.dao.DaoConfigUpdaterThread;
 import com.jenetics.smocker.dao.DaoManager;
 import com.jenetics.smocker.dao.DaoManagerByModel;
-import com.jenetics.smocker.dao.DaoSingletonLock;
 import com.jenetics.smocker.jseval.JSEvaluator;
 import com.jenetics.smocker.model.Communication;
 import com.jenetics.smocker.model.Connection;
@@ -52,7 +51,7 @@ import com.vaadin.ui.TabSheet.Tab;
 @ContentView(sortingOrder = 1, viewName = "JavaAppView", icon = "icons/java-43-569305.png", 
 homeView = true, rootViewParent = ConnectionsRoot.class, bundle=SmockerUI.BUNDLE_NAME)
 public class JavaApplicationsView extends AbstractConnectionTreeView<JavaApplication, Connection, Communication, ConnectionDetailsView> 
-implements RefreshableView, SearcheableView, ItemRemovableView<CommunicationsRemoved> {
+implements RefreshableView, SearcheableView {
 
 	public static DaoManager<JsFilterAndDisplay> daoManagerJsFilterAndDisplay = DaoManagerByModel.getDaoManager(JsFilterAndDisplay.class);
 
@@ -259,8 +258,11 @@ implements RefreshableView, SearcheableView, ItemRemovableView<CommunicationsRem
 	
 	public void watchButtonJavaAppClicked(ValueChangeEvent<Boolean> event) {
 		SwitchWithEntity<JavaApplication> switchWithEntity = (SwitchWithEntity<JavaApplication>) event.getSource();
-		switchButtinsByJavaApp.get(switchWithEntity.getEntity()).stream()
+		List<SwitchWithEntity<Connection>> targetSwitchButton = switchButtinsByJavaApp.get(switchWithEntity.getEntity());
+		if (targetSwitchButton != null) {
+			targetSwitchButton.stream()
 			.forEach( switchButton -> switchButton.setValue(switchWithEntity.getValue()));
+		}
 	}
 	
 
@@ -270,9 +272,6 @@ implements RefreshableView, SearcheableView, ItemRemovableView<CommunicationsRem
 
 	@Override
 	public void refresh(EntityWithId entityWithId) {
-		
-//		if (DaoConfigUpdaterThread.getSingleConf().isAutorefesh()
-//		DaoConfig.getSingleConfig().isAutorefesh();
 		if (isMainTabSelected()) {
 			refreshEntity(entityWithId);
 		}
@@ -293,6 +292,8 @@ implements RefreshableView, SearcheableView, ItemRemovableView<CommunicationsRem
 		if (!isMainTabSelected()) {
 			builder.addButton("AddToMock_Button", VaadinIcons.PLUS, "AddToMock_ToolTip",  this::canAddToMock			
 					, this::addToMock, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
+			.addButton("AddAllToMock_Button", VaadinIcons.PLUS, "AddAllToMock_ToolTip",  this::canAddAllToMock			
+					, this::addAllToMock, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
 			.addButton("CleanAll_Button", VaadinIcons.MINUS, "CleanAll_ToolTip",  this::canCleanAll			
 					, this::cleanAll, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
 			.addButton("Sort_Button", VaadinIcons.SORT, "Sort_ToolTip",  this::canSort			
@@ -306,13 +307,30 @@ implements RefreshableView, SearcheableView, ItemRemovableView<CommunicationsRem
 	public void addToMock(ClickEvent event) {
 		ConnectionDetailsView connectionDetailsView = getSelectedDetailView();
 		MockConverter.convertcommunication(connectionDetailsView.getSelectedCommunication());
+		SmockerUI.getInstance().displayNotif(SmockerUI.getBundleValue("Notif_CommMocked_Added"), 0);
 	}
+	
+	public void addAllToMock(ClickEvent event) {
+		ConnectionDetailsView connectionDetailsView = getSelectedDetailView();
+		for (Communication comm : connectionDetailsView.getCommunications()) {
+			MockConverter.convertcommunication(comm);
+		}
+		SmockerUI.getInstance().displayNotif(SmockerUI.getBundleValue("Notif_CommsMocked_Added"), 0);
+	}
+
 
 	public boolean canAddToMock() {
 		ConnectionDetailsView connectionDetailsView = getSelectedDetailView();
 		return (connectionDetailsView != null && !isMainTabSelected() && connectionDetailsView.isSelected());
 	}
 	
+	public boolean canAddAllToMock() {
+		ConnectionDetailsView connectionDetailsView = getSelectedDetailView();
+		if (connectionDetailsView != null) {
+			return connectionDetailsView.getCommunications().size() > 0;
+		}
+		return false;
+	}
 
 	public void clean(ClickEvent event) {
 		if (isMainTabSelected()) {
@@ -331,7 +349,6 @@ implements RefreshableView, SearcheableView, ItemRemovableView<CommunicationsRem
 					Connection selectedConnection = treeGridConnectionData.getConnection();
 					selectedConnection.getJavaApplication().getConnections().remove(selectedConnection);
 					daoManagerJavaApplication.update(selectedConnection.getJavaApplication());
-					//daoManagerConnection.deleteById(selectedConnection.getId());
 					removeTabConn(selectedConnection);
 					switchButtinsByJavaApp.get(selectedConnection.getJavaApplication()).remove(selectedConnection);
 					refreshClickable();
@@ -339,18 +356,8 @@ implements RefreshableView, SearcheableView, ItemRemovableView<CommunicationsRem
 				else if (treeGridConnectionData.isJavaApplication()) {
 					JavaApplication selectedJavaApplication = treeGridConnectionData.getJavaApplication();
 					selectedJavaApplication.getConnections().stream().forEach(this::removeTabConn);
-//					List<Connection> listConnection = daoManagerConnection.listAll();
-//					List<Connection> listConnectionRef = 
-//							daoManagerConnection.queryList("SELECT conn FROM Connection conn WHERE conn.javaApplication.id = " 
-//					+ selectedJavaApplication.getId());
-//					for (Connection conn : listConnectionRef) {
-//						daoManagerConnection.delete(conn);
-//					} 
-					
-					//DaoSingletonLock.lock();
 					daoManagerJavaApplication.delete(selectedJavaApplication);
 					switchButtinsByJavaApp.remove(selectedJavaApplication);
-					//DaoSingletonLock.unlock();
 				}
 				fillTreeTable();
 			}
@@ -438,10 +445,16 @@ implements RefreshableView, SearcheableView, ItemRemovableView<CommunicationsRem
 			selectedView.search(searchQuery, this::refreshClickable);
 		}
 	}
-	@Override
+	
 	public void remove(CommunicationsRemoved item) {
-		System.out.println(item);
-		
+		Iterator<Component> iter = tabSheet.iterator();
+		while (iter.hasNext()) {
+			Component current = iter.next();
+			if (current instanceof ConnectionDetailsView) {
+				((ConnectionDetailsView)current).deleteCommunications(item);
+			}
+			
+		}
 	}
 	
 	

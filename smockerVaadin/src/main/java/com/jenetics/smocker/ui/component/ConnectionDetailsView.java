@@ -2,6 +2,7 @@ package com.jenetics.smocker.ui.component;
 
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,6 +14,7 @@ import com.jenetics.smocker.dao.IDaoManager;
 import com.jenetics.smocker.lucene.LuceneIndexer;
 import com.jenetics.smocker.model.Communication;
 import com.jenetics.smocker.model.Connection;
+import com.jenetics.smocker.model.event.CommunicationsRemoved;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.component.seach.CommunicationItemsResults;
 import com.jenetics.smocker.ui.dialog.Dialog;
@@ -48,6 +50,7 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 	private Map<Communication, String[]> decodedCommunications = new HashMap<>();
 
 	protected transient IDaoManager<Connection> daoManagerConnection = DaoManagerByModel.getDaoManager(Connection.class);
+	private Set<Communication> communications;
 
 	public ConnectionDetailsView(Connection connection) {
 		super();
@@ -94,6 +97,7 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 	public Connection getConnection() {
 		return connection;
 	}
+	
 
 	public void menuSelectionChange(SelectionEvent<CommunicationDateDisplay> event) {
 		if (refreshClickable != null) {
@@ -106,14 +110,14 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 	}
 
 	public Set<Communication> getCommunications () {
-		return connection.getCommunications();
+		return communications;
 	}
 
 	private void fillCommunication() {
 		treeData.clear();
 		DaoSingletonLock.lock();
 		try {
-			Set<Communication> communications = connection.getCommunications();
+			communications = connection.getCommunications();
 			for (Communication communication : communications) {
 				CommunicationDateDisplay commDateDisplay = new CommunicationDateDisplay(communication);
 				commDisplayByComm.put(communication, commDateDisplay);
@@ -190,6 +194,23 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 	private void deleteCommunication(Communication communication) {
 		communication.getConnection().getCommunications().remove(communication);
 		daoManagerConnection.update(communication.getConnection());
+		removeCommFromTree(communication);
+		treeDataProvider.refreshAll();
+	}
+
+	private void removeCommFromTree(Communication communication) {
+		CommunicationDateDisplay communicationDateDisplay = commDisplayByComm.get(communication);
+		if (communicationDateDisplay != null) {
+			treeData.removeItem(communicationDateDisplay);
+		}
+	}
+	
+	public void deleteCommunications(CommunicationsRemoved communicationsRemoved) {
+		List<Communication> commList = communicationsRemoved.getCommList();
+		for (Communication comm : commList) {
+			removeCommFromTree(comm);
+		}
+		treeDataProvider.refreshAll();
 	}
 
 	private void deleteAll() {
@@ -244,7 +265,6 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 	private void selectedCommFromSearch(Communication comm) {
 		menu.select(commDisplayByComm.get(comm));
 		selectCommunication(comm);
-		//refreshClickable();
 	}
 
 	public void displayStack() {

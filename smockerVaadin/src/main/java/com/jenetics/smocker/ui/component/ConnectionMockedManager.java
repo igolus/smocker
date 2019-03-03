@@ -594,6 +594,10 @@ public class ConnectionMockedManager extends EasyAppLayout {
 					treeData.removeItem(commItem);
 				}
 			}
+			
+			selectedTreeItem.getScenario().getCommunicationsMocked().clear();
+			scenarioDaoManager.update(selectedTreeItem.getScenario());
+			
 			//all comm are in the same connection
 			if (listCommsToRemove.size() > 0) {
 				ConnectionMocked connection = listCommsToRemove.get(0).getConnection();
@@ -601,8 +605,7 @@ public class ConnectionMockedManager extends EasyAppLayout {
 				connectionDaoManager.update(connection);
 			}
 			
-			selectedTreeItem.getScenario().getCommunicationsMocked().clear();
-			scenarioDaoManager.update(selectedTreeItem.getScenario());
+			
 			treeDataProvider.refreshAll();
 		}
 	}

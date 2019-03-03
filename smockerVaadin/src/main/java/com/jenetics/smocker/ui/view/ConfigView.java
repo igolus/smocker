@@ -1,5 +1,10 @@
 package com.jenetics.smocker.ui.view;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
 import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
 import org.vaadin.aceeditor.AceTheme;
@@ -14,20 +19,32 @@ import com.jenetics.smocker.dao.IDaoManager;
 import com.jenetics.smocker.jseval.SmockerJsEnv;
 import com.jenetics.smocker.model.config.SmockerConf;
 import com.jenetics.smocker.ui.SmockerUI;
+import com.jenetics.smocker.ui.component.DupHostEditor;
+import com.jenetics.smocker.ui.dialog.Dialog;
+import com.jenetics.smocker.ui.util.DuplicateHost;
 import com.vaadin.annotations.Push;
+import com.vaadin.data.TreeData;
 import com.vaadin.data.HasValue.ValueChangeEvent;
+import com.vaadin.data.provider.TreeDataProvider;
+import com.vaadin.event.selection.SelectionEvent;
 import com.vaadin.icons.VaadinIcons;
+import com.vaadin.server.Sizeable;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.Tree;
+import com.vaadin.ui.TreeGrid;
 import com.vaadin.ui.VerticalLayout;
+
+import de.steinwedel.messagebox.MessageBox;
 
 @SuppressWarnings("serial")
 @Push
@@ -35,6 +52,7 @@ import com.vaadin.ui.VerticalLayout;
 @ContentView(sortingOrder = 4, viewName = "ConfigView", icon = "icons/Settings-icon.png", homeView = true, rootViewParent = ConnectionsRoot.class)
 public class ConfigView extends EasyAppLayout {
 
+	private static final String SEP_IGNORED_HOST = ";";
 	protected transient IDaoManager<SmockerConf> daoManagerSmockerConf = null;
 	private SmockerConf singleConfig;
 	protected final TabSheet tabSheet = new TabSheet();
@@ -42,6 +60,11 @@ public class ConfigView extends EasyAppLayout {
 	private AceEditor aceEditorFilter = new AceEditor();
 	private AceEditor aceEditorFormatDisplay = new AceEditor();
 	private AceEditor aceEditorDefaultMockFunction = new AceEditor();
+	private Button editButton;
+	private DuplicateHost selectedDuplicateHost;
+	private TreeData<DuplicateHost> treeDataDupHost;
+	private TreeData<String> treeDataIgnoreHost;
+	private TreeDataProvider<DuplicateHost> treeDataProviderDupHost;
 	
 	public ConfigView() {
 		singleConfig = DaoConfig.getSingleConfig();
@@ -137,41 +160,241 @@ public class ConfigView extends EasyAppLayout {
 
 
 	private Component buildGlobalConfigPane() {
-		HorizontalLayout layout = new HorizontalLayout();
+		VerticalLayout layout = new VerticalLayout();
+		layout.setSpacing(false);
+
 		VerticalLayout fillerRight = new VerticalLayout();
 		
 		fillerRight.setWidth(0, Unit.PIXELS);
 		
-		Label label = new Label("<b>" + SmockerUI.getBundleValue("UI_Conf") + "</b>", ContentMode.HTML);
-		GridLayout grid = new GridLayout(1, 2);
-		grid.setWidth("100%");
-		grid.setStyleName("Config");
-		grid.addComponent(label, 0, 0);
-		
 		CheckBox autoRefreshBox = createCheckBoxAutoRefresh();
-		grid.addComponent(autoRefreshBox, 0, 1);
-		layout.addComponent(grid);
-		layout.setExpandRatio(grid, 1.0f);
+		GridLayout gridAutoRefresh = createInLabelBox(SmockerUI.getBundleValue("UI_Conf"), autoRefreshBox);
+		layout.addComponent(gridAutoRefresh);
+		layout.setExpandRatio(gridAutoRefresh, 1.0f);
 		
-		Label labelInteration = new Label("<b>" + SmockerUI.getBundleValue("UI_Conf") + "</b>", ContentMode.HTML);
+		Button clearGlobalVar = new Button(SmockerUI.getBundleValue("Clear_Global_Var_Button"));
+		
+		clearGlobalVar.addClickListener(this::clearVar);
+		GridLayout gridClearGlobalVar = createInLabelBox(SmockerUI.getBundleValue("Manage_Env"), clearGlobalVar);
+		layout.addComponent(gridClearGlobalVar);
+		layout.setExpandRatio(gridClearGlobalVar, 1.0f);
+		
+		
+		Component dupHost = buildDupHostGrid();
+				
+		GridLayout gridDupHost = createInLabelBox(SmockerUI.getBundleValue("Manage_Dup_Host"), dupHost);
+		layout.addComponent(gridDupHost);
+		layout.setExpandRatio(gridDupHost, 1.0f);
+		
+		
+		Component ignoreHost = buildIgnoreHostListGrid();
+		
+		GridLayout gridIgnoreHost = createInLabelBox(SmockerUI.getBundleValue("Manage_Ignored_Host"), ignoreHost);
+		layout.addComponent(gridIgnoreHost);
+		layout.setExpandRatio(gridIgnoreHost, 1.0f);
+		
+		layout.addComponent(fillerRight);
+		layout.setWidth("100%");
+		return layout;
+	}
+	
+	private List<DuplicateHost> duplicateHosts = 
+			DuplicateHost.getListFromDbValue(DaoConfig.getSingleConfig().getDuplicateHosts());
+	private List<String> ignoredHosts;
+	
+	private TreeDataProvider<String> treeDataProviderIgnoreHost;
+	private String selectedIgnoredHost;
+	private Button removeIgnoreHostButton;
+
+	public List<DuplicateHost> getDuplicateHosts() {
+		return duplicateHosts;
+	}
+
+	public List<String> getIgnoredHosts() {
+		return ignoredHosts;
+	}
+
+	private Component buildDupHostGrid() {
+		
+		GridLayout gridInteration  = new GridLayout(1, 2);
+		gridInteration.setWidth("100%");
+		
+		HorizontalLayout layoutButtons = new HorizontalLayout();
+		editButton = new Button(VaadinIcons.PENCIL);
+		editButton.setDescription(SmockerUI.getBundleValue("Edit_Dup_Host_toolTip"));
+		editButton.setEnabled(false);
+		editButton.addClickListener(this::editDupHost);
+		layoutButtons.addComponent(editButton);
+		
+		Button addButton = new Button(VaadinIcons.PLUS);
+		
+		addButton.setDescription(SmockerUI.getBundleValue("Add_Dup_Host_toolTip"));
+		addButton.addClickListener(this::addDupHost);
+		layoutButtons.addComponent(addButton);
+		
+		
+		gridInteration.addComponent(layoutButtons, 0, 0);
+		
+		TreeGrid<DuplicateHost> dupHostGrid = new TreeGrid<>();
+		
+		dupHostGrid.setSelectionMode(SelectionMode.SINGLE);
+		dupHostGrid.addColumn(DuplicateHost::toString).setCaption("Dup host");
+		treeDataDupHost = new TreeData<>();
+		treeDataProviderDupHost = new TreeDataProvider<>(treeDataDupHost);
+		dupHostGrid.setDataProvider(treeDataProviderDupHost);
+		dupHostGrid.setWidth("100%");
+		
+		refreshDupHost();
+		gridInteration.addComponent(dupHostGrid, 0, 1);
+		
+		
+		dupHostGrid.addSelectionListener(this::gridDupHostSelected);
+		
+		return gridInteration;
+	}
+	
+	
+
+
+	private Component buildIgnoreHostListGrid() {
+		GridLayout gridInteration  = new GridLayout(1, 2);
+		gridInteration.setWidth("100%");
+		
+		HorizontalLayout layoutButtons = new HorizontalLayout();
+		
+		
+		removeIgnoreHostButton = new Button(VaadinIcons.MINUS);
+		removeIgnoreHostButton.setDescription(SmockerUI.getBundleValue("Remove_Ignore_Host_toolTip"));
+		removeIgnoreHostButton.setEnabled(false);
+		removeIgnoreHostButton.addClickListener(this::removeIgnoredHost);
+		layoutButtons.addComponent(removeIgnoreHostButton);
+		
+		Button addButton = new Button(VaadinIcons.PLUS);
+		
+		addButton.setDescription(SmockerUI.getBundleValue("Add_Ignore_Host_toolTip"));
+		addButton.addClickListener(this::addIgnoreHost);
+		layoutButtons.addComponent(addButton);
+		
+		
+		gridInteration.addComponent(layoutButtons, 0, 0);
+		
+		TreeGrid<String> ignoreHostGrid = new TreeGrid<>();
+		
+		ignoreHostGrid.setSelectionMode(SelectionMode.SINGLE);
+		ignoreHostGrid.addColumn(String::toString).setCaption(SmockerUI.getBundleValue("Ignore_Host_Column"));
+		treeDataIgnoreHost = new TreeData<>();
+		treeDataProviderIgnoreHost = new TreeDataProvider<>(treeDataIgnoreHost);
+		ignoreHostGrid.setDataProvider(treeDataProviderIgnoreHost);
+		ignoreHostGrid.setWidth("100%");
+		
+		refreshDupHost();
+		gridInteration.addComponent(ignoreHostGrid, 0, 1);
+		
+		
+		ignoreHostGrid.addSelectionListener(this::gridIgnoreHostSelected);
+		getIgnoredListFromDb(DaoConfig.getSingleConfig().getIgnoredHosts());
+		return gridInteration;
+	}
+	
+	
+	private void refreshDupHost() {
+		treeDataDupHost.clear();
+		for (DuplicateHost dupHost : duplicateHosts) {
+			treeDataDupHost.addItem(null, dupHost);
+		}
+		treeDataProviderDupHost.refreshAll();
+	}
+	
+	private void refreshIgnoredHost() {
+		treeDataIgnoreHost.clear();
+		for (String host : ignoredHosts) {
+			treeDataIgnoreHost.addItem(null, host);
+		}
+		treeDataProviderIgnoreHost.refreshAll();
+	}
+
+	private void editDupHost(ClickEvent event) {
+		DupHostEditor dupHostEditor = new DupHostEditor(selectedDuplicateHost);
+		Dialog.displayComponentBox(SmockerUI.getBundleValue("Dup_Host"), this::dupHostUpdated, dupHostEditor);
+	}
+	
+	private void dupHostUpdated(DuplicateHost dupHost) {
+		updateDupHostInDB();
+	}
+	
+	private void addDupHost(ClickEvent event) {
+		DuplicateHost dupHost = new DuplicateHost();
+		DupHostEditor dupHostEditor = new DupHostEditor(dupHost);
+		MessageBox displayComponentBox = 
+				Dialog.displayComponentBox(SmockerUI.getBundleValue("Dup_Host"), this::dupHostCreated, dupHostEditor);
+		dupHostEditor.setBox(displayComponentBox);
+	}
+	
+	private void addIgnoreHost(ClickEvent event) {
+		Dialog.displayCreateStringBox(SmockerUI.getBundleValue("Dup_Host"), this::ignoreHostCreated);
+	}
+	
+	
+	private void removeIgnoredHost(ClickEvent event) {
+		ignoredHosts.remove(selectedIgnoredHost);
+		updateIgnoredHostInDB();
+	}
+	
+	
+	private void dupHostCreated(DuplicateHost dupHost) {
+		duplicateHosts.add(dupHost);
+		updateDupHostInDB();
+	}
+	
+	private void ignoreHostCreated(String host) {
+		ignoredHosts.add(host);
+		updateIgnoredHostInDB();
+	}
+
+	private void updateDupHostInDB() {
+		DaoConfig.getSingleConfig().setDuplicateHosts(DuplicateHost.getDbValueFromList(duplicateHosts));
+		DaoConfig.saveConfig();
+		refreshDupHost();
+	}
+	
+	private void updateIgnoredHostInDB() {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < ignoredHosts.size(); i++) {
+			sb.append(ignoredHosts.get(i));
+			if (i < ignoredHosts.size() - 1) {
+				 sb.append(SEP_IGNORED_HOST);
+			}
+		}
+		DaoConfig.getSingleConfig().setIgnoredHosts(sb.toString());
+		DaoConfig.saveConfig();
+		refreshIgnoredHost();
+	}
+	
+	private void getIgnoredListFromDb(String ignoredHostString) {
+		ignoredHosts = new ArrayList<>(Arrays.asList(ignoredHostString.split(SEP_IGNORED_HOST)));
+		refreshIgnoredHost();
+	}
+	
+	private void gridDupHostSelected(SelectionEvent<DuplicateHost> dupHost) {
+		selectedDuplicateHost = dupHost.getFirstSelectedItem().get();
+		editButton.setEnabled(true);
+	}
+	
+	private void gridIgnoreHostSelected(SelectionEvent<String> dupHost) {
+		selectedIgnoredHost = dupHost.getFirstSelectedItem().get();
+		removeIgnoreHostButton.setEnabled(true);
+	}
+	
+	private GridLayout createInLabelBox (String textDesc, Component component) {
+		Label labelInteration = new Label("<b>" + textDesc + "</b>", ContentMode.HTML);
 		GridLayout gridInteration  = new GridLayout(1, 2);
 		gridInteration.setWidth("100%");
 		gridInteration.setStyleName("Config");
 		gridInteration.addComponent(labelInteration, 0, 0);
 		
-		Button clearGlobalVar = new Button("Clear Global var");
-		clearGlobalVar.addClickListener(this::clearVar);
-		gridInteration.addComponent(clearGlobalVar, 0, 1);
-		layout.addComponent(gridInteration);
-		layout.setExpandRatio(gridInteration, 1.0f);
+		gridInteration.addComponent(component, 0, 1);
+		return gridInteration;
 		
-		
-		
-		layout.addComponent(fillerRight);
-		layout.setSizeFull();
-		layout.setSizeFull();
-		layout.setWidth("100%");
-		return layout;
 	}
 	
 	private void clearVar(ClickEvent event) {

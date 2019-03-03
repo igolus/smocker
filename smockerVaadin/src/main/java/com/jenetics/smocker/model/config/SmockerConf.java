@@ -2,11 +2,18 @@ package com.jenetics.smocker.model.config;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Version;
 
+import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.EntityWithId;
 
 @Entity
@@ -43,8 +50,29 @@ public class SmockerConf implements EntityWithId {
 	
 	@Column(columnDefinition = "TEXT")
 	private String defaultMockFunction;
-
 	
+	@Column(columnDefinition = "TEXT")
+	private String duplicateHosts;
+	
+	@Column(columnDefinition = "TEXT")
+	private String ignoredHosts;
+	
+	public String getIgnoredHosts() {
+		return ignoredHosts;
+	}
+
+	public void setIgnoredHosts(String ignoredHosts) {
+		this.ignoredHosts = ignoredHosts;
+	}
+
+	public String getDuplicateHosts() {
+		return duplicateHosts;
+	}
+
+	public void setDuplicateHosts(String duplicateHosts) {
+		this.duplicateHosts = duplicateHosts;
+	}
+
 	public String getGlobalJsFunction() {
 		return globalJsFunction;
 	}
@@ -62,11 +90,11 @@ public class SmockerConf implements EntityWithId {
 	}
 
 	public String getFormatDisplayJsFunction() {
-		return formatDisplayJsFunction;
+		return this.formatDisplayJsFunction;
 	}
 
 	public void setFormatDisplayJsFunction(String formatDisplayJsFunction) {
-		formatDisplayJsFunction = formatDisplayJsFunction;
+		this.formatDisplayJsFunction = formatDisplayJsFunction;
 	}
 
 	public String getDefaultMockFunction() {

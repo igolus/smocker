@@ -58,7 +58,6 @@ public class JSEvaluator {
 			base64Input = NetworkReaderUtility.encode(realInput);
 		}
 		runtimeAndLogger.getRuntime().add("bas64Input", base64Input);
-		//V8Value byteValue = new V8Value(input);
 		runtimeAndLogger.getRuntime().add(
 				"providedInput", providedInput == null ? NetworkReaderUtility.decode(comm.getRequest()) : providedInput);
 		runtimeAndLogger.getRuntime().add(
@@ -136,7 +135,12 @@ public class JSEvaluator {
 			throws SmockerException {
 		String code = DaoConfig.getSingleConfig().getFormatDisplayJsFunction();
 		String globalCode = DaoConfig.getSingleConfig().getGlobalJsFunction();
-		code = code + "\n" + globalCode;
+		if (globalCode != null) {
+			code = code + "\n" + globalCode;
+		}
+		if (code == null) {
+			code = "";
+		}
 		
 		RuntimeAndLogger runtimeAndLogger = getRuntimeAndLogger();
 		
@@ -169,7 +173,7 @@ public class JSEvaluator {
 		}
 		return output;
 	}
-	
+	  
 	private static class RuntimeAndLogger {
 		private V8 runtime;
 		private LoggerCallBack callBack;

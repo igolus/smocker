@@ -54,6 +54,8 @@ import com.vaadin.ui.VerticalLayout;
 public abstract class AbstractConnectionTreeView<T extends EntityWithId, U extends EntityWithId, V extends Serializable, W extends AbstractConnectionDetails> 
 	extends EasyAppLayout implements SearcheableView  {
 
+	private static final int DISPLAY_NOTIF_DELAY = 1000;
+
 	/**
 	 * Tree Item object by javaApplication id used to find the associated UI
 	 * Item from an Application id
@@ -277,7 +279,6 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 
 		updateTree(entityWithId);
 	}
-
 
 	/**
 	 * Rebuild the treeTable

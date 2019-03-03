@@ -31,8 +31,10 @@ public class ScenarioUploader implements Receiver, SucceededListener {
 	private Logger logger = Logger.getLogger(ScenarioUploader.class);
 	
 	DaoManager<Scenario> daoManagerScenario = DaoManagerByModel.getDaoManager(Scenario.class);
-	DaoManager<ConnectionMocked> daoManagerConnectionMocked = DaoManagerByModel.getDaoManager(ConnectionMocked.class);
-	DaoManager<JavaApplicationMocked> daoManagerJavaApplicationMocked = DaoManagerByModel.getDaoManager(JavaApplicationMocked.class);
+	DaoManager<ConnectionMocked> daoManagerConnectionMocked = 
+			DaoManagerByModel.getDaoManager(ConnectionMocked.class);
+	DaoManager<JavaApplicationMocked> daoManagerJavaApplicationMocked = 
+			DaoManagerByModel.getDaoManager(JavaApplicationMocked.class);
 
 	
 	private static ObjectMapper mapper = new ObjectMapper();

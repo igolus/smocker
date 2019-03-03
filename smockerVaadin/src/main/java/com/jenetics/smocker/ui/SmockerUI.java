@@ -23,7 +23,6 @@ import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.model.event.CommunicationsRemoved;
 import com.jenetics.smocker.rest.AliveEndPoint;
-import com.jenetics.smocker.ui.util.ItemRemovableView;
 import com.jenetics.smocker.ui.util.RefreshableView;
 import com.jenetics.smocker.ui.util.SearcheableView;
 import com.jenetics.smocker.ui.view.JavaApplicationsView;

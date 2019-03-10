@@ -20,10 +20,13 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.internal.filter.ValueNode.JsonNode;
 import com.jenetics.smocker.jseval.SmockerFunctionClass;
 import com.jenetics.smocker.jseval.SmockerJsEnv;
 import com.jenetics.smocker.jseval.SmockerMethod;
@@ -33,15 +36,21 @@ import com.jenetics.smocker.util.NetworkReaderUtility;
 public class UsefullFunctions {
 	
 	@SmockerMethod
-	public static String xpath(String input, String xpathExpression) 
+	public static String smockerXpath(String input, String xpathExpression) 
 			throws ParserConfigurationException, XPathExpressionException, SAXException, IOException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = factory.newDocumentBuilder();
-		Document doc = builder.parse(input);
+		Document doc = builder.parse(new InputSource(new StringReader(input)));
 		XPathFactory xPathfactory = XPathFactory.newInstance();
 		XPath xpath = xPathfactory.newXPath();
 		XPathExpression expr = xpath.compile(xpathExpression);
 		return expr.evaluate(doc);
+	}
+	
+	@SmockerMethod
+	public static String smockerJsonPath(String input, String jsonPath) {
+		Object path = JsonPath.read(input, jsonPath);
+		return path.toString();
 	}
 	
 	/**
@@ -117,6 +126,9 @@ public class UsefullFunctions {
 	 */
 	@SmockerMethod
 	public static String smockerFormatXML (String xml, int indent) throws TransformerException {
+		if (xml.isEmpty()) {
+			return "";
+		}
 		Source xmlInput = new StreamSource(new StringReader(xml));
         StringWriter stringWriter = new StringWriter();
         StreamResult xmlOutput = new StreamResult(stringWriter);
@@ -134,10 +146,14 @@ public class UsefullFunctions {
 	 * @return
 	 */
 	@SmockerMethod
-	public static String removeHeader (String fullContent) {
+	public static String smockerRemoveHeader (String fullContent) {
 		int indexDoubleRet = fullContent.indexOf("\r\n\r\n");
 		if (indexDoubleRet != -1) {
 			return fullContent.substring(indexDoubleRet + 4);
+		}
+		indexDoubleRet = fullContent.indexOf("\n\n");
+		if (indexDoubleRet != -1) {
+			return fullContent.substring(indexDoubleRet + 2);
 		}
 		return fullContent;
 		

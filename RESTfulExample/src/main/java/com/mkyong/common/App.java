@@ -37,7 +37,7 @@ public class App
 				//callGoogle();
 				for (int i = 0; i < 1; i++) {
 					//callGoogleSocketChannell();
-					callJsonplaceholder();
+					callGeoService();
 					Thread.sleep(1000);
 					System.out.println("Call " + i);
 				}
@@ -92,6 +92,28 @@ public class App
 		System.out.println("Output from Server .... \n");
 		httpClient.getConnectionManager().shutdown();
 	}
+	
+	private static void callGeoService() throws IOException, ClientProtocolException {
+		DefaultHttpClient httpClient = new DefaultHttpClient();
+		HttpGet getRequest = new HttpGet(
+				"https://geoservices.tamu.edu/Services/Geocode/WebService/GeocoderWebServiceHttpNonParsed_V04_01.aspx?streetAddress=9355%20Burton%20Way&city=Beverly%20Hills&state=ca&zip=90210&apikey=demo&format=XML&census=false&notStore=false&version=4.01");
+		getRequest.addHeader("accept", "application/xml");
+
+		org.apache.http.HttpResponse response = httpClient.execute(getRequest);
+
+		if (response.getStatusLine().getStatusCode() != 200) {
+			throw new RuntimeException("Failed : HTTP error code : "
+					+ response.getStatusLine().getStatusCode());
+		}
+
+		BufferedReader br = new BufferedReader(
+				new InputStreamReader((response.getEntity().getContent())));
+
+		String output;
+		System.out.println("Output from Server .... \n");
+		httpClient.getConnectionManager().shutdown();
+	}
+	
 	
 	
 

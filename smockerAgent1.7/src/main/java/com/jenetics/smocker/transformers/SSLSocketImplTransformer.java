@@ -23,16 +23,9 @@ public class SSLSocketImplTransformer extends AbstractTransformer {
 		byte[] byteCode;
 		ClassPool classPool = ClassPool.getDefault();
 		CtClass ctClass = classPool.makeClass(new ByteArrayInputStream(classfileBuffer));
-		// CtMethod getOutputStreamMethod =
-		// ctClass.getDeclaredMethod("getOutputStream");
-
 		redefineGetOutputStream(classPool, ctClass);
 		redefineGetInputStream(classPool, ctClass);
 		redefineClose(classPool, ctClass);
-		// redefineBind(classPool, ctClass);
-		//redefineConnect(classPool, ctClass);
-		//redefineConstructors(classPool, ctClass);
-
 		byteCode = ctClass.toBytecode();
 		ctClass.detach();
 		ctClass.defrost();
@@ -53,7 +46,6 @@ public class SSLSocketImplTransformer extends AbstractTransformer {
 	}
 
 	private void redefineBind(ClassPool classPool, CtClass ctClass) throws NotFoundException, CannotCompileException {
-		// TODO Auto-generated method stub
 		CtMethod closeMethod = ctClass.getDeclaredMethod("bind");
 
 		String body = "{" + " try{" + " 	com.jenetics.smocker.util.TransformerUtility.socketBinded( $$, $0 );"
@@ -64,7 +56,6 @@ public class SSLSocketImplTransformer extends AbstractTransformer {
 	}
 
 	private void redefineClose(ClassPool classPool, CtClass ctClass) throws NotFoundException, CannotCompileException {
-		// TODO Auto-generated method stub
 		CtMethod closeMethod = ctClass.getDeclaredMethod("close");
 
 		String body = "{" + " try{" + " 	com.jenetics.smocker.util.TransformerUtility.socketClosed( $0 );"

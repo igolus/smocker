@@ -72,6 +72,18 @@ public class Dialog {
 		box.open();
 		return box;
 	}
+	
+	public static void displayComponentInVLayoutBox(String caption, Component... components) {
+		MessageBox box = MessageBox.create();
+		VerticalLayout layoutButtons = new VerticalLayout();
+		for (Component component : components) {
+			layoutButtons.addComponent(component);
+			component.setWidth("100%");
+		}
+		
+		box.withCaption(caption).withMessage(layoutButtons);
+		box.open();
+	}
 
 	public static void displayCreateStringBox(String caption, Consumer<String> selected) {
 		TextField textField = new TextField();

@@ -28,7 +28,6 @@ import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.component.ConnectionDetailsView;
 import com.jenetics.smocker.ui.dialog.Dialog;
 import com.jenetics.smocker.ui.util.ButtonWithIEntity;
-import com.jenetics.smocker.ui.util.ItemRemovableView;
 import com.jenetics.smocker.ui.util.RefreshableView;
 import com.jenetics.smocker.ui.util.SearcheableView;
 import com.jenetics.smocker.ui.util.StrandardTreeGridConnectionData;
@@ -41,8 +40,10 @@ import com.vaadin.data.HasValue.ValueChangeEvent;
 import com.vaadin.event.selection.SelectionEvent;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.TabSheet.Tab;
 
 @SuppressWarnings("serial")
@@ -89,15 +90,16 @@ implements RefreshableView, SearcheableView {
 
 	@Override
 	protected void addTreeMapping() {
-		treeGrid.addColumn(item -> item.getApplication()).setCaption(APPLICATION);
+		treeGrid.addColumn(item -> 
+			item.getApplication() != null ? 
+					item.getApplicationId() +  "_" + item.getApplication()
+					: null).setCaption(APPLICATION);
 		treeGrid.addColumn(item -> item.getAdress()).setCaption(ADRESS);
 		treeGrid.addColumn(item -> item.getPort()).setCaption(PORT);
 		treeGrid.addComponentColumn(this::buildWatchButton).setCaption(WATCH);
-		treeGrid.addComponentColumn(this::buildFilterButton).setCaption(FITLER);
-		treeGrid.addComponentColumn(this::buildFormatInputButton).setCaption(FORMAT_DISPLAY_INPUT);
-		treeGrid.addComponentColumn(this::buildFormatOutputButton).setCaption(FORMAT_DISPLAY_OUTPUT);
+		treeGrid.addComponentColumn(this::buildConfigureButton).setCaption(CONFIGURE);
 	}
-	
+
 	private HashMap<JavaApplication, List<SwitchWithEntity<Connection>>> switchButtinsByJavaApp = new HashMap<>();
 
 	private Switch buildWatchButton(TreeGridConnectionData<JavaApplication, Connection> item) {
@@ -107,7 +109,7 @@ implements RefreshableView, SearcheableView {
 			switchConnection.setValue(connection.getWatched());
 			switchConnection.addValueChangeListener(this::watchButtonClicked);
 			switchButtinsByJavaApp.computeIfAbsent(connection.getJavaApplication(), key -> new ArrayList<SwitchWithEntity<Connection>>())
-				.add(switchConnection);
+			.add(switchConnection);
 			return switchConnection;
 		}
 		else if (item.isJavaApplication()) {
@@ -120,44 +122,45 @@ implements RefreshableView, SearcheableView {
 		return null;
 	}
 
-	private Component buildFilterButton(TreeGridConnectionData<JavaApplication, Connection> item) {
+	private Component buildConfigureButton(TreeGridConnectionData<JavaApplication, Connection> item) {
 		if (item.isConnection()) {
 			Connection connection = item.getConnection();
 			ButtonWithIEntity<Connection> filterButton = new ButtonWithIEntity<>(connection);
 			filterButton.setHeight("100%");
-			filterButton.setCaption(SmockerUI.getBundleValue(FITLER));
-			filterButton.setDescription(SmockerUI.getBundleValue("Filter_TootTip"));
-			filterButton.addClickListener(this::filterClicked);
+			filterButton.setCaption(SmockerUI.getBundleValue(CONFIGURE));
+			filterButton.setDescription(SmockerUI.getBundleValue("COnfigure_TootTip"));
+			filterButton.addClickListener(this::configureClicked);
 			return filterButton;
 		}
 		return null;
 	}
 
-	private Component buildFormatInputButton(TreeGridConnectionData<JavaApplication, Connection> item) {
-		if (item.isConnection()) {
-			Connection connection = item.getConnection();
-			ButtonWithIEntity<Connection> formatButton = new ButtonWithIEntity<>(connection);
-			formatButton.setCaption(SmockerUI.getBundleValue(FORMAT_DISPLAY_INPUT));
-			formatButton.setHeight("100%");
-			formatButton.setDescription(SmockerUI.getBundleValue("Format_Display_Input_TootTip"));
-			formatButton.addClickListener(this::formatInputClicked);
-			return formatButton;
-		}
-		return null;
+	private Button buildFilterButton(Connection connection) {
+		ButtonWithIEntity<Connection> filterButton = new ButtonWithIEntity<>(connection);
+		filterButton.setHeight("100%");
+		filterButton.setCaption(SmockerUI.getBundleValue(FITLER));
+		filterButton.setDescription(SmockerUI.getBundleValue("Filter_TootTip"));
+		filterButton.addClickListener(this::filterClicked);
+		return filterButton;
 	}
-	
-	
-	private Component buildFormatOutputButton(TreeGridConnectionData<JavaApplication, Connection> item) {
-		if (item.isConnection()) {
-			Connection connection = item.getConnection();
-			ButtonWithIEntity<Connection> formatButton = new ButtonWithIEntity<>(connection);
-			formatButton.setCaption(SmockerUI.getBundleValue(FORMAT_DISPLAY_OUTPUT));
-			formatButton.setHeight("100%");
-			formatButton.setDescription(SmockerUI.getBundleValue("Format_Display_Output_TootTip"));
-			formatButton.addClickListener(this::formatOutputClicked);
-			return formatButton;
-		}
-		return null;
+
+	private Button buildFormatInputButton(Connection connection) {
+		ButtonWithIEntity<Connection> formatButton = new ButtonWithIEntity<>(connection);
+		formatButton.setCaption(SmockerUI.getBundleValue(FORMAT_DISPLAY_INPUT));
+		formatButton.setHeight("100%");
+		formatButton.setDescription(SmockerUI.getBundleValue("Format_Display_Input_TootTip"));
+		formatButton.addClickListener(this::formatInputClicked);
+		return formatButton;
+	}
+
+
+	private Button buildFormatOutputButton(Connection connection) {
+		ButtonWithIEntity<Connection> formatButton = new ButtonWithIEntity<>(connection);
+		formatButton.setCaption(SmockerUI.getBundleValue(FORMAT_DISPLAY_OUTPUT));
+		formatButton.setHeight("100%");
+		formatButton.setDescription(SmockerUI.getBundleValue("Format_Display_Output_TootTip"));
+		formatButton.addClickListener(this::formatOutputClicked);
+		return formatButton;
 	}
 
 	public void filterClicked(ClickEvent event) {
@@ -177,6 +180,18 @@ implements RefreshableView, SearcheableView {
 						Dialog.warning("Bad Javascript function should be of function(string) returning boolean " + checkValue);
 					}
 				}, first.getFunctionFilter());
+	}
+
+	public void configureClicked(ClickEvent event) {
+		ButtonWithIEntity<Connection>  button = (ButtonWithIEntity<Connection>) event.getButton();
+		Connection conn = button.getEntity();
+
+		Dialog.displayComponentInVLayoutBox(SmockerUI.getBundleValue(CONFIGURE), 
+				new Label(conn.getHost() + ":" + conn.getPort()),
+				buildFilterButton(conn), 
+				buildFormatInputButton(conn), 
+				buildFormatOutputButton(conn));
+
 	}
 
 
@@ -199,7 +214,7 @@ implements RefreshableView, SearcheableView {
 					}
 				}, first.getFunctionInputDisplay());
 	}
-	
+
 	public void formatOutputClicked(ClickEvent event) {
 		ButtonWithIEntity<Connection>  button = (ButtonWithIEntity<Connection>) event.getButton();
 		Connection conn = button.getEntity();
@@ -255,7 +270,7 @@ implements RefreshableView, SearcheableView {
 		}
 		daoManagerConnection.update(switchWithEntity.getEntity());	
 	}
-	
+
 	public void watchButtonJavaAppClicked(ValueChangeEvent<Boolean> event) {
 		SwitchWithEntity<JavaApplication> switchWithEntity = (SwitchWithEntity<JavaApplication>) event.getSource();
 		List<SwitchWithEntity<Connection>> targetSwitchButton = switchButtinsByJavaApp.get(switchWithEntity.getEntity());
@@ -264,7 +279,7 @@ implements RefreshableView, SearcheableView {
 			.forEach( switchButton -> switchButton.setValue(switchWithEntity.getValue()));
 		}
 	}
-	
+
 
 	public void treeSelectionChange(SelectionEvent<TreeGridConnectionData<JavaApplication, Connection>> event) {
 		refreshClickable();
@@ -309,7 +324,7 @@ implements RefreshableView, SearcheableView {
 		MockConverter.convertcommunication(connectionDetailsView.getSelectedCommunication());
 		SmockerUI.getInstance().displayNotif(SmockerUI.getBundleValue("Notif_CommMocked_Added"), 0);
 	}
-	
+
 	public void addAllToMock(ClickEvent event) {
 		ConnectionDetailsView connectionDetailsView = getSelectedDetailView();
 		for (Communication comm : connectionDetailsView.getCommunications()) {
@@ -323,7 +338,7 @@ implements RefreshableView, SearcheableView {
 		ConnectionDetailsView connectionDetailsView = getSelectedDetailView();
 		return (connectionDetailsView != null && !isMainTabSelected() && connectionDetailsView.isSelected());
 	}
-	
+
 	public boolean canAddAllToMock() {
 		ConnectionDetailsView connectionDetailsView = getSelectedDetailView();
 		if (connectionDetailsView != null) {
@@ -383,7 +398,7 @@ implements RefreshableView, SearcheableView {
 			connectionDetailsView.cleanAll();
 		}
 	}
-	
+
 	public void sort(ClickEvent event) {
 		if (!isMainTabSelected()) {
 			getSelectedDetailView().sort();
@@ -393,7 +408,7 @@ implements RefreshableView, SearcheableView {
 	public boolean canCleanAll() {
 		return !isMainTabSelected() && getSelectedDetailView().getConnection().getCommunications().size() > 0;
 	}
-	
+
 	public boolean canSort() {
 		return true;
 	}
@@ -425,7 +440,7 @@ implements RefreshableView, SearcheableView {
 
 	@Override
 	protected String getConnectionKey(Connection conn) {
-		return conn.getHost() + ":" + conn.getPort();
+		return conn.getJavaApplication().getId() + "_" + conn.getHost() + ":" + conn.getPort();
 	}
 
 
@@ -445,7 +460,7 @@ implements RefreshableView, SearcheableView {
 			selectedView.search(searchQuery, this::refreshClickable);
 		}
 	}
-	
+
 	public void remove(CommunicationsRemoved item) {
 		Iterator<Component> iter = tabSheet.iterator();
 		while (iter.hasNext()) {
@@ -453,9 +468,9 @@ implements RefreshableView, SearcheableView {
 			if (current instanceof ConnectionDetailsView) {
 				((ConnectionDetailsView)current).deleteCommunications(item);
 			}
-			
+
 		}
 	}
-	
-	
+
+
 }

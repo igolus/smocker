@@ -117,6 +117,9 @@ public class DupHostEditor extends VerticalLayout implements BoxableItem<Duplica
 
 	private void manageOkButton() {
 		if (displayComponentBox != null && duplicateHost.getListDupHost().size() > 1) {
+			displayComponentBox.getButton(ButtonType.OK).setEnabled(true);
+		}
+		else if (displayComponentBox != null) {
 			displayComponentBox.getButton(ButtonType.OK).setEnabled(false);
 		}
 	}

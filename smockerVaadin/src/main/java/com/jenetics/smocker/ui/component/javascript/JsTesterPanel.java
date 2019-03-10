@@ -1,19 +1,17 @@
 package com.jenetics.smocker.ui.component.javascript;
 
-import java.util.Date;
-
 import org.vaadin.easyapp.util.ActionContainer;
-import org.vaadin.easyapp.util.ActionContainerBuilder;
-import org.vaadin.easyapp.util.EasyAppLayout;
 import org.vaadin.easyapp.util.ActionContainer.InsertPosition;
 import org.vaadin.easyapp.util.ActionContainer.Position;
+import org.vaadin.easyapp.util.ActionContainerBuilder;
+import org.vaadin.easyapp.util.EasyAppLayout;
 
 import com.jenetics.smocker.model.CommunicationMocked;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.component.TextPanel;
 import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.VerticalSplitPanel;
 
 public class JsTesterPanel extends EasyAppLayout {
 

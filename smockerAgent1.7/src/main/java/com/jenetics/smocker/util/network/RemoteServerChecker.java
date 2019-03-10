@@ -1,15 +1,12 @@
 package com.jenetics.smocker.util.network;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.ReentrantLock;
 
 import com.jenetics.smocker.util.MessageLogger;
 import com.jenetics.smocker.util.SimpleJsonReader;
-import com.jenetics.smocker.util.TransformerUtility;
 
 
 public class RemoteServerChecker {
@@ -97,9 +94,14 @@ public class RemoteServerChecker {
 								remoteServerAlive = false;
 							}
 							
-							String responseIgnoreHost = RestClientSmocker.getInstance().getAllIgnoredHosts();
-							if (responseIgnoreHost != null) {
-								ignoredHosts = SimpleJsonReader.readValues(responseIgnoreHost, "listIgnoredList");
+							String responseIgnoredHosts = RestClientSmocker.getInstance().getAllIgnoredHosts();
+							if (responseIgnoredHosts != null) {
+								ignoredHosts = SimpleJsonReader.readValues(responseIgnoredHosts, "listIgnoredList");
+							} 
+							
+							String responseDupHosts = RestClientSmocker.getInstance().getAllDupHosts();
+							if (responseDupHosts != null) {
+								duplicatedHosts = SimpleJsonReader.readValuesDoubleList(responseDupHosts, "listDupHost");
 							}
 							
 							String listHostWatched = RestClientSmocker.getInstance().getAllUnWachedConnections();

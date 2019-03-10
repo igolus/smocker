@@ -29,6 +29,8 @@ public class LoggerCallBack implements JavaVoidCallback {
 		return sb.toString();
 	}
 	
-	
+	public void reset() {
+		sb = new StringBuffer();
+	}
 
 }

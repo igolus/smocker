@@ -21,11 +21,12 @@ import com.jenetics.smocker.util.SmockerUtility;
 @SuppressWarnings("serial")
 public class JsEditor extends EasyAppLayout {
 
-	public static String DEFAULT_JS = "function matchAndReturnOutput(recordDate, realInput, bas64Input, providedInput, providedOutput, index)" + System.lineSeparator()
+	public static String DEFAULT_JS = "function matchAndReturnOutput(recordDate, realInput, bas64Input, providedInput, providedOutput,"  + System.lineSeparator() 
+		+"    index, targetHost, targetPort)" + System.lineSeparator()
 		+ "{" + System.lineSeparator()
 		+ "  if (realInput == providedInput)" + System.lineSeparator()
 		+ "  {" + System.lineSeparator()
-		+ "    return btoa(providedOutput);" + System.lineSeparator()
+		+ "    return smockerBtoa(providedOutput);" + System.lineSeparator()
 		+ "  }" + System.lineSeparator()
 		+ "  return null;" + System.lineSeparator()
 		+ "}";

@@ -122,6 +122,7 @@
 	</dependencyManagement>
 
 	<dependencies>
+
 		<dependency>
 			<groupId>org.vaadin</groupId>
 			<artifactId>uploadbutton</artifactId>

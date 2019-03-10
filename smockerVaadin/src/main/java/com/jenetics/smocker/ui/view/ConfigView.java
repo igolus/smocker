@@ -307,15 +307,19 @@ public class ConfigView extends EasyAppLayout {
 	
 	private void refreshIgnoredHost() {
 		treeDataIgnoreHost.clear();
-		for (String host : ignoredHosts) {
-			treeDataIgnoreHost.addItem(null, host);
+		if (ignoredHosts != null) {
+			for (String host : ignoredHosts) {
+				treeDataIgnoreHost.addItem(null, host);
+			}
 		}
 		treeDataProviderIgnoreHost.refreshAll();
 	}
 
 	private void editDupHost(ClickEvent event) {
 		DupHostEditor dupHostEditor = new DupHostEditor(selectedDuplicateHost);
-		Dialog.displayComponentBox(SmockerUI.getBundleValue("Dup_Host"), this::dupHostUpdated, dupHostEditor);
+		MessageBox displayComponentBox = 
+				Dialog.displayComponentBox(SmockerUI.getBundleValue("Dup_Host"), this::dupHostUpdated, dupHostEditor);
+		dupHostEditor.setBox(displayComponentBox);
 	}
 	
 	private void dupHostUpdated(DuplicateHost dupHost) {
@@ -371,12 +375,16 @@ public class ConfigView extends EasyAppLayout {
 	}
 	
 	private void getIgnoredListFromDb(String ignoredHostString) {
-		ignoredHosts = new ArrayList<>(Arrays.asList(ignoredHostString.split(SEP_IGNORED_HOST)));
+		if (ignoredHostString != null) {
+			ignoredHosts = new ArrayList<>(Arrays.asList(ignoredHostString.split(SEP_IGNORED_HOST)));
+		}
 		refreshIgnoredHost();
 	}
 	
 	private void gridDupHostSelected(SelectionEvent<DuplicateHost> dupHost) {
-		selectedDuplicateHost = dupHost.getFirstSelectedItem().get();
+		if (dupHost.getFirstSelectedItem().isPresent()) {
+			selectedDuplicateHost = dupHost.getFirstSelectedItem().get();
+		}
 		editButton.setEnabled(true);
 	}
 	

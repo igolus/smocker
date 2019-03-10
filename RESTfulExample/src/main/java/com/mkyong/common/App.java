@@ -35,9 +35,9 @@ public class App
 
 				line = bufferedReader.readLine();
 				//callGoogle();
-				for (int i = 0; i < 500; i++) {
+				for (int i = 0; i < 1; i++) {
 					//callGoogleSocketChannell();
-					callGoogle();
+					callJsonplaceholder();
 					Thread.sleep(1000);
 					System.out.println("Call " + i);
 				}
@@ -69,12 +69,31 @@ public class App
 
 		String output;
 		System.out.println("Output from Server .... \n");
-//		while ((output = br.readLine()) != null) {
-//			System.out.println(output);
-//		}
-
 		httpClient.getConnectionManager().shutdown();
 	}
+	
+	private static void callJsonplaceholder() throws IOException, ClientProtocolException {
+		DefaultHttpClient httpClient = new DefaultHttpClient();
+		HttpGet getRequest = new HttpGet(
+				"https://jsonplaceholder.typicode.com/todos/1");
+		getRequest.addHeader("accept", "application/json");
+
+		org.apache.http.HttpResponse response = httpClient.execute(getRequest);
+
+		if (response.getStatusLine().getStatusCode() != 200) {
+			throw new RuntimeException("Failed : HTTP error code : "
+					+ response.getStatusLine().getStatusCode());
+		}
+
+		BufferedReader br = new BufferedReader(
+				new InputStreamReader((response.getEntity().getContent())));
+
+		String output;
+		System.out.println("Output from Server .... \n");
+		httpClient.getConnectionManager().shutdown();
+	}
+	
+	
 
 	private static void callGoogleSocketChannell() throws UnknownHostException, IOException {
 
@@ -96,6 +115,7 @@ public class App
 		int indexBuffer = 0;
 		
 		SocketChannel socketChannel = SocketChannel.open(new InetSocketAddress("www.google.com", 80));
+		
 		for (int i = 0; i < 1; i++) {
 			indexBuffer = 0;
 			//buffer.clear();

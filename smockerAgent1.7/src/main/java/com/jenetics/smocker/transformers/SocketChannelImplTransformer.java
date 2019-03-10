@@ -27,9 +27,6 @@ public class SocketChannelImplTransformer {
 		ClassPool classPool = ClassPool.getDefault();
 		CtClass ctClass = classPool.makeClass(new ByteArrayInputStream(classfileBuffer));
 
-		//redefineGetOutputStream(classPool, ctClass);
-		//redefineGetInputStream(classPool, ctClass);
-		//redefineClose(classPool, ctClass);
 		redefineWrite(classPool, ctClass);
 		redefineRead(classPool, ctClass);
 		redefineImplCloseSelectableChannel(classPool, ctClass);

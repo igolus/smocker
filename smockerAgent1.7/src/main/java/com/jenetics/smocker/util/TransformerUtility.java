@@ -22,7 +22,6 @@ import com.jenetics.smocker.util.network.RemoteServerChecker;
 
 public class TransformerUtility {
 	private static String callerApp = null;
-	private static Long javaAppId = null;
 
 	private static Hashtable<Object, SmockerContainer> smockerContainerBySocket = new Hashtable<Object, SmockerContainer>();
 	private TransformerUtility() {
@@ -52,14 +51,16 @@ public class TransformerUtility {
 			int write = buffer.capacity();
 
 			ByteBuffer bufferDup = buffer.duplicate();
-			//byte[] array = new byte[buffer.capacity()];
+			byte[] array = new byte[bufferDup.limit()];
+			bufferDup.flip();
+			bufferDup.get(array);
 //			try {
 //				bufferDup.get(array);
 //			}
 //			catch (Exception e) {
 //				e.printStackTrace();
 //			}
-			byte[] array = buffer.array();
+//			byte[] array = buffer.array();
 			
 
 			SmockerContainer smockerContainer = smockerContainerBySocket.get(socketChannel);

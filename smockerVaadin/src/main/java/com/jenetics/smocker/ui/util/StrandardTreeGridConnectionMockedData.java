@@ -11,9 +11,6 @@ public class StrandardTreeGridConnectionMockedData extends TreeGridConnectionDat
 
 	@Override
 	public String getConnectionType() {
-//		if (isConnection()) {
-//			return connection.
-//		}
 		return null;
 	}
 
@@ -46,5 +43,12 @@ public class StrandardTreeGridConnectionMockedData extends TreeGridConnectionDat
 			return null;
 		}
 	}
+
+	@Override
+	public String getApplicationId() {
+		return null;
+	}
+	
+	
 
 }

@@ -35,6 +35,7 @@ public abstract class TreeGridConnectionData<T, U> {
 	public abstract String getPort();
 	public abstract String getAdress();
 	public abstract String getApplication();
+	public abstract String getApplicationId();
 
 
 }

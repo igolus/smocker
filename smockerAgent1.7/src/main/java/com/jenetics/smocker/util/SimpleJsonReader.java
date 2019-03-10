@@ -3,6 +3,7 @@ package com.jenetics.smocker.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -97,6 +98,32 @@ public class SimpleJsonReader {
 			for (int i = 0; i < valuesArray.length; i++) {
 				retValues.add(valuesArray[i].substring(1, valuesArray[i].length() - 1));
 			}
+			return retValues;
+		}
+		return null;
+	}
+	
+	public static List<List<String>> readValuesDoubleList(String json, String secondKey) {
+		List<List<String>> ret = new ArrayList<>();
+		List<String> readListValuesDoubleList = readListValuesDoubleList(json);
+		for (String jsonList : readListValuesDoubleList) {
+			ret.add(readValues(jsonList, secondKey));
+		}
+		return ret; 
+	}
+
+	private static List<String> readListValuesDoubleList(String json) {
+		int startIndex = json.indexOf("[");
+		int endIndex = json.lastIndexOf("]");
+		
+		List<String> retValues = new ArrayList<>();
+		if (startIndex != -1 && endIndex != -1) {
+			String listValues = json.substring(startIndex + 1, endIndex);
+			String[] splittedValues = listValues.split("},");
+			for (int i = 0; i < splittedValues.length - 1; i++) {
+				retValues.add(splittedValues[i] + "}");
+			}
+			retValues.add(splittedValues[splittedValues.length - 1]);
 			return retValues;
 		}
 		return null;

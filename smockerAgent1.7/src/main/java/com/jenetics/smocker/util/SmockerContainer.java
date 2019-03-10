@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.List;
 
 import com.jenetics.smocker.util.io.TeeInputStream;
 import com.jenetics.smocker.util.io.TeeOutputStream;
@@ -96,7 +97,7 @@ public class SmockerContainer {
 
 	public SmockerContainer(String ip, String host, int port, String stackTrace, Object source) {
 		this.ip = ip;
-		this.host = host;
+		this.host = checkDuplicateHost(host);
 		this.port = port;
 		this.stackTrace = stackTrace;
 		this.source = source;
@@ -104,6 +105,19 @@ public class SmockerContainer {
 		this.applyMock = RemoteServerChecker.getMockedHosts().contains(host + ":" + port);
 	}
 
+
+	private String checkDuplicateHost(String host) {
+		List<List<String>> duplicatedHosts = RemoteServerChecker.getDuplicatedHosts();
+		if (duplicatedHosts == null) {
+			return host;
+		}
+		for (List<String> listDup : duplicatedHosts) {
+			if (listDup.contains(host)) {
+				return listDup.get(0);
+			}
+		}
+		return host;
+	}
 
 	public SmockerContainer(SmockerSocketInputStream smockerSocketInputStream,
 			SmockerSocketOutputStream smockerSocketOutputStream) {
@@ -232,16 +246,6 @@ public class SmockerContainer {
 		}
     	return null;
 	}
-	
-//	private boolean resetMatchNextWrite = false;
-//
-//	public boolean isResetMatchNextWrite() {
-//		return resetMatchNextWrite;
-//	}
-//
-//	public void setResetMatchNextWrite(boolean resetMatchNextWrite) {
-//		this.resetMatchNextWrite = resetMatchNextWrite;
-//	}
 	
 	private boolean reseNextWrite = false;
 

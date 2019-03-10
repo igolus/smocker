@@ -44,4 +44,15 @@ public class StrandardTreeGridConnectionData extends TreeGridConnectionData<Java
 		}
 	}
 
+	@Override
+	public String getApplicationId() {
+		if (isJavaApplication()) {
+			return javaApplication.getId().toString();
+		}
+		else {
+			return null;
+		}
+	}
+	
+
 }

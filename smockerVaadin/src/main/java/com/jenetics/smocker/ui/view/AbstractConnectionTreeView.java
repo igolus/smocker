@@ -67,12 +67,14 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 	static ResourceBundle bundle = ResourceBundle.getBundle("BundleUI");
 	protected static final String CONNECTION_TYPE =SmockerUI.getBundleValue("ConnectionType");
 	protected static final String PORT = SmockerUI.getBundleValue("Port");
+	protected static final String ID = SmockerUI.getBundleValue("IdJavaApp");
 	protected static final String ADRESS = SmockerUI.getBundleValue("Adress");
 	protected static final String APPLICATION = SmockerUI.getBundleValue("Application");
 	protected static final String WATCH = SmockerUI.getBundleValue("Watch_Button");
 	protected static final String FITLER = SmockerUI.getBundleValue("Filter_Button");
 	protected static final String FORMAT_DISPLAY_INPUT = SmockerUI.getBundleValue("Format_Display_Input_Button");
 	protected static final String FORMAT_DISPLAY_OUTPUT = SmockerUI.getBundleValue("Format_Display_Output_Button");
+	protected static final String CONFIGURE = SmockerUI.getBundleValue("Configure_Button");
 	
 	protected static final String ALL = "all";
 	protected static final String SEP_CONN = ":";

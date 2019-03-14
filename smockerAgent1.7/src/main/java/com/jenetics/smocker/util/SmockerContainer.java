@@ -112,7 +112,7 @@ public class SmockerContainer {
 			return host;
 		}
 		for (List<String> listDup : duplicatedHosts) {
-			if (listDup.contains(host)) {
+			if (listDup != null && listDup.contains(host)) {
 				return listDup.get(0);
 			}
 		}

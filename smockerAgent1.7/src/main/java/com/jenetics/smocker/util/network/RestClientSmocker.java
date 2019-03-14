@@ -115,11 +115,7 @@ public class RestClientSmocker extends RESTClient {
 		String host = smockerContainer.getHost();
 		int port = smockerContainer.getPort();
 
-		//smockerContainer.getSmockerSocketOutputStream().getSmockerOutputStreamData().getBytes();
-		//Long idConnection = TransformerUtility.getConnectionIdBySocket().get(smockerContainer.getSource());
-		//		Long javaAppId = TransformerUtility.getJavaAppId();
 		Long javaAppId = RemoteServerChecker.getInstance().getJavaAppId();
-
 
 		if (RemoteServerChecker.isConnectionWatched(host, port) && 
 				smockerContainer.getSmockerSocketOutputStream() != null && 

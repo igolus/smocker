@@ -56,8 +56,10 @@ public class SmockerConfEndpoint extends AbstractEndpoint<SmockerConf> {
 		ConfigView configView = getConfigView();
 		List<String> ignoredHosts = configView.getIgnoredHosts();
 		ListIgnoredHosts listIgnoredHosts = new ListIgnoredHosts();
-		for (String ignoredHost : ignoredHosts) {
-			listIgnoredHosts.addIgnoredHost(ignoredHost);
+		if (ignoredHosts != null) {
+			for (String ignoredHost : ignoredHosts) {
+				listIgnoredHosts.addIgnoredHost(ignoredHost);
+			}
 		}
 		return Response.ok().entity(listIgnoredHosts).build();
 	}

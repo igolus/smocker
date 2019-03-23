@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.channels.SelectionKey;
 import java.util.List;
 
 import com.jenetics.smocker.util.io.TeeInputStream;
@@ -32,6 +33,8 @@ public class SmockerContainer {
 	private boolean applyMock;
 	private boolean streamResent = false;
 	private int indexForArrayCopy = 0;
+	//private int initialReadyOpts = 0;
+	//private SelectionKey initialSelectionKey = null;
 	
 	public int getIndexForArrayCopy() {
 		return indexForArrayCopy;
@@ -93,7 +96,25 @@ public class SmockerContainer {
 	public int getPort() {
 		return port;
 	}
+	
 
+//	public int getInitialReadyOpts() {
+//		return initialReadyOpts;
+//	}
+//
+//	public void setInitialReadyOpts(int initialReadyOpts) {
+//		this.initialReadyOpts = initialReadyOpts;
+//	}
+//	
+//	
+//
+//	public SelectionKey getInitialSelectionKey() {
+//		return initialSelectionKey;
+//	}
+//
+//	public void setInitialSelectionKey(SelectionKey initialSelectionKey) {
+//		this.initialSelectionKey = initialSelectionKey;
+//	}
 
 	public SmockerContainer(String ip, String host, int port, String stackTrace, Object source) {
 		this.ip = ip;

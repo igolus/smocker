@@ -36,8 +36,8 @@ public class App
 				line = bufferedReader.readLine();
 				//callGoogle();
 				for (int i = 0; i < 1; i++) {
-					//callGoogleSocketChannell();
-					callGeoService();
+					callGoogleSocketChannell();
+					//callGeoService();
 					Thread.sleep(1000);
 					System.out.println("Call " + i);
 				}
@@ -143,11 +143,7 @@ public class App
 			//buffer.clear();
 			while (indexBuffer < bytesToSend.length) {
 				byte[] destArray = new byte[Math.min(capacity, bytesToSend.length - indexBuffer)];
-				
-				
 				System.arraycopy(bytesToSend, indexBuffer, destArray, 0, destArray.length);
-				
-				
 				ByteBuffer buffer = ByteBuffer.wrap(destArray);
 				indexBuffer += destArray.length;
 				int write = socketChannel.write(buffer);
@@ -165,7 +161,7 @@ public class App
 				}
 				buffer.clear();
 			}
-			//System.out.println(bfOut.toString());
+			System.out.println(bfOut.toString());
 			buffer.flip();
 		}
 		socketChannel.close();

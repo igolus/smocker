@@ -6,12 +6,17 @@ import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 
 import com.jenetics.smocker.transformers.AbstractInterruptibleChannelTransformer;
+import com.jenetics.smocker.transformers.AbstractSelectableChannelTransformer;
+import com.jenetics.smocker.transformers.NioEventLoopTransformer;
 import com.jenetics.smocker.transformers.SSLSocketImplTransformer;
+import com.jenetics.smocker.transformers.SelectionKeyImplTransformer;
+import com.jenetics.smocker.transformers.SelectionKeyTransformer;
 import com.jenetics.smocker.transformers.SocketChannelImplTransformer;
 import com.jenetics.smocker.transformers.SocketAdaptorImplTransformer;
 import com.jenetics.smocker.transformers.SocketImplTransformer;
 import com.jenetics.smocker.transformers.SocketInputStreamtTransformer;
 import com.jenetics.smocker.transformers.SocketTransformer;
+import com.jenetics.smocker.transformers.WindowsSelectorImplTransformer;
 import com.jenetics.smocker.util.MessageLogger;
 import com.jenetics.smocker.util.RessourceLoader;
 import com.jenetics.smocker.util.TransformerUtility;
@@ -43,8 +48,28 @@ public class MainTransformer implements ClassFileTransformer {
 				byteCode = new SocketChannelImplTransformer().transform(classfileBuffer);
 			}
 			
-			if (className != null && className.equals("java/nio/channels/spi/AbstractInterruptibleChannel")) {
-				byteCode = new AbstractInterruptibleChannelTransformer().transform(classfileBuffer);
+//			if (className != null && className.equals("java/nio/channels/spi/AbstractInterruptibleChannel")) {
+//				byteCode = new AbstractInterruptibleChannelTransformer().transform(classfileBuffer);
+//			}
+			
+			if (className != null && className.equals("java/nio/channels/spi/AbstractSelectableChannel")) {
+				byteCode = new AbstractSelectableChannelTransformer().transform(classfileBuffer);
+			}
+			
+			if (className != null && className.equals("sun/nio/ch/SelectionKeyImpl")) {
+				byteCode = new SelectionKeyImplTransformer().transform(classfileBuffer);
+			}
+			
+			if (className != null && className.equals("java/nio/channels/SelectionKey")) {
+				byteCode = new SelectionKeyTransformer().transform(classfileBuffer);
+			}
+			
+			if (className != null && className.equals("io/netty/channel/nio/NioEventLoop")) {
+				byteCode = new NioEventLoopTransformer().transform(classfileBuffer);
+			}
+			
+			if (className != null && className.equals("sun/nio/ch/WindowsSelectorImpl")) {
+				byteCode = new WindowsSelectorImplTransformer().transform(classfileBuffer);
 			}
 
 		} catch (Exception ex) {

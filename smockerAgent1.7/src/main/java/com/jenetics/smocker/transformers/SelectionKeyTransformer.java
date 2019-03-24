@@ -31,8 +31,6 @@ public class SelectionKeyTransformer {
 	}
 
 	private void defineNewMethod(ClassPool classPool, CtClass ctClass) throws CannotCompileException, NotFoundException {
-		//ctClass.setModifiers(Modifier.PUBLIC);
-//		ctClass.getDeclaredField("attachment").setModifiers(Modifier.PUBLIC & Modifier.VOLATILE);
 		
 		final String body = "public void setAttachment (Object attachment) {"
 				+ " try{" 

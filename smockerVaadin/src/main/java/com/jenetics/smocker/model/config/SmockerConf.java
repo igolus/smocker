@@ -27,7 +27,7 @@ public class SmockerConf implements EntityWithId {
 	@Version
 	@Column(name = "version")
 	private int version;
-	
+
 	@Column
 	private boolean autorefesh = true;
 
@@ -38,31 +38,42 @@ public class SmockerConf implements EntityWithId {
 	public void setAutorefesh(boolean autorefesh) {
 		this.autorefesh = autorefesh;
 	}
-	
+
 	@Column(columnDefinition = "TEXT")
 	private String globalJsFunction;
-	
+
 	@Column(columnDefinition = "TEXT")
 	private String filterJsFunction;
 
 	@Column(columnDefinition = "TEXT")
 	private String formatDisplayJsFunction;
-	
+
 	@Column(columnDefinition = "TEXT")
 	private String defaultMockFunction;
-	
+
 	@Column(columnDefinition = "TEXT")
 	private String duplicateHosts;
-	
+
 	@Column(columnDefinition = "TEXT")
-	private String ignoredHosts;
-	
-	public String getIgnoredHosts() {
-		return ignoredHosts;
+	private String excludedHosts;
+
+	@Column(columnDefinition = "TEXT")
+	private String includedHosts;
+
+	public String getExcludedHosts() {
+		return excludedHosts;
 	}
 
-	public void setIgnoredHosts(String ignoredHosts) {
-		this.ignoredHosts = ignoredHosts;
+	public void setExcludedHosts(String excludedHosts) {
+		this.excludedHosts = excludedHosts;
+	}
+
+	public String getIncludedHosts() {
+		return includedHosts;
+	}
+
+	public void setIncludedHosts(String includedHosts) {
+		this.includedHosts = includedHosts;
 	}
 
 	public String getDuplicateHosts() {

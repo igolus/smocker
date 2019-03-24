@@ -112,8 +112,25 @@ public class SimpleJsonReader {
 		return ret; 
 	}
 
-	private static List<String> readListValuesDoubleList(String json) {
+	public static List<String> readListValuesDoubleList(String json) {
 		int startIndex = json.indexOf("[");
+		int endIndex = json.lastIndexOf("]");
+		
+		List<String> retValues = new ArrayList<>();
+		if (startIndex != -1 && endIndex != -1) {
+			String listValues = json.substring(startIndex + 1, endIndex);
+			String[] splittedValues = listValues.split("},");
+			for (int i = 0; i < splittedValues.length - 1; i++) {
+				retValues.add(splittedValues[i] + "}");
+			}
+			retValues.add(splittedValues[splittedValues.length - 1]);
+			return retValues;
+		}
+		return null;
+	}
+	
+	private static List<String> readJsonItemInList(String json, String key) {
+		int startIndex = json.indexOf("\"" + key + "\" : [");
 		int endIndex = json.lastIndexOf("]");
 		
 		List<String> retValues = new ArrayList<>();

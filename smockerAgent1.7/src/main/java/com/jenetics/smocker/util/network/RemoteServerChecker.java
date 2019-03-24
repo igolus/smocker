@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.jenetics.smocker.util.HostAndPortRangeModel;
 import com.jenetics.smocker.util.MessageLogger;
 import com.jenetics.smocker.util.SimpleJsonReader;
 
@@ -16,7 +17,8 @@ public class RemoteServerChecker {
 	private static RemoteServerChecker instance;
 	private static boolean remoteServerAlive = false;
 	private static List<String> mockedHosts = new ArrayList<>();
-	private static List<String>	ignoredHosts = new ArrayList<>();
+	private static List<HostAndPortRangeModel>	excludedHosts = new ArrayList<>();
+	private static List<HostAndPortRangeModel>	includedHosts = new ArrayList<>();
 	private static List<List<String>> duplicatedHosts = new ArrayList<>();
 	private static List<String> unWatchedHost = new ArrayList<>();
 	private static Map<String, String> listConnectionsReferenced = new HashMap<>();
@@ -31,9 +33,13 @@ public class RemoteServerChecker {
 	public static List<String> getMockedHosts() {
 		return mockedHosts;
 	}
-	
-	public static List<String> getIgnoredHosts() {
-		return ignoredHosts;
+
+	public static List<HostAndPortRangeModel> getExcludedHosts() {
+		return excludedHosts;
+	}
+
+	public static List<HostAndPortRangeModel> getIncludedHosts() {
+		return includedHosts;
 	}
 
 	public static List<List<String>> getDuplicatedHosts() {
@@ -73,10 +79,44 @@ public class RemoteServerChecker {
 	}
 	
 	public static boolean isConnectionWatched(String host, int port) {
-		boolean isHostIgnored = ignoredHosts == null ? false : ignoredHosts.contains(host);
-		return !isHostIgnored && (unWatchedHost == null || !unWatchedHost.contains(host + SEP + port));
+		boolean doNotfilter = true;
+		if (includedHosts.size() > 0) {
+			doNotfilter = false;
+			for (HostAndPortRangeModel hostAndPortRangeModel : includedHosts) {
+				if (isMatching(hostAndPortRangeModel, host, port)) {
+					doNotfilter = true;
+					break;
+				}
+			}
+		}
+		
+		if (excludedHosts.size() > 0 && doNotfilter) {
+			for (HostAndPortRangeModel hostAndPortRangeModel : excludedHosts) {
+				if (isMatching(hostAndPortRangeModel, host, port)) {
+					doNotfilter = false;
+					break;
+				}
+			}
+		}
+		
+		return doNotfilter && (unWatchedHost == null || !unWatchedHost.contains(host + SEP + port));
 	}
 
+
+	private static boolean isMatching(HostAndPortRangeModel hostAndPortRangeModel, String host, int port) {
+		if (hostAndPortRangeModel.getMinPort() == -1) {
+			return hostAndPortRangeModel.getHost().equals(host);
+		}
+		if (hostAndPortRangeModel.getMaxPort() == 0) {
+			return hostAndPortRangeModel.getHost().equals(host) 
+					&& hostAndPortRangeModel.getMinPort() == port;
+		}
+		else {
+			return hostAndPortRangeModel.getHost().equals(host) 
+					&& port >= hostAndPortRangeModel.getMinPort()
+					&& port <= hostAndPortRangeModel.getMaxPort();
+		}
+	}
 
 	public void startChecker() {
 		Runnable checkerTask = new Runnable() {
@@ -94,9 +134,32 @@ public class RemoteServerChecker {
 								remoteServerAlive = false;
 							}
 							
-							String responseIgnoredHosts = RestClientSmocker.getInstance().getAllIgnoredHosts();
-							if (responseIgnoredHosts != null) {
-								ignoredHosts = SimpleJsonReader.readValues(responseIgnoredHosts, "listIgnoredList");
+							excludedHosts.clear();
+							String responseExcludedHosts = RestClientSmocker.getInstance().getAllExcludedHosts();
+							if (responseExcludedHosts != null) {
+								List<String> listExcluded = SimpleJsonReader.readListValuesDoubleList(responseExcludedHosts);
+								if (listExcluded != null) {
+									for (String jsonSingle : listExcluded) {
+										HostAndPortRangeModel hostAndPortRangeModel = readHostAndPortRangeModel(jsonSingle);
+										if (hostAndPortRangeModel != null) {
+											excludedHosts.add(hostAndPortRangeModel);
+										}
+									}
+								}
+							} 
+							
+							includedHosts.clear();
+							String responseIncludedHosts = RestClientSmocker.getInstance().getAllIncludedHosts();
+							if (responseIncludedHosts != null) {
+								List<String> listIncluded = SimpleJsonReader.readListValuesDoubleList(responseIncludedHosts);
+								if (listIncluded != null) {
+									for (String jsonSingle : listIncluded) {
+										HostAndPortRangeModel hostAndPortRangeModel = readHostAndPortRangeModel(jsonSingle);
+										if (hostAndPortRangeModel != null) {
+											includedHosts.add(hostAndPortRangeModel);
+										}
+									}
+								}
 							} 
 							
 							String responseDupHosts = RestClientSmocker.getInstance().getAllDupHosts();
@@ -136,6 +199,24 @@ public class RemoteServerChecker {
 						MessageLogger.logErrorWithMessage("Unable to check remote server", e, RemoteServerChecker.class);
 					}
 				}
+			}
+
+			private HostAndPortRangeModel readHostAndPortRangeModel(String jsonSingle) {
+				try {
+					if (!jsonSingle.isEmpty()) {
+						String host = SimpleJsonReader.readValue(jsonSingle, "host");
+						int minPort = Integer.parseInt(SimpleJsonReader.readValue(jsonSingle, "minPort"));
+						int maxPort = Integer.parseInt(SimpleJsonReader.readValue(jsonSingle, "maxPort"));
+						
+						HostAndPortRangeModel hostAndPortRangeModel = new HostAndPortRangeModel(host, minPort, maxPort);
+						return hostAndPortRangeModel;
+					}
+				}
+				catch (NumberFormatException ex) {
+					MessageLogger.logThrowable(ex);
+				}
+				return null;
+				
 			}
 		};
 		Thread checkerThread = new Thread(checkerTask);

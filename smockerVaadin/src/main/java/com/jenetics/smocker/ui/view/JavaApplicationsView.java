@@ -177,7 +177,7 @@ implements RefreshableView, SearcheableView {
 					}
 					else {
 						first.setFunctionFilter("");
-						Dialog.warning("Bad Javascript function should be of function(string) returning boolean " + checkValue);
+						Dialog.warning(SmockerUI.getBundleValue("Bad_JS_Filter_Function_Warning") + checkValue);
 					}
 				}, first.getFunctionFilter());
 	}

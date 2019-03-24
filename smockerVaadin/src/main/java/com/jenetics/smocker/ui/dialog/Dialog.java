@@ -16,6 +16,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.Button.ClickEvent;
 
+import de.steinwedel.messagebox.ButtonOption;
 import de.steinwedel.messagebox.ButtonType;
 import de.steinwedel.messagebox.MessageBox;
 
@@ -63,13 +64,17 @@ public class Dialog {
 	}
 	
 	public static <T> MessageBox displayComponentBox(String caption, Consumer<T> selected, 
-			BoxableItem<T> boxableItem) {
+			BoxableItem<T> boxableItem, boolean open, boolean closeOnOk) {
 		MessageBox box = MessageBox.create();
 		box.withCaption(caption).withMessage(boxableItem.getComponent()).withCancelButton();
-		box.withOkButton(() -> {
-			selected.accept(boxableItem.getItem());
-		});
-		box.open();
+		if (selected != null) {
+			box.withOkButton(() -> {
+				selected.accept(boxableItem.getItem());
+			}, ButtonOption.closeOnClick(closeOnOk));
+		}
+		if (open) {
+			box.open();
+		}
 		return box;
 	}
 	

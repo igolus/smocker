@@ -36,21 +36,7 @@ public class SelectionKeyImplTransformer {
 		readyOpsField.setModifiers(Modifier.PUBLIC);
 		
 		ctClass.getDeclaredField("selector").setModifiers(Modifier.PUBLIC);
-		//ctClass.getDeclaredField("attached").setModifiers(Modifier.PUBLIC);
-		
-//		final String body = "public void changeReadyOps (int value) {"
-//				+ " try{" 
-//				+ " 	$0.readyOps = value;"
-//				+ "} catch (Throwable t) "
-//				+ "{ "
-//				+ "     t.printStackTrace(); "
-//				+ "     throw t; "
-//				+ "}" 
-//				+ "}";
-//		
-//		CtMethod writeMethod = CtNewMethod.make(body, ctClass);
-//		ctClass.addMethod(writeMethod);
-		
+	
 		
 		final String getSelectorBody = "public Object getSelector () {"
 				+ " try{" 

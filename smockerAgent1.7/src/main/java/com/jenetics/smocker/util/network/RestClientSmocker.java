@@ -33,7 +33,8 @@ public class RestClientSmocker extends RESTClient {
 	private static final String MANAGE_JAVA_APP =  "/manageJavaApplication/";
 	private static final String LIST_CONNECTIONS =  "/listConnections";
 	
-	private static final String SMOCKER_IGNORE_HOST_LIST = "/configurations/ignoredHosts";
+	private static final String SMOCKER_EXCLUDED_HOST_LIST = "/configurations/excludedHosts";
+	private static final String SMOCKER_INCLUDED_HOST_LIST = "/configurations/includedHosts";
 	private static final String SMOCKER_DUPLICATE_HOST_LIST = "/configurations/dupHosts";
 
 	//"http://admin:admin@localhost:9990/management/deployment/smocker-1.0-SNAPSHOT.war?operation=attribute&name=status"
@@ -64,8 +65,12 @@ public class RestClientSmocker extends RESTClient {
 		return get(SMOCKER_REST_PATH + SMOCKER_DUPLICATE_HOST_LIST);
 	}
 	
-	public String getAllIgnoredHosts() {
-		return get(SMOCKER_REST_PATH + SMOCKER_IGNORE_HOST_LIST);
+	public String getAllExcludedHosts() {
+		return get(SMOCKER_REST_PATH + SMOCKER_EXCLUDED_HOST_LIST);
+	}
+	
+	public String getAllIncludedHosts() {
+		return get(SMOCKER_REST_PATH + SMOCKER_INCLUDED_HOST_LIST);
 	}
 
 	public String getAllUnWachedConnections() {

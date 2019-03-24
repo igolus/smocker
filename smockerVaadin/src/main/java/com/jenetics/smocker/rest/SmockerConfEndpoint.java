@@ -17,10 +17,12 @@ import com.jenetics.smocker.jseval.SmockerJsEnv;
 import com.jenetics.smocker.model.Connection;
 import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.model.config.SmockerConf;
+import com.jenetics.smocker.rest.model.HostAndPortRangeModel;
 import com.jenetics.smocker.rest.model.ListDuplicatedHosts;
-import com.jenetics.smocker.rest.model.ListIgnoredHosts;
+import com.jenetics.smocker.rest.model.ListHostAndRangeModel;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.util.DuplicateHost;
+import com.jenetics.smocker.ui.util.HostAndPortRange;
 import com.jenetics.smocker.ui.view.ConfigView;
 import com.jenetics.smocker.ui.view.MockSpaceView;
 import com.vaadin.ui.Component;
@@ -51,17 +53,46 @@ public class SmockerConfEndpoint extends AbstractEndpoint<SmockerConf> {
 	}
 	
 	@GET
-	@Path("/ignoredHosts")
+	@Path("/excludedHosts")
 	public Response ignoredHosts() {
 		ConfigView configView = getConfigView();
-		List<String> ignoredHosts = configView.getIgnoredHosts();
-		ListIgnoredHosts listIgnoredHosts = new ListIgnoredHosts();
-		if (ignoredHosts != null) {
-			for (String ignoredHost : ignoredHosts) {
-				listIgnoredHosts.addIgnoredHost(ignoredHost);
+		List<HostAndPortRange> excludedHosts = configView.getExcludedHosts();
+		ListHostAndRangeModel listExcludedHosts = new ListHostAndRangeModel();
+		if (excludedHosts != null) {
+			fillHostAndPortRange(excludedHosts, listExcludedHosts);
+		}
+		return Response.ok().entity(listExcludedHosts).build();
+	}
+	
+	@GET
+	@Path("/includedHosts")
+	public Response incincludedHostsuded() {
+		ConfigView configView = getConfigView();
+		List<HostAndPortRange> includedHosts = configView.getIncludedHosts();
+		ListHostAndRangeModel listIncludedHosts = new ListHostAndRangeModel();
+		if (includedHosts != null) {
+			fillHostAndPortRange(includedHosts, listIncludedHosts);
+		}
+		return Response.ok().entity(listIncludedHosts).build();
+	}
+
+	private void fillHostAndPortRange(List<HostAndPortRange> hostAndPortRangeList, 
+			ListHostAndRangeModel listHostAndRangeModel) {
+		for (HostAndPortRange hostAndPortRange : hostAndPortRangeList) {
+			HostAndPortRangeModel hostAndPortRangeModel = 
+					new HostAndPortRangeModel(hostAndPortRange.getHost());
+			int[] portRangeArray = HostAndPortRange.getPortRange(hostAndPortRange.getPortRange());
+			if (portRangeArray != null) {
+				if (portRangeArray.length == 1) {
+					hostAndPortRangeModel.setMinPort(portRangeArray[0]);
+				}
+				else if (portRangeArray.length == 2) {
+					hostAndPortRangeModel.setMinPort(portRangeArray[0]);
+					hostAndPortRangeModel.setMaxPort(portRangeArray[1]);
+				}
+				listHostAndRangeModel.addIHostAndPortRangeModel(hostAndPortRangeModel);
 			}
 		}
-		return Response.ok().entity(listIgnoredHosts).build();
 	}
 
 	private ConfigView getConfigView() {

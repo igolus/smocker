@@ -6,7 +6,6 @@ import java.io.IOException;
 import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
-import javassist.CtConstructor;
 import javassist.CtField;
 import javassist.CtMethod;
 import javassist.CtNewMethod;
@@ -21,7 +20,7 @@ public class SelectionKeyImplTransformer {
 		ClassPool classPool = ClassPool.getDefault();
 		CtClass ctClass = classPool.makeClass(new ByteArrayInputStream(classfileBuffer));
 
-		defineNewMethod(classPool, ctClass);
+		defineNewMethod(ctClass);
 
 		byteCode = ctClass.toBytecode();
 		ctClass.detach();
@@ -29,7 +28,7 @@ public class SelectionKeyImplTransformer {
 		return byteCode;
 	}
 
-	private void defineNewMethod(ClassPool classPool, CtClass ctClass) throws CannotCompileException, NotFoundException {
+	private void defineNewMethod(CtClass ctClass) throws CannotCompileException, NotFoundException {
 		ctClass.setModifiers(Modifier.PUBLIC);
 		
 		CtField readyOpsField = ctClass.getDeclaredField("readyOps");

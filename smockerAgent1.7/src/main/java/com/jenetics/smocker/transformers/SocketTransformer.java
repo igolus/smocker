@@ -8,8 +8,6 @@ import com.jenetics.smocker.util.RessourceLoader;
 import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
-import javassist.CtConstructor;
-import javassist.CtField;
 import javassist.CtMethod;
 import javassist.Modifier;
 import javassist.NotFoundException;
@@ -27,7 +25,7 @@ public class SocketTransformer extends AbstractTransformer {
 		
 		redefineGetOutputStream(classPool, ctClass);
 		redefineGetInputStream(classPool, ctClass);
-		redefineClose(classPool, ctClass);
+		redefineClose(ctClass);
 		
 		byteCode = ctClass.toBytecode();
 		ctClass.detach();
@@ -35,7 +33,7 @@ public class SocketTransformer extends AbstractTransformer {
 		return byteCode;
 	}
 
-	private void redefineClose(ClassPool classPool, CtClass ctClass) throws NotFoundException, CannotCompileException {
+	private void redefineClose(CtClass ctClass) throws NotFoundException, CannotCompileException {
 		CtMethod closeMethod = ctClass.getDeclaredMethod("close");
 
 		String body = "{" 
@@ -71,7 +69,7 @@ public class SocketTransformer extends AbstractTransformer {
 					+ "}";
 		
 		CtMethod getOutputStreamMethod = ctClass.getDeclaredMethod("getInputStream");
-		getOutputStreamMethod.setBody(body.toString());
+		getOutputStreamMethod.setBody(body);
 		
 	}
 
@@ -98,62 +96,6 @@ public class SocketTransformer extends AbstractTransformer {
 					+ "}\n";
 		
 		CtMethod getOutputStreamMethod = ctClass.getDeclaredMethod("getOutputStream");
-		getOutputStreamMethod.setBody(body.toString());
-	}
-
-	protected void redefineConstructors(ClassPool classPool, CtClass ctClass) throws NotFoundException, CannotCompileException {
-//		CtConstructor constructor = ctClass.getDeclaredConstructor(new CtClass[] {
-//				classPool.get("java.net.SocketAddress"), 
-//				classPool.get("java.net.SocketAddress"),
-//				CtClass.booleanType
-//				});
-		
-		
-//		CtConstructor[] constructors = ctClass.getDeclaredConstructors();
-//		for (CtConstructor ctConstructor : constructors) {
-//			try {
-//				ctConstructor.insertAfter(body);
-//			}
-//			catch (Throwable t) {
-//				t.printStackTrace();
-//			}
-//		}
-//		
-//		CtField smockerAdressField = new CtField(classPool.get("java.net.SocketAddress"), "smockerAdress", ctClass);
-//		smockerAdressField.setModifiers(Modifier.PUBLIC);
-//		ctClass.addField(smockerAdressField);
-//	
-//		CtField smockerLocalAdressField = new CtField(classPool.get("java.net.SocketAddress"), "smockerLocalAdress", ctClass);
-//		smockerLocalAdressField.setModifiers(Modifier.PUBLIC);
-//		ctClass.addField(smockerLocalAdressField);
-//		
-//		CtField smockerStreamField = new CtField(CtClass.booleanType, "smockerStream", ctClass);
-//		smockerStreamField.setModifiers(Modifier.PUBLIC);
-//		ctClass.addField(smockerStreamField);
-		
-		String body = " try{"
-				+ " 	com.jenetics.smocker.util.TransformerUtility.socketCreated( $$ , $0 );"
-				+ "} catch (Throwable t) " + "{ " + "     throw t; " + "}";
-		
-		CtConstructor[] constructors = ctClass.getDeclaredConstructors();
-		for (CtConstructor ctConstructor : constructors) {
-			try {
-				ctConstructor.insertAfter(body);
-			}
-			catch (Throwable t) {
-				t.printStackTrace();
-			}
-		}
-	
-//		String body = 
-//					  " try{" 
-//					+ " 	com.jenetics.smocker.util.TransformerUtility.socketCreated( (java.net.InetSocketAddress)$0.smockerAdress, "
-//					+ "(java.net.InetSocketAddress)$0.smockerLocalAdress, $0.smockerStream, $0 );"
-//					+ "} catch (Throwable t) "
-//					+ "{ "
-//					+ "     throw t; "
-//					+ "}";
-//		constructor.insertAfter(body);
-		
+		getOutputStreamMethod.setBody(body);
 	}
 }

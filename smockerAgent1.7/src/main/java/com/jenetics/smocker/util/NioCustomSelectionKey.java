@@ -17,7 +17,7 @@ public class NioCustomSelectionKey extends SelectionKey {
 
 	@Override
 	public Selector selector() {
-		return (Selector) selectorNio;
+		return selectorNio;
 	}
 	
 	@Override
@@ -44,10 +44,13 @@ public class NioCustomSelectionKey extends SelectionKey {
 	public SelectableChannel channel() {
 		return socketChannel;
 	}
-	
+
 	@Override
+	/**
+	 * Nothing to do for cancel
+	 */
 	public void cancel() {
-		System.out.println("Cancel");
+		
 	}
 
 }

@@ -9,11 +9,9 @@ import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.nio.channels.spi.SelectorProvider;
 import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +26,7 @@ import com.jenetics.smocker.util.network.RemoteServerChecker;
 public class TransformerUtility {
 	private static String callerApp = null;
 
-	private static Hashtable<Object, SmockerContainer> smockerContainerBySocket = new Hashtable<Object, SmockerContainer>();
+	private static Hashtable<Object, SmockerContainer> smockerContainerBySocket = new Hashtable<>();
 	private TransformerUtility() {
 		super();
 	}
@@ -49,8 +47,8 @@ public class TransformerUtility {
 		return callerApp;
 	}
 
-	public synchronized static int socketChannelWrite (final SocketChannel socketChannel, ByteBuffer bytebuffer) 
-			throws IOException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, SecurityException, NoSuchFieldException {
+	public static synchronized int socketChannelWrite (final SocketChannel socketChannel, ByteBuffer bytebuffer) 
+			throws IOException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 		if (socketChannel != null && !filterSmockerBehavior() && RemoteServerChecker.isRemoteServerAlive() 
 				&& isConnectionWatched(socketChannel)) {
 			int write = bytebuffer.limit();			
@@ -78,29 +76,29 @@ public class TransformerUtility {
 				array = getArrayFromBuffer(bytebuffer);
 				outBytes = Arrays.copyOfRange(array, initialPosition, bytebuffer.limit());
 				bytebuffer.position(0);
-				
+
 				SelectionKey[] keysSelection = getKeys(socketChannel);
-				
+
 				if (keysSelection != null && keysSelection.length > 0) {
 					SelectionKey initialSelectionKey = keysSelection[0];
-					
-					Method getAttachmentMethod = initialSelectionKey.getClass().getMethod("getAttachment", new Class[] {});
-					final Object attached = getAttachmentMethod.invoke(initialSelectionKey, new Object[] {});
-				
+
+					Method getAttachmentMethod = initialSelectionKey.getClass().getMethod("getAttachment");
+					final Object attached = getAttachmentMethod.invoke(initialSelectionKey);
+
 					Method getSelectorMethod = initialSelectionKey.getClass().getMethod("getSelector");
-					final Selector selectorNio = (Selector) getSelectorMethod.invoke(initialSelectionKey, new Object[] {});
-					
+					final Selector selectorNio = (Selector) getSelectorMethod.invoke(initialSelectionKey);
+
 					Method getSelectedKeysMethod = selectorNio.getClass().getMethod("getSelectedKeys");
-					Object selectedKeys = getSelectedKeysMethod.invoke(selectorNio, new Object[] {});
+					Object selectedKeys = getSelectedKeysMethod.invoke(selectorNio);
 					AbstractCollection<SelectionKey> collectionSelectedKeys = (AbstractCollection<SelectionKey>) selectedKeys;
 
 					SelectionKey readSelectionKey = new NioCustomSelectionKey(selectorNio, socketChannel);
-					
+
 					Method setAttachmentMethod = readSelectionKey.getClass().getMethod("setAttachment", Object.class);
 					setAttachmentMethod.invoke(readSelectionKey, attached);
 					collectionSelectedKeys.add(readSelectionKey);
 				}
-				
+
 			}
 
 			smockerContainer.getSmockerSocketOutputStream().write(outBytes);
@@ -111,15 +109,6 @@ public class TransformerUtility {
 		}
 	}
 
-//	private static void changeReadyOps(SocketChannel socketChannel, int value)
-//			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, SecurityException, NoSuchFieldException {
-//		
-//		SelectionKey[] keysSelection = getKeys(socketChannel);
-//		SelectionKey firstSelectionKey = keysSelection[0];
-//		Method methodReadOpts =  firstSelectionKey.getClass().getMethods()[6];
-//		methodReadOpts.invoke(firstSelectionKey, value);
-//	}
-
 	private static byte[] getArrayFromBuffer(ByteBuffer bytebuffer) {
 		byte[] array;
 		ByteBuffer bufferDup = bytebuffer.duplicate();
@@ -129,8 +118,8 @@ public class TransformerUtility {
 		return array;
 	}
 
-	public synchronized static int socketChannelRead (SocketChannel socketChannel,  ByteBuffer bytebuffer) 
-			throws IOException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public static synchronized int socketChannelRead (SocketChannel socketChannel,  ByteBuffer bytebuffer) 
+			throws IOException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 		SmockerContainer smockerContainer = smockerContainerBySocket.get(socketChannel);
 		if (smockerContainer != null && socketChannel != null && !filterSmockerBehavior() && RemoteServerChecker.isRemoteServerAlive() 
 				&& isConnectionWatched(socketChannel)) {
@@ -149,12 +138,10 @@ public class TransformerUtility {
 					byte[] targetBytes = new byte[lengthToCopy];
 					System.arraycopy(matchMock, index, targetBytes, 0, lengthToCopy);
 					smockerContainer.setIndexForArrayCopy(index + lengthToCopy);
-					//bytebuffer.clear();
 					bytebuffer.put(targetBytes);
 					return lengthToCopy;
 				}
 				else {
-					//resend the buffer
 					if (!smockerContainer.isStreamResent()) {
 						ByteBuffer buffer = ByteBuffer.wrap(smockerContainer.getSmockerSocketOutputStream().getBytes());
 						writeSocketChannel(buffer, socketChannel);
@@ -186,23 +173,16 @@ public class TransformerUtility {
 	}
 
 	private static int readSocketChannel(ByteBuffer buffer, SocketChannel socketChannel) 
-			throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 		Method readNew = socketChannel.getClass().
-				getMethod("readNew", new Class[] {java.nio.ByteBuffer.class});
-		return (int) readNew.invoke(socketChannel, new Object[] {buffer});
+				getMethod("readNew", java.nio.ByteBuffer.class);
+		return (int) readNew.invoke(socketChannel, buffer);
 
 	}
-	
-	private static void modifyFirstKeyRead(SocketChannel socketChannel) 
-			throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		Method modifyFirstKeyRead = socketChannel.getClass().
-				getMethod("modifyFirstKeyRead", null);
-		modifyFirstKeyRead.invoke(socketChannel, null);
 
-	}
-	
+
 	private static SelectionKey[] getKeys(SocketChannel socketChannel) 
-			throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 		Method getKeys = socketChannel.getClass().
 				getMethod("getKeys", null);
 		return (SelectionKey[]) getKeys.invoke(socketChannel, null);
@@ -211,27 +191,22 @@ public class TransformerUtility {
 
 
 	private static int writeSocketChannel(ByteBuffer buffer, SocketChannel socketChannel) 
-			throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 		Method writeNew = socketChannel.getClass().
-				getMethod("writeNew", new Class[] {java.nio.ByteBuffer.class});
-		return (int) writeNew.invoke(socketChannel, new Object[] {buffer});
+				getMethod("writeNew", java.nio.ByteBuffer.class);
+		return (int) writeNew.invoke(socketChannel, buffer);
 	}
 
-	public synchronized static void socketChannelClosed (Object socketChannel) throws IOException, 
-	NoSuchMethodException, SecurityException, IllegalAccessException, 
-	IllegalArgumentException, InvocationTargetException {
+	public static synchronized void socketChannelClosed (Object socketChannel) throws IOException {
 		SmockerContainer smockerContainer = smockerContainerBySocket.get(socketChannel);
 
 		if (smockerContainer != null && smockerContainer.isReseNextWrite()) {
 			smockerContainer.postCommunication();
 			smockerContainerBySocket.remove(socketChannel); 
 		}
-
-		Method closeNew = socketChannel.getClass(). getMethod("implCloseSelectableChannelNew", null);
-		closeNew.invoke(socketChannel, null);
 	}
 
-	public synchronized static InputStream manageInputStream(InputStream is, Socket source) throws IOException {
+	public static synchronized InputStream manageInputStream(InputStream is, Socket source) {
 		if (!filterSmockerBehavior() && RemoteServerChecker.isRemoteServerAlive() && isConnectionWatched(source)) {
 			if (!smockerContainerBySocket.containsKey(source)) {
 				addSmockerContainer(source, source.getInetAddress().getHostAddress(), source.getInetAddress().getHostName() ,source.getPort());
@@ -247,7 +222,7 @@ public class TransformerUtility {
 		return is;
 	}
 
-	public synchronized static OutputStream manageOutputStream(OutputStream os, Socket source) throws IOException {
+	public static synchronized OutputStream manageOutputStream(OutputStream os, Socket source) {
 		if (!filterSmockerBehavior() && RemoteServerChecker.isRemoteServerAlive() && isConnectionWatched(source)) {
 			SmockerContainer container = null;
 			if (!smockerContainerBySocket.containsKey(source)) {
@@ -283,7 +258,7 @@ public class TransformerUtility {
 				remoteAddress.getPort());
 	}
 
-	public synchronized static void socketClosed(Object source) throws UnsupportedEncodingException {
+	public static synchronized void socketClosed(Object source) throws UnsupportedEncodingException {
 		if (!filterSmockerBehavior()) {
 			if (smockerContainerBySocket.get(source) != null) {
 				smockerContainerBySocket.get(source).postCommunication();
@@ -293,7 +268,7 @@ public class TransformerUtility {
 	}
 
 
-	private static SmockerContainer addSmockerContainer(Object source, String ip, String host, int port) throws IOException {
+	private static SmockerContainer addSmockerContainer(Object source, String ip, String host, int port) {
 		String stackTrace = getStackTrace();
 		SmockerContainer smockerContainer = new SmockerContainer(ip, host, port, stackTrace, source);
 		smockerContainerBySocket.put(source, smockerContainer);
@@ -314,7 +289,7 @@ public class TransformerUtility {
 	}
 
 	public static String[] getStackTraceAsArray() {
-		List<String> arrRet = new ArrayList<String>();
+		List<String> arrRet = new ArrayList<>();
 		for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
 			arrRet.add(ste.toString());
 		}

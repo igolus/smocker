@@ -35,8 +35,9 @@ public class ButtonWithIEntity<T extends EntityWithId> extends Button {
 		if (entity == null) {
 			if (other.entity != null)
 				return false;
-		} else if (!entity.equals(other.entity))
+		} else if (!entity.equals(other.entity)) {
 			return false;
+		}
 		return true;
 	}
 	

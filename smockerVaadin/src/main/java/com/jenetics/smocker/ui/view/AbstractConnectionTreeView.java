@@ -54,8 +54,6 @@ import com.vaadin.ui.VerticalLayout;
 public abstract class AbstractConnectionTreeView<T extends EntityWithId, U extends EntityWithId, V extends Serializable, W extends AbstractConnectionDetails> 
 	extends EasyAppLayout implements SearcheableView  {
 
-	private static final int DISPLAY_NOTIF_DELAY = 1000;
-
 	/**
 	 * Tree Item object by javaApplication id used to find the associated UI
 	 * Item from an Application id
@@ -84,12 +82,11 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 	protected V selectedCommunication = null;
 	protected boolean allSelected;
 
-	protected IDaoManager<T> daoManagerJavaApplication = null;
+	protected transient IDaoManager<T> daoManagerJavaApplication = null;
 	protected transient IDaoManager<U> daoManagerConnection = null;
 
 	private Class<T> tParameterClass = null;
 	private Class<U> uParameterClass = null;
-	private Class<V> vParameterClass = null;
 	
 	protected JPAContainer<T> jpaJavaApplication;
 
@@ -97,10 +94,10 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 	protected TreeData<TreeGridConnectionData<T, U>> treeData = null;
 	protected TreeDataProvider<TreeGridConnectionData<T, U>> treeDataProvider = null;
 	
-	protected Map<String, Tab> tabByConnectionKey = new HashMap<>();
+	protected transient Map<String, Tab> tabByConnectionKey = new HashMap<>();
 	
 	protected Map<Tab, W> detailsViewByTab = new HashMap<>();
-	protected Map<U, Tab> tabByConnection = new HashMap<>();
+	protected transient Map<U, Tab> tabByConnection = new HashMap<>();
 	
 	protected W selectedDetailView = null;
 
@@ -267,18 +264,7 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 
 
 	protected void refreshEntity(EntityWithId entityWithId) {
-		//Notification notif = new Notification("Refreshing", Type.ASSISTIVE_NOTIFICATION);
-
-		// Customize it
-		//notif.setDelayMsec(100);
-		//notif.setPosition(Position.BOTTOM_RIGHT);
-		//notif.setIcon(VaadinIcons.SPINNER);
-
-		// Show it in the page
-		//notif.show(Page.getCurrent());
-
 		treeGrid.setEnabled(true);
-
 		updateTree(entityWithId);
 	}
 
@@ -294,7 +280,7 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 		treeDataProvider.refreshAll();
 	}
 	
-	Map<T, TreeGridConnectionData<T, U>> treeItemByJavaApplication = new Hashtable<>();
+	private transient Map<T, TreeGridConnectionData<T, U>> treeItemByJavaApplication = new HashMap<>();
 	/**
 	 * Add a Java application item to the tree
 	 * @param javaApplication
@@ -360,9 +346,6 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 	
 	@Override
 	public boolean canSearch() {
-		if (isMainTabSelected()) {
-			return false;
-		}
-		return true;
+		return !isMainTabSelected();
 	}
 }

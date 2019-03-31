@@ -3,6 +3,7 @@ package com.mkyong.common.netty;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.HttpObject;
 import io.netty.util.CharsetUtil;
@@ -21,7 +22,13 @@ public class ClientHandler extends SimpleChannelInboundHandler<ByteBuf> {
     	sb.append(lineSeparator);
     	
     	
-        channelHandlerContext.writeAndFlush(Unpooled.copiedBuffer(sb.toString(), CharsetUtil.UTF_8));
+        try {
+			channelHandlerContext.writeAndFlush(Unpooled.copiedBuffer(sb.toString(), CharsetUtil.UTF_8));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        //channelHandlerContext.close();
     }
 
 
@@ -34,5 +41,9 @@ public class ClientHandler extends SimpleChannelInboundHandler<ByteBuf> {
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, ByteBuf  in) throws Exception {
 		System.out.print("Client received: " + in.toString(CharsetUtil.UTF_8));
+		if (in.writerIndex() < in.capacity()) {
+			ctx.channel().close();
+		}
 	}
+	
 }

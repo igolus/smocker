@@ -1,7 +1,6 @@
 package com.jenetics.smocker.util;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -9,6 +8,11 @@ import java.io.InputStreamReader;
 public class RessourceLoader {
 	
 	private static final String SOURCE_COPY = "sourceCopy";
+	
+	
+	private RessourceLoader() {
+		super();
+	}
 
 	/**
 	 * Load a piece of javassit source code from resources/sourceCopy
@@ -51,20 +55,19 @@ public class RessourceLoader {
 
 		String line;
 		try {
-
 			br = new BufferedReader(new InputStreamReader(is));
 			while ((line = br.readLine()) != null) {
 				sb.append(line);
 			}
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			MessageLogger.logThrowable(e, RessourceLoader.class);
 		} finally {
 			if (br != null) {
 				try {
 					br.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					MessageLogger.logThrowable(e, RessourceLoader.class);
 				}
 			}
 		}

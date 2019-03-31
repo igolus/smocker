@@ -2,27 +2,23 @@ package com.jenetics.smocker.transformers;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.lang.invoke.VolatileCallSite;
 
 import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
-import javassist.CtConstructor;
-import javassist.CtField;
 import javassist.CtMethod;
 import javassist.CtNewMethod;
-import javassist.Modifier;
 import javassist.NotFoundException;
 
 public class SelectionKeyTransformer {
 
 	public byte[] transform(byte[] classfileBuffer)
-			throws IOException, NotFoundException, CannotCompileException {
+			throws IOException, CannotCompileException {
 		byte[] byteCode;
 		ClassPool classPool = ClassPool.getDefault();
 		CtClass ctClass = classPool.makeClass(new ByteArrayInputStream(classfileBuffer));
 
-		defineNewMethod(classPool, ctClass);
+		defineNewMethod(ctClass);
 
 		byteCode = ctClass.toBytecode();
 		ctClass.detach();
@@ -30,7 +26,7 @@ public class SelectionKeyTransformer {
 		return byteCode;
 	}
 
-	private void defineNewMethod(ClassPool classPool, CtClass ctClass) throws CannotCompileException, NotFoundException {
+	private void defineNewMethod(CtClass ctClass) throws CannotCompileException {
 		
 		final String body = "public void setAttachment (Object attachment) {"
 				+ " try{" 

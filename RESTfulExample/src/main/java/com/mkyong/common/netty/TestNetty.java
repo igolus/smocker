@@ -27,9 +27,8 @@ public class TestNetty {
 				});
 				ChannelFuture channelFuture = clientBootstrap.connect().sync();
 				channelFuture.channel().closeFuture().sync();
-				//clientBootstrap.
 			}
-		} catch (InterruptedException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {

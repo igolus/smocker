@@ -2,11 +2,6 @@ package com.jenetics.smocker.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 public class SmockerSocketOutputStream extends BaseSmockerSocketHandler {
 	
@@ -14,7 +9,7 @@ public class SmockerSocketOutputStream extends BaseSmockerSocketHandler {
 	
 	@Override
 	public void write(int b) throws IOException {
-		smockerSocketOutputStreamData.buffer.write(b);
+		smockerSocketOutputStreamData.getBuffer().write(b);
 	}
 
 	public SmockerSocketOutputStreamData getSmockerOutputStreamData() {

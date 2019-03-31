@@ -2,24 +2,16 @@ package com.jenetics.smocker.transformers;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-
-import com.jenetics.smocker.util.RessourceLoader;
 
 import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
-import javassist.CtConstructor;
 import javassist.CtMethod;
 import javassist.CtNewMethod;
 import javassist.Modifier;
 import javassist.NotFoundException;
-import javassist.expr.ExprEditor;
-import javassist.expr.MethodCall;
 
 public class SocketChannelImplTransformer {
-
-	private static final String chanellReadSRCFile = "sun.nio.ch.SocketChannelImpl_read.txt";
 
 	public byte[] transform(byte[] classfileBuffer)
 			throws IOException, NotFoundException, CannotCompileException {
@@ -29,7 +21,7 @@ public class SocketChannelImplTransformer {
 
 		redefineWrite(classPool, ctClass);
 		redefineRead(classPool, ctClass);
-		redefineImplCloseSelectableChannel(classPool, ctClass);
+		redefineImplCloseSelectableChannel(ctClass);
 
 		byteCode = ctClass.toBytecode();
 		ctClass.detach();
@@ -59,7 +51,7 @@ public class SocketChannelImplTransformer {
 		ctClass.addMethod(writeMethod);
 	}
 	
-private void redefineImplCloseSelectableChannel(ClassPool classPool, CtClass ctClass) throws NotFoundException, CannotCompileException {
+private void redefineImplCloseSelectableChannel(CtClass ctClass) throws NotFoundException, CannotCompileException {
 		
 		CtMethod implCloseMethodInitial = ctClass.getDeclaredMethod("implCloseSelectableChannel", null);
 		implCloseMethodInitial.setName("implCloseSelectableChannelNew");	

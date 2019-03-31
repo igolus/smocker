@@ -1,7 +1,6 @@
 package java.net;
 
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.SocketImpl;
 import java.security.PrivilegedExceptionAction;
 

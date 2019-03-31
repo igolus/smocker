@@ -24,7 +24,7 @@ import com.vaadin.ui.TreeGrid;
 @SuppressWarnings("serial")
 public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 	
-	private TreeGrid<TreeGridMockedItem> treeGrid;
+	//private TreeGrid<TreeGridMockedItem> treeGrid;
 	private CommunicationMocked selectedCommunication = null;
 	private HorizontalSplitPanel mainLayout = null;
 	
@@ -42,8 +42,6 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 		super();
 		this.refreshClickable = refreshClickable;
 		mainLayout = new HorizontalSplitPanel();
-		
-		//this.connectionMocked = connectionMocked;
 	
 		connectionMockedManager = new ConnectionMockedManager(
 				connectionMocked, this::commSelected, this.refreshClickable);
@@ -75,26 +73,26 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 		return selectedRequestPane;
 	}
 	
-	protected void addTreeMapping() {
-		treeGrid.addColumn(item -> item.getDisplay());
-		treeGrid.addComponentColumn(this::buildEnableButton);
-	}
+//	protected void addTreeMapping() {
+//		treeGrid.addColumn(item -> item.getDisplay());
+//		treeGrid.addComponentColumn(this::buildEnableButton);
+//	}
 	
 	
-	private Button buildEnableButton(TreeGridMockedItem item) {
-		if (!item.isRoot()) {
-			ButtonWithIEntity<CommunicationMocked> buttonWithId = new ButtonWithIEntity<>(item.getCommunication());
-			buttonWithId.setCaption("Enable");
-			buttonWithId.addClickListener(this::enableButtonClicked);
-			return buttonWithId;
-		}
-		return null;
-    }
+//	private Button buildEnableButton(TreeGridMockedItem item) {
+//		if (!item.isRoot()) {
+//			ButtonWithIEntity<CommunicationMocked> buttonWithId = new ButtonWithIEntity<>(item.getCommunication());
+//			buttonWithId.setCaption("Enable");
+//			buttonWithId.addClickListener(this::enableButtonClicked);
+//			return buttonWithId;
+//		}
+//		return null;
+//    }
 	
-	public void enableButtonClicked(ClickEvent event) {
-		ButtonWithIEntity<CommunicationMocked> buttonWithEntity = 
-				(ButtonWithIEntity<CommunicationMocked>) event.getSource();
-	}
+//	public void enableButtonClicked(ClickEvent event) {
+//		ButtonWithIEntity<CommunicationMocked> buttonWithEntity = 
+//				(ButtonWithIEntity<CommunicationMocked>) event.getSource();
+//	}
 
 	public void commSelected(CommunicationMocked comm) {
 		if (comm != null) {

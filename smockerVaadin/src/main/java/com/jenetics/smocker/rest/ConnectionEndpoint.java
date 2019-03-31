@@ -23,7 +23,7 @@ import com.jenetics.smocker.model.ListHostResponse;
 public class ConnectionEndpoint extends AbstractEndpoint<Connection> {
 	
 	@Inject
-	Logger logger;
+	Logger loggerConnectionEndpoint;
 	
 	@GET
 	@Path("/listHostUnWatched")
@@ -41,7 +41,7 @@ public class ConnectionEndpoint extends AbstractEndpoint<Connection> {
 				return Response.ok(hostResponses).build();
 		}
 		catch (Exception e) {
-			logger.error("Unabel to get list of activated host", e);
+			loggerConnectionEndpoint.error("Unabel to get list of activated host", e);
 		}
 		return null;
 		

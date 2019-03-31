@@ -3,16 +3,12 @@ package com.jenetics.smocker.util.network;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.bind.DatatypeConverter;
 
-import java.util.Date;
-//import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.jenetics.smocker.configuration.MemoryConfiguration;
 import com.jenetics.smocker.configuration.SystemPropertyConfiguration;
 import com.jenetics.smocker.util.MessageLogger;
 import com.jenetics.smocker.util.SimpleJsonReader;
@@ -96,8 +92,7 @@ public class RestClientSmocker extends RESTClient {
 	}
 
 	public String postConnection(SmockerContainer smockerContainer, Long javaAppId) {
-		StringBuffer buffer = new StringBuffer();
-		Map<String, String> headers = buildHeader();
+		StringBuilder buffer = new StringBuilder();
 		buffer.append("{\"id\": 0, \"version\": 0,  \"host\": \"")
 		.append(smockerContainer.getHost())
 		.append("\",  \"port\":")
@@ -110,7 +105,7 @@ public class RestClientSmocker extends RESTClient {
 		try {
 			return put(buffer.toString(), path, null);
 		} catch (Exception e) {
-			MessageLogger.logThrowable(e);
+			MessageLogger.logThrowable(e, getClass());
 		}
 		return null;
 	}
@@ -144,7 +139,7 @@ public class RestClientSmocker extends RESTClient {
 				byte[] outputBytes = smockerContainer.getSmockerSocketOutputStream().getSmockerOutputStreamData().getBytes();
 				byte[] inputBytes = smockerContainer.getSmockerSocketInputStream().getSmockerOutputStreamData().getBytes();
 
-				StringBuffer buffer = new StringBuffer();
+				StringBuilder buffer = new StringBuilder();
 				Map<String, String> headers = buildHeader();
 				try {
 					buffer.append("{\"id\": 0, \"request\":\"")
@@ -159,7 +154,7 @@ public class RestClientSmocker extends RESTClient {
 					String path = SMOCKER_REST_PATH + SMOCKER_ADDCOMM + "/" + javaAppId + "/" + idConnection;
 					return put(buffer.toString(), path, headers);
 				} catch (Exception e) {
-					MessageLogger.logThrowable(e);
+					MessageLogger.logThrowable(e, getClass());
 				}
 			}
 		}
@@ -167,18 +162,16 @@ public class RestClientSmocker extends RESTClient {
 	}
 
 	private String getCurrentDate() {
-		//DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
 		return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(new Date());
 	}
 
 	public String postCommunication(SmockerContainer smockerContainer, Long javaAppId, Long connectionId) {
 
 		String host = smockerContainer.getHost();
-		String ip = smockerContainer.getIp();
 		int port = smockerContainer.getPort();
 
 		if (RemoteServerChecker.isConnectionWatched(host, port)) {
-			StringBuffer buffer = new StringBuffer();
+			StringBuilder buffer = new StringBuilder();
 			Map<String, String> headers = buildHeader();
 			try {
 				String input = "";
@@ -195,7 +188,7 @@ public class RestClientSmocker extends RESTClient {
 				String path = SMOCKER_REST_PATH + SMOCKER_ADDCOMM + "/" + javaAppId + "/" + connectionId;
 				return put(buffer.toString(), path, headers);
 			} catch (Exception e) {
-				MessageLogger.logThrowable(e);
+				MessageLogger.logThrowable(e, getClass());
 			}
 		}
 		return null;
@@ -233,7 +226,7 @@ public class RestClientSmocker extends RESTClient {
 	}
 
 	public String postCheckMatch(String content, String host) {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		Map<String, String> headers = buildHeader();
 		buffer.append("{\"request\": \"" + encode(content) + "\",")
 		.append("\"host\":\"" + host ).append("\"}");
@@ -247,7 +240,7 @@ public class RestClientSmocker extends RESTClient {
 	}
 
 	public String postJavaApp() {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		Map<String, String> headers = buildHeader();
 		String host = null;
 		String ip = null;
@@ -278,8 +271,7 @@ public class RestClientSmocker extends RESTClient {
 	}
 
 	private Map<String, String> buildHeader() {
-		Map<String,String> headers = new HashMap<String,String>();
-		//headers.put("Content-Type", "application/json");
+		Map<String,String> headers = new HashMap<>();
 		return headers;
 	}
 

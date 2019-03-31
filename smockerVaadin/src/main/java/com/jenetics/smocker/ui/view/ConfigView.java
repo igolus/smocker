@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.eclipse.persistence.internal.oxm.record.deferred.IgnorableWhitespaceEvent;
 import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
 import org.vaadin.aceeditor.AceTheme;
@@ -26,24 +25,22 @@ import com.jenetics.smocker.ui.dialog.Dialog;
 import com.jenetics.smocker.ui.util.DuplicateHost;
 import com.jenetics.smocker.ui.util.HostAndPortRange;
 import com.vaadin.annotations.Push;
-import com.vaadin.data.TreeData;
 import com.vaadin.data.HasValue.ValueChangeEvent;
+import com.vaadin.data.TreeData;
 import com.vaadin.data.provider.TreeDataProvider;
 import com.vaadin.event.selection.SelectionEvent;
 import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.Sizeable;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TabSheet;
-import com.vaadin.ui.Tree;
 import com.vaadin.ui.TreeGrid;
 import com.vaadin.ui.VerticalLayout;
 
@@ -63,25 +60,24 @@ public class ConfigView extends EasyAppLayout {
 	private AceEditor aceEditorFilter = new AceEditor();
 	private AceEditor aceEditorFormatDisplay = new AceEditor();
 	private AceEditor aceEditorDefaultMockFunction = new AceEditor();
-	private Button editButton;
 	
 	private Button removeDupHostHostButton;
-	private DuplicateHost selectedDuplicateHost;
+	private transient DuplicateHost selectedDuplicateHost;
 	private TreeData<DuplicateHost> treeDataDupHost;
 	private TreeDataProvider<DuplicateHost> treeDataProviderDupHost;
-	private List<DuplicateHost> duplicateHosts = 
+	private transient List<DuplicateHost> duplicateHosts = 
 			DuplicateHost.getListFromDbValue(DaoConfig.getSingleConfig().getDuplicateHosts());
 
-	private List<HostAndPortRange> excludedHosts = new ArrayList<>();
+	private transient List<HostAndPortRange> excludedHosts = new ArrayList<>();
 	private TreeDataProvider<HostAndPortRange> treeDataProviderExcludedHost;
-	private HostAndPortRange selectedExcludedHost;
+	private transient HostAndPortRange selectedExcludedHost;
 	private Button removeExcludedHostButton;
 	private TreeData<HostAndPortRange> treeDataExcludedHost;
 	
 
-	private List<HostAndPortRange> includedHosts = new ArrayList<>();
+	private transient List<HostAndPortRange> includedHosts = new ArrayList<>();
 	private TreeDataProvider<HostAndPortRange> treeDataProviderIncludedHost;
-	private HostAndPortRange selectedIncludedHost;
+	private transient HostAndPortRange selectedIncludedHost;
 	private Button removeIncludedHostButton;
 	private TreeData<HostAndPortRange> treeDataIncludedHost;
 
@@ -242,7 +238,7 @@ public class ConfigView extends EasyAppLayout {
 		gridInteration.setWidth("100%");
 
 		HorizontalLayout layoutButtons = new HorizontalLayout();
-		editButton = new Button(VaadinIcons.PENCIL);
+		Button editButton = new Button(VaadinIcons.PENCIL);
 		editButton.setDescription(SmockerUI.getBundleValue("Edit_Dup_Host_toolTip"));
 		editButton.setEnabled(false);
 		editButton.addClickListener(this::editDupHost);
@@ -314,7 +310,7 @@ public class ConfigView extends EasyAppLayout {
 		exludedHostGrid.setSelectionMode(SelectionMode.SINGLE);
 		exludedHostGrid.addColumn(HostAndPortRange::toString).setCaption(SmockerUI.getBundleValue("Excluded_Host_Column"));
 		treeDataExcludedHost = new TreeData<>();
-		treeDataProviderExcludedHost = new TreeDataProvider<HostAndPortRange>(treeDataExcludedHost);
+		treeDataProviderExcludedHost = new TreeDataProvider<>(treeDataExcludedHost);
 		exludedHostGrid.setDataProvider(treeDataProviderExcludedHost);
 		exludedHostGrid.setWidth("100%");
 
@@ -512,7 +508,7 @@ public class ConfigView extends EasyAppLayout {
 
 	private void gridDupHostSelected(SelectionEvent<DuplicateHost> dupHost) {
 		if (dupHost.getFirstSelectedItem().isPresent()) {
-			selectedDuplicateHost = dupHost.getFirstSelectedItem().get();
+			selectedDuplicateHost = dupHost.getFirstSelectedItem().orElse(null);
 			removeDupHostHostButton.setEnabled(true);
 		}
 		else {

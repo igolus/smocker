@@ -24,7 +24,6 @@ import java.io.UnsupportedEncodingException;
 
 import com.jenetics.smocker.util.SmockerContainer;
 import com.jenetics.smocker.util.SmockerSocketInputStream;
-import com.jenetics.smocker.util.network.RestClientSmocker;
 
 /**
  * InputStream proxy that transparently writes a copy of all bytes read

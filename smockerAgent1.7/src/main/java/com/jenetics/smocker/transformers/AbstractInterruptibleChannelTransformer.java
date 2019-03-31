@@ -6,15 +6,10 @@ import java.io.IOException;
 import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
-import javassist.CtConstructor;
 import javassist.CtMethod;
-import javassist.CtNewMethod;
-import javassist.Modifier;
 import javassist.NotFoundException;
 
 public class AbstractInterruptibleChannelTransformer {
-
-
 
 	public byte[] transform(byte[] classfileBuffer)
 			throws IOException, NotFoundException, CannotCompileException {
@@ -22,7 +17,7 @@ public class AbstractInterruptibleChannelTransformer {
 		ClassPool classPool = ClassPool.getDefault();
 		CtClass ctClass = classPool.makeClass(new ByteArrayInputStream(classfileBuffer));
 
-		//redefineClose(classPool, ctClass);
+		redefineClose(ctClass);
 
 		byteCode = ctClass.toBytecode();
 		ctClass.detach();
@@ -30,16 +25,11 @@ public class AbstractInterruptibleChannelTransformer {
 		return byteCode;
 	}
 
-	private void redefineClose(ClassPool classPool, CtClass ctClass) throws NotFoundException, CannotCompileException {
+	private void redefineClose(CtClass ctClass) throws NotFoundException, CannotCompileException {
 
 		CtMethod writeMethodInitial = ctClass.getDeclaredMethod("close");
-		writeMethodInitial.setName("closeNew");	
-		writeMethodInitial.setModifiers(Modifier.PUBLIC);
-		writeMethodInitial.setModifiers(writeMethodInitial.getModifiers() & ~Modifier.ABSTRACT);
-		ctClass.setModifiers(Modifier.PUBLIC);
 
-
-		final String body = "public void close () {"
+		final String body = "{"
 				+ " try{" 
 				+ " 	com.jenetics.smocker.util.TransformerUtility.socketChannelClosed( $0 );"
 				+ "} catch (Throwable t) "
@@ -48,11 +38,7 @@ public class AbstractInterruptibleChannelTransformer {
 				+ "}" 
 				+ "}";
 
-
-		CtMethod closeMethod = CtNewMethod.make(body, ctClass);
-		closeMethod.setModifiers(closeMethod.getModifiers() & ~Modifier.ABSTRACT);
-		ctClass.addMethod(closeMethod);
-
+		writeMethodInitial.insertAfter(body);
 	}
 
 }

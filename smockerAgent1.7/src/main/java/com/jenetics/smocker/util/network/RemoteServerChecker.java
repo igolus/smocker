@@ -80,7 +80,7 @@ public class RemoteServerChecker {
 	
 	public static boolean isConnectionWatched(String host, int port) {
 		boolean doNotfilter = true;
-		if (includedHosts.size() > 0) {
+		if (!includedHosts.isEmpty()) {
 			doNotfilter = false;
 			for (HostAndPortRangeModel hostAndPortRangeModel : includedHosts) {
 				if (isMatching(hostAndPortRangeModel, host, port)) {
@@ -90,7 +90,7 @@ public class RemoteServerChecker {
 			}
 		}
 		
-		if (excludedHosts.size() > 0 && doNotfilter) {
+		if (!excludedHosts.isEmpty() && doNotfilter) {
 			for (HostAndPortRangeModel hostAndPortRangeModel : excludedHosts) {
 				if (isMatching(hostAndPortRangeModel, host, port)) {
 					doNotfilter = false;
@@ -163,6 +163,7 @@ public class RemoteServerChecker {
 							} 
 							
 							String responseDupHosts = RestClientSmocker.getInstance().getAllDupHosts();
+							
 							if (responseDupHosts != null) {
 								duplicatedHosts = SimpleJsonReader.readValuesDoubleList(responseDupHosts, "listDupHost");
 							}
@@ -213,7 +214,7 @@ public class RemoteServerChecker {
 					}
 				}
 				catch (NumberFormatException ex) {
-					MessageLogger.logThrowable(ex);
+					MessageLogger.logThrowable(ex, getClass());
 				}
 				return null;
 				
@@ -223,7 +224,7 @@ public class RemoteServerChecker {
 		checkerThread.start();
 	}
 	
-	private synchronized static void updateJavaAppId() {
+	private static synchronized void updateJavaAppId() {
 		String response = RestClientSmocker.getInstance().postJavaApp();
 		if (response != null) {
 			String id = ResponseReader.readValueFromResponse(response, "id");
@@ -238,7 +239,10 @@ public class RemoteServerChecker {
 		if (listConnectionsReferenced == null) {
 			listConnectionsReferenced = new HashMap<>();
 		}
-		listConnectionsReferenced.put(host + ":" + port, idConnection.toString());	
+		if (idConnection != null) {
+			listConnectionsReferenced.put(host + ":" + port, idConnection.toString());	
+		}
+		
 	}
 
 }

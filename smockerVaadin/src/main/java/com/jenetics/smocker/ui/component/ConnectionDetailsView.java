@@ -2,7 +2,6 @@ package com.jenetics.smocker.ui.component;
 
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,7 +45,7 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 	private TreeData<CommunicationDateDisplay> treeData;
 	private TreeDataProvider<CommunicationDateDisplay> treeDataProvider;
 	private Communication selectedCommunication = null;
-	private Map<Communication, CommunicationDateDisplay> commDisplayByComm = new HashMap<>();
+	private transient Map<Communication, CommunicationDateDisplay> commDisplayByComm = new HashMap<>();
 	private Map<Communication, String[]> decodedCommunications = new HashMap<>();
 
 	protected transient IDaoManager<Connection> daoManagerConnection = DaoManagerByModel.getDaoManager(Connection.class);
@@ -124,9 +123,6 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 				treeData.addItem(null, commDateDisplay);
 			}
 			treeDataProvider.refreshAll();
-		}
-		catch (Exception ex) {
-			throw ex;
 		}
 		finally {
 			DaoSingletonLock.unlock();
@@ -276,8 +272,8 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 
 	public void sort() {
 		treeData.clear();
-		Set<Communication> communications = connection.getCommunications();
-		List<Communication> sortedList = communications.stream().sorted(
+		Set<Communication> communicationsSet = connection.getCommunications();
+		List<Communication> sortedList = communicationsSet.stream().sorted(
 				Comparator.comparing(Communication::getDateTime)).collect(Collectors.toList());
 		for (Communication communication : sortedList) {
 			CommunicationDateDisplay commDateDisplay = new CommunicationDateDisplay(communication);

@@ -4,15 +4,19 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class MessageLogger {
-	
 	private static final String SMOCKER_HEAD = "SMOCKER -- ";
+
+	private MessageLogger() {
+		super();
+	}
 
 	/**
 	 * Log exception
 	 * @param t
 	 */
-	public static void logThrowable (Throwable t) {
-		t.printStackTrace();
+	public static void logThrowable (Throwable t, Class<?> source) {
+		Logger logger = Logger.getLogger(source.getName());
+		logger.log(Level.SEVERE, SMOCKER_HEAD, t);
 	}
 	
 	/**

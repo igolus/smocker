@@ -1,9 +1,7 @@
 package com.jenetics.smocker.util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +12,10 @@ import java.util.Map;
  */
 public class SimpleJsonReader {
 	
+	private SimpleJsonReader() {
+		super();
+	}
+
 	/**
 	 * Read first value from key in one json string
 	 * @param json
@@ -24,19 +26,19 @@ public class SimpleJsonReader {
 		int startIndex = json.indexOf(key);
 		if (startIndex != -1) {
 			String after = json.substring(startIndex);
-			int afterDoubleDot = after.indexOf(":");
+			int afterDoubleDot = after.indexOf(':');
 			String afterSecond = after.substring(afterDoubleDot + 1);
 			
 			if (afterSecond.startsWith("\"")) {
 				int firstQuoteIndex = 1;
-				int secondQuoteIndex = afterSecond.substring(1).indexOf("\"") + 1;
+				int secondQuoteIndex = afterSecond.substring(1).indexOf('\"') + 1;
 				return afterSecond.substring(firstQuoteIndex,secondQuoteIndex);
 			}
 			else {
 				int firstIndex = 0;
-				int secondIndex = afterSecond.indexOf(",");
+				int secondIndex = afterSecond.indexOf(',');
 				if (secondIndex == -1) {
-					secondIndex =  afterSecond.indexOf("}");
+					secondIndex =  afterSecond.indexOf('}');
 				}
 				return afterSecond.substring(firstIndex,secondIndex);
 			}
@@ -49,9 +51,9 @@ public class SimpleJsonReader {
 		int startIndex = json.indexOf(rootKey);
 		if (startIndex != -1) {
 			String after = json.substring(startIndex);
-			int afterDoubleDot = after.indexOf(":");
+			int afterDoubleDot = after.indexOf(':');
 			String afterSecond = after.substring(afterDoubleDot + 1);
-			String values = afterSecond.substring(afterSecond.indexOf("{") + 1, afterSecond.indexOf("}}"));
+			String values = afterSecond.substring(afterSecond.indexOf('{') + 1, afterSecond.indexOf("}}"));
 			if (values.equals("")) {
 				return ret;
 			}
@@ -65,9 +67,6 @@ public class SimpleJsonReader {
 					if (key.length() >= 2) {
 						key = key.substring(1, key.length());
 					}
-					//if (value.length() >= 2) {
-					//	value = value.substring(1, value.length() - 1);
-					//}
 					ret.put(key, value);
 				}
 			}
@@ -88,9 +87,9 @@ public class SimpleJsonReader {
 		List<String> retValues = new ArrayList<>();
 		if (startIndex != -1) {
 			String after = json.substring(startIndex);
-			int afterDoubleDot = after.indexOf(":");
+			int afterDoubleDot = after.indexOf(':');
 			String afterSecond = after.substring(afterDoubleDot + 1);
-			String values = afterSecond.substring(afterSecond.indexOf("[") + 1, afterSecond.indexOf("]"));
+			String values = afterSecond.substring(afterSecond.indexOf('[') + 1, afterSecond.indexOf(']'));
 			if (values.equals("")) {
 				return retValues;
 			}
@@ -100,7 +99,7 @@ public class SimpleJsonReader {
 			}
 			return retValues;
 		}
-		return null;
+		return new ArrayList<>();
 	}
 	
 	public static List<List<String>> readValuesDoubleList(String json, String secondKey) {
@@ -113,8 +112,8 @@ public class SimpleJsonReader {
 	}
 
 	public static List<String> readListValuesDoubleList(String json) {
-		int startIndex = json.indexOf("[");
-		int endIndex = json.lastIndexOf("]");
+		int startIndex = json.indexOf('[');
+		int endIndex = json.lastIndexOf(']');
 		
 		List<String> retValues = new ArrayList<>();
 		if (startIndex != -1 && endIndex != -1) {
@@ -126,37 +125,21 @@ public class SimpleJsonReader {
 			retValues.add(splittedValues[splittedValues.length - 1]);
 			return retValues;
 		}
-		return null;
+		return new ArrayList<>();
 	}
 	
-	private static List<String> readJsonItemInList(String json, String key) {
-		int startIndex = json.indexOf("\"" + key + "\" : [");
-		int endIndex = json.lastIndexOf("]");
-		
-		List<String> retValues = new ArrayList<>();
-		if (startIndex != -1 && endIndex != -1) {
-			String listValues = json.substring(startIndex + 1, endIndex);
-			String[] splittedValues = listValues.split("},");
-			for (int i = 0; i < splittedValues.length - 1; i++) {
-				retValues.add(splittedValues[i] + "}");
-			}
-			retValues.add(splittedValues[splittedValues.length - 1]);
-			return retValues;
-		}
-		return null;
-	}
-	
+
 	
 	public static String[] readSubResources(String json, String key) {
 		//connections":[
-		int startIndex = json.indexOf(key + "\"" + ":[");
+		int startIndex = json.indexOf(key + '\"' + ":[");
 		if (startIndex != -1) {
 			String after = json.substring(startIndex + key.length() + 3);
 			String[] values = findInBracket(after);
 			return values;
 			
 		}
-		return null;
+		return new String[] {};
 	}
 
 	/**
@@ -165,9 +148,9 @@ public class SimpleJsonReader {
 	 * @return
 	 */
 	private static String[] findInBracket(String toScan) {
-		List<String> listRet = new ArrayList<String>();
+		List<String> listRet = new ArrayList<>();
 		if (toScan.startsWith("]")) {
-			return null;
+			return new String[] {};
 		}
 		
 		byte[] bytesToScan = toScan.getBytes();
@@ -189,7 +172,6 @@ public class SimpleJsonReader {
 				if ((char) bytesToScan[i+1] == ',') {
 					i++;
 					startIndex = ++index;
-					continue;
 				}
 				else {
 					break;

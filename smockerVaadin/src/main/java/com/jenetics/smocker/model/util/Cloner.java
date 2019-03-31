@@ -12,6 +12,10 @@ import com.jenetics.smocker.util.SmockerUtility;
 public class Cloner {
 	private static ObjectMapper mapper = new ObjectMapper();
 	
+	private Cloner() {
+		super();
+	}
+
 	static {
 		mapper.configure(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE, false);
 	}

@@ -40,36 +40,10 @@ public class ConnectionMocked implements EntityWithId {
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "connection")
 	private Set<CommunicationMocked> communications = new HashSet<>();
 
-//	@JoinColumn(nullable = true)
-//	@OneToOne
-//	@JsonIgnore
-//	private JavaApplicationMocked javaApplication;
-	
-	
-//	@JoinColumn(nullable = false)
-//	@OneToOne
-//	@JsonIgnore
-//	private Scenario scenario;
-	
-//	public Scenario getScenario() {
-//		return scenario;
-//	}
-//
-//	public void setScenario(Scenario scenario) {
-//		this.scenario = scenario;
-//	}
 
 	@Column
 	private Boolean watched = true;
 
-//	public JavaApplicationMocked getJavaApplication() {
-//		return javaApplication;
-//	}
-//
-//	public void setJavaApplication(JavaApplicationMocked javaApplication) {
-//		this.javaApplication = javaApplication;
-//	}
-	
 	@Override
 	public Long getId() {
 		return this.id;

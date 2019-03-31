@@ -1,7 +1,6 @@
 package com.jenetics.smocker.ui.component.seach;
 
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import com.jenetics.smocker.model.Communication;
@@ -20,7 +19,7 @@ public class CommunicationItemsResults extends VerticalLayout {
 	private String searchQuery;
 	private transient Consumer<Communication> selected;
 	private Window searchWindow;
-	private Runnable callBack;
+	private transient Runnable callBack;
 
 	public CommunicationItemsResults(Runnable callBack, List<Communication> foundComms, String searchQuery, 
 			Consumer<Communication> selected) {

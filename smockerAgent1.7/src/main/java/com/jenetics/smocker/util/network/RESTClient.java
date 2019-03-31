@@ -1,13 +1,14 @@
 package com.jenetics.smocker.util.network;
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 
 /**
@@ -27,7 +28,6 @@ public class RESTClient {
 	
 	public static final String CONTENT_TYPE_JSON = "application/json";
 
-	private static final Logger logger = Logger.getLogger(RESTClient.class.getName());
 	private static final int TIMEOUT = 1000;
 
 	public RESTClient(String hostName, int port) {
@@ -39,11 +39,11 @@ public class RESTClient {
 		}
 	}
 
-	public String post(String content, String path, Map<String,String> headers) throws Exception {
+	public String post(String content, String path, Map<String,String> headers) {
 		return sendMethod(content, CONTENT_TYPE_JSON, path, headers, TIMEOUT, METHOD_POST);
 	}
 	
-	public String put(String content, String path, Map<String,String> headers) throws Exception {
+	public String put(String content, String path, Map<String,String> headers) {
 		return sendMethod(content, CONTENT_TYPE_JSON, path, headers, TIMEOUT, METHOD_PUT);
 	}
 	
@@ -98,16 +98,12 @@ public class RESTClient {
 			char[] buffer = new char[SIZE_BUFFER];
 			
 			StringWriter stringWriter = new StringWriter();
-			
-			//byte[] buffer = new byte[0xFFFF];
+
 		    for (int len = is.read(buffer); len != -1; len = is.read(buffer)) { 
 		    	stringWriter.write(buffer, 0, len);
 		    }
-			//stringWriter.write(buffer);
-			
 			return stringWriter.toString();
 		} catch (Exception e) {
-			//logger.log(Level.SEVERE, "Problem communicating", e);
 			return null;
 		}finally{
 			try {
@@ -132,73 +128,6 @@ public class RESTClient {
 		}
 
 	}
-
-	
-
-
-//	private String get(String path, Map<String,String> headers, int timeout, InetAddress inetAddress, int port) {
-//		Socket socket = null;
-//		BufferedWriter wr = null;
-//		InputStreamReader is = null;
-//		try {
-//			socket = new Socket(inetAddress, port);
-//			socket.setSoTimeout(timeout);
-//			wr = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF8"));
-//			is = new InputStreamReader(socket.getInputStream());
-//			wr.write("GET " + path + " HTTP/1.1" + System.lineSeparator());
-//			int index = 0;
-//			if (headers != null && headers.size() > 0) {
-//				wr.write(System.lineSeparator());
-//				for (Map.Entry<String, String> header : headers.entrySet()) {
-//					wr.write(getFormattedHeader(header.getKey(),header.getValue()));
-//					wr.write(System.lineSeparator());
-//					//					if (++index < headers.size()) {
-//					//						wr.write(System.lineSeparator());
-//					//					}
-//				}
-//				//wr.write(System.lineSeparator());
-//				//wr.write(System.lineSeparator());
-//			}
-//			else {
-//				wr.write(System.lineSeparator());
-//				//wr.write(System.lineSeparator());
-//			}
-//
-//			wr.flush();
-//
-//
-//			BufferedReader inFromServer = new BufferedReader(is);
-//			String response;
-//			StringWriter stringWriter = new StringWriter();
-//			while((response = inFromServer.readLine()) != null){
-//				stringWriter.write(response);
-//				stringWriter.write(System.lineSeparator());
-//			}
-//			return stringWriter.toString();
-//		} catch (Exception e) {
-//			return null;
-//		}finally{
-//			try {
-//				if (wr != null) {
-//					wr.close();
-//				}
-//			} catch (Exception ex) {
-//			}
-//			try {
-//				if (is != null) {
-//					is.close();
-//				}
-//			} catch (IOException ex) {
-//			}
-//			try {
-//				if (socket != null) {
-//					socket.close();
-//				}
-//			} catch (IOException ex) {
-//			}
-//
-//		}
-//	}
 
 	String getFormattedHeader(String key,String value){
 		return key + ": " + value + "\r\n";

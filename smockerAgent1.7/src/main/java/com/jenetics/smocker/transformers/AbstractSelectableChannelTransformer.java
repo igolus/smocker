@@ -6,23 +6,18 @@ import java.io.IOException;
 import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
-import javassist.CtConstructor;
 import javassist.CtMethod;
 import javassist.CtNewMethod;
-import javassist.Modifier;
-import javassist.NotFoundException;
 
 public class AbstractSelectableChannelTransformer {
 
-
-
 	public byte[] transform(byte[] classfileBuffer)
-			throws IOException, NotFoundException, CannotCompileException {
+			throws IOException, CannotCompileException {
 		byte[] byteCode;
 		ClassPool classPool = ClassPool.getDefault();
 		CtClass ctClass = classPool.makeClass(new ByteArrayInputStream(classfileBuffer));
 
-		defineModifyKey(classPool, ctClass);
+		defineModifyKey(ctClass);
 
 		byteCode = ctClass.toBytecode();
 		ctClass.detach();
@@ -30,11 +25,7 @@ public class AbstractSelectableChannelTransformer {
 		return byteCode;
 	}
 
-	private void defineModifyKey(ClassPool classPool, CtClass ctClass) throws CannotCompileException {
-//		CtMethod writeMethodInitial = ctClass.getDeclaredMethod("write", new CtClass[] {classPool.getCtClass("java.nio.ByteBuffer")});
-//		writeMethodInitial.setName("writeNew");	
-//		writeMethodInitial.setModifiers(Modifier.PUBLIC);
-//		ctClass.setModifiers(Modifier.PUBLIC);
+	private void defineModifyKey(CtClass ctClass) throws CannotCompileException {
 		
 		final String body = "public void modifyFirstKeyRead () {"
 				+ " try{" 
@@ -42,7 +33,6 @@ public class AbstractSelectableChannelTransformer {
 				+ " 	System.out.println($0.keys[0].getClass());"
 				+ " 	System.out.println($0.keys);" 
 				+ " 	sun.nio.ch.SelectionKeyImpl selectionKeyImpl = (sun.nio.ch.SelectionKeyImpl)$0.keys[0];"
-				//+ " 	//selectionKeyImpl.nioReadyOps(1);"
 				+ "} catch (Throwable t) "
 				+ "{ "
 				+ "     t.printStackTrace(); "
@@ -68,7 +58,4 @@ public class AbstractSelectableChannelTransformer {
 		ctClass.addMethod(getKeyMethod);
 		
 	}
-
-	
-
 }

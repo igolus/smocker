@@ -3,15 +3,10 @@ package com.jenetics.smocker.transformers;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-import com.jenetics.smocker.util.RessourceLoader;
-
 import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
-import javassist.CtConstructor;
-import javassist.CtField;
 import javassist.CtMethod;
-import javassist.Modifier;
 import javassist.NotFoundException;
 
 public class SocketAdaptorImplTransformer extends AbstractTransformer {
@@ -23,7 +18,7 @@ public class SocketAdaptorImplTransformer extends AbstractTransformer {
 		ClassPool classPool = ClassPool.getDefault();
 		CtClass ctClass = classPool.makeClass(new ByteArrayInputStream(classfileBuffer));
 		
-		redefineGetOutputStream(classPool, ctClass);
+		redefineGetOutputStream(ctClass);
 		
 		byteCode = ctClass.toBytecode();
 		ctClass.detach();
@@ -31,14 +26,19 @@ public class SocketAdaptorImplTransformer extends AbstractTransformer {
 		return byteCode;
 	}
 
-	private void redefineGetOutputStream(ClassPool classPool, CtClass ctClass)
+	private void redefineGetOutputStream(CtClass ctClass)
 			throws NotFoundException, CannotCompileException {
-		String body = "{" + " try{"
-				+ " 	com.jenetics.smocker.util.TransformerUtility.manageOutputStreamNio( $0 );"
-				+ "} catch (Throwable t) " + "{ " + "     throw t; " + "}" + "}\n";
+		String body = "{" +
+				      " try{" +
+				      " 	com.jenetics.smocker.util.TransformerUtility.manageOutputStreamNio( $0 );" +
+				      "} catch (Throwable t) " +
+				      "{ " +
+				      "     throw t; " +
+				      "}" +
+				      "}\n";
 
 		CtMethod getOutputStreamMethod = ctClass.getDeclaredMethod("getOutputStream");
-		getOutputStreamMethod.insertAfter(body.toString());
+		getOutputStreamMethod.insertAfter(body);
 		
 		
 		

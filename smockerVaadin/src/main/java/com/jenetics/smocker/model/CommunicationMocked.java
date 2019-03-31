@@ -140,11 +140,6 @@ public class CommunicationMocked implements EntityWithId {
 		}
 		CommunicationMocked other = (CommunicationMocked) obj;
 		return (id == null || id.equals(other.id));
-		
-//		if (id != null && !id.equals(other.id)) {
-//			return false;
-//		}
-//		return true;
 	}
 
 	@Override
@@ -218,8 +213,6 @@ public class CommunicationMocked implements EntityWithId {
 			result += ", InputForTest: " + inputForTest;
 		if (name != null && !name.trim().isEmpty())
 			result += ", name: " + name;
-//		if (scenario != null)
-//			result += ", scenario: " + scenario.getId();
 		result += ", activated: " + activated;
 		return result;
 	}

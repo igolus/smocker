@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 
 public class SmockerSocketOutputStreamData {
-	public ByteArrayOutputStream buffer;
+	private ByteArrayOutputStream buffer;
 
 	public SmockerSocketOutputStreamData(ByteArrayOutputStream buffer) {
 		this.buffer = buffer;
@@ -17,4 +17,9 @@ public class SmockerSocketOutputStreamData {
 	public byte[] getBytes() {
 		return this.buffer.toByteArray();
 	}
+
+	public ByteArrayOutputStream getBuffer() {
+		return buffer;
+	}
+	
 }

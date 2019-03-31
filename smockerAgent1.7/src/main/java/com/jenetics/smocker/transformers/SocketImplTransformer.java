@@ -3,13 +3,9 @@ package com.jenetics.smocker.transformers;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-import com.jenetics.smocker.util.RessourceLoader;
-
 import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
-import javassist.CtConstructor;
-import javassist.CtField;
 import javassist.CtMethod;
 import javassist.Modifier;
 import javassist.NotFoundException;
@@ -32,8 +28,6 @@ public class SocketImplTransformer extends AbstractTransformer {
 	}
 
 	private void definePublicGetSocket(ClassPool classPool, CtClass ctClass) throws NotFoundException, CannotCompileException {
-		// TODO Auto-generated method stub
-		
 		CtMethod publicGetSocket = new CtMethod(classPool.get("java.net.Socket"),
 				"publicGetSocket", null, ctClass);
 

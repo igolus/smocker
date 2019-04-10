@@ -82,19 +82,19 @@ public class LoggerPanel extends VerticalLayout {
 
 	private class Message {
 		private Level level;
-		private String message;
+		private String internalMessage;
 
 		private Message(Level level, String message) {
 			super();
 			this.level = level;
-			this.message = message;
+			this.internalMessage = message;
 		}
 
 		public Level getLevel() {
 			return level;
 		}
 		public String getMessage() {
-			return message;
+			return internalMessage;
 		}
 	}
 

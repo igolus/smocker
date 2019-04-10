@@ -60,6 +60,11 @@
 		<param-value>"jdbc:h2:~/test"</param-value>
 	</context-param>
 	<context-param>
+        <description>Vaadin production mode</description>
+        <param-name>productionMode</param-name>
+        <param-value>true</param-value>
+    </context-param>
+	<context-param>
 		<param-name>db.user</param-name>
 		<param-value>sa</param-value>
 	</context-param>
@@ -71,7 +76,4 @@
 		<param-name>db.tcpServer</param-name>
 		<param-value>-tcpAllowOthers</param-value>
 	</context-param>
-	<!-- <context-param> <param-name>db.url</param-name> <param-value>jdbc:h2:~/smockerPersistant</param-value> 
-		</context-param> -->
-
 </web-app>

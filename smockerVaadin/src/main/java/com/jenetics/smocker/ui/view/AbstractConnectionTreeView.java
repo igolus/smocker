@@ -2,7 +2,6 @@ package com.jenetics.smocker.ui.view;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -28,14 +27,9 @@ import com.vaadin.addon.jpacontainer.JPAContainerFactory;
 import com.vaadin.data.TreeData;
 import com.vaadin.data.provider.TreeDataProvider;
 import com.vaadin.event.selection.SelectionEvent;
-import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.Page;
-import com.vaadin.shared.Position;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
 import com.vaadin.ui.TabSheet.Tab;
@@ -96,7 +90,7 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 	
 	protected transient Map<String, Tab> tabByConnectionKey = new HashMap<>();
 	
-	protected Map<Tab, W> detailsViewByTab = new HashMap<>();
+	protected transient  Map<Tab, W> detailsViewByTab = new HashMap<>();
 	protected transient Map<U, Tab> tabByConnection = new HashMap<>();
 	
 	protected W selectedDetailView = null;
@@ -106,11 +100,10 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 
 	private VerticalLayout tabmainlayout;
 
-	public AbstractConnectionTreeView(Class<T> tParameterClass, Class<U> uParameterClass, Class<V> vParameterClass) {
+	public AbstractConnectionTreeView(Class<T> tParameterClass, Class<U> uParameterClass) {
 		super();
 		this.tParameterClass = tParameterClass;
 		this.uParameterClass = uParameterClass;
-		this.vParameterClass = vParameterClass;
 		
 		
 		daoManagerJavaApplication = DaoManagerByModel.getDaoManager(tParameterClass);

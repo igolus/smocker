@@ -4,18 +4,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ListConnections {
-	private Map<String, Long> listConnections = new HashMap<>();
+	private Map<String, Long> connectionMap = new HashMap<>();
 
 	public ListConnections() {
 		super();
 	}
 	
 	public void addConnection(String host, int port, long id) {
-		listConnections.put(host + ":" + port, id);
+		connectionMap.put(host + ":" + port, id);
 	}
 
 	public Map<String, Long> getListConnections() {
-		return listConnections;
+		return connectionMap;
 	}
 	
 }

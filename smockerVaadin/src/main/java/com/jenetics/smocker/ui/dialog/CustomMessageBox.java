@@ -7,7 +7,7 @@ import de.steinwedel.messagebox.MessageBox;
 
 public class CustomMessageBox extends MessageBox {
 	
-	
+	@Override
 	public MessageBox withMessage(Component messageComponent) {
 		if (this.messageComponent != null) {
 			contentLayout.removeComponent(this.messageComponent);

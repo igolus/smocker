@@ -67,7 +67,7 @@ implements RefreshableView {
 	private Logger logger;
 
 	public MockSpaceView() {
-		super(JavaApplicationMocked.class, ConnectionMocked.class, CommunicationMocked.class);
+		super(JavaApplicationMocked.class, ConnectionMocked.class);
 		treeGrid.addSelectionListener(this::treeSelectionChange);
 		setSizeFull();
 	}

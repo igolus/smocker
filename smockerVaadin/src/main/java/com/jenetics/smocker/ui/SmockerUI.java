@@ -340,10 +340,10 @@ public class SmockerUI extends UI {
 		notif.setDelayMsec(delay == 0 ? DISPLAY_NOTIF_DELAY : delay);
 		notif.setPosition(com.vaadin.shared.Position.BOTTOM_RIGHT);
 		notif.setIcon(VaadinIcons.SPINNER);
-
+		
 		// Show it in the page
-		if (Page.getCurrent() != null) {
-			notif.show(Page.getCurrent());
+		if (SmockerUI.getInstance().getPage() != null) {
+			notif.show(SmockerUI.getInstance().getPage());
 		}
 		
 	}

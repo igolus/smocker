@@ -31,12 +31,9 @@ public class ExecutorBean {
 
     public static<T> void executeAsync(T source, Consumer<T> consumer) {
     	initExecutorService();
-     	Runnable runnable = new Runnable() {
-			@Override
-			public void run() {
-				consumer.accept(source);
-			}
-		};
+    	
+     	Runnable runnable = () -> consumer.accept(source);
+
     	managedExecutorService.submit(runnable);
     }
     

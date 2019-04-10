@@ -3,8 +3,6 @@ package com.jenetics.smocker.rest.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.jenetics.smocker.ui.util.HostAndPortRange;
-
 public class ListHostAndRangeModel {
 	
 	private List<HostAndPortRangeModel> listPortAndRangeList = null;

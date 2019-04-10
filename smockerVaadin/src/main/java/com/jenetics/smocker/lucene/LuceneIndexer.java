@@ -77,9 +77,16 @@ public class LuceneIndexer {
 	}
 	
 	public synchronized List<Communication> search(String queryStr) {
-		List<Communication> ret = new ArrayList();
-		ret.addAll(search(queryStr, "request"));
-		ret.addAll(search(queryStr, "response"));
+		List<Communication> ret = new ArrayList<>();
+		
+		List<Communication> queryReq = search(queryStr, "request");
+		ret.addAll(queryReq);
+		
+		List<Communication> queryRes = search(queryStr, "response");
+		ret.addAll(queryRes);
+		
+		
+		Notification.show("Found " + (queryReq.size() + queryRes.size()) + " hits.");
 		ret = ret.stream().distinct().collect(Collectors.toList());
 		return ret;
 	}
@@ -93,7 +100,6 @@ public class LuceneIndexer {
 	        Query query = new QueryParser(field, analyzer).parse(queryStr);
 	        TopDocs docs = searcher.search(query, hitsPerPage);
 	        ScoreDoc[] hits = docs.scoreDocs;
-	        Notification.show("Found " + hits.length + " hits.");
 	        List<Communication> foundComms = new ArrayList<>();
 	        for(int i=0;i<hits.length;++i) {
 	            int docId = hits[i].doc;

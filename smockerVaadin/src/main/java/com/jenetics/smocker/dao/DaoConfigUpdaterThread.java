@@ -11,13 +11,12 @@ public class DaoConfigUpdaterThread {
 	
 	private static DaoConfigUpdaterThread instance = null;
 	private static final int SLEEP_TIME = 2000;
-	private static SmockerConf singleConf = null;
+	private static SmockerConf singleConf = DaoConfig.getSingleConfig();
 	@Inject
 	private Logger logger = Logger.getLogger(DaoConfigUpdaterThread.class);
 	
 	private DaoConfigUpdaterThread() {
 		super();
-		singleConf = DaoConfig.getSingleConfig();
 	}
 	
 	public static synchronized DaoConfigUpdaterThread getInstance() {

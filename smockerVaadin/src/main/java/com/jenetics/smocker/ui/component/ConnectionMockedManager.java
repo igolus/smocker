@@ -9,8 +9,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
 import org.jboss.logging.Logger;
 import org.vaadin.easyapp.util.ActionContainer;
 import org.vaadin.easyapp.util.ActionContainerBuilder;
@@ -58,22 +56,22 @@ public class ConnectionMockedManager extends EasyAppLayout {
 	private TreeData<TreeGridMockedItem> treeData;
 	private TreeDataProvider<TreeGridMockedItem> treeDataProvider;
 	private ConnectionMocked connectionMocked;
-	private Consumer<CommunicationMocked> itemClicked;
+	private transient Consumer<CommunicationMocked> itemClicked;
 
 	private transient DaoManager<Scenario> scenarioDaoManager = DaoManagerByModel.getDaoManager(Scenario.class);
 	private transient DaoManager<CommunicationMocked> communicationDaoManager = DaoManagerByModel.getDaoManager(CommunicationMocked.class);
 	private transient DaoManager<ConnectionMocked> connectionDaoManager = DaoManagerByModel.getDaoManager(ConnectionMocked.class);
 	private ComboBox comboBox;
 	
-	private List<Scenario> listScenarios;
-	private TreeGridMockedItem selectedTreeItem;
-	private TreeGridMockedItem root;
+	private transient List<Scenario> listScenarios;
+	private transient TreeGridMockedItem selectedTreeItem;
+	private transient TreeGridMockedItem root;
 	
-	private Map<CommunicationMocked, TreeGridMockedItem> treeScenarioItemByComm = new HashMap<>();
-	private Map<TreeGridMockedItem, List<TreeGridMockedItem>> commItemsByScenarioItem = new HashMap<>();
-	private Map<CommunicationMocked, TreeGridMockedItem> treeCommItemByComm = new HashMap<>();
-	private Map<Scenario, TreeGridMockedItem> treeScenarioItemByScenario = new LinkedHashMap<>();
-	private List<TreeGridMockedItem> listItems = new ArrayList<>();
+	private transient Map<CommunicationMocked, TreeGridMockedItem> treeScenarioItemByComm = new HashMap<>();
+	private transient Map<TreeGridMockedItem, List<TreeGridMockedItem>> commItemsByScenarioItem = new HashMap<>();
+	private transient Map<CommunicationMocked, TreeGridMockedItem> treeCommItemByComm = new HashMap<>();
+	private transient Map<Scenario, TreeGridMockedItem> treeScenarioItemByScenario = new LinkedHashMap<>();
+	private transient List<TreeGridMockedItem> listItems = new ArrayList<>();
 
 	private Logger logger = Logger.getLogger(ConnectionMockedManager.class);
 
@@ -103,7 +101,7 @@ public class ConnectionMockedManager extends EasyAppLayout {
 	}
 
 	
-	private TreeGridMockedItem undefinedScenarioItem;
+	private transient TreeGridMockedItem undefinedScenarioItem;
 	
 	public ComboBox getComboBox() {
 		return comboBox;
@@ -233,7 +231,7 @@ public class ConnectionMockedManager extends EasyAppLayout {
 		updateComboBoxValues(event.getItem());
 	}
 	
-	private TreeGridMockedItem selectedItem;
+	private transient TreeGridMockedItem selectedItem;
 	private transient Runnable refreshClickable;
 
 	public TreeGridMockedItem getSelectedItem() {
@@ -245,45 +243,46 @@ public class ConnectionMockedManager extends EasyAppLayout {
 		this.refreshClickable.run();
 		comboBox.clear();
 		comboBox.setEmptySelectionCaption("...");
+		
 		if (treeItem.isRoot()) {
 			comboBox.setItems(SmockerUI.getBundleValue(CREATE_SCENARIO));
 		}
 		else if (treeItem.isScenario()) {
 			Scenario scenario = treeItem.getScenario();
-			List<String> lisItems = new ArrayList<>();
+			List<String> lisItemsAction = new ArrayList<>();
 			
 			if (!scenario.getCommunicationsMocked().isEmpty()) {
-				lisItems.add(SmockerUI.getBundleValue(REMOVE_COMMS));
-				lisItems.add(SmockerUI.getBundleValue(TURN_ON_ALL));
-				lisItems.add(SmockerUI.getBundleValue(TURN_OFF_ALL));
+				lisItemsAction.add(SmockerUI.getBundleValue(REMOVE_COMMS));
+				lisItemsAction.add(SmockerUI.getBundleValue(TURN_ON_ALL));
+				lisItemsAction.add(SmockerUI.getBundleValue(TURN_OFF_ALL));
 				if (listScenarios.size() >= 2) {
-					lisItems.add(SmockerUI.getBundleValue(MOVE_ALL_COMMS));
+					lisItemsAction.add(SmockerUI.getBundleValue(MOVE_ALL_COMMS));
 				}
 			}
 			
 			if (!scenario.equals(DaoManagerByModel.getUNDEFINED_SCENARIO())) {
-				lisItems.add(SmockerUI.getBundleValue(RENAME_SCENARIO));
-				lisItems.add(SmockerUI.getBundleValue(DELETE_SCENARIO));
+				lisItemsAction.add(SmockerUI.getBundleValue(RENAME_SCENARIO));
+				lisItemsAction.add(SmockerUI.getBundleValue(DELETE_SCENARIO));
 			}
 			
-			comboBox.setItems(lisItems);
+			comboBox.setItems(lisItemsAction);
 		}
 		else if (treeItem.isCommunication()) {
-			List<String> listItems = new ArrayList<>(); 
-			listItems.addAll(Arrays.asList(SmockerUI.getBundleValue(MOVE_COMM), 
+			List<String> listItemsAction = new ArrayList<>(); 
+			listItemsAction.addAll(Arrays.asList(SmockerUI.getBundleValue(MOVE_COMM), 
 					SmockerUI.getBundleValue(RENAME_COMM), 
 					SmockerUI.getBundleValue(DELETE_COMM),
 					SmockerUI.getBundleValue(DUPLICATE_COMM)));
 			List<CommunicationMocked> commsOfScenario = getListCommOrdered(treeItem.getCommunication().getScenario());
 			int indeoxOfComm = commsOfScenario.indexOf(treeItem.getCommunication());
 			if (indeoxOfComm < commsOfScenario.size() - 1) {
-				listItems.add(SmockerUI.getBundleValue(MOVE_DOWN));
+				listItemsAction.add(SmockerUI.getBundleValue(MOVE_DOWN));
 			}
 			
 			if (indeoxOfComm > 0) {
-				listItems.add(SmockerUI.getBundleValue(MOVE_UP));
+				listItemsAction.add(SmockerUI.getBundleValue(MOVE_UP));
 			}
-			comboBox.setItems(listItems);
+			comboBox.setItems(listItemsAction);
 		}
 	}
 
@@ -507,8 +506,6 @@ public class ConnectionMockedManager extends EasyAppLayout {
 			if (!communicationsMocked.contains(communication)) {
 				communicationsMocked.add(communication);
 				communication.setScenario(targetScenario);
-				//targetScenario.setCommunicationsMocked(communicationsMocked);
-				
 			}
 			
 			targetScenario = scenarioDaoManager.update(targetScenario);
@@ -533,7 +530,6 @@ public class ConnectionMockedManager extends EasyAppLayout {
 		scenario.setName(scenarioName);
 		scenario.setHost(connectionMocked.getHost());
 		scenario.setPort(connectionMocked.getPort());
-		//scenario.setClassQualifiedName(connectionMocked.getJavaApplication().getClassQualifiedName());
 		scenario = scenarioDaoManager.create(scenario);
 		listScenarios.add(scenario);
 		addScenarioToRootExceptUndifined(scenario);
@@ -571,10 +567,6 @@ public class ConnectionMockedManager extends EasyAppLayout {
 				connectionDaoManager.update(communicationMocked.getConnection());
 			}
 			
-//			for (CommunicationMocked communicationMocked : newList) {
-//				communicationDaoManager.delete(communicationMocked);
-//			}
-			
 			TreeGridMockedItem scenarioItemTarget = treeScenarioItemByScenario.get(scenarioSelected);
 			treeData.removeItem(scenarioItemTarget);
 			treeScenarioItemByScenario.remove(scenarioSelected);
@@ -599,7 +591,7 @@ public class ConnectionMockedManager extends EasyAppLayout {
 			scenarioDaoManager.update(selectedTreeItem.getScenario());
 			
 			//all comm are in the same connection
-			if (listCommsToRemove.size() > 0) {
+			if (!listCommsToRemove.isEmpty()) {
 				ConnectionMocked connection = listCommsToRemove.get(0).getConnection();
 				connection.getCommunications().clear();
 				connectionDaoManager.update(connection);

@@ -9,9 +9,10 @@ import com.vaadin.data.TreeData;
 import com.vaadin.data.provider.TreeDataProvider;
 import com.vaadin.event.selection.SelectionEvent;
 import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Tree;
@@ -20,16 +21,10 @@ import com.vaadin.ui.VerticalLayout;
 import de.steinwedel.messagebox.ButtonType;
 import de.steinwedel.messagebox.MessageBox;
 
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Grid.SelectionMode;
-
 public class DupHostEditor extends VerticalLayout implements BoxableItem<DuplicateHost> {
 	private DuplicateHost duplicateHost = null;
-	private Button addButton;
-	private Button removeButton;
 	private TreeData<String> treeData;
 	private TreeDataProvider<String> treeDataProvider;
-	private Tree<String> listHostTree;
 	private String selectedHost;
 	private MessageBox displayComponentBox;
 
@@ -43,19 +38,19 @@ public class DupHostEditor extends VerticalLayout implements BoxableItem<Duplica
 		GridLayout gridLayout = new GridLayout(1, 2);
 
 		HorizontalLayout layoutButtons = new HorizontalLayout();
-		addButton = new Button(VaadinIcons.PLUS);
+		Button addButton = new Button(VaadinIcons.PLUS);
 		addButton.setDescription(SmockerUI.getBundleValue("Add_Host_toolTip"));
 		addButton.addClickListener(this::addHost);
 		layoutButtons.addComponent(addButton);
 
-		removeButton = new Button(VaadinIcons.MINUS);
+		Button removeButton = new Button(VaadinIcons.MINUS);
 		removeButton.setDescription(SmockerUI.getBundleValue("Remove_Host_toolTip"));
 		removeButton.addClickListener(this::removeHost);
 		layoutButtons.addComponent(removeButton);
 
 		gridLayout.addComponent(layoutButtons, 0, 0);
 
-		listHostTree = new Tree<String>();
+		Tree<String> listHostTree = new Tree<>();
 		listHostTree.setSelectionMode(SelectionMode.SINGLE);
 		treeData = new TreeData<>();
 		treeDataProvider = new TreeDataProvider<>(treeData);

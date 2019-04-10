@@ -6,23 +6,19 @@ import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.dialog.Dialog;
 import com.jenetics.smocker.ui.util.HostAndPortRange;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.GridLayout;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Button.ClickEvent;
 
 import de.steinwedel.messagebox.ButtonOption;
-import de.steinwedel.messagebox.ButtonType;
 import de.steinwedel.messagebox.MessageBox;
 
 public class HostAndPortEditor extends VerticalLayout implements BoxableItem<HostAndPortRange> {
 	
-	private HostAndPortRange hostAndPort;
+	private transient HostAndPortRange hostAndPort;
 	private MessageBox sourceBox;
 	private TextField textFieldHost;
 	private TextField textFieldPortAndRange;
-	private Consumer<HostAndPortRange> callBack;
+	private transient Consumer<HostAndPortRange> callBack;
 
 	public HostAndPortEditor(HostAndPortRange hostAndPort) {
 		super();
@@ -54,14 +50,8 @@ public class HostAndPortEditor extends VerticalLayout implements BoxableItem<Hos
 			this.sourceBox = sourceBox;
 			sourceBox.withOkButton(this::updatehostAndPort, ButtonOption.closeOnClick(false));
 			sourceBox.open();
-			//this.sourceBox.
-			//manageOkButton();
 		}
 	}
-	
-//	private void manageOkButton() {
-//		sourceBox.getButton(ButtonType.OK).addClickListener(this::updatehostAndPort);
-//	}
 	
 	private void updatehostAndPort() {
 		String hostValue = textFieldHost.getValue();
@@ -81,7 +71,7 @@ public class HostAndPortEditor extends VerticalLayout implements BoxableItem<Hos
 		String hostValue = textFieldHost.getValue();
 		String portAndRangeValue = textFieldPortAndRange.getValue();
 		
-		if (hostValue.indexOf(" ") != -1) {
+		if (hostValue.indexOf(' ') != -1) {
 			Dialog.warning(SmockerUI.getBundleValue("Bad_JS_Host_Warning"));
 			return false;
 		}

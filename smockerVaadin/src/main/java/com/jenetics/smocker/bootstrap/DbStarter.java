@@ -36,12 +36,10 @@ public class DbStarter implements ServletContextListener {
 
             // This will get the setting from a context-param in web.xml if defined:
             ServletContext servletContext = servletContextEvent.getServletContext();
-//            String url = getParameter(servletContext, "db.url", "jdbc:h2:~/smockerPersistant");
-//            String user = getParameter(servletContext, "db.user", "sa");
-//            String password = getParameter(servletContext, "db.password", "sa");
 
             // Start the server if configured to do so
             String serverParams = getParameter(servletContext, "db.tcpServer", null);
+            
             serverParams += " ";
             serverParams += "-webAllowOthers";
             serverParams += " ";
@@ -87,12 +85,12 @@ public class DbStarter implements ServletContextListener {
             stat.execute("SHUTDOWN");
             stat.close();
         } catch (Exception e) {
-            e.printStackTrace();
+        	logger.log(Level.SEVERE, "Unable to close the statement", e);
         }
         try {
             conn.close();
         } catch (Exception e) {
-            e.printStackTrace();
+        	logger.log(Level.SEVERE, "Unable to close the connection", e);
         }
         if (server != null) {
             server.stop();

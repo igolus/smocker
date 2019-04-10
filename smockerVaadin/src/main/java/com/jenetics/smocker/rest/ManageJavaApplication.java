@@ -44,6 +44,7 @@ import com.jenetics.smocker.threading.ExecutorBean;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.util.NetworkReaderUtility;
 import com.jenetics.smocker.util.SmockerException;
+import com.vaadin.ui.UI;
 
 @RequestScoped
 @Path("/manageJavaApplication/")
@@ -156,6 +157,8 @@ public class ManageJavaApplication {
 
 		AddCommunicationContainer addCommunicationContainer = new AddCommunicationContainer(javaApplicationId,  
 				connectionId, comm);
+		
+		//final UI ui = getCurrent();
 		ExecutorBean.executeAsync(addCommunicationContainer, this::createAsync);
 		return Response.ok().build();
 	}

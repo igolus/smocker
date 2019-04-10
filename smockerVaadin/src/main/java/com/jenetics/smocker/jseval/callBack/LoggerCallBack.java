@@ -8,7 +8,7 @@ import com.eclipsesource.v8.V8Object;
 
 public class LoggerCallBack implements JavaVoidCallback {
 	
-	private StringBuffer sb = new StringBuffer();
+	private StringBuilder sb = new StringBuilder();
 	
 	public LoggerCallBack() {
 		super();
@@ -30,7 +30,7 @@ public class LoggerCallBack implements JavaVoidCallback {
 	}
 	
 	public void reset() {
-		sb = new StringBuffer();
+		sb = new StringBuilder();
 	}
 
 }

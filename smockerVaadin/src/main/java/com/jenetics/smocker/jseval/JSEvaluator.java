@@ -16,7 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.jboss.logging.Logger;
 import org.reflections.Reflections;
-import org.vaadin.easyapp.util.annotations.RootView;
 
 import com.eclipsesource.v8.JavaCallback;
 import com.eclipsesource.v8.JavaVoidCallback;
@@ -24,12 +23,8 @@ import com.eclipsesource.v8.NodeJS;
 import com.eclipsesource.v8.V8;
 import com.eclipsesource.v8.V8Array;
 import com.eclipsesource.v8.V8Object;
-import com.google.common.collect.Multiset.Entry;
 import com.jenetics.smocker.dao.DaoConfig;
 import com.jenetics.smocker.jseval.callBack.LoggerCallBack;
-import com.jenetics.smocker.jseval.callBack.SmockerJsEnvCallBackAdd;
-import com.jenetics.smocker.jseval.callBack.SmockerJsEnvCallBackGet;
-import com.jenetics.smocker.jseval.callBack.SmockerJsEnvCallBackRemove;
 import com.jenetics.smocker.model.CommunicationMocked;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.util.NetworkReaderUtility;
@@ -37,9 +32,13 @@ import com.jenetics.smocker.util.SmockerException;
 import com.jenetics.smocker.util.SmockerRuntimeException;
 
 public class JSEvaluator {
+	
+	private JSEvaluator() {
+		super();
+	}
 
+	private static final String ERROR_EVALUATING_SCRIPT = "Error evaluating script";
 	private static Logger logger = Logger.getLogger(JSEvaluator.class);
-	//private static RuntimeAndLogger runtimeAndLogger; 
 	private static Map<String, JavaCallback> mapMethodNameJavaCallBack = null;
 	private static Map<String, JavaVoidCallback> mapMethodNameJavaVoidCallBack = null;
 
@@ -91,15 +90,14 @@ public class JSEvaluator {
 			runtimeAndLogger.getRuntime().executeVoidScript(script + code);
 			output = runtimeAndLogger.getRuntime().getString("output");
 		}
+		catch (SmockerRuntimeException smockerRuntimeException) {
+			throw new SmockerException( smockerRuntimeException.getCause() );
+		}
 		catch (Exception ex) {
-			SmockerUI.log(Level.SEVERE, "Error evaluating script", ex);
-			if (ex instanceof SmockerRuntimeException) {
-				throw new SmockerException( ((SmockerRuntimeException)ex).getCause() );
-			}
+			SmockerUI.log(Level.SEVERE, ERROR_EVALUATING_SCRIPT, ex);
 			throw new SmockerException(ex);
 		}
 		
-		//runtimeAndLogger.getRuntime().release(false);
 		log(runtimeAndLogger.getCallBack());
 		return new String[] {runtimeAndLogger.getCallBack().toString(), output};
 	}
@@ -126,16 +124,14 @@ public class JSEvaluator {
 				for (Class<?> classWithFunction : annotatedRootView) {
 					Method[] methodsInFUnctionClass = classWithFunction.getMethods();
 					for (Method method : methodsInFUnctionClass) {
-						if (method.isAnnotationPresent(SmockerMethod.class)) {
-							if (Modifier.isStatic(method.getModifiers())) {
-								if (method.getReturnType() == null) {
-									mapMethodNameJavaVoidCallBack.put(method.getName(), 
-											getJavaVoidCallBack(classWithFunction, method, runtime));
-								}
-								else {
-									mapMethodNameJavaCallBack.put(method.getName(), 
-											getJavaCallBack(classWithFunction, method, runtime));
-								}
+						if (method.isAnnotationPresent(SmockerMethod.class) && Modifier.isStatic(method.getModifiers())) {
+							if (method.getReturnType() == null) {
+								mapMethodNameJavaVoidCallBack.put(method.getName(), 
+										getJavaVoidCallBack(method));
+							}
+							else {
+								mapMethodNameJavaCallBack.put(method.getName(), 
+										getJavaCallBack(method));
 							}
 						}
 					}
@@ -153,7 +149,7 @@ public class JSEvaluator {
 
 	}
 	
-	private static JavaCallback getJavaCallBack(Class<?> classWithFunction, Method method, V8 runtime) {
+	private static JavaCallback getJavaCallBack(Method method) {
 		JavaCallback callBack = new JavaCallback() {
 			@Override
 			public Object invoke(V8Object receiver, V8Array parameters) {
@@ -167,7 +163,7 @@ public class JSEvaluator {
 		return callBack;
 	}
 	
-	private static JavaVoidCallback getJavaVoidCallBack(Class<?> classWithFunction, Method method, V8 runtime) {
+	private static JavaVoidCallback getJavaVoidCallBack(Method method) {
 		JavaVoidCallback callBack = new JavaVoidCallback() {
 			@Override	
 			public void invoke(V8Object receiver, V8Array parameters) {
@@ -181,40 +177,8 @@ public class JSEvaluator {
 		return callBack;
 	}
 
-//	private static void referenceMethodInRuntime(Class<?> classWithFunction, Method method, V8 runtime) 
-//	{
-//		//void method
-//		if (method.getReturnType() == null) {
-//			JavaVoidCallback callBack = new JavaVoidCallback() {
-//				@Override	
-//				public void invoke(V8Object receiver, V8Array parameters) {
-//					try {
-//						invokeAndReturn(method, parameters);
-//					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-//						throw new SmockerRuntimeException(e);
-//					}
-//				}
-//			};
-//			runtime.registerJavaMethod(callBack, method.getName());
-//		}
-//		else {
-//			JavaCallback callBack = new JavaCallback() {
-//
-//				@Override
-//				public Object invoke(V8Object receiver, V8Array parameters) {
-//					try {
-//						return invokeAndReturn(method, parameters);
-//					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-//						throw new SmockerRuntimeException(e);
-//					}
-//				}
-//			};
-//			runtime.registerJavaMethod(callBack, method.getName());
-//		}
-//	}
-
 	private static Object invokeAndReturn(Method method, V8Array parameters) 
-			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+			throws IllegalAccessException, InvocationTargetException {
 		List<Object> listArgs = new ArrayList<>();
 		for (int i = 0; i < parameters.length(); i++) {
 			listArgs.add(parameters.get(i));
@@ -251,7 +215,7 @@ public class JSEvaluator {
 			output = runtimeAndLogger.getRuntime().getBoolean("match");
 		}
 		catch (Exception ex) {
-			SmockerUI.log(Level.SEVERE, "Error evaluating script", ex);
+			SmockerUI.log(Level.SEVERE, ERROR_EVALUATING_SCRIPT, ex);
 			throw new SmockerException(ex);
 		}
 		log(runtimeAndLogger.getCallBack());
@@ -280,7 +244,7 @@ public class JSEvaluator {
 			output = runtimeAndLogger.getRuntime().getString("ret");
 		}
 		catch (Exception ex) {
-			SmockerUI.log(Level.SEVERE, "Error evaluating script", ex);
+			SmockerUI.log(Level.SEVERE, ERROR_EVALUATING_SCRIPT, ex);
 			throw new SmockerException(ex);
 		}
 		output = escapeJsStringResult(output);

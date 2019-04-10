@@ -9,22 +9,17 @@ import com.jenetics.smocker.model.ConnectionMocked;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.component.javascript.JsEditor;
 import com.jenetics.smocker.ui.component.javascript.JsTesterPanel;
-import com.jenetics.smocker.ui.util.ButtonWithIEntity;
-import com.jenetics.smocker.ui.util.TreeGridMockedItem;
 import com.jenetics.smocker.util.NetworkReaderUtility;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
-import com.vaadin.ui.TreeGrid;
 
 
 @SuppressWarnings("serial")
 public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 	
-	//private TreeGrid<TreeGridMockedItem> treeGrid;
 	private CommunicationMocked selectedCommunication = null;
 	private HorizontalSplitPanel mainLayout = null;
 	
@@ -73,27 +68,6 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 		return selectedRequestPane;
 	}
 	
-//	protected void addTreeMapping() {
-//		treeGrid.addColumn(item -> item.getDisplay());
-//		treeGrid.addComponentColumn(this::buildEnableButton);
-//	}
-	
-	
-//	private Button buildEnableButton(TreeGridMockedItem item) {
-//		if (!item.isRoot()) {
-//			ButtonWithIEntity<CommunicationMocked> buttonWithId = new ButtonWithIEntity<>(item.getCommunication());
-//			buttonWithId.setCaption("Enable");
-//			buttonWithId.addClickListener(this::enableButtonClicked);
-//			return buttonWithId;
-//		}
-//		return null;
-//    }
-	
-//	public void enableButtonClicked(ClickEvent event) {
-//		ButtonWithIEntity<CommunicationMocked> buttonWithEntity = 
-//				(ButtonWithIEntity<CommunicationMocked>) event.getSource();
-//	}
-
 	public void commSelected(CommunicationMocked comm) {
 		if (comm != null) {
 			String request = NetworkReaderUtility.decode(comm.getRequest());
@@ -139,11 +113,6 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 		TextPanel textPanel = new TextPanel(request, false);
 		tabSheet.addTab(textPanel, SmockerUI.getBundleValue(locString));
 		return textPanel;
-	}
-	
-	
-	private void clearTabs() {
-		mainLayout.setSecondComponent(null);
 	}
 
 	public void cleanAll(ClickEvent event) {

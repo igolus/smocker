@@ -1,15 +1,11 @@
 package com.jenetics.smocker.ui.component.javascript;
 
-import java.util.Date;
-
 import org.apache.commons.lang3.StringUtils;
 import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
 import org.vaadin.aceeditor.AceTheme;
 import org.vaadin.easyapp.util.EasyAppLayout;
 
-import com.eclipsesource.v8.NodeJS;
-import com.eclipsesource.v8.V8;
 import com.jenetics.smocker.dao.DaoConfig;
 import com.jenetics.smocker.jseval.JSEvaluator;
 import com.jenetics.smocker.model.CommunicationMocked;
@@ -21,7 +17,7 @@ import com.jenetics.smocker.util.SmockerUtility;
 @SuppressWarnings("serial")
 public class JsEditor extends EasyAppLayout {
 
-	public static String DEFAULT_JS = "function matchAndReturnOutput(recordDate, realInput, bas64Input, providedInput, providedOutput,"  + System.lineSeparator() 
+	public static final String DEFAULT_JS = "function matchAndReturnOutput(recordDate, realInput, bas64Input, providedInput, providedOutput,"  + System.lineSeparator() 
 		+"    index, targetHost, targetPort)" + System.lineSeparator()
 		+ "{" + System.lineSeparator()
 		+ "  if (realInput == providedInput)" + System.lineSeparator()

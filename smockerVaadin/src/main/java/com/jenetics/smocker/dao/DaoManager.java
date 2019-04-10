@@ -1,6 +1,5 @@
 package com.jenetics.smocker.dao;
 
-import java.io.Serializable;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -13,9 +12,9 @@ import com.jenetics.smocker.model.EntityWithId;
 
 public class DaoManager<T extends EntityWithId> implements IDaoManager<T> {
 
-	private Logger logger = Logger.getLogger(DaoManager.class);
+	private static final String UNABLE_TO_DELETE_ENTITY = "Unable to delete entity";
 
-	//private static Object lock = new Object();
+	private Logger logger = Logger.getLogger(DaoManager.class);
 
 	private EntityManager entityManager;
 
@@ -96,7 +95,7 @@ public class DaoManager<T extends EntityWithId> implements IDaoManager<T> {
 			entityManager.remove(lastEntity);
 			entityTransaction.commit();
 		} catch (Exception ex) {
-			logger.error("Unable to delete entity", ex);
+			logger.error(UNABLE_TO_DELETE_ENTITY, ex);
 			entityTransaction.rollback();
 		}
 		finally {
@@ -141,7 +140,7 @@ public class DaoManager<T extends EntityWithId> implements IDaoManager<T> {
 				entityManager.remove(entity);
 				entityTransaction.commit();
 			} catch (Exception ex) {
-				logger.error("Unable to delete entity", ex);
+				logger.error(UNABLE_TO_DELETE_ENTITY, ex);
 				entityTransaction.rollback();
 			}
 			finally {
@@ -161,7 +160,7 @@ public class DaoManager<T extends EntityWithId> implements IDaoManager<T> {
 			query.executeUpdate();
 			entityTransaction.commit();
 		} catch (Exception ex) {
-			logger.error("Unable to delete entity", ex);
+			logger.error(UNABLE_TO_DELETE_ENTITY, ex);
 			entityTransaction.rollback();
 		}
 		finally {
@@ -171,9 +170,7 @@ public class DaoManager<T extends EntityWithId> implements IDaoManager<T> {
 
 	@Override
 	public List<T> queryList(String querySql) {
-		String entityName = typeParameterClass.getSimpleName();
 		Query query = entityManager.createQuery(querySql);
-		EntityTransaction entityTransaction = entityManager.getTransaction();
 		return query.getResultList();
 	}
 

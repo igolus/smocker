@@ -1,0 +1,21 @@
+<project name="Smocker" default="release" basedir=".">
+	
+	<property name="srcWildFlyNoWar" value="fatWildFly/wildfly-13.0.0.Final-Smocker.zip"/>
+	<property name="distribDir" value="distrib"/>
+	<property name="destClient" value="distrib/smockerClient.zip"/>
+	<property name="targetClientFolder" value="smockerAgent1.7/target"/>
+	<property name="targetClientJar" value="smockerAgent1.7-1.0-SNAPSHOT.jar"/>
+	<property name="libClientFolder" value="smockerAgent1.7/lib"/>
+	<property name="libClientJar" value="javassist.jar"/>
+	
+	<target name="release">
+		<zip destfile="${srcWildFlyNoWar}" update="true">
+			<zipfileset dir="smockerVaadin\target" includes="*.war" prefix="wildfly-13.0.0.Final-Smocker\standalone\deployments"/>
+		</zip>
+		<copy file="${srcWildFlyNoWar}" todir="${distribDir}"/>
+		<zip destfile="${destClient}">
+			<zipfileset dir="${targetClientFolder}" includes="${targetClientJar}" prefix="smockerClient"/>
+			<zipfileset dir="${libClientFolder}" includes="${libClientJar}" prefix="smockerClient"/>
+		</zip>
+	  </target>
+</project>

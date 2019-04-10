@@ -35,10 +35,11 @@ public class App
 
 				line = bufferedReader.readLine();
 				//callGoogle();
-				for (int i = 0; i < 1; i++) {
-					callGoogleSocketChannell();
+				for (int i = 0; i < 50; i++) {
+					//callGoogleSocketChannell();
+					callGoogle();
 					//callGeoService();
-					Thread.sleep(1000);
+					Thread.sleep(50);
 					System.out.println("Call " + i);
 				}
 				

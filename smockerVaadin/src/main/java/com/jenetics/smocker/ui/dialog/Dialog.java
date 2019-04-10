@@ -5,19 +5,13 @@ import java.util.function.Consumer;
 
 import org.jboss.logging.Logger;
 
-import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.component.BoxableItem;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.Button.ClickEvent;
 
 import de.steinwedel.messagebox.ButtonOption;
-import de.steinwedel.messagebox.ButtonType;
 import de.steinwedel.messagebox.MessageBox;
 
 public class Dialog {
@@ -56,9 +50,7 @@ public class Dialog {
 		
 		MessageBox box = MessageBox.create();
 		box.withCaption(caption).withMessage(comboBox).withCancelButton();
-		box.withOkButton(() -> {
-			selected.accept(comboBox.getSelectedItem().get());
-		});
+		box.withOkButton(() -> selected.accept(comboBox.getSelectedItem().get()));
 		
 		box.open();
 	}
@@ -68,9 +60,8 @@ public class Dialog {
 		MessageBox box = MessageBox.create();
 		box.withCaption(caption).withMessage(boxableItem.getComponent()).withCancelButton();
 		if (selected != null) {
-			box.withOkButton(() -> {
-				selected.accept(boxableItem.getItem());
-			}, ButtonOption.closeOnClick(closeOnOk));
+			box.withOkButton(() -> selected.accept(boxableItem.getItem())
+			, ButtonOption.closeOnClick(closeOnOk));
 		}
 		if (open) {
 			box.open();
@@ -95,12 +86,8 @@ public class Dialog {
 		
 		MessageBox box = MessageBox.create();
 		box.withCaption(caption).withMessage(textField).withCancelButton();
-		box.withOkButton(() -> {
-			selected.accept(textField.getValue());
-		});
-		
+		box.withOkButton(() -> selected.accept(textField.getValue()));
 		box.open();
-		
 	}
 	
 	public static void displayCreateStringBox(String caption, Consumer<String> selected, String initialValue) {
@@ -111,9 +98,7 @@ public class Dialog {
 		textField.setValue(initialValue);
 		MessageBox box = MessageBox.create();
 		box.withCaption(caption).withMessage(textField).withCancelButton();
-		box.withOkButton(() -> {
-			selected.accept(textField.getValue());
-		});
+		box.withOkButton(() -> selected.accept(textField.getValue()));
 		
 		box.open();
 		

@@ -54,10 +54,13 @@ homeView = true, rootViewParent = ConnectionsRoot.class, bundle=SmockerUI.BUNDLE
 public class JavaApplicationsView extends AbstractConnectionTreeView<JavaApplication, Connection, Communication, ConnectionDetailsView> 
 implements RefreshableView, SearcheableView {
 
-	public static DaoManager<JsFilterAndDisplay> daoManagerJsFilterAndDisplay = DaoManagerByModel.getDaoManager(JsFilterAndDisplay.class);
+	public static final DaoManager<JsFilterAndDisplay> daoManagerJsFilterAndDisplay = DaoManagerByModel.getDaoManager(JsFilterAndDisplay.class);
 
+	private transient HashMap<JavaApplication, List<SwitchWithEntity<Connection>>> switchButtonsByJavaApp = new HashMap<>();
+	private transient HashMap<Connection, SwitchWithEntity<Connection>> switchWithEntityByConnection = new HashMap<>();
+	
 	public JavaApplicationsView() {
-		super(JavaApplication.class, Connection.class, Communication.class);
+		super(JavaApplication.class, Connection.class);
 		treeGrid.addSelectionListener(this::treeSelectionChange);
 		setSizeFull();
 		tabSheet.addSelectedTabChangeListener(this::tabChanged);
@@ -100,7 +103,6 @@ implements RefreshableView, SearcheableView {
 		treeGrid.addComponentColumn(this::buildConfigureButton).setCaption(CONFIGURE);
 	}
 
-	private HashMap<JavaApplication, List<SwitchWithEntity<Connection>>> switchButtinsByJavaApp = new HashMap<>();
 
 	private Switch buildWatchButton(TreeGridConnectionData<JavaApplication, Connection> item) {
 		if (item.isConnection()) {
@@ -108,8 +110,10 @@ implements RefreshableView, SearcheableView {
 			SwitchWithEntity<Connection> switchConnection = new SwitchWithEntity<>(connection);
 			switchConnection.setValue(connection.getWatched());
 			switchConnection.addValueChangeListener(this::watchButtonClicked);
-			switchButtinsByJavaApp.computeIfAbsent(connection.getJavaApplication(), key -> new ArrayList<SwitchWithEntity<Connection>>())
+			switchButtonsByJavaApp.computeIfAbsent(connection.getJavaApplication(), key -> new ArrayList<SwitchWithEntity<Connection>>())
 			.add(switchConnection);
+			
+			switchWithEntityByConnection.put(connection, switchConnection);
 			return switchConnection;
 		}
 		else if (item.isJavaApplication()) {
@@ -273,7 +277,7 @@ implements RefreshableView, SearcheableView {
 
 	public void watchButtonJavaAppClicked(ValueChangeEvent<Boolean> event) {
 		SwitchWithEntity<JavaApplication> switchWithEntity = (SwitchWithEntity<JavaApplication>) event.getSource();
-		List<SwitchWithEntity<Connection>> targetSwitchButton = switchButtinsByJavaApp.get(switchWithEntity.getEntity());
+		List<SwitchWithEntity<Connection>> targetSwitchButton = switchButtonsByJavaApp.get(switchWithEntity.getEntity());
 		if (targetSwitchButton != null) {
 			targetSwitchButton.stream()
 			.forEach( switchButton -> switchButton.setValue(switchWithEntity.getValue()));
@@ -342,7 +346,7 @@ implements RefreshableView, SearcheableView {
 	public boolean canAddAllToMock() {
 		ConnectionDetailsView connectionDetailsView = getSelectedDetailView();
 		if (connectionDetailsView != null) {
-			return connectionDetailsView.getCommunications().size() > 0;
+			return !connectionDetailsView.getCommunications().isEmpty();
 		}
 		return false;
 	}
@@ -365,14 +369,15 @@ implements RefreshableView, SearcheableView {
 					selectedConnection.getJavaApplication().getConnections().remove(selectedConnection);
 					daoManagerJavaApplication.update(selectedConnection.getJavaApplication());
 					removeTabConn(selectedConnection);
-					switchButtinsByJavaApp.get(selectedConnection.getJavaApplication()).remove(selectedConnection);
+					switchButtonsByJavaApp.get(selectedConnection.getJavaApplication()).remove(switchWithEntityByConnection.get(selectedConnection));
+					switchWithEntityByConnection.remove(selectedConnection);
 					refreshClickable();
 				}
 				else if (treeGridConnectionData.isJavaApplication()) {
 					JavaApplication selectedJavaApplication = treeGridConnectionData.getJavaApplication();
 					selectedJavaApplication.getConnections().stream().forEach(this::removeTabConn);
 					daoManagerJavaApplication.delete(selectedJavaApplication);
-					switchButtinsByJavaApp.remove(selectedJavaApplication);
+					switchButtonsByJavaApp.remove(selectedJavaApplication);
 				}
 				fillTreeTable();
 			}
@@ -406,7 +411,7 @@ implements RefreshableView, SearcheableView {
 	}
 
 	public boolean canCleanAll() {
-		return !isMainTabSelected() && getSelectedDetailView().getConnection().getCommunications().size() > 0;
+		return !isMainTabSelected() && !getSelectedDetailView().getConnection().getCommunications().isEmpty();
 	}
 
 	public boolean canSort() {

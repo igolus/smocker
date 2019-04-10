@@ -18,7 +18,6 @@ public class JsTesterPanel extends EasyAppLayout {
 	private static final String LOG_KEYWORD = "===== LOG :";
 	private static final String OUTPUT_KEYWORD = "===== OUTPUT :";
 	private JsEditor jsEditor;
-	private String[] result;
 	private TextPanel textPanelInput;
 	private TextPanel textPanelOutput;
 	private CommunicationMocked comm;
@@ -50,11 +49,11 @@ public class JsTesterPanel extends EasyAppLayout {
 	}
 	
 	public void test(ClickEvent event) {
-		result = jsEditor.runScript(textPanelInput.getText(), comm);
+		String[]  result = jsEditor.runScript(textPanelInput.getText(), comm);
 		String logs = result[0];
 		String outputResult = result[1];
 		
-		StringBuffer buff = new StringBuffer();
+		StringBuilder buff = new StringBuilder();
 		if (logs != null) {
 			buff.append(LOG_KEYWORD).append(System.lineSeparator());
 			buff.append(logs).append(System.lineSeparator());

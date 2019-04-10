@@ -1,15 +1,9 @@
 package com.jenetics.smocker.ui.netdisplayer.implementation;
 
-import java.util.ResourceBundle;
-
-import org.jboss.logging.Logger;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jenetics.smocker.jseval.JSEvaluator;
 import com.jenetics.smocker.model.config.JsFilterAndDisplay;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.netdisplayer.ComponentWithDisplayChange;
-import com.jenetics.smocker.util.NetworkReaderUtility;
 import com.jenetics.smocker.util.SmockerException;
 import com.jenetics.smocker.util.SmockerUtility;
 import com.vaadin.ui.Component;

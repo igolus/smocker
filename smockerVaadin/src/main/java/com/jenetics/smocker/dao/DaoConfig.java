@@ -9,13 +9,17 @@ import com.jenetics.smocker.ui.view.JavaApplicationsView;
 
 public class DaoConfig {
 	
+	private DaoConfig() {
+		super();
+	}
+
 	protected static IDaoManager<SmockerConf> daoManagerSmockerConf = 
 			DaoManagerByModel.getDaoManager(SmockerConf.class);
 	private static SmockerConf smockerConfSingleItem; 
 	
 	public static SmockerConf getSingleConfig() {
 		List<SmockerConf> listConfig = daoManagerSmockerConf.listAll();
-		if (listConfig.size() == 0) {
+		if (listConfig.isEmpty()) {
 			smockerConfSingleItem = new SmockerConf();
 			smockerConfSingleItem = daoManagerSmockerConf.create(smockerConfSingleItem);
 		}

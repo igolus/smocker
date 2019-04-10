@@ -1,15 +1,10 @@
 package com.jenetics.smocker.model;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.Version;
 
 @Entity
@@ -26,9 +21,6 @@ public class JavaApplicationMocked implements EntityWithId {
 
 	@Column(length = 1024)
 	private String classQualifiedName;
-
-//	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "javaApplication")
-//	private Set<ConnectionMocked> connections = new HashSet<>();
 
 	@Column
 	private int sourcePort;
@@ -87,14 +79,6 @@ public class JavaApplicationMocked implements EntityWithId {
 		this.classQualifiedName = classQualifiedName;
 	}
 
-//	public Set<ConnectionMocked> getConnections() {
-//		return this.connections;
-//	}
-//
-//	public void setConnections(final Set<ConnectionMocked> connections) {
-//		this.connections = connections;
-//	}
-
 	public int getSourcePort() {
 		return sourcePort;
 	}
@@ -127,8 +111,6 @@ public class JavaApplicationMocked implements EntityWithId {
 		result += ", version: " + version;
 		if (classQualifiedName != null && !classQualifiedName.trim().isEmpty())
 			result += ", classQualifiedName: " + classQualifiedName;
-//		if (connections != null)
-//			result += ", Connections: " + connections;
 		if (sourceHost != null && !sourceHost.trim().isEmpty())
 			result += ", sourceHost: " + sourceHost;
 		if (sourceIp != null && !sourceIp.trim().isEmpty())

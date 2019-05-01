@@ -32,6 +32,9 @@ public class Scenario implements EntityWithId {
 	private String host;
 	
 	@Column(nullable = false)
+	private String ip;
+	
+	@Column(nullable = false)
 	private Integer port;
 	
 //	@Column(nullable = true)
@@ -87,14 +90,6 @@ public class Scenario implements EntityWithId {
 	public List<CommunicationMocked> getCommunicationsMocked() {
 		return this.communicationsMocked;
 	}
-	
-//	public ConnectionMocked getConnectionMocked() {
-//		return connectionMocked;
-//	}
-//
-//	public void setConnectionMocked(ConnectionMocked connectionMocked) {
-//		this.connectionMocked = connectionMocked;
-//	}
 
 	public String getName() {
 		return name;
@@ -119,6 +114,8 @@ public class Scenario implements EntityWithId {
 	public void setPort(Integer port) {
 		this.port = port;
 	}
+	
+	
 
 //	public String getClassQualifiedName() {
 //		return classQualifiedName;
@@ -127,6 +124,14 @@ public class Scenario implements EntityWithId {
 //	public void setClassQualifiedName(String classQualifiedName) {
 //		this.classQualifiedName = classQualifiedName;
 //	}
+
+	public String getIp() {
+		return ip;
+	}
+
+	public void setIp(String ip) {
+		this.ip = ip;
+	}
 
 	@Override
 	public String toString() {

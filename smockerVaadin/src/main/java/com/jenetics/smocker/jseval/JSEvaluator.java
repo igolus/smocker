@@ -19,7 +19,6 @@ import org.reflections.Reflections;
 
 import com.eclipsesource.v8.JavaCallback;
 import com.eclipsesource.v8.JavaVoidCallback;
-import com.eclipsesource.v8.NodeJS;
 import com.eclipsesource.v8.V8;
 import com.eclipsesource.v8.V8Array;
 import com.eclipsesource.v8.V8Object;
@@ -191,8 +190,7 @@ public class JSEvaluator {
 	}
 
 	public static RuntimeAndLogger getRuntimeAndLogger() {
-			NodeJS nodeJS = NodeJS.createNodeJS();
-			V8 runtime =nodeJS.getRuntime();
+			V8 runtime = V8.createV8Runtime();
 
 			LoggerCallBack logger = new LoggerCallBack();
 			runtime.registerJavaMethod(logger, "smockerLog");
@@ -201,25 +199,26 @@ public class JSEvaluator {
 			return new RuntimeAndLogger(runtime, logger);
 	}
 
-	public static boolean filter(String functionName, String input) throws SmockerException {
+	public static boolean filter(String functionName, String input, String output) throws SmockerException {
 		String code = DaoConfig.getSingleConfig().getFilterJsFunction();
 		String globalCode = DaoConfig.getSingleConfig().getGlobalJsFunction();
 		code = code + "\n" + globalCode;
 
 		RuntimeAndLogger runtimeAndLogger = getRuntimeAndLogger();
-		String script = "var match = " + functionName +  "(realInput);\n";
+		String script = "var match = " + functionName +  "(realInput, realOutput);\n";
 		runtimeAndLogger.getRuntime().add("realInput", input);
-		Boolean output = false;
+		runtimeAndLogger.getRuntime().add("realOutput", output);
+		Boolean result = false;
 		try {
 			runtimeAndLogger.getRuntime().executeVoidScript(script + code);
-			output = runtimeAndLogger.getRuntime().getBoolean("match");
+			result = runtimeAndLogger.getRuntime().getBoolean("match");
 		}
 		catch (Exception ex) {
 			SmockerUI.log(Level.SEVERE, ERROR_EVALUATING_SCRIPT, ex);
 			throw new SmockerException(ex);
 		}
 		log(runtimeAndLogger.getCallBack());
-		return output;
+		return result;
 	}
 
 

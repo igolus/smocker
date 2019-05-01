@@ -132,7 +132,7 @@ implements RefreshableView, SearcheableView {
 			ButtonWithIEntity<Connection> filterButton = new ButtonWithIEntity<>(connection);
 			filterButton.setHeight("100%");
 			filterButton.setCaption(SmockerUI.getBundleValue(CONFIGURE));
-			filterButton.setDescription(SmockerUI.getBundleValue("COnfigure_TootTip"));
+			filterButton.setDescription(SmockerUI.getBundleValue("Configure_ToolTip"));
 			filterButton.addClickListener(this::configureClicked);
 			return filterButton;
 		}
@@ -243,7 +243,7 @@ implements RefreshableView, SearcheableView {
 			return null;
 		}
 		try {
-			JSEvaluator.filter(selectedFunction, "");
+			JSEvaluator.filter(selectedFunction, "", "");
 		} catch (SmockerException e) {
 			return SmockerUtility.getStackTrace(e, 400);
 		}
@@ -302,9 +302,9 @@ implements RefreshableView, SearcheableView {
 	@Override
 	public ActionContainer buildActionContainer() {
 		ActionContainerBuilder builder = new ActionContainerBuilder(SmockerUI.BUNDLE_NAME)
-				.addButton("ViewDetails_Button", VaadinIcons.EYE, null,  this::isConnectionSelected			
+				.addButton("ViewDetails_Button", VaadinIcons.EYE, "ViewDetails_ToolTip",  this::isConnectionSelected			
 						, this::details, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
-				.addButton("Refresh_Button", VaadinIcons.REFRESH, null,  this::always			
+				.addButton("Refresh_Button", VaadinIcons.REFRESH, "Refresh_ToolTip",  this::always			
 						, this::refresh, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
 				.addButton("Clean_Button", VaadinIcons.MINUS, "Clean_ToolTip",  this::isSelected			
 						, this::clean, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER);

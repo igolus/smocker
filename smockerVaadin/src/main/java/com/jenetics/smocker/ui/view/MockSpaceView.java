@@ -270,9 +270,14 @@ implements RefreshableView {
 
 	private void cleanScenario(ConnectionMocked connection) {
 		for (CommunicationMocked comm : connection.getCommunications()) {
-			comm.getScenario().getCommunicationsMocked().remove(comm);
-			daoManagerScenario.update(comm.getScenario());
+			if (comm.getScenario() != null) {
+				comm.getScenario().getCommunicationsMocked().remove(comm);
+				daoManagerScenario.update(comm.getScenario());
+			}
+			comm.getConnection().getCommunications().remove(comm);
+			daoManagerConnection.update(comm.getConnection());
 		}
+		refreshClickable();
 	}
 
 	private void removeTabConn(ConnectionMocked selectedConnection) {

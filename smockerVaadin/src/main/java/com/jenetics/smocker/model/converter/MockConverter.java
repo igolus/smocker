@@ -40,8 +40,6 @@ public class MockConverter {
 		Connection sourceConnection = sourceCommunication.getConnection();
 		JavaApplication sourceJavaApplication = sourceConnection.getJavaApplication();
 		JavaApplicationMocked targetJavaApplicationMocked = null;
-		//targetJavaApplicationMocked = findOrCreateTargetJavaApplication(sourceJavaApplication);
-		
 		ConnectionMocked targetConnectionMocked = findOrCreateTargetConnection(sourceConnection);
 		
 		addSingleCommunicationToConnection(targetConnectionMocked, sourceCommunication, true);

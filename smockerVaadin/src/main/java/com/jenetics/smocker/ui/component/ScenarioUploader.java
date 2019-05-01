@@ -65,6 +65,7 @@ public class ScenarioUploader implements Receiver, SucceededListener {
 		List<CommunicationMocked> clonedList = new ArrayList<>();
 		for (CommunicationMocked commSource : source) {
 			CommunicationMocked cloneCommunication = cloneCommunication(commSource);
+			cloneCommunication.setActivated(false);
 			if (cloneCommunication !=null) {
 				clonedList.add(cloneCommunication);
 			}
@@ -93,6 +94,7 @@ public class ScenarioUploader implements Receiver, SucceededListener {
 		daoManagerScenario.create(scenarioImported);
 
 		String host = scenarioImported.getHost();
+		String ip = scenarioImported.getIp();
 		int port = scenarioImported.getPort();
 
 		List<ConnectionMocked> listConnectionMocked = 
@@ -101,10 +103,13 @@ public class ScenarioUploader implements Receiver, SucceededListener {
 
 		ConnectionMocked targetConnectionMocked = listConnectionMocked.stream().findFirst().orElse(null);
 		if (listConnectionMocked.size() == 0) {
-			targetConnectionMocked = new ConnectionMocked();
-			targetConnectionMocked.setHost(host);
-			targetConnectionMocked.setPort(port);
-			daoManagerConnectionMocked.create(targetConnectionMocked);
+			if (communicationsMocked.size() > 0) {
+				targetConnectionMocked = new ConnectionMocked();
+				targetConnectionMocked.setHost(host);
+				targetConnectionMocked.setPort(port);
+				targetConnectionMocked.setIp(ip);
+				daoManagerConnectionMocked.create(targetConnectionMocked);
+			}
 		}
 
 

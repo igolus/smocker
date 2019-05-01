@@ -353,17 +353,39 @@ public class ConnectionMockedManager extends EasyAppLayout {
 	}
 	
 	private void duplicateComm(CommunicationMocked selectedComm) {
+		
+		List<CommunicationMocked> commsOfScenario = getListCommOrdered(selectedComm.getScenario());
+		selectedComm.getIndex();
+		
+		
+		
 		TreeGridMockedItem scenarioItem = treeScenarioItemByComm.get(selectedComm);
 		Scenario scenario = selectedComm.getScenario();
 		CommunicationMocked cloneCommunication = ScenarioUploader.cloneCommunication(selectedComm);
 		cloneCommunication.setScenario(scenario);
 		cloneCommunication.setConnection(selectedComm.getConnection());
 		cloneCommunication = communicationDaoManager.create(cloneCommunication);
+		
+		cloneCommunication.setIndex(selectedComm.getIndex() + 1);
+		//increment index for remaining
+		int indexNext = commsOfScenario.indexOf(selectedComm) + 1;
+		
 		selectedComm.getConnection().getCommunications().add(cloneCommunication);
 		connectionDaoManager.update(selectedComm.getConnection());
 		scenario.getCommunicationsMocked().add(cloneCommunication);
 		scenarioDaoManager.update(scenario);
 		addCommunicationItemToScenario(scenarioItem, cloneCommunication);
+		
+		if (indexNext <= commsOfScenario.size()) {
+			List<CommunicationMocked> subList = 
+					commsOfScenario.subList(indexNext, commsOfScenario.size());
+			for (CommunicationMocked communicationMocked : subList) {
+				communicationMocked.setIndex(communicationMocked.getIndex() + 1);
+				communicationDaoManager.update(communicationMocked);
+			}
+		}
+		
+		reorderScenarioItem(selectedComm.getScenario());	
 		treeDataProvider.refreshAll();
 	}
 
@@ -381,14 +403,14 @@ public class ConnectionMockedManager extends EasyAppLayout {
 				selectedComm.setIndex(indexNext);
 				communicationDaoManager.update(selectedComm);
 				communicationDaoManager.update(nextComm);
-				
-				reorderScenarioItem(selectedComm, selectedComm.getScenario());	
 			}
 		}
+		reorderScenarioItem(selectedComm.getScenario());	
 		treeDataProvider.refreshAll();
 	}
+	
 
-	private void reorderScenarioItem(CommunicationMocked selectedComm, Scenario scenario) {
+	private void reorderScenarioItem(Scenario scenario) {
 		TreeGridMockedItem treeGridMockedScenarioItem = treeScenarioItemByScenario.get(scenario);
 		List<TreeGridMockedItem> children = treeData.getChildren(treeGridMockedScenarioItem);
 		List<TreeGridMockedItem> itemsToRemove = new ArrayList<>();
@@ -398,7 +420,7 @@ public class ConnectionMockedManager extends EasyAppLayout {
 		for (TreeGridMockedItem treeGridMockedItem : itemsToRemove) {
 			treeData.removeItem(treeGridMockedItem);
 		}
-		List<CommunicationMocked> listCommOrdered = getListCommOrdered(selectedComm.getScenario());
+		List<CommunicationMocked> listCommOrdered = getListCommOrdered(scenario);
 		for (CommunicationMocked communicationMocked : listCommOrdered) {
 			addCommunicationItemToScenario(treeGridMockedScenarioItem, communicationMocked);
 		}
@@ -430,7 +452,7 @@ public class ConnectionMockedManager extends EasyAppLayout {
 				communicationDaoManager.update(selectedComm);
 				communicationDaoManager.update(previousComm);
 
-				reorderScenarioItem(selectedComm, selectedComm.getScenario());	
+				reorderScenarioItem(selectedComm.getScenario());	
 			}
 		}
 		treeDataProvider.refreshAll();
@@ -529,6 +551,7 @@ public class ConnectionMockedManager extends EasyAppLayout {
 		Scenario scenario = new Scenario();
 		scenario.setName(scenarioName);
 		scenario.setHost(connectionMocked.getHost());
+		scenario.setIp(connectionMocked.getIp());
 		scenario.setPort(connectionMocked.getPort());
 		scenario = scenarioDaoManager.create(scenario);
 		listScenarios.add(scenario);
@@ -566,6 +589,10 @@ public class ConnectionMockedManager extends EasyAppLayout {
 				communicationMocked.getConnection().getCommunications().remove(communicationMocked);
 				connectionDaoManager.update(communicationMocked.getConnection());
 			}
+			
+			for (CommunicationMocked communicationMocked : newList) {
+				communicationDaoManager.delete(communicationMocked);
+			} 
 			
 			TreeGridMockedItem scenarioItemTarget = treeScenarioItemByScenario.get(scenarioSelected);
 			treeData.removeItem(scenarioItemTarget);

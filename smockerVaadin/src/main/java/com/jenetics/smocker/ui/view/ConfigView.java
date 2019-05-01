@@ -555,6 +555,7 @@ public class ConfigView extends EasyAppLayout {
 
 	private void clearVar(ClickEvent event) {
 		SmockerJsEnv.getInstance().clear();
+		SmockerUI.getInstance().displayNotif(SmockerUI.getBundleValue("Global_Var_Cleaned"), 0);
 	}
 
 	private CheckBox createCheckBoxAutoRefresh() {

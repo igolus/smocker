@@ -53,6 +53,7 @@ public class DaoManagerByModel {
 				Scenario scenario = new Scenario();
 				scenario.setName(SmockerUI.getBundleValue("undefined"));
 				scenario.setHost(SmockerUI.getBundleValue("undefined"));
+				scenario.setIp(SmockerUI.getBundleValue("undefined"));
 				scenario.setPort(0);
 				scenario = daoManagerScenario.create(scenario);
 				DaoManagerByModel.UNDEFINED_SCENARIO = scenario;

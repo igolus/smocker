@@ -156,6 +156,29 @@ public class UsefullFunctions {
 			return fullContent.substring(indexDoubleRet + 2);
 		}
 		return fullContent;
-		
+	}
+	
+	/**
+	 * remove header content
+	 * @param fullConntent
+	 * @return
+	 */
+	@SmockerMethod
+	public static int smockerContentLength (String fullContent) {
+		return smockerRemoveHeader(fullContent).length();
+	}
+	
+	/**
+	 * remove header content
+	 * @param fullConntent
+	 * @return
+	 */
+	@SmockerMethod
+	public static String smockerReplaceHeader (String fullContent, String headerName, String value) {
+		if (fullContent.indexOf(headerName) != -1) {
+			String regExp = headerName + ".+";
+			fullContent = fullContent.replaceFirst(regExp, headerName + ": " + value);
+		}
+		return fullContent;
 	}
 }

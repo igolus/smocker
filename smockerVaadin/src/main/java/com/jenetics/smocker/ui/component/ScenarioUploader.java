@@ -35,6 +35,8 @@ public class ScenarioUploader implements Receiver, SucceededListener {
 			DaoManagerByModel.getDaoManager(ConnectionMocked.class);
 	DaoManager<JavaApplicationMocked> daoManagerJavaApplicationMocked = 
 			DaoManagerByModel.getDaoManager(JavaApplicationMocked.class);
+	DaoManager<CommunicationMocked> daoManagerCommunicationMocked = 
+			DaoManagerByModel.getDaoManager(CommunicationMocked.class);
 
 	
 	private static ObjectMapper mapper = new ObjectMapper();
@@ -55,6 +57,7 @@ public class ScenarioUploader implements Receiver, SucceededListener {
 			scenarioImported.setId((long)0);
 			String newName = findNewNameScenario(scenarioImported.getName());
 			scenarioImported.setName(newName);
+			scenarioImported.setId(null);
 			createNewScenario(scenarioImported);
 		} catch (IOException e) {
 			SmockerUI.log(Level.SEVERE, SmockerUtility.getStackTrace(e));
@@ -91,7 +94,6 @@ public class ScenarioUploader implements Receiver, SucceededListener {
 		//associated comm to connection
 		List<CommunicationMocked> communicationsMocked = clone(scenarioImported.getCommunicationsMocked());
 		scenarioImported.getCommunicationsMocked().clear();
-		daoManagerScenario.create(scenarioImported);
 
 		String host = scenarioImported.getHost();
 		String ip = scenarioImported.getIp();
@@ -112,15 +114,18 @@ public class ScenarioUploader implements Receiver, SucceededListener {
 			}
 		}
 
-
+		daoManagerScenario.create(scenarioImported);
+		daoManagerScenario.listAll();
+		
 		for (CommunicationMocked comm : communicationsMocked) {
 			targetConnectionMocked.getCommunications().add(comm);
 			scenarioImported.getCommunicationsMocked().add(comm);
 			comm.setConnection(targetConnectionMocked);
+			daoManagerCommunicationMocked.create(comm);
 			comm.setScenario(scenarioImported);
+			daoManagerCommunicationMocked.update(comm);
 		}
-
-		daoManagerScenario.create(scenarioImported);
+		daoManagerScenario.update(scenarioImported);
 	}
 
 	@Override

@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.jboss.logging.Logger;
@@ -569,31 +570,19 @@ public class ConnectionMockedManager extends EasyAppLayout {
 	
 	public void scenarioDeleted() {
 		if (selectedTreeItem != null && selectedTreeItem.isScenario()) {
+			connectionMocked = connectionDaoManager.findById(connectionMocked.getId());
 			Scenario scenarioSelected = selectedTreeItem.getScenario();
-			
-			
 			List<CommunicationMocked> communicationsMocked = scenarioSelected.getCommunicationsMocked();
 			List<CommunicationMocked> newList = new ArrayList<>(communicationsMocked);
-
-			scenarioSelected.getCommunicationsMocked().clear();
-			scenarioDaoManager.update(scenarioSelected);
 			
 			for (CommunicationMocked communicationMocked : newList) {
-				communicationMocked.setScenario(null);
-				communicationDaoManager.update(communicationMocked);
+				CommunicationMocked communication = 
+						communicationDaoManager.findById(communicationMocked.getId());
+				communication.setScenario(null);
+				communicationDaoManager.update(communication);
 			}
-
 			scenarioDaoManager.delete(scenarioSelected);
-			
-			for (CommunicationMocked communicationMocked : newList) {
-				communicationMocked.getConnection().getCommunications().remove(communicationMocked);
-				connectionDaoManager.update(communicationMocked.getConnection());
-			}
-			
-			for (CommunicationMocked communicationMocked : newList) {
-				communicationDaoManager.delete(communicationMocked);
-			} 
-			
+
 			TreeGridMockedItem scenarioItemTarget = treeScenarioItemByScenario.get(scenarioSelected);
 			treeData.removeItem(scenarioItemTarget);
 			treeScenarioItemByScenario.remove(scenarioSelected);
@@ -642,12 +631,18 @@ public class ConnectionMockedManager extends EasyAppLayout {
 			treeData.removeItem(selectedTreeItem);
 			
 			CommunicationMocked communication = selectedTreeItem.getCommunication();
-			communication = communicationDaoManager.findById(communication.getId());
-			removeCommunicationItemFromScenario(communication);
-			connectionMocked.getCommunications().remove(communication);
-			connectionDaoManager.update(connectionMocked);
+			clearCommunicationAndRelatedScenario(communication);
 			treeDataProvider.refreshAll();
 		}
+	}
+
+	private void clearCommunicationAndRelatedScenario(CommunicationMocked communication) {
+		communication = communicationDaoManager.findById(communication.getId());
+		removeCommunicationItemFromScenario(communication);
+		connectionMocked.getCommunications().remove(communication);
+		connectionMocked = connectionDaoManager.findById(connectionMocked.getId());
+		connectionDaoManager.update(connectionMocked);
+		communicationDaoManager.delete(communication);
 	}
 
 	public void communicationMockedCreated(CommunicationMocked communicationMocked) {

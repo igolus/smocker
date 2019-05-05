@@ -23,8 +23,8 @@ public class Scenario implements EntityWithId {
 	@Column(name = "version")
 	private int version;
 
-	@OneToMany
-	//@OneToMany(cascade = CascadeType.ALL, orphanRemoval = false, mappedBy = "scenario")
+	//@OneToMany (cascade = CascadeType.PERSIST, mappedBy = "scenario")
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = false, mappedBy = "scenario")
 	//@OrderColumn(name="INDEX")
 	private List<CommunicationMocked> communicationsMocked;
 	

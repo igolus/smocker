@@ -88,4 +88,8 @@ Then add java program you want to smock: java %SMOCKER_JAVA_ARGS% ....
 Simply run standalone.bat or standalone.sh in [Smocker_Server]\wildfly-13.0.0.Final-Smocker\bin folder.
 Use firefox to browse http://localhost:8080/smocker/
 
+## Licence
+
+Smocker use Apache License 2.0
+
  

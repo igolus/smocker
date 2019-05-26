@@ -23,6 +23,7 @@ import com.jenetics.smocker.model.ConnectionMocked;
 import com.jenetics.smocker.model.Scenario;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.dialog.Dialog;
+import com.jenetics.smocker.ui.util.ScenarioUploader;
 import com.jenetics.smocker.ui.util.SwitchWithEntity;
 import com.jenetics.smocker.ui.util.TreeGridMockedItem;
 import com.vaadin.data.HasValue.ValueChangeEvent;

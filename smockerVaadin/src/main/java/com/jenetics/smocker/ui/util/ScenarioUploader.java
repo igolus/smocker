@@ -1,4 +1,4 @@
-package com.jenetics.smocker.ui.component;
+package com.jenetics.smocker.ui.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

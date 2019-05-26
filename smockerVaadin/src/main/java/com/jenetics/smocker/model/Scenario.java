@@ -23,9 +23,7 @@ public class Scenario implements EntityWithId {
 	@Column(name = "version")
 	private int version;
 
-	//@OneToMany (cascade = CascadeType.PERSIST, mappedBy = "scenario")
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = false, mappedBy = "scenario")
-	//@OrderColumn(name="INDEX")
 	private List<CommunicationMocked> communicationsMocked;
 	
 	@Column(nullable = false)
@@ -36,9 +34,6 @@ public class Scenario implements EntityWithId {
 	
 	@Column(nullable = false)
 	private Integer port;
-	
-//	@Column(nullable = true)
-//	private String classQualifiedName;
 	
 	@Column
 	private String name;
@@ -115,16 +110,6 @@ public class Scenario implements EntityWithId {
 		this.port = port;
 	}
 	
-	
-
-//	public String getClassQualifiedName() {
-//		return classQualifiedName;
-//	}
-//
-//	public void setClassQualifiedName(String classQualifiedName) {
-//		this.classQualifiedName = classQualifiedName;
-//	}
-
 	public String getIp() {
 		return ip;
 	}

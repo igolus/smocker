@@ -213,6 +213,7 @@ public class ManageJavaApplication {
 				if (!StringUtils.isEmpty(filterJsFunction)) {
 					try {
 						if (JSEvaluator.filter(filterJsFunction, input, output)) {
+							trace(comm);
 							return Response.ok().build();
 						}
 					} catch (SmockerException e) {
@@ -236,6 +237,7 @@ public class ManageJavaApplication {
 
 				SmockerUI.getInstance().log(Level.INFO, builder.toString());
 				DaoSingletonLock.unlock();
+				trace(comm);
 				return Response.ok().build();
 			}
 			DaoSingletonLock.unlock();
@@ -248,6 +250,15 @@ public class ManageJavaApplication {
 			DaoSingletonLock.unlock();
 		}
 		return null;
+	}
+
+	private void trace(Communication comm) throws SmockerException {
+		//trace function
+		JsFilterAndDisplay first = DaoConfig.findJsDisplayAndFilter(comm.getConnection());
+		if (first.getFunctionTrace() != null) {
+			JSEvaluator.trace(first.getFunctionTrace(), 
+					NetworkReaderUtility.decode(comm.getRequest()), NetworkReaderUtility.decode(comm.getResponse()));
+		}
 	}
 	
 	private void deleteComms(Communication[] commToRemove) {

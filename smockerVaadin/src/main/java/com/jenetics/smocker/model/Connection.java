@@ -44,7 +44,6 @@ public class Connection implements EntityWithId {
 	@JoinColumn(nullable = true)
 	@OneToOne
 	@JsonIgnore
-	//@ManyToOne(cascade = CascadeType.ALL)
 	private JavaApplication javaApplication;
 
 	@Column

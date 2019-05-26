@@ -88,7 +88,9 @@ public class DbStarter implements ServletContextListener {
         	logger.log(Level.SEVERE, "Unable to close the statement", e);
         }
         try {
-            conn.close();
+            if (conn != null) {
+            	conn.close();
+            }
         } catch (Exception e) {
         	logger.log(Level.SEVERE, "Unable to close the connection", e);
         }

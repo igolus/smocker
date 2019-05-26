@@ -220,18 +220,31 @@ public class JSEvaluator {
 		log(runtimeAndLogger.getCallBack());
 		return result;
 	}
-
+	
+	public static void trace(String functionName, String input, String output) 
+			throws SmockerException {
+		String code = DaoConfig.getSingleConfig().getTraceFunctionJsFunction();
+		code = appendGlobalCode(code);
+		
+		RuntimeAndLogger runtimeAndLogger = getRuntimeAndLogger();
+		
+		String script =  functionName +  "(realInput, realOutput);\n";
+		runtimeAndLogger.getRuntime().add("realInput", input);
+		runtimeAndLogger.getRuntime().add("realOutput", output);
+		
+		try {
+			runtimeAndLogger.getRuntime().executeVoidScript(script + code);
+		}
+		catch (Exception ex) {
+			SmockerUI.log(Level.SEVERE, ERROR_EVALUATING_SCRIPT, ex);
+			throw new SmockerException(ex);
+		}
+	}
 
 	public static String formatAndDisplay(String functionName, String input) 
 			throws SmockerException {
 		String code = DaoConfig.getSingleConfig().getFormatDisplayJsFunction();
-		String globalCode = DaoConfig.getSingleConfig().getGlobalJsFunction();
-		if (globalCode != null) {
-			code = code + "\n" + globalCode;
-		}
-		if (code == null) {
-			code = "";
-		}
+		code = appendGlobalCode(code);
 
 		RuntimeAndLogger runtimeAndLogger = getRuntimeAndLogger();
 
@@ -249,6 +262,19 @@ public class JSEvaluator {
 		output = escapeJsStringResult(output);
 		log(runtimeAndLogger.getCallBack());
 		return output;
+	}
+
+
+
+	private static String appendGlobalCode(String code) {
+		String globalCode = DaoConfig.getSingleConfig().getGlobalJsFunction();
+		if (globalCode != null) {
+			code = code + "\n" + globalCode;
+		}
+		if (code == null) {
+			code = "";
+		}
+		return code;
 	}
 
 	private static String escapeJsStringResult(String output) {

@@ -47,6 +47,9 @@ public class SmockerConf implements EntityWithId {
 
 	@Column(columnDefinition = "TEXT")
 	private String formatDisplayJsFunction;
+	
+	@Column(columnDefinition = "TEXT")
+	private String traceFunctionJsFunction;
 
 	@Column(columnDefinition = "TEXT")
 	private String defaultMockFunction;
@@ -114,6 +117,14 @@ public class SmockerConf implements EntityWithId {
 
 	public void setDefaultMockFunction(String defaultMockFunction) {
 		this.defaultMockFunction = defaultMockFunction;
+	}
+
+	public String getTraceFunctionJsFunction() {
+		return traceFunctionJsFunction;
+	}
+
+	public void setTraceFunctionJsFunction(String traceFunctionJsFunction) {
+		this.traceFunctionJsFunction = traceFunctionJsFunction;
 	}
 
 	public Long getId() {

@@ -31,13 +31,14 @@ import com.jenetics.smocker.model.Scenario;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.component.ConnectionMockedDetailsView;
 import com.jenetics.smocker.ui.component.ConnectionMockedManager;
-import com.jenetics.smocker.ui.component.ScenarioUploader;
 import com.jenetics.smocker.ui.component.UploadPanel;
 import com.jenetics.smocker.ui.dialog.Dialog;
 import com.jenetics.smocker.ui.util.JsonFileDownloader;
 import com.jenetics.smocker.ui.util.JsonFileDownloader.OnDemandStreamResource;
 import com.jenetics.smocker.ui.util.RefreshableView;
+import com.jenetics.smocker.ui.util.ScenarioUploader;
 import com.jenetics.smocker.ui.util.StrandardTreeGridConnectionMockedData;
+import com.jenetics.smocker.ui.util.StreamResourceJacksonSerializer;
 import com.jenetics.smocker.ui.util.TreeGridConnectionData;
 import com.vaadin.annotations.Push;
 import com.vaadin.event.selection.SelectionEvent;
@@ -64,7 +65,7 @@ implements RefreshableView {
 	private IDaoManager<Scenario> daoManagerScenario = DaoManagerByModel.getDaoManager(Scenario.class);
 	
 	@Inject
-	private Logger logger;
+	private static Logger logger;
 
 	public MockSpaceView() {
 		super(JavaApplicationMocked.class, ConnectionMocked.class);
@@ -80,16 +81,6 @@ implements RefreshableView {
 
 	private static final String BUNDLE_NAME = "BundleUI";
 
-
-//	@Override
-//	protected Set<ConnectionMocked> getJavaAppConnections(JavaApplicationMocked javaApplication) {
-//		return javaApplication.getConnections();
-//	}
-//
-//	@Override
-//	protected JavaApplicationMocked getJavaAppFromConnection(ConnectionMocked connection) {
-//		return connection.getJavaApplication();
-//	}
 
 	@Override
 	protected ConnectionMocked getConnectionFromCommunication(CommunicationMocked comm) {
@@ -109,7 +100,6 @@ implements RefreshableView {
 
 	@Override
 	protected void addTreeMapping() {
-		//treeGrid.addColumn(item -> item.getApplication()).setCaption(APPLICATION);
 		treeGrid.addColumn(item -> item.getAdress()).setCaption(ADRESS);
 		treeGrid.addColumn(item -> item.getPort()).setCaption(PORT);
 	}
@@ -159,9 +149,10 @@ implements RefreshableView {
 		ActionContainer actionContainer = builder.build();
 		List<ButtonWithCheck> listButtonWithCheck = actionContainer.getListButtonWithCheck();
 		ButtonWithCheck exportButton = listButtonWithCheck.get(listButtonWithCheck.size() - 1);
-
-		//OnDemandStreamResource myResource = createResource();
-
+		
+		
+//		OnDemandStreamResource streamResourceScenario = 
+//				StreamResourceJacksonSerializer.getStreamResource(getSelectedScenario(), getSelectedScenario().getName() + ".json");
 		JsonFileDownloader downloader = new JsonFileDownloader(createResource());
 		downloader.extend(exportButton);
 
@@ -245,28 +236,14 @@ implements RefreshableView {
 			for (TreeGridConnectionData<JavaApplicationMocked, ConnectionMocked> treeGridConnectionData : selectedItems) {
 				if (treeGridConnectionData.isConnection()) {
 					ConnectionMocked selectedConnection = treeGridConnectionData.getConnection();
-					//selectedConnection.getJavaApplication().getConnections().remove(selectedConnection);
 					removeTabConn(selectedConnection);
 					cleanScenario(selectedConnection);
 					daoManagerConnection.delete(selectedConnection);
-					//daoManagerJavaApplication.update(selectedConnection.getJavaApplication());
 				}
-//				else if (treeGridConnectionData.isJavaApplication()) {
-//					JavaApplicationMocked selectedJavaApplication = treeGridConnectionData.getJavaApplication();
-//					selectedJavaApplication.getConnections().stream().forEach(this::removeTabConn);
-//					cleanScenario(selectedJavaApplication);
-//					daoManagerJavaApplication.deleteById(selectedJavaApplication.getId());
-//				}
 				fillTreeTable();
 			}
 		}
 	}
-
-//	private void cleanScenario(JavaApplicationMocked javaApplication) {
-//		for (ConnectionMocked conn : javaApplication.getConnections()) {
-//			cleanScenario(conn);
-//		}
-//	}
 
 	private void cleanScenario(ConnectionMocked connection) {
 		for (CommunicationMocked comm : connection.getCommunications()) {
@@ -339,7 +316,6 @@ implements RefreshableView {
 
 	@Override
 	protected JavaApplicationMocked getJavaAppFromConnection(ConnectionMocked connection) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 }

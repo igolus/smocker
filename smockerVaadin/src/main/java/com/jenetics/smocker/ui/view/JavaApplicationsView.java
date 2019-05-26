@@ -54,11 +54,15 @@ homeView = true, rootViewParent = ConnectionsRoot.class, bundle=SmockerUI.BUNDLE
 public class JavaApplicationsView extends AbstractConnectionTreeView<JavaApplication, Connection, Communication, ConnectionDetailsView> 
 implements RefreshableView, SearcheableView {
 
+	private static final String FORMAT_DISPLAY_OUTPUT_BUTTON = "Format_Display_Output_Button";
+	private static final String FORMAT_DISPLAY_INPUT_BUTTON = "Format_Display_Input_Button";
+
+
 	public static final DaoManager<JsFilterAndDisplay> daoManagerJsFilterAndDisplay = DaoManagerByModel.getDaoManager(JsFilterAndDisplay.class);
 
 	private transient HashMap<JavaApplication, List<SwitchWithEntity<Connection>>> switchButtonsByJavaApp = new HashMap<>();
 	private transient HashMap<Connection, SwitchWithEntity<Connection>> switchWithEntityByConnection = new HashMap<>();
-	
+
 	public JavaApplicationsView() {
 		super(JavaApplication.class, Connection.class);
 		treeGrid.addSelectionListener(this::treeSelectionChange);
@@ -94,9 +98,9 @@ implements RefreshableView, SearcheableView {
 	@Override
 	protected void addTreeMapping() {
 		treeGrid.addColumn(item -> 
-			item.getApplication() != null ? 
-					item.getApplicationId() +  "_" + item.getApplication()
-					: null).setCaption(APPLICATION);
+		item.getApplication() != null ? 
+				item.getApplicationId() +  "_" + item.getApplication()
+				: null).setCaption(APPLICATION);
 		treeGrid.addColumn(item -> item.getAdress()).setCaption(ADRESS);
 		treeGrid.addColumn(item -> item.getPort()).setCaption(PORT);
 		treeGrid.addComponentColumn(this::buildWatchButton).setCaption(WATCH);
@@ -112,7 +116,7 @@ implements RefreshableView, SearcheableView {
 			switchConnection.addValueChangeListener(this::watchButtonClicked);
 			switchButtonsByJavaApp.computeIfAbsent(connection.getJavaApplication(), key -> new ArrayList<SwitchWithEntity<Connection>>())
 			.add(switchConnection);
-			
+
 			switchWithEntityByConnection.put(connection, switchConnection);
 			return switchConnection;
 		}
@@ -142,29 +146,56 @@ implements RefreshableView, SearcheableView {
 	private Button buildFilterButton(Connection connection) {
 		ButtonWithIEntity<Connection> filterButton = new ButtonWithIEntity<>(connection);
 		filterButton.setHeight("100%");
-		filterButton.setCaption(SmockerUI.getBundleValue(FITLER));
-		filterButton.setDescription(SmockerUI.getBundleValue("Filter_TootTip"));
+		filterButton.setCaption(SmockerUI.getBundleValue("Filter_Button"));
+		filterButton.setDescription(SmockerUI.getBundleValue("Filter_ToolTip"));
 		filterButton.addClickListener(this::filterClicked);
 		return filterButton;
 	}
 
 	private Button buildFormatInputButton(Connection connection) {
 		ButtonWithIEntity<Connection> formatButton = new ButtonWithIEntity<>(connection);
-		formatButton.setCaption(SmockerUI.getBundleValue(FORMAT_DISPLAY_INPUT));
+		formatButton.setCaption(SmockerUI.getBundleValue("Format_Display_Input_Button"));
 		formatButton.setHeight("100%");
-		formatButton.setDescription(SmockerUI.getBundleValue("Format_Display_Input_TootTip"));
+		formatButton.setDescription(SmockerUI.getBundleValue("Format_Display_Input_ToolTip"));
 		formatButton.addClickListener(this::formatInputClicked);
+		return formatButton;
+	}
+
+	private Button buildFormatMockInputButton(Connection connection) {
+		ButtonWithIEntity<Connection> formatButton = new ButtonWithIEntity<>(connection);
+		formatButton.setCaption(SmockerUI.getBundleValue("Format_Display_Mock_Input_Button"));
+		formatButton.setHeight("100%");
+		formatButton.setDescription(SmockerUI.getBundleValue("Format_Display_Mock_Input_Button"));
+		formatButton.addClickListener(this::formatMockInputClicked);
 		return formatButton;
 	}
 
 
 	private Button buildFormatOutputButton(Connection connection) {
 		ButtonWithIEntity<Connection> formatButton = new ButtonWithIEntity<>(connection);
-		formatButton.setCaption(SmockerUI.getBundleValue(FORMAT_DISPLAY_OUTPUT));
+		formatButton.setCaption(SmockerUI.getBundleValue("Format_Display_Output_Button"));
 		formatButton.setHeight("100%");
-		formatButton.setDescription(SmockerUI.getBundleValue("Format_Display_Output_TootTip"));
+		formatButton.setDescription(SmockerUI.getBundleValue("Format_Display_Output_ToolTip"));
 		formatButton.addClickListener(this::formatOutputClicked);
 		return formatButton;
+	}
+
+	private Button buildFormatMockOutputButton(Connection connection) {
+		ButtonWithIEntity<Connection> formatButton = new ButtonWithIEntity<>(connection);
+		formatButton.setCaption(SmockerUI.getBundleValue("Format_Display_Mock_Output_Button"));
+		formatButton.setHeight("100%");
+		formatButton.setDescription(SmockerUI.getBundleValue("Format_Display_Mock_Output_ToolTip"));
+		formatButton.addClickListener(this::formatMockOutputClicked);
+		return formatButton;
+	}
+
+	private Button buildTraceButton(Connection connection) {
+		ButtonWithIEntity<Connection> traceButton = new ButtonWithIEntity<>(connection);
+		traceButton.setCaption(SmockerUI.getBundleValue("Trace_Function_Button"));
+		traceButton.setHeight("100%");
+		traceButton.setDescription(SmockerUI.getBundleValue("Trace_Function_ToolTip"));
+		traceButton.addClickListener(this::traceFunctionClicked);
+		return traceButton;
 	}
 
 	public void filterClicked(ClickEvent event) {
@@ -194,8 +225,10 @@ implements RefreshableView, SearcheableView {
 				new Label(conn.getHost() + ":" + conn.getPort()),
 				buildFilterButton(conn), 
 				buildFormatInputButton(conn), 
-				buildFormatOutputButton(conn));
-
+				buildFormatOutputButton(conn),
+				buildFormatMockInputButton(conn), 
+				buildFormatMockOutputButton(conn),
+				buildTraceButton(conn));
 	}
 
 
@@ -219,6 +252,26 @@ implements RefreshableView, SearcheableView {
 				}, first.getFunctionInputDisplay());
 	}
 
+	public void traceFunctionClicked(ClickEvent event) {
+		ButtonWithIEntity<Connection>  button = (ButtonWithIEntity<Connection>) event.getButton();
+		Connection conn = button.getEntity();
+		final JsFilterAndDisplay first = DaoConfig.findJsDisplayAndFilter(conn);
+		Dialog.displayCreateStringBox(SmockerUI.getBundleValue("format_function_output_display"), 
+				selectedFunction -> {
+					first.setFunctionTrace(selectedFunction);
+					String checkValue = checkValidFunctionTrace(selectedFunction);
+					if (checkValue == null) {
+						daoManagerJsFilterAndDisplay.update(first);
+					}
+					else {
+						first.setFunctionOutputDisplay("");
+						Dialog.warning("Bad Javascript function should be of "
+								+ "function(string) returning boolean " + checkValue);
+					}
+				}, first.getFunctionTrace());
+	}
+
+
 	public void formatOutputClicked(ClickEvent event) {
 		ButtonWithIEntity<Connection>  button = (ButtonWithIEntity<Connection>) event.getButton();
 		Connection conn = button.getEntity();
@@ -238,6 +291,48 @@ implements RefreshableView, SearcheableView {
 				}, first.getFunctionOutputDisplay());
 	}
 
+
+	public void formatMockInputClicked(ClickEvent event) {
+		ButtonWithIEntity<Connection>  button = (ButtonWithIEntity<Connection>) event.getButton();
+		Connection conn = button.getEntity();
+		final JsFilterAndDisplay first = DaoConfig.findJsDisplayAndFilter(conn);
+		Dialog.displayCreateStringBox(SmockerUI.getBundleValue("format_function_mock_input_display"), 
+				selectedFunction -> {
+					first.setFunctionMockInputDisplay(selectedFunction);
+					String checkValue = checkValidFunctionDisplay(selectedFunction);
+					if (checkValue == null) {
+						daoManagerJsFilterAndDisplay.update(first);
+					}
+					else {
+						first.setFunctionMockInputDisplay("");
+						Dialog.warning("Bad Javascript function should be of "
+								+ "function(string) returning boolean " + checkValue);
+					}
+				}, first.getFunctionMockInputDisplay());
+	}
+
+	public void formatMockOutputClicked(ClickEvent event) {
+		ButtonWithIEntity<Connection>  button = (ButtonWithIEntity<Connection>) event.getButton();
+		Connection conn = button.getEntity();
+		final JsFilterAndDisplay first = DaoConfig.findJsDisplayAndFilter(conn);
+		Dialog.displayCreateStringBox(SmockerUI.getBundleValue("format_function_mock_output_display"), 
+				selectedFunction -> {
+					first.setFunctionMockOutputDisplay(selectedFunction);
+					String checkValue = checkValidFunctionDisplay(selectedFunction);
+					if (checkValue == null) {
+						daoManagerJsFilterAndDisplay.update(first);
+					}
+					else {
+						first.setFunctionMockOutputDisplay("");
+						Dialog.warning("Bad Javascript function should be of "
+								+ "function(string) returning boolean " + checkValue);
+					}
+				}, first.getFunctionMockOutputDisplay());
+	}
+
+
+
+
 	private String checkValidFunctionFilter(String selectedFunction) {
 		if (StringUtils.isEmpty(selectedFunction)) {
 			return null;
@@ -256,6 +351,18 @@ implements RefreshableView, SearcheableView {
 		}
 		try {
 			JSEvaluator.formatAndDisplay(selectedFunction, "");
+		} catch (SmockerException e) {
+			return SmockerUtility.getStackTrace(e, 400);
+		}
+		return null;
+	}
+	
+	private String checkValidFunctionTrace(String selectedFunction) {
+		if (StringUtils.isEmpty(selectedFunction)) {
+			return null;
+		}
+		try {
+			JSEvaluator.trace(selectedFunction, "", "");
 		} catch (SmockerException e) {
 			return SmockerUtility.getStackTrace(e, 400);
 		}

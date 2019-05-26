@@ -34,7 +34,16 @@ public class JsFilterAndDisplay implements EntityWithId {
 	private String functionInputDisplay;	
 	
 	@Column(nullable = true)
-	private String functionOutputDisplay;	
+	private String functionOutputDisplay;
+	
+	@Column(nullable = true)
+	private String functionMockOutputDisplay;	
+	
+	@Column(nullable = true)
+	private String functionMockInputDisplay;
+	
+	@Column(nullable = true)
+	private String functionTrace;	
 	
 	public String getHost() {
 		return host;
@@ -74,6 +83,30 @@ public class JsFilterAndDisplay implements EntityWithId {
 
 	public void setFunctionOutputDisplay(String functionOutputDisplay) {
 		this.functionOutputDisplay = functionOutputDisplay;
+	}
+
+	public String getFunctionMockOutputDisplay() {
+		return functionMockOutputDisplay;
+	}
+
+	public void setFunctionMockOutputDisplay(String functionMockOutputDisplay) {
+		this.functionMockOutputDisplay = functionMockOutputDisplay;
+	}
+
+	public String getFunctionMockInputDisplay() {
+		return functionMockInputDisplay;
+	}
+
+	public void setFunctionMockInputDisplay(String functionMockInputDisplay) {
+		this.functionMockInputDisplay = functionMockInputDisplay;
+	}
+
+	public String getFunctionTrace() {
+		return functionTrace;
+	}
+
+	public void setFunctionTrace(String functionTrace) {
+		this.functionTrace = functionTrace;
 	}
 
 	public Long getId() {

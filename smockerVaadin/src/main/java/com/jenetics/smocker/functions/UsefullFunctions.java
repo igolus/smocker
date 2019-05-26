@@ -1,8 +1,14 @@
 package com.jenetics.smocker.functions;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.net.Socket;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -44,6 +50,7 @@ public class UsefullFunctions {
 		XPathFactory xPathfactory = XPathFactory.newInstance();
 		XPath xpath = xPathfactory.newXPath();
 		XPathExpression expr = xpath.compile(xpathExpression);
+		String res = null;
 		return expr.evaluate(doc);
 	}
 	
@@ -164,6 +171,24 @@ public class UsefullFunctions {
 	 * @return
 	 */
 	@SmockerMethod
+	public static String smockerGetHeader (String fullContent) {
+		int indexDoubleRet = fullContent.indexOf("\r\n\r\n");
+		if (indexDoubleRet != -1) {
+			return fullContent.substring(0, indexDoubleRet + 4);
+		}
+		indexDoubleRet = fullContent.indexOf("\n\n");
+		if (indexDoubleRet != -1) {
+			return fullContent.substring(0, indexDoubleRet + 2);
+		}
+		return fullContent;
+	}
+	
+	/**
+	 * remove header content
+	 * @param fullConntent
+	 * @return
+	 */
+	@SmockerMethod
 	public static int smockerContentLength (String fullContent) {
 		return smockerRemoveHeader(fullContent).length();
 	}
@@ -181,4 +206,18 @@ public class UsefullFunctions {
 		}
 		return fullContent;
 	}
+	
+	/**
+	 * remove header content
+	 * @param fullConntent
+	 * @return
+	 * @throws IOException 
+	 */
+	@SmockerMethod
+	public static void smockerWriteToDisk (String content, String filePath) throws IOException {
+		BufferedWriter writer = new BufferedWriter(new FileWriter(filePath));
+	    writer.write(content);
+	    writer.close();
+	}
+	
 }

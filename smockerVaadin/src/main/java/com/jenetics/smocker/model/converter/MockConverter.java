@@ -1,13 +1,17 @@
 package com.jenetics.smocker.model.converter;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.logging.Level;
 
 import org.vaadin.easyapp.util.AnnotationScanner;
 
+import com.jenetics.smocker.dao.DaoConfig;
 import com.jenetics.smocker.dao.DaoManager;
 import com.jenetics.smocker.dao.DaoManagerByModel;
 import com.jenetics.smocker.dao.IDaoManager;
+import com.jenetics.smocker.jseval.JSEvaluator;
 import com.jenetics.smocker.model.Communication;
 import com.jenetics.smocker.model.CommunicationMocked;
 import com.jenetics.smocker.model.Connection;
@@ -15,10 +19,13 @@ import com.jenetics.smocker.model.ConnectionMocked;
 import com.jenetics.smocker.model.JavaApplication;
 import com.jenetics.smocker.model.JavaApplicationMocked;
 import com.jenetics.smocker.model.Scenario;
+import com.jenetics.smocker.model.config.JsFilterAndDisplay;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.component.javascript.JsEditor;
 import com.jenetics.smocker.ui.view.LogView;
 import com.jenetics.smocker.ui.view.MockSpaceView;
+import com.jenetics.smocker.util.NetworkReaderUtility;
+import com.jenetics.smocker.util.SmockerException;
 
 public class MockConverter {
 
@@ -52,34 +59,10 @@ public class MockConverter {
 	 * @param sourceConnection
 	 */
 	public static void convertConnection(Connection sourceConnection) {
-//		JavaApplication sourceJavaApplication = sourceConnection.getJavaApplication();
-//		JavaApplicationMocked targetJavaApplicationMocked = null;
-//		targetJavaApplicationMocked = findOrCreateTargetJavaApplication(sourceJavaApplication);
-		
 		ConnectionMocked targetConnectionMocked = findOrCreateTargetConnection(sourceConnection);
-		
 		addCommunications(sourceConnection, targetConnectionMocked);
 	}
 	
-	/**
-	 * convert JavaApplication to javaApplicationMocked
-	 * 
-	 * @param sourceConnection
-	 */
-//	public static void convertJavaApplication(JavaApplication sourceJavaApplication) {
-//		JavaApplicationMocked targetJavaApplicationMocked = findOrCreateTargetJavaApplication(sourceJavaApplication);
-//
-//		Set<Connection> connections = sourceJavaApplication.getConnections();	
-//		
-//		for (Connection sourceConnection : connections) {
-//			ConnectionMocked targetConnectionMocked = findOrCreateTargetConnection(sourceConnection, targetJavaApplicationMocked);
-//			Set<Communication> sourceCommunications = sourceConnection.getCommunications();
-//			addCommunications(sourceConnection, targetConnectionMocked);
-//		}
-//		
-//	}
-
-
 	private static void addCommunications(Connection sourceConnection, ConnectionMocked targetConnectionMocked) {
 		Set<Communication> sourceCommunications = sourceConnection.getCommunications();
 		for (Communication communication : sourceCommunications) {
@@ -90,10 +73,15 @@ public class MockConverter {
 
 	private static void addSingleCommunicationToConnection(
 			ConnectionMocked targetConnectionMocked, Communication communication, boolean updateIdBb ) {
+		JsFilterAndDisplay first = DaoConfig.findJsDisplayAndFilter(communication.getConnection());
+		String inputMockFunction = Optional.ofNullable(first).map(JsFilterAndDisplay::getFunctionMockInputDisplay).orElse(null);
+		String outputMockFunction = Optional.ofNullable(first).map(JsFilterAndDisplay::getFunctionMockOutputDisplay).orElse(null);;
+		
+				
 		CommunicationMocked communicationMocked = new CommunicationMocked();
 		communicationMocked.setScenario(DaoManagerByModel.getUNDEFINED_SCENARIO());
-		communicationMocked.setRequest(communication.getRequest());
-		communicationMocked.setResponse(communication.getResponse());
+		communicationMocked.setRequest(format(communication.getRequest(), inputMockFunction));
+		communicationMocked.setResponse(format(communication.getResponse(), outputMockFunction));
 		communicationMocked.setDateTime(communication.getDateTime());
 		communicationMocked.setConnection(targetConnectionMocked);
 		
@@ -110,10 +98,23 @@ public class MockConverter {
 					SmockerUI.getInstance().getEasyAppMainView().getScanner().getViewMap().get(MockSpaceView.class.toString());
 			mockSpaceView.communicationMockedCreated(communicationMocked);
 		}
-		
-		
-		//
 	}
+
+	private static String format(String content, String formatFunction) {
+		if (formatFunction == null) {
+			return content;
+		}
+		try {
+			String decodedContent = NetworkReaderUtility.decode(content);
+			String result = JSEvaluator.formatAndDisplay(formatFunction, decodedContent);
+			return NetworkReaderUtility.encode(result);
+			
+		} catch (Exception e) {
+			SmockerUI.log(Level.WARNING, "Unable to format", e);
+		}
+		return content;
+	}
+
 
 	private static ConnectionMocked findOrCreateTargetConnection(Connection sourceConnection) {
 		ConnectionMocked targetConnectionMocked = null;

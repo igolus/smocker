@@ -1,29 +1,46 @@
 package com.jenetics.smocker.ui.view;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import javax.inject.Inject;
+
+import org.jboss.logging.Logger;
 import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
 import org.vaadin.aceeditor.AceTheme;
 import org.vaadin.easyapp.util.ActionContainer;
 import org.vaadin.easyapp.util.ActionContainer.InsertPosition;
+import org.vaadin.easyapp.util.ActionContainer.Position;
 import org.vaadin.easyapp.util.ActionContainerBuilder;
+import org.vaadin.easyapp.util.ButtonWithCheck;
 import org.vaadin.easyapp.util.EasyAppLayout;
 import org.vaadin.easyapp.util.annotations.ContentView;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.jenetics.smocker.dao.DaoConfig;
 import com.jenetics.smocker.dao.IDaoManager;
 import com.jenetics.smocker.jseval.SmockerJsEnv;
+import com.jenetics.smocker.model.Scenario;
 import com.jenetics.smocker.model.config.SmockerConf;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.component.DupHostEditor;
 import com.jenetics.smocker.ui.component.HostAndPortEditor;
 import com.jenetics.smocker.ui.dialog.Dialog;
+import com.jenetics.smocker.ui.util.ConfigUploader;
 import com.jenetics.smocker.ui.util.DuplicateHost;
 import com.jenetics.smocker.ui.util.HostAndPortRange;
+import com.jenetics.smocker.ui.util.JsonFileDownloader;
+import com.jenetics.smocker.ui.util.ScenarioUploader;
+import com.jenetics.smocker.ui.util.StreamResourceJacksonSerializer;
+import com.jenetics.smocker.ui.util.JsonFileDownloader.OnDemandStreamResource;
 import com.vaadin.annotations.Push;
 import com.vaadin.data.HasValue.ValueChangeEvent;
 import com.vaadin.data.TreeData;
@@ -42,6 +59,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TreeGrid;
+import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
 
 import de.steinwedel.messagebox.MessageBox;
@@ -51,7 +69,10 @@ import de.steinwedel.messagebox.MessageBox;
 @ViewScope
 @ContentView(sortingOrder = 4, viewName = "ConfigView", icon = "icons/Settings-icon.png", homeView = true, rootViewParent = ConnectionsRoot.class)
 public class ConfigView extends EasyAppLayout {
-
+	
+	@Inject
+	private static Logger logger;
+	
 	private static final String SEP_IGNORED_HOST = ";";
 	protected transient IDaoManager<SmockerConf> daoManagerSmockerConf = null;
 	private SmockerConf singleConfig;
@@ -59,6 +80,7 @@ public class ConfigView extends EasyAppLayout {
 	private AceEditor aceEditorGlobalFunctions = new AceEditor();
 	private AceEditor aceEditorFilter = new AceEditor();
 	private AceEditor aceEditorFormatDisplay = new AceEditor();
+	private AceEditor aceEditorTraceFunction = new AceEditor();
 	private AceEditor aceEditorDefaultMockFunction = new AceEditor();
 	
 	private Button removeDupHostHostButton;
@@ -88,6 +110,10 @@ public class ConfigView extends EasyAppLayout {
 		Component globalConfigPane = buildGlobalConfigPane();
 		globalConfigPane.setCaption(SmockerUI.getBundleValue("globalConfigPane"));
 		tabSheet.addTab(globalConfigPane);
+		
+		Component traceFunctionPane = buildTraceFunctionPane();
+		traceFunctionPane.setCaption(SmockerUI.getBundleValue("traceFunctionPane"));
+		tabSheet.addTab(traceFunctionPane);
 
 		Component jsGlobalFunctionsPane = buildJSGlobalFunctionsPanel();
 		jsGlobalFunctionsPane.setCaption(SmockerUI.getBundleValue("jsGlobalFunctionsPane"));
@@ -115,8 +141,59 @@ public class ConfigView extends EasyAppLayout {
 	public ActionContainer buildActionContainer() {
 		ActionContainerBuilder builder = new ActionContainerBuilder(SmockerUI.BUNDLE_NAME)
 				.addButton("Save_Button", VaadinIcons.DISC, null,  this::canSave			
-						, this::save, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER);
-		return builder.build();
+						, this::save, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
+				.addButton("Export_Button", VaadinIcons.SHARE, "ExportConfigToolTip",  () -> true			
+								, null, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER);
+		
+		ConfigUploader uploader = new ConfigUploader();
+		Upload upload = new Upload(null, uploader);
+		upload.setButtonCaption(SmockerUI.getBundleValue("Import_Button"));
+		upload.setDescription(SmockerUI.getBundleValue("ImportConfigToolTip"));
+		upload.addSucceededListener(uploader);
+		builder.addComponent(upload, Position.LEFT, InsertPosition.AFTER);
+		
+		ActionContainer actionContainer = builder.build(); 
+		
+		List<ButtonWithCheck> listButtonWithCheck = actionContainer.getListButtonWithCheck();
+		ButtonWithCheck exportButton = listButtonWithCheck.get(listButtonWithCheck.size() - 1);
+		
+//		OnDemandStreamResource streamResourceConfig = 
+//				StreamResourceJacksonSerializer.getStreamResource(, );
+		JsonFileDownloader downloader = new JsonFileDownloader(createResource());
+		
+		downloader.extend(exportButton);
+		return actionContainer;
+
+	}
+	
+	private OnDemandStreamResource createResource() {
+
+		return new OnDemandStreamResource() {
+			@Override
+			public InputStream getStream() {
+				try {
+					SmockerConf conf = DaoConfig.getSingleConfig();
+					if (conf != null) {
+						ObjectMapper mapper = new ObjectMapper();
+						mapper.enable(SerializationFeature.INDENT_OUTPUT);
+						mapper.configure(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE, false);
+						mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+						String jsonObjSTring = 
+								mapper.writerWithDefaultPrettyPrinter().writeValueAsString(conf);
+						return new ByteArrayInputStream(jsonObjSTring.getBytes("UTF-8"));
+					}
+				} catch (IOException e) {
+					logger.error("Unable to export scenario", e);
+				}
+				return null;
+			}
+
+			@Override
+			public String getFilename() {
+				return "mySmockerConfig.json";
+			}
+
+		};
 	}
 
 	public void save(ClickEvent event) {
@@ -124,8 +201,15 @@ public class ConfigView extends EasyAppLayout {
 		singleConfig.setFilterJsFunction(aceEditorFilter.getValue());
 		singleConfig.setFormatDisplayJsFunction(aceEditorFormatDisplay.getValue());
 		singleConfig.setDefaultMockFunction(aceEditorDefaultMockFunction.getValue());
+		singleConfig.setTraceFunctionJsFunction(aceEditorTraceFunction.getValue());
 		DaoConfig.saveConfig();
 	}
+	
+
+	public void importConf(ClickEvent event) {
+		
+	}
+
 
 	public boolean canSave() {
 		return true;
@@ -143,10 +227,7 @@ public class ConfigView extends EasyAppLayout {
 	}
 
 	private Component buildJSFilterPanel() {
-		aceEditorFilter = new AceEditor();
-		aceEditorFilter.setMode(AceMode.javascript);
-		aceEditorFilter.setTheme(AceTheme.eclipse);
-		aceEditorFilter.setSizeFull();
+		customizeAceEditor(aceEditorFilter);
 		if (singleConfig.getFilterJsFunction() != null) {
 			aceEditorFilter.setValue(singleConfig.getFilterJsFunction());
 		}
@@ -154,9 +235,7 @@ public class ConfigView extends EasyAppLayout {
 	}
 
 	private Component buildJSDefaultMockFunctionPanel() {
-		aceEditorDefaultMockFunction.setMode(AceMode.javascript);
-		aceEditorDefaultMockFunction.setTheme(AceTheme.eclipse);
-		aceEditorDefaultMockFunction.setSizeFull();
+		customizeAceEditor(aceEditorDefaultMockFunction);
 		if (singleConfig.getDefaultMockFunction() != null) {
 			aceEditorDefaultMockFunction.setValue(singleConfig.getDefaultMockFunction());
 		}
@@ -164,16 +243,28 @@ public class ConfigView extends EasyAppLayout {
 	}
 
 	private Component buildJSFormatDisplayPanel() {
-		aceEditorFormatDisplay.setMode(AceMode.javascript);
-		aceEditorFormatDisplay.setTheme(AceTheme.eclipse);
-		aceEditorFormatDisplay.setSizeFull();
+		customizeAceEditor(aceEditorFormatDisplay);
 		if (singleConfig.getFormatDisplayJsFunction() != null) {
 			aceEditorFormatDisplay.setValue(singleConfig.getFormatDisplayJsFunction());
 		}
 		return aceEditorFormatDisplay;
 	}
 
-
+	private Component buildTraceFunctionPane() {
+		customizeAceEditor(aceEditorTraceFunction);
+		if (singleConfig.getTraceFunctionJsFunction() != null) {
+			aceEditorTraceFunction.setValue(singleConfig.getTraceFunctionJsFunction());
+		}
+		return aceEditorTraceFunction;
+	}
+	
+	private void customizeAceEditor (AceEditor aceEditor) {
+		aceEditor.setMode(AceMode.javascript);
+		aceEditor.setTheme(AceTheme.eclipse);
+		aceEditor.setSizeFull();
+	}
+	
+	
 	private Component buildGlobalConfigPane() {
 		VerticalLayout layout = new VerticalLayout();
 		layout.setSpacing(false);

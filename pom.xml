@@ -1,21 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.jenetics</groupId>
-	<artifactId>smocker-root</artifactId>
-	<version>1.0-SNAPSHOT</version>
+  <groupId>com.jenetics</groupId>
+  <artifactId>smocker-root</artifactId>
+  <version>1.0-SNAPSHOT</version>
 
-	<name>smocker-root</name>
-	<!-- FIXME change it to the project's website -->
-	<url>http://www.smocker.org</url>
-	<packaging>pom</packaging>
+  <name>smocker-root</name>
+  <!-- FIXME change it to the project's website -->
+  <url>http://www.smocker.org</url>
+  <packaging>pom</packaging>
+  
+  
+  
+  <modules>
+    <module>smockerAgent1.7</module>
+    <module>smockerVaadin</module>
+	<module>smockerOverlay</module>
+  </modules>
+	
+    <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.7</version>
+        <executions>
+          <execution>
+            <phase>generate-sources</phase>
+            <configuration>
+              <tasks>
+					
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 
-	<modules>
-		<module>smockerAgent1.7</module>
-		<module>smockerVaadin</module>
-	</modules>
+  
 </project>

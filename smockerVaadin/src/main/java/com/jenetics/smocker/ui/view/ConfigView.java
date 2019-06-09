@@ -152,13 +152,15 @@ public class ConfigView extends EasyAppLayout {
 		upload.addSucceededListener(uploader);
 		builder.addComponent(upload, Position.LEFT, InsertPosition.AFTER);
 		
+		
+		builder.addButton("Refresh_Button", VaadinIcons.REFRESH, null,  () -> true
+				, this::refresh, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER);
+		
 		ActionContainer actionContainer = builder.build(); 
 		
 		List<ButtonWithCheck> listButtonWithCheck = actionContainer.getListButtonWithCheck();
-		ButtonWithCheck exportButton = listButtonWithCheck.get(listButtonWithCheck.size() - 1);
+		ButtonWithCheck exportButton = listButtonWithCheck.get(listButtonWithCheck.size() - 2);
 		
-//		OnDemandStreamResource streamResourceConfig = 
-//				StreamResourceJacksonSerializer.getStreamResource(, );
 		JsonFileDownloader downloader = new JsonFileDownloader(createResource());
 		
 		downloader.extend(exportButton);
@@ -205,11 +207,32 @@ public class ConfigView extends EasyAppLayout {
 		DaoConfig.saveConfig();
 	}
 	
-
-	public void importConf(ClickEvent event) {
+	public void refresh(ClickEvent event) {
+		excludedHosts = getListFromDb(DaoConfig.getSingleConfig().getExcludedHosts());
+		includedHosts = getListFromDb(DaoConfig.getSingleConfig().getIncludedHosts());
+		duplicateHosts = DuplicateHost.getListFromDbValue(DaoConfig.getSingleConfig().getDuplicateHosts());
 		
+		
+		refreshDupHost();
+		refreshHost(excludedHosts, treeDataProviderExcludedHost, treeDataExcludedHost);
+		refreshHost(includedHosts, treeDataProviderIncludedHost, treeDataIncludedHost);
+			
+		if (singleConfig.getGlobalJsFunction() != null) {
+			aceEditorGlobalFunctions.setValue(singleConfig.getGlobalJsFunction());
+		}
+		if (singleConfig.getFilterJsFunction() != null) {
+			aceEditorFilter.setValue(singleConfig.getFilterJsFunction());
+		}
+		if (singleConfig.getFormatDisplayJsFunction() != null) {
+			aceEditorFormatDisplay.setValue(singleConfig.getFormatDisplayJsFunction());
+		}
+		if (singleConfig.getTraceFunctionJsFunction() != null) {
+			aceEditorTraceFunction.setValue(singleConfig.getTraceFunctionJsFunction());
+		}
+		if (singleConfig.getDefaultMockFunction() != null) {
+			aceEditorDefaultMockFunction.setValue(singleConfig.getDefaultMockFunction());
+		}
 	}
-
 
 	public boolean canSave() {
 		return true;

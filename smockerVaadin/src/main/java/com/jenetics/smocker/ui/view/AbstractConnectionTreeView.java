@@ -63,8 +63,6 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 	protected static final String ADRESS = SmockerUI.getBundleValue("Adress");
 	protected static final String APPLICATION = SmockerUI.getBundleValue("Application");
 	protected static final String WATCH = SmockerUI.getBundleValue("Watch_Button");
-	//protected static final String FITLER = SmockerUI.getBundleValue("Filter_Button");
-	//protected static final String TRACE_FUNCTION = SmockerUI.getBundleValue("Trace_Function_Button");
 	
 	protected static final String CONFIGURE = SmockerUI.getBundleValue("Configure_Button");
 	

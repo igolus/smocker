@@ -24,7 +24,16 @@
 			<type>war</type>
 			<scope>compile</scope>
 		</dependency>
-
+		
+		
+				
+		<dependency>
+		    <groupId>com.jenetics</groupId>
+			<artifactId>smocker</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		    <scope>system</scope>
+		    <systemPath>${project.basedir}/../smockerVaadin/target/smocker-1.0-SNAPSHOT-classes.jar</systemPath>
+		</dependency>
 
 	</dependencies>
 

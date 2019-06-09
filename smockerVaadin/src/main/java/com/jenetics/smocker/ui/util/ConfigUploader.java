@@ -55,22 +55,33 @@ public class ConfigUploader implements Receiver, SucceededListener {
 			SmockerConf newConf = mapper.readValue(content, SmockerConf.class);
 			SmockerConf singleConfig = DaoConfig.getSingleConfig();
 			
-			String defaultMockFunction = singleConfig.getDefaultMockFunction();
-			String traceFunctionJsFunction = singleConfig.getTraceFunctionJsFunction();
-			String filterJsFunction = singleConfig.getFilterJsFunction();
-			String formatDisplayJsFunction = singleConfig.getFormatDisplayJsFunction();
-			String globalJsFunction = singleConfig.getGlobalJsFunction();
+//			String defaultMockFunction = singleConfig.getDefaultMockFunction();
+//			String traceFunctionJsFunction = singleConfig.getTraceFunctionJsFunction();
+//			String filterJsFunction = singleConfig.getFilterJsFunction();
+//			String formatDisplayJsFunction = singleConfig.getFormatDisplayJsFunction();
+//			String globalJsFunction = singleConfig.getGlobalJsFunction();
+//
+//			String mergedDefaultMockFunction = defaultMockFunction == null ? "" : defaultMockFunction
+//					+  newConf.getDefaultMockFunction() == null ? "" : "\n" + newConf.getDefaultMockFunction();
+//			String mergedTraceFunctionJsFunction = traceFunctionJsFunction == null ? "" : traceFunctionJsFunction 
+//					+ newConf.getTraceFunctionJsFunction() == null ? "" : "\n" + newConf.getTraceFunctionJsFunction();
+//			String mergedFilterJsFunction = filterJsFunction == null ? "" : filterJsFunction 
+//					+ newConf.getFilterJsFunction() == null ? "" : "\n" + newConf.getFilterJsFunction();
+//			String mergedFormatDisplayJsFunction = formatDisplayJsFunction == null ? "" : formatDisplayJsFunction 
+//					+ newConf.getFormatDisplayJsFunction() == null ? "" : "\n" + newConf.getFormatDisplayJsFunction();
+//			String mergedGlobalJsFunction = globalJsFunction == null ? "" : globalJsFunction
+//					+ newConf.getGlobalJsFunction() == null ? "" : "\n" + newConf.getGlobalJsFunction();
 			
-			Long oldId = singleConfig.getId();
+			singleConfig.setDefaultMockFunction(newConf.getDefaultMockFunction());
+			singleConfig.setTraceFunctionJsFunction(newConf.getTraceFunctionJsFunction());
+			singleConfig.setFilterJsFunction(newConf.getFilterJsFunction());
+			singleConfig.setFormatDisplayJsFunction(newConf.getFormatDisplayJsFunction());
+			singleConfig.setGlobalJsFunction(newConf.getGlobalJsFunction());
 			
-			//BeanUtils.copyProperties(newConf, singleConfig);
+			singleConfig.setDuplicateHosts(newConf.getDuplicateHosts());
+			singleConfig.setExcludedHosts(newConf.getExcludedHosts());
+			singleConfig.setIncludedHosts(newConf.getIncludedHosts());
 			
-			//newConf.setId(oldId);
-			singleConfig.setDefaultMockFunction(defaultMockFunction + "\n" + newConf.getDefaultMockFunction());
-			singleConfig.setTraceFunctionJsFunction(traceFunctionJsFunction + "\n" + newConf.getTraceFunctionJsFunction());
-			singleConfig.setFilterJsFunction(filterJsFunction + "\n" + newConf.getFilterJsFunction());
-			singleConfig.setFormatDisplayJsFunction(formatDisplayJsFunction + "\n" + newConf.getFormatDisplayJsFunction());
-			singleConfig.setGlobalJsFunction(globalJsFunction + "\n" + newConf.getGlobalJsFunction());
 			DaoConfig.saveConfig();
 		} catch (IOException e) {
 			Dialog.warning(SmockerUI.getBundleValue("warn_unable_to_import_conf"));

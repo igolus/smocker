@@ -34,19 +34,26 @@ public class DaoConfig {
 	}
 
 	public static JsFilterAndDisplay findJsDisplayAndFilter(Connection conn) {
-		List<JsFilterAndDisplay> listDisplayandFilter = JavaApplicationsView.daoManagerJsFilterAndDisplay.queryList("SELECT js FROM JsFilterAndDisplay js WHERE js.host = '" + conn.getHost() + 
-				"' and js.port = '" + conn.getPort().toString() + "'");
-	
-		JsFilterAndDisplay first = listDisplayandFilter.stream().findFirst().orElse(null);
-		if (first == null) {
-			first = new JsFilterAndDisplay();
-			first.setHost(conn.getHost());
-			first.setPort(conn.getPort());
-			first.setFunctionFilter("");
-			first.setFunctionInputDisplay("");
-			first.setFunctionOutputDisplay("");
-			first = JavaApplicationsView.daoManagerJsFilterAndDisplay.create(first);
+		
+		if (conn != null && conn.getHost() != null && conn.getPort() != null) {
+			List<JsFilterAndDisplay> listDisplayandFilter = JavaApplicationsView.daoManagerJsFilterAndDisplay.queryList("SELECT js FROM JsFilterAndDisplay js WHERE js.host = '" + conn.getHost() + 
+					"' and js.port = '" + conn.getPort().toString() + "'");
+
+			if (listDisplayandFilter != null) {
+				JsFilterAndDisplay first = listDisplayandFilter.stream().findFirst().orElse(null);
+				if (first == null) {
+					first = new JsFilterAndDisplay();
+					first.setHost(conn.getHost());
+					first.setPort(conn.getPort());
+					first.setFunctionFilter("");
+					first.setFunctionInputDisplay("");
+					first.setFunctionOutputDisplay("");
+					first = JavaApplicationsView.daoManagerJsFilterAndDisplay.create(first);
+				}
+				return first;
+			}
 		}
-		return first;
+		return null;
+		
 	}
 }

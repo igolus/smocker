@@ -29,7 +29,7 @@ public class SmockerConf implements EntityWithId {
 	private int version;
 
 	@Column
-	private boolean autorefesh = true;
+	private boolean autorefesh = false;
 
 	public boolean isAutorefesh() {
 		return autorefesh;

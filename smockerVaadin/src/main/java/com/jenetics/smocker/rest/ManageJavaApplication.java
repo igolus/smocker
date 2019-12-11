@@ -208,11 +208,11 @@ public class ManageJavaApplication {
 				JsFilterAndDisplay jsDisplayAndFilter = DaoConfig.findJsDisplayAndFilter(connection.get());
 				String input = NetworkReaderUtility.decode(comm.getRequest());
 				String output = NetworkReaderUtility.decode(comm.getResponse());
-				String filterJsFunction = jsDisplayAndFilter.getFunctionFilter();
+				//String filterJsFunction = jsDisplayAndFilter.getFunctionFilter();
 
-				if (!StringUtils.isEmpty(filterJsFunction)) {
+				if (jsDisplayAndFilter != null && !StringUtils.isEmpty(jsDisplayAndFilter.getFunctionFilter())) {
 					try {
-						if (JSEvaluator.filter(filterJsFunction, input, output)) {
+						if (JSEvaluator.filter(jsDisplayAndFilter.getFunctionFilter(), input, output)) {
 							trace(comm);
 							return Response.ok().build();
 						}

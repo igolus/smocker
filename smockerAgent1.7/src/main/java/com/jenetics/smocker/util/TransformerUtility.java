@@ -84,7 +84,7 @@ public class TransformerUtility {
 
 					Method getAttachmentMethod = initialSelectionKey.getClass().getMethod("getAttachment");
 					final Object attached = getAttachmentMethod.invoke(initialSelectionKey);
-
+					
 					Method getSelectorMethod = initialSelectionKey.getClass().getMethod("getSelector");
 					final Selector selectorNio = (Selector) getSelectorMethod.invoke(initialSelectionKey);
 

@@ -1,5 +1,7 @@
 package com.jenetics.smocker.ui.component.javascript;
 
+import java.io.IOException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
@@ -22,7 +24,7 @@ public class JsEditor extends EasyAppLayout {
 		+ "{" + System.lineSeparator()
 		+ "  if (realInput == providedInput)" + System.lineSeparator()
 		+ "  {" + System.lineSeparator()
-		+ "    return smockerBtoa(providedOutput);" + System.lineSeparator()
+		+ "    return smockerMock(providedOutput);" + System.lineSeparator()
 		+ "  }" + System.lineSeparator()
 		+ "  return null;" + System.lineSeparator()
 		+ "}";
@@ -66,7 +68,7 @@ public class JsEditor extends EasyAppLayout {
 			output = JSEvaluator.runScript(null, input, comm, selectedRequestPane.getText(), 
 					selectedResponsePane.getText(), aceEditor.getValue(), comm.getIndex());
 		}
-		catch (SmockerException smockerEx) {
+		catch (SmockerException | IOException smockerEx) {
 			return new String[] {SmockerUtility.getStackTrace(smockerEx.getCause()), null};
 		}
 		return output;

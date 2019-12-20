@@ -7,6 +7,7 @@
 package com.jenetics.smocker.bootstrap;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -59,6 +60,13 @@ public class DbStarter implements ServletContextListener {
                 server = Server.createTcpServer(params);
                 server.start();
             }
+            
+            
+            String url = "jdbc:h2:tcp://localhost/./smockerPersistant";
+            String user = getParameter(servletContext, "db.user", "sa");
+            String password = getParameter(servletContext, "db.password", "sa");
+            conn = DriverManager.getConnection(url, user, password);
+            
             servletContext.setAttribute("connection", conn);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Unable to start H2 db", e);
@@ -80,24 +88,24 @@ public class DbStarter implements ServletContextListener {
     }
 
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
-        try {
-            Statement stat = conn.createStatement();
-            stat.execute("SHUTDOWN");
-            stat.close();
-        } catch (Exception e) {
-        	logger.log(Level.SEVERE, "Unable to close the statement", e);
-        }
-        try {
-            if (conn != null) {
-            	conn.close();
-            }
-        } catch (Exception e) {
-        	logger.log(Level.SEVERE, "Unable to close the connection", e);
-        }
-        if (server != null) {
-            server.stop();
-            server = null;
-        }
+//        try {
+//            Statement stat = conn.createStatement();
+//            stat.execute("SHUTDOWN");
+//            //stat.close();
+//        } catch (Exception e) {
+//        	logger.log(Level.SEVERE, "Unable to close the statement", e);
+//        }
+//        try {
+//            if (conn != null) {
+//            	conn.close();
+//            }
+//        } catch (Exception e) {
+//        	logger.log(Level.SEVERE, "Unable to close the connection", e);
+//        }
+//        if (server != null) {
+//            server.stop();
+//            server = null;
+//        }
     }
 
 }

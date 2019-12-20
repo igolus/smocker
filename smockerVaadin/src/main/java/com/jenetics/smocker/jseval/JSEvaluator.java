@@ -1,5 +1,9 @@
 package com.jenetics.smocker.jseval;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -22,6 +26,7 @@ import com.eclipsesource.v8.JavaVoidCallback;
 import com.eclipsesource.v8.V8;
 import com.eclipsesource.v8.V8Array;
 import com.eclipsesource.v8.V8Object;
+import com.google.common.io.CharStreams;
 import com.jenetics.smocker.dao.DaoConfig;
 import com.jenetics.smocker.jseval.callBack.LoggerCallBack;
 import com.jenetics.smocker.model.CommunicationMocked;
@@ -49,9 +54,10 @@ public class JSEvaluator {
 	 * @param providedOutput if null take the info from comm
 	 * @param code if null take the info from comm
 	 * @return
+	 * @throws IOException 
 	 */
 	public static String[] runScript(String base64Input, String realInput, CommunicationMocked comm, String providedInput, 
-			String providedOutput, String code, long index) throws SmockerException {
+			String providedOutput, String code, long index) throws SmockerException, IOException {
 		RuntimeAndLogger runtimeAndLogger = getRuntimeAndLogger();
 
 		String script = "var output = matchAndReturnOutput(recordDate, realInput, bas64Input,"
@@ -78,14 +84,24 @@ public class JSEvaluator {
 		if (code == null) {
 			return null;
 		}
-
+		
+		InputStream inputStream = JSEvaluator.class
+				.getClassLoader().getResourceAsStream("function.js");
+		String source = null;
+	    try (final Reader reader = new InputStreamReader(inputStream)) {
+	    	source = CharStreams.toString(reader);
+	    }
+		
+		//String embeddedCode = 
 		String globalCode = DaoConfig.getSingleConfig().getGlobalJsFunction();
 		code = code + "\n" + (globalCode != null ? globalCode : "");
-
+		code = code + "\n" + (source != null ? source : "");
+		
 		String output;
 
 		try {
 			runtimeAndLogger.reset();
+			registerAnnotedFunction(runtimeAndLogger.getRuntime());
 			runtimeAndLogger.getRuntime().executeVoidScript(script + code);
 			output = runtimeAndLogger.getRuntime().getString("output");
 		}

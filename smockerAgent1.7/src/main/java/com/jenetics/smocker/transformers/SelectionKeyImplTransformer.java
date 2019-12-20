@@ -35,7 +35,7 @@ public class SelectionKeyImplTransformer {
 		readyOpsField.setModifiers(Modifier.PUBLIC);
 		
 		ctClass.getDeclaredField("selector").setModifiers(Modifier.PUBLIC);
-		
+	
 		
 		final String getSelectorBody = "public Object getSelector () {"
 				+ " try{" 

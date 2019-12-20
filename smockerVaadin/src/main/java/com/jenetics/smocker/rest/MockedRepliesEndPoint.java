@@ -1,5 +1,6 @@
 package com.jenetics.smocker.rest;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.List;
@@ -101,7 +102,7 @@ public class MockedRepliesEndPoint  {
 					
 					return Response.ok(response).build();
 				}
-			} catch (SmockerException e) {
+			} catch (SmockerException | IOException e) {
 				SmockerUI.log(Level.SEVERE, "Unable To evaluate Script", e);
 			}
 		}	

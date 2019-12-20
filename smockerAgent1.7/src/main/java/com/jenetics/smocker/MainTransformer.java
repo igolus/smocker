@@ -10,6 +10,7 @@ import com.jenetics.smocker.transformers.NioEventLoopTransformer;
 import com.jenetics.smocker.transformers.SSLSocketImplTransformer;
 import com.jenetics.smocker.transformers.SelectionKeyImplTransformer;
 import com.jenetics.smocker.transformers.SelectionKeyTransformer;
+import com.jenetics.smocker.transformers.SelectorImplTransformer;
 import com.jenetics.smocker.transformers.SocketChannelImplTransformer;
 import com.jenetics.smocker.transformers.SocketTransformer;
 import com.jenetics.smocker.transformers.WindowsSelectorImplTransformer;
@@ -35,6 +36,11 @@ public class MainTransformer implements ClassFileTransformer {
 				byteCode = new SocketTransformer().transform(classfileBuffer);
 			}
 			
+			if (className != null && className.equals("java/net/URLConnection")) {
+				byteCode = new SocketTransformer().transform(classfileBuffer);
+			}
+			
+			
 			if (className != null && className.equals("sun/nio/ch/SocketChannelImpl")) {
 				byteCode = new SocketChannelImplTransformer().transform(classfileBuffer);
 			}
@@ -59,9 +65,17 @@ public class MainTransformer implements ClassFileTransformer {
 				byteCode = new NioEventLoopTransformer().transform(classfileBuffer);
 			}
 			
-			if (className != null && className.equals("sun/nio/ch/WindowsSelectorImpl")) {
+			if (className != null && (className.equals("sun/nio/ch/WindowsSelectorImpl") || className.equals("sun/nio/ch/EPollSelectorImpl"))) {
 				byteCode = new WindowsSelectorImplTransformer().transform(classfileBuffer);
 			}
+			
+//			if (className != null && className.equals("sun/nio/ch/EPollSelectorImpl")) {
+//			
+//				System.out.println("sun/nio/ch/EPollSelectorImpl");
+//				byteCode = new SelectorImplTransformer().transform(classfileBuffer);
+//			}
+			
+			
 
 		} catch (Exception ex) {
 			MessageLogger.logErrorWithMessage("Unable to insrument", ex, MainTransformer.class);

@@ -9,6 +9,10 @@ import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.Socket;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -25,6 +29,8 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -183,6 +189,18 @@ public class UsefullFunctions {
 		return fullContent;
 	}
 	
+	
+	/**
+	 * adjust header content length
+	 * @param fullConntent
+	 * @return
+	 */
+	@SmockerMethod
+	public static String smockerAdjustContentLength (String fullContent) {
+		return smockerReplaceHeader(fullContent, "Content-Length",String.valueOf(smockerContentLength(fullContent)));
+	}
+	
+	
 	/**
 	 * remove header content
 	 * @param fullConntent
@@ -219,5 +237,27 @@ public class UsefullFunctions {
 	    writer.write(content);
 	    writer.close();
 	}
+	
+	
+	/**
+	 * get the value of a query parameter
+	 * @param fullConntent
+	 * @return
+	 * @throws IOException 
+	 * @throws URISyntaxException 
+	 */
+	@SmockerMethod
+	public static String smockerGetQueryParam (String input, String paramName) throws IOException, URISyntaxException {
+		String[] split = input.split(" ");
+		if (split.length > 1) {
+			String url = split[1];
+			List<NameValuePair> params = URLEncodedUtils.parse(new URI(url), "UTF-8");
+			return params.stream().filter(p -> p.getName().equals(paramName)).map(NameValuePair::getValue).findFirst().orElse(null);
+		}
+		return null;
+		
+	}
+	
+	
 	
 }

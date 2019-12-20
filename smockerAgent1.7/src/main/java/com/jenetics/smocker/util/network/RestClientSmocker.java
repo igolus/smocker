@@ -13,6 +13,7 @@ import com.jenetics.smocker.configuration.SystemPropertyConfiguration;
 import com.jenetics.smocker.util.MessageLogger;
 import com.jenetics.smocker.util.SimpleJsonReader;
 import com.jenetics.smocker.util.SmockerContainer;
+import com.jenetics.smocker.util.SmockerSocketOutputStreamData;
 import com.jenetics.smocker.util.TransformerUtility;
 
 public class RestClientSmocker extends RESTClient {
@@ -209,7 +210,7 @@ public class RestClientSmocker extends RESTClient {
 	public static String decode(String source) {
 		byte[] decoded = DatatypeConverter.parseBase64Binary(source);
 		try {
-			return new String(decoded, "UTF-8");
+			return new String(decoded, "utf-8" );
 		} catch (UnsupportedEncodingException e) {
 			MessageLogger.logErrorWithMessage("Unable to decode ", e,RestClientSmocker.class);
 		}
@@ -221,14 +222,15 @@ public class RestClientSmocker extends RESTClient {
 		return encoded;
 	}
 
-	public static byte[] decodeByte(String source) {
-		return DatatypeConverter.parseBase64Binary(source);
-	}
-
-	public String postCheckMatch(String content, String host) {
+  public static byte[] decodeByte(String source) {
+    byte[] decoded = DatatypeConverter.parseBase64Binary(source);
+    return DatatypeConverter.parseHexBinary(new String(decoded));
+  }
+		
+	public String postCheckMatch(SmockerSocketOutputStreamData content, String host) {
 		StringBuilder buffer = new StringBuilder();
 		Map<String, String> headers = buildHeader();
-		buffer.append("{\"request\": \"" + encode(content) + "\",")
+		buffer.append("{\"request\": \"" + encode(content.getBytes()) + "\",")
 		.append("\"host\":\"" + host ).append("\"}");
 		String path = SMOCKER_REST_PATH + SMOCKER_CHECK_MATCH;
 		try {

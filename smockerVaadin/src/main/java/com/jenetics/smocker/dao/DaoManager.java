@@ -91,9 +91,12 @@ public class DaoManager<T extends EntityWithId> implements IDaoManager<T> {
 		}
 		try {
 			T lastEntity = findById(entity.getId());
-			entity.setVersion(lastEntity.getVersion());
-			entityManager.remove(lastEntity);
-			entityTransaction.commit();
+			if (lastEntity != null) {
+				entity.setVersion(lastEntity.getVersion());
+				entityManager.remove(lastEntity);
+				entityTransaction.commit();
+			}
+			
 		} catch (Exception ex) {
 			logger.error(UNABLE_TO_DELETE_ENTITY, ex);
 			entityTransaction.rollback();

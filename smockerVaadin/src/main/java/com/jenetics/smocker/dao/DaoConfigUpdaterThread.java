@@ -41,7 +41,7 @@ public class DaoConfigUpdaterThread {
 				singleConf = DaoConfig.getSingleConfig();
 				Thread.sleep(SLEEP_TIME);
 			} catch (InterruptedException e) {
-				logger.error("Unable to update config", e);
+				logger.warn("Unable to update config");
 			}
 		}
 	}

@@ -255,7 +255,7 @@ public class ManageJavaApplication {
 	private void trace(Communication comm) throws SmockerException {
 		//trace function
 		JsFilterAndDisplay first = DaoConfig.findJsDisplayAndFilter(comm.getConnection());
-		if (first.getFunctionTrace() != null) {
+		if (first != null && first.getFunctionTrace() != null) {
 			JSEvaluator.trace(first.getFunctionTrace(), 
 					NetworkReaderUtility.decode(comm.getRequest()), NetworkReaderUtility.decode(comm.getResponse()));
 		}

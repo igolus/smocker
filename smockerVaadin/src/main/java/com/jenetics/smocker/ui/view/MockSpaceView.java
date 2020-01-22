@@ -70,6 +70,8 @@ implements RefreshableView {
 	public MockSpaceView() {
 		super(JavaApplicationMocked.class, ConnectionMocked.class);
 		treeGrid.addSelectionListener(this::treeSelectionChange);
+		//treeGrid.setStyleName("Smocker");
+		treeGrid.setSizeFull();
 		setSizeFull();
 	}
 

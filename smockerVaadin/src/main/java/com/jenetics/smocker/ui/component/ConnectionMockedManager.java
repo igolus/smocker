@@ -30,6 +30,7 @@ import com.vaadin.data.HasValue.ValueChangeEvent;
 import com.vaadin.data.TreeData;
 import com.vaadin.data.provider.TreeDataProvider;
 import com.vaadin.event.selection.SingleSelectionEvent;
+import com.vaadin.shared.ui.grid.ColumnResizeMode;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.TreeGrid;
@@ -145,7 +146,7 @@ public class ConnectionMockedManager extends EasyAppLayout {
 		
 		listScenarios = scenarioDaoManager.listAll();
 		for (Scenario scenario : listScenarios) {
-			if (!scenario.equals(DaoManagerByModel.getUNDEFINED_SCENARIO())) {
+			if (!scenario.equals(DaoManagerByModel.getUNDEFINED_SCENARIO()) && scenario.getHost().equals(connectionMocked.getHost())) {
 				TreeGridMockedItem scenarioItem = addScenarioToRootExceptUndifined(scenario);
 				List<CommunicationMocked> communicationsMockedScenario = getListCommOrdered(scenario);
 				for (CommunicationMocked communicationMocked : communicationsMockedScenario) {
@@ -157,6 +158,7 @@ public class ConnectionMockedManager extends EasyAppLayout {
 		
 		treeGrid.setDataProvider(treeDataProvider);
 		addComponent(treeGrid);
+		treeGrid.setColumnResizeMode(ColumnResizeMode.ANIMATED);
 		treeDataProvider.refreshAll();
 	}
 	

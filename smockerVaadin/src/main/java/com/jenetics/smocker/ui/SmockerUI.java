@@ -322,18 +322,21 @@ public class SmockerUI extends UI {
 			enableSearch(true);
 		}
 	}
-	
+
 	private SearcheableView getSearcheableView() {
-		Class<?> currentViewClass =  easyAppMainView.getNavigator().getCurrentView().getClass();
-		if (ViewWithToolBar.class.isAssignableFrom(currentViewClass)) {
-			ViewWithToolBar viewWithToolBar =  (ViewWithToolBar)easyAppMainView.getNavigator().getCurrentView();
-			if (viewWithToolBar.getInnerComponent() != null && SearcheableView.class.isAssignableFrom(viewWithToolBar.getInnerComponent().getClass())) {
-				return (SearcheableView) viewWithToolBar.getInnerComponent();
+		if (easyAppMainView.getNavigator() != null && easyAppMainView.getNavigator().getCurrentView() != null) {
+			Class<?> currentViewClass =  easyAppMainView.getNavigator().getCurrentView().getClass();
+			if (ViewWithToolBar.class.isAssignableFrom(currentViewClass)) {
+				ViewWithToolBar viewWithToolBar =  (ViewWithToolBar)easyAppMainView.getNavigator().getCurrentView();
+				if (viewWithToolBar.getInnerComponent() != null && SearcheableView.class.isAssignableFrom(viewWithToolBar.getInnerComponent().getClass())) {
+					return (SearcheableView) viewWithToolBar.getInnerComponent();
+				}
 			}
+
 		}
 		return null;
 	}
-	
+
 	public void displayNotif(String text, int delay) {
 		Notification notif = new Notification(text, Type.ASSISTIVE_NOTIFICATION);
 		// Customize it

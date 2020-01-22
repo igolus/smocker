@@ -8,9 +8,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.jenetics.smocker.threading.ExecutorBean;
+import com.jenetics.smocker.ui.SmockerUI;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 public class LoggerPanel extends VerticalLayout {
@@ -74,6 +76,7 @@ public class LoggerPanel extends VerticalLayout {
 		}
 		logTextArea.setValue(null);
 		logTextArea.setValue(buffer.toString());
+		SmockerUI.getInstance().push();
 	}
 
 	public void appendMessage(Level level, String message, Exception ex) {

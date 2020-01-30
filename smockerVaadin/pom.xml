@@ -38,7 +38,7 @@
 		<google-json.version>1.1</google-json.version>
 		<vaadin-sliderpanel.version>1.4.2</vaadin-sliderpanel.version>
 		<version.wildfly-swarm>2018.3.3</version.wildfly-swarm>
-		<easyApp.version>0.1</easyApp.version>
+		<easyApp.version>0.2</easyApp.version>
 		<apache.commons.version>3.7</apache.commons.version>
 		<commons-collections4.version>4.1</commons-collections4.version>
 		<lucene.version>7.4.0</lucene.version>

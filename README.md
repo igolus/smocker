@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/igolus/smocker.svg?branch=master)](https://travis-ci.com/igolus/smocker)
+
 ## Visit http://www.smocker.org/
 
 # What is Smocker ?

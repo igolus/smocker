@@ -1,4 +1,5 @@
-[![Build Status](https://travis-ci.com/igolus/smocker.svg?branch=master)](https://travis-ci.com/igolus/smocker)
+[![Build Status](https://img.shields.io/travis/igolus/smocker/master?logo=travis)](https://travis-ci.org/igolus/smocker)
+[![Docker Repository](https://img.shields.io/badge/docker-igolus%2Fsmocker-blue?logo=docker)](https://hub.docker.com/r/igolus/smocker) 
 
 ## Visit http://www.smocker.org/
 
@@ -87,7 +88,25 @@ Then add java program you want to smock: java %SMOCKER_JAVA_ARGS% ....
 
 #### Run Wildfly
 
+##### With a local fat wildfly
+
+Download the server part [here](https://www.smocker.org/install/)
+
+Adapt the [Install Folder]/bin/standalone.bat or standalone.sh to set your Java Home (if needed)
+
 Simply run standalone.bat or standalone.sh in [Smocker_Server]\wildfly-13.0.0.Final-Smocker\bin folder.
+
+##### With Docker 
+
+```
+docker pull igolus/smocker
+docker run -p 8080:8080 igolus/smocker
+```
+
+You can test with [Play with docker](https://labs.play-with-docker.com/)
+
+##### Enjoy
+
 Use firefox to browse http://localhost:8080/smocker/
 
 ## Licence

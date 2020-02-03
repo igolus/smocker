@@ -1,4 +1,4 @@
-[![Build Status](https://img.shields.io/travis/igolus/smocker/master?logo=travis)](https://travis-ci.org/igolus/smocker)
+[![Build Status](https://travis-ci.com/igolus/smocker.svg?branch=master)](https://travis-ci.com/igolus/smocker)
 [![Docker Repository](https://img.shields.io/badge/docker-igolus%2Fsmocker-blue?logo=docker)](https://hub.docker.com/r/igolus/smocker) 
 
 ## Visit http://www.smocker.org/
@@ -102,8 +102,6 @@ Simply run standalone.bat or standalone.sh in [Smocker_Server]\wildfly-13.0.0.Fi
 docker pull igolus/smocker
 docker run -p 8080:8080 igolus/smocker
 ```
-
-You can test with [Play with docker](https://labs.play-with-docker.com/)
 
 ##### Enjoy
 

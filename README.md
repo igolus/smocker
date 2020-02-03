@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.com/igolus/smocker.svg?branch=master)](https://travis-ci.com/igolus/smocker)
-[![Docker Repository](https://img.shields.io/badge/docker-igolus%2Fsmocker-blue?logo=docker)](https://hub.docker.com/r/igolus/smocker) 
+[![Docker Repository](https://img.shields.io/badge/docker-igolus%2Fsmocker-blue?logo=docker)](https://hub.docker.com/r/igolus/smocker)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ## Visit http://www.smocker.org/
 

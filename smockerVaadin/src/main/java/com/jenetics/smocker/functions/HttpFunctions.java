@@ -17,6 +17,9 @@ import org.apache.http.HttpEntity;
 import org.apache.http.ParseException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
@@ -37,18 +40,29 @@ public class HttpFunctions {
 		HttpGet request = new HttpGet(targetUrl);
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 		// add request headers
-		if (headerLine != null) {
-			String[] headers = headerLine.split("/");
-			for (int i = 0; headers != null && i < headers.length; i++) {
-				String[] headerInfo = headerLine.split(":");
-				if (headerInfo.length == 2) {
-					request.addHeader(headerInfo[0], headerInfo[1]);
-				}
-			}
-		}
+		addHeaders(headerLine, request);
 		
 		CloseableHttpResponse response = httpClient.execute(request);
 		
+		return getStringFromResponse(response);
+	}
+	
+	@SmockerMethod
+	public static String smockerHttpPostJson(String url, String headerLine, String body) throws IOException {
+
+		CloseableHttpClient httpClient = HttpClients.createDefault();
+        HttpPost post = new HttpPost(url);
+        addHeaders(headerLine, post);
+        StringBuilder json = new StringBuilder();
+        json.append(body);
+
+        post.setEntity(new StringEntity(json.toString()));
+        CloseableHttpResponse response = httpClient.execute(post);
+        return getStringFromResponse(response);
+    }
+
+
+	private static String getStringFromResponse(CloseableHttpResponse response) throws IOException {
 		StringBuffer sb = new StringBuffer();
 		Header[] allHeaders = response.getAllHeaders();
 		for (int i = 0; i < allHeaders.length; i++) {
@@ -65,4 +79,20 @@ public class HttpFunctions {
 		}
 		return null;
 	}
+
+
+	private static void addHeaders(String headerLine, HttpRequestBase request) {
+		if (headerLine != null) {
+			String[] headers = headerLine.split("/");
+			for (int i = 0; headers != null && i < headers.length; i++) {
+				String[] headerInfo = headerLine.split(":");
+				if (headerInfo.length == 2) {
+					request.addHeader(headerInfo[0], headerInfo[1]);
+				}
+			}
+		}
+	}
+	
+	
+	
 }

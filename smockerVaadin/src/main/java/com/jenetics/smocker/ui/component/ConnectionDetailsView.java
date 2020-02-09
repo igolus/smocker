@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 
 import com.jenetics.smocker.dao.DaoManagerByModel;
@@ -33,6 +34,7 @@ import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.Tree.ItemClick;
+import com.vaadin.ui.components.grid.SingleSelectionModel;
 import com.vaadin.ui.Window;
 
 
@@ -40,7 +42,6 @@ import com.vaadin.ui.Window;
 public class ConnectionDetailsView extends AbstractConnectionDetails {
 
 	private Connection connection;
-	private GridLayout grid = null;
 	private Tree<CommunicationDateDisplay> menu;
 	private TreeData<CommunicationDateDisplay> treeData;
 	private TreeDataProvider<CommunicationDateDisplay> treeDataProvider;
@@ -50,18 +51,23 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 
 	protected transient IDaoManager<Connection> daoManagerConnection = DaoManagerByModel.getDaoManager(Connection.class);
 	private Set<Communication> communications;
+	private HorizontalSplitPanel mainLayout = new HorizontalSplitPanel();
+
 
 	public ConnectionDetailsView(Connection connection) {
 		super();
-		HorizontalSplitPanel mainLayout = new HorizontalSplitPanel();
 
 		this.connection = connection;
 
 		menu = new Tree<>();
+		menu.setStyleName("NoSelect");
+
+
 		menu.setSelectionMode(SelectionMode.SINGLE);
 		treeData = new TreeData<>();
 		treeDataProvider = new TreeDataProvider<>(treeData);
 		menu.setDataProvider(treeDataProvider);
+
 		menu.addSelectionListener(this::menuSelectionChange);
 
 		fillCommunication();
@@ -70,12 +76,9 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 		treeDataProvider.refreshAll();
 
 		menu.setSizeFull();
-
-		grid = new GridLayout(2, 1);
-		grid.setSizeFull();
+		((SingleSelectionModel)menu.getSelectionModel()).setDeselectAllowed(false);
 
 		mainLayout.setFirstComponent(menu);
-		mainLayout.setSecondComponent(grid);
 		mainLayout.setSplitPosition(23);
 		mainLayout.setSizeFull();
 		addComponent(mainLayout);
@@ -96,7 +99,7 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 	public Connection getConnection() {
 		return connection;
 	}
-	
+
 
 	public void menuSelectionChange(SelectionEvent<CommunicationDateDisplay> event) {
 		if (refreshClickable != null) {
@@ -127,7 +130,7 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 		finally {
 			DaoSingletonLock.unlock();
 		}
-		
+
 	}
 
 	public void treeItemClick(ItemClick<CommunicationDateDisplay> event) {
@@ -135,33 +138,39 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 		selectCommunication(comm);
 	}
 
+	/**
+	 * Trigger when communication is selected
+	 * @param comm
+	 */
 	private void selectCommunication(Communication comm) {
+		if (selectedCommunication == comm) {
+			return;
+		}
 		String[] decodedCommunication = getDecodedCommunication(comm);
-		
-		
+		//recreate the grid and fill it
+
+		GridLayout grid = new GridLayout(2, 1);
+		grid.setSizeFull();
+
+
 		String request = NetworkReaderUtility.decode(comm.getRequest());
 		ComponentWithDisplayChange componentWithDisplayChangeInput = NetDisplayerFactoryInput.getComponent(request, comm);
 		Component inputComponent = componentWithDisplayChangeInput.getComponent();
-		inputComponent.setSizeFull();
-		grid.removeComponent(0, 0);
-		grid.addComponent(inputComponent, 0, 0);
 		componentWithDisplayChangeInput.selectionValue(decodedCommunication[0]);
+		inputComponent.setSizeFull();
+		grid.addComponent(inputComponent, 0, 0);
 
 		String response = NetworkReaderUtility.decode(comm.getResponse());
 		ComponentWithDisplayChange componentWithDisplayChangeOutput = NetDisplayerFactoryOutput.getComponent(response, comm);
 		Component outputComponent = componentWithDisplayChangeOutput.getComponent();
-		outputComponent.setSizeFull();
-		grid.removeComponent(1, 0);
-		grid.addComponent(outputComponent, 1, 0);
+
 		componentWithDisplayChangeOutput.selectionValue(decodedCommunication[1]);
+		outputComponent.setSizeFull();
 
+		grid.addComponent(outputComponent, 1, 0);
 		selectedCommunication = comm;
+		mainLayout.setSecondComponent(grid);
 		refreshClickable();
-	}
-
-	public void cleanGrid() {
-		grid.removeComponent(0, 0);
-		grid.removeComponent(1, 0);
 	}
 
 	public void clean() {
@@ -182,7 +191,6 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 
 
 	private void postDeleteUiUpdate() {
-		cleanGrid();
 		fillCommunication();
 		refreshClickable();
 	}
@@ -200,7 +208,7 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 			treeData.removeItem(communicationDateDisplay);
 		}
 	}
-	
+
 	public void deleteCommunications(CommunicationsRemoved communicationsRemoved) {
 		List<Communication> commList = communicationsRemoved.getCommList();
 		for (Communication comm : commList) {

@@ -128,7 +128,7 @@ public class ConnectionMockedManager extends EasyAppLayout {
 		
 		
 		treeGrid.setItems(listItems);
-		
+		treeGrid.setStyleName("NoSelect");
 		
 		treeData.clear();
 		root = new TreeGridMockedItem();

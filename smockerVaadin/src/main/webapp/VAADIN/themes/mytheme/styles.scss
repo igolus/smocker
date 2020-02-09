@@ -178,6 +178,7 @@
     	.v-button:hover  {
     		//@include buttonForContainer($buttonHoverContainergroundColor, $buttonHoverContainerContentColor)
     	}
+    	user-select: none;
     }
  	
 	.v-button:focus:after {
@@ -214,6 +215,38 @@
 	.v-vertical-no-space > .v-spacing {
 	    height: 30px;
 	}
+	
+	.v-grid-cell {
+        user-select: none;
+    }
+    
+    .v-treegrid-NoSelect{
+        user-select: none;
+        
+        .v-treegrid-cell {
+    		user-select: none;
+    	}
+    	
+    	v-treegrid-row-selected {
+    		user-select: none;
+    	}
+    }
+    
+    .v-tree8-NoSelect{
+        user-select: none;
+        
+        .v-tree8-cell {
+    		user-select: none;
+    	}
+    	
+    	v-tree8-cell-selected {
+    		user-select: none;
+    	}
+    }
+    
+    .v-treegrid-cell-NoSelect {
+    	user-select: none;
+    }
 	
 	.v-accordion-Nav {
 		.v-accordion-item {

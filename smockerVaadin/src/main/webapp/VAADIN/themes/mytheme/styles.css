@@ -15162,6 +15162,7 @@ div.v-layout.v-horizontal.v-widget {
 	margin: 0px 0px 5px 0px;
 	background-color: #FFFFFF;
 	margin: none;
+	user-select: none;
 }
 
 .mytheme .v-button:focus:after {
@@ -15234,6 +15235,38 @@ div.v-layout.v-horizontal.v-widget {
 
 .mytheme .v-vertical-no-space > .v-spacing {
 	height: 30px;
+}
+
+.mytheme .v-grid-cell {
+	user-select: none;
+}
+
+.mytheme .v-treegrid-NoSelect {
+	user-select: none;
+}
+
+.mytheme .v-treegrid-NoSelect .v-treegrid-cell {
+	user-select: none;
+}
+
+.mytheme .v-treegrid-NoSelect v-treegrid-row-selected {
+	user-select: none;
+}
+
+.mytheme .v-tree8-NoSelect {
+	user-select: none;
+}
+
+.mytheme .v-tree8-NoSelect .v-tree8-cell {
+	user-select: none;
+}
+
+.mytheme .v-tree8-NoSelect v-tree8-cell-selected {
+	user-select: none;
+}
+
+.mytheme .v-treegrid-cell-NoSelect {
+	user-select: none;
 }
 
 .mytheme .v-accordion-Nav .v-accordion-item {

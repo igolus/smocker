@@ -10,6 +10,7 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
 
 public class JSConfigViewer implements ComponentWithDisplayChange {
 
@@ -22,6 +23,8 @@ public class JSConfigViewer implements ComponentWithDisplayChange {
 	private JsFilterAndDisplay jsDisplayAndFilter;
 
 	private boolean input;
+
+	private String content;
 
 	public JSConfigViewer(String defaultTitle, JsFilterAndDisplay jsDisplayAndFilter, boolean input) {
 		super();
@@ -47,31 +50,35 @@ public class JSConfigViewer implements ComponentWithDisplayChange {
 		VerticalLayout vlayout = new VerticalLayout();
 		vlayout.addComponent(areaOutputJsDisplay);
 		tabsheet.addTab(areaOutputJsDisplay, SmockerUI.getBundleValue("jsDisplay"));
+		tabsheet.addSelectedTabChangeListener(this::tabbedChanged);
 
 		tabsheet.setSizeFull();
 		return tabsheet;
 	}
+	
+	private void tabbedChanged(SelectedTabChangeEvent event) {
+		Component selected = tabsheet.getSelectedTab();
+		if (areaOutputJsDisplay == selected) {
+		String functionDisplay = null;
+		   if (input) {
+				functionDisplay = jsDisplayAndFilter.getFunctionInputDisplay();
+			}
+			else {
+				functionDisplay = jsDisplayAndFilter.getFunctionOutputDisplay();
+			}
+			try {
+				String formattedDisplay = JSEvaluator.formatAndDisplay(functionDisplay, content);
+				areaOutputJsDisplay.setValue(formattedDisplay);
+			} catch (SmockerException e) {
+				areaOutputJsDisplay.setValue(SmockerUtility.getStackTrace(e));
+			}
+		}
+	}
 
 	@Override
 	public void selectionValue(String content) {
-
+		this.content = content;
 		areaOutput.setValue(content);
-		String functionDisplay = null;
-		if (input) {
-			functionDisplay = jsDisplayAndFilter.getFunctionInputDisplay();
-		}
-		else {
-			functionDisplay = jsDisplayAndFilter.getFunctionOutputDisplay();
-		}
-		
-		String formattedDisplay;
-		try {
-			formattedDisplay = JSEvaluator.formatAndDisplay(functionDisplay, content);
-			areaOutputJsDisplay.setValue(formattedDisplay);
-		} catch (SmockerException e) {
-			areaOutputJsDisplay.setValue(SmockerUtility.getStackTrace(e));
-		}
-		
 	}
 
 }

@@ -83,7 +83,7 @@ public class HttpFunctions {
 
 	private static void addHeaders(String headerLine, HttpRequestBase request) {
 		if (headerLine != null) {
-			String[] headers = headerLine.split("/");
+			String[] headers = headerLine.split("|");
 			for (int i = 0; headers != null && i < headers.length; i++) {
 				String[] headerInfo = headerLine.split(":");
 				if (headerInfo.length == 2) {

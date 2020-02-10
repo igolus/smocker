@@ -22,19 +22,12 @@ public class NetDisplayerFactoryOutput {
 	private static ResourceBundle bundle = ResourceBundle.getBundle("BundleUI");
 
 	public static ComponentWithDisplayChange getComponent(String socketOutput, Communication comm) {
-		
-		//check if we get a mapper for the display 
 		JsFilterAndDisplay jsDisplayAndFilter = DaoConfig.findJsDisplayAndFilter(comm.getConnection());
 		String functionOutputDisplay = jsDisplayAndFilter.getFunctionOutputDisplay();
 		if (!StringUtils.isEmpty(functionOutputDisplay) ) {
 			return new JSConfigViewer(bundle.getString("Output"), jsDisplayAndFilter, false);
 		}
-		
-//		if (NetworkReaderUtility.readHeaderValue(socketOutput, NetworkReaderUtility.HEADER_CONTENT_TYPE) != null && 
-//				NetworkReaderUtility.readHeaderValue(socketOutput, NetworkReaderUtility.HEADER_CONTENT_TYPE).trim()
-//				.startsWith(NetworkReaderUtility.CONTENT_TYPE_JSON)) {
-//			return new JsonViewer(bundle.getString("Output"));
-//		}
+
 		return new DefaultViewer(bundle.getString("Output"));
 	}
 }

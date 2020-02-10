@@ -6,11 +6,14 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 
+
 import com.jenetics.smocker.model.EntityWithId;
 import com.jenetics.smocker.model.Scenario;
 import com.jenetics.smocker.ui.SmockerUI;
 
 public class DaoManagerByModel {
+
+	private static final String UNDEFINED = "undefined";
 
 	static {
 		daoManagerByClass = new HashMap<>();
@@ -26,7 +29,10 @@ public class DaoManagerByModel {
 
 	public static Scenario getUNDEFINED_SCENARIO() {
 		DaoManager<Scenario> daoManagerScenario = getDaoManager(Scenario.class);
-		return daoManagerScenario.findById(UNDEFINED_SCENARIO.getId());
+		if (daoManagerScenario != null) {
+			return daoManagerScenario.findById(UNDEFINED_SCENARIO.getId());
+		}
+		return null;
 	}
 
 	public static <T extends EntityWithId> DaoManager<T> getDaoManager(Class<T> typeParameterClass) {
@@ -51,9 +57,9 @@ public class DaoManagerByModel {
 		if (daoManagerScenario != null) {
 			if (daoManagerScenario.listAll().isEmpty()) {
 				Scenario scenario = new Scenario();
-				scenario.setName(SmockerUI.getBundleValue("undefined"));
-				scenario.setHost(SmockerUI.getBundleValue("undefined"));
-				scenario.setIp(SmockerUI.getBundleValue("undefined"));
+				scenario.setName(SmockerUI.getBundleValue(UNDEFINED));
+				scenario.setHost(SmockerUI.getBundleValue(UNDEFINED));
+				scenario.setIp(SmockerUI.getBundleValue(UNDEFINED));
 				scenario.setPort(0);
 				scenario = daoManagerScenario.create(scenario);
 				DaoManagerByModel.UNDEFINED_SCENARIO = scenario;

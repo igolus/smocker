@@ -1,16 +1,6 @@
 package com.jenetics.smocker.functions;
 
 import java.io.IOException;
-import java.io.StringReader;
-import java.util.Arrays;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -23,9 +13,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import com.jenetics.smocker.jseval.SmockerFunctionClass;
 import com.jenetics.smocker.jseval.SmockerMethod;
@@ -38,43 +25,43 @@ public class HttpFunctions {
 			throws ParseException, IOException 
 	{
 		HttpGet request = new HttpGet(targetUrl);
-		CloseableHttpClient httpClient = HttpClients.createDefault();
-		// add request headers
-		addHeaders(headerLine, request);
-		
-		CloseableHttpResponse response = httpClient.execute(request);
-		
-		return getStringFromResponse(response);
+		try (CloseableHttpClient httpClient = HttpClients.createDefault()){
+			// add request headers
+			addHeaders(headerLine, request);
+			CloseableHttpResponse response = httpClient.execute(request);
+			return getStringFromResponse(response);
+		}
 	}
-	
+
 	@SmockerMethod
 	public static String smockerHttpPostJson(String url, String headerLine, String body) throws IOException {
+		try (CloseableHttpClient httpClient = HttpClients.createDefault()){
+			HttpPost post = new HttpPost(url);
+			addHeaders(headerLine, post);
+			StringBuilder json = new StringBuilder();
+			json.append(body);
 
-		CloseableHttpClient httpClient = HttpClients.createDefault();
-        HttpPost post = new HttpPost(url);
-        addHeaders(headerLine, post);
-        StringBuilder json = new StringBuilder();
-        json.append(body);
-
-        post.setEntity(new StringEntity(json.toString()));
-        CloseableHttpResponse response = httpClient.execute(post);
-        return getStringFromResponse(response);
-    }
+			post.setEntity(new StringEntity(json.toString()));
+			CloseableHttpResponse response = httpClient.execute(post);
+			httpClient.close();
+			return getStringFromResponse(response);
+		}
+	}
 
 
 	private static String getStringFromResponse(CloseableHttpResponse response) throws IOException {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		Header[] allHeaders = response.getAllHeaders();
 		for (int i = 0; i < allHeaders.length; i++) {
 			sb.append(allHeaders[i].toString()).append(System.lineSeparator());
 		}
 		sb.append(System.lineSeparator());
-		
+
 		HttpEntity entity = response.getEntity();
 		if (entity != null) {
 			// return it as a String
 			sb.append(EntityUtils.toString(entity));
-			
+
 			return sb.toString();
 		}
 		return null;
@@ -92,7 +79,7 @@ public class HttpFunctions {
 			}
 		}
 	}
-	
-	
-	
+
+
+
 }

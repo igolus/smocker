@@ -51,12 +51,14 @@ public class ComboWithId<T extends EntityWithId> extends ComboBox {
 		if (entity == null) {
 			if (other.entity != null)
 				return false;
-		} else if (!entity.equals(other.entity))
+		} 
+		else if (!entity.equals(other.entity))
 			return false;
 		if (uiId == null) {
 			if (other.uiId != null)
 				return false;
-		} else if (!uiId.equals(other.uiId))
+		} 
+		else if (!uiId.equals(other.uiId))
 			return false;
 		return true;
 	}

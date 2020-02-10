@@ -62,7 +62,7 @@ public class HostAndPortRange {
 		catch (NumberFormatException e) {
 			String[] portRange = portAndRangeValue.split("-");
 			if (portRange.length != 2) {
-				return null;
+				return new int[0];
 			}
 			
 			int minPort=0;
@@ -72,18 +72,18 @@ public class HostAndPortRange {
 				minPort = Integer.parseInt(portRange[0]);
 			}
 			catch (NumberFormatException e1) {
-				return null;
+				return new int[0];
 			}
 			
 			try {
 				maxPort = Integer.parseInt(portRange[1]);
 			}
 			catch (NumberFormatException e2) {
-				return null;
+				return new int[0];
 			}
 			
 			if (minPort > maxPort) {
-				return null;
+				return new int[0];
 			}
 			
 			return new int[] {minPort, maxPort};

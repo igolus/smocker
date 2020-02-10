@@ -57,10 +57,7 @@ public class JavaApplicationMocked implements EntityWithId {
 			return false;
 		}
 		JavaApplicationMocked other = (JavaApplicationMocked) obj;
-		if (id != null && !id.equals(other.id)) {
-			return false;
-		}
-		return true;
+		return (id == null || id.equals(other.id));
 	}
 
 	@Override

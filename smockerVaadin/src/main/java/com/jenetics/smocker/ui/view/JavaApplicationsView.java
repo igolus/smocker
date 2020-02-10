@@ -54,10 +54,6 @@ homeView = true, rootViewParent = ConnectionsRoot.class, bundle=SmockerUI.BUNDLE
 public class JavaApplicationsView extends AbstractConnectionTreeView<JavaApplication, Connection, Communication, ConnectionDetailsView> 
 implements RefreshableView, SearcheableView {
 
-	private static final String FORMAT_DISPLAY_OUTPUT_BUTTON = "Format_Display_Output_Button";
-	private static final String FORMAT_DISPLAY_INPUT_BUTTON = "Format_Display_Input_Button";
-
-
 	public static final DaoManager<JsFilterAndDisplay> daoManagerJsFilterAndDisplay = DaoManagerByModel.getDaoManager(JsFilterAndDisplay.class);
 
 	private transient HashMap<JavaApplication, List<SwitchWithEntity<Connection>>> switchButtonsByJavaApp = new HashMap<>();

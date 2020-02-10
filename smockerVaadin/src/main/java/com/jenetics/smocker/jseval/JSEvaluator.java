@@ -36,7 +36,10 @@ import com.jenetics.smocker.util.SmockerException;
 import com.jenetics.smocker.util.SmockerRuntimeException;
 
 public class JSEvaluator {
-	
+
+	private static final String TARGET_HOST = "targetHost";
+	private static final String REAL_INPUT = "realInput";
+
 	private JSEvaluator() {
 		super();
 	}
@@ -62,9 +65,9 @@ public class JSEvaluator {
 
 		String script = "var output = matchAndReturnOutput(recordDate, realInput, bas64Input,"
 				+ "providedInput, providedOutput, index, targetHost, targetPort);\n";
-		
+
 		runtimeAndLogger.getRuntime().add("recordDate", comm.getDateTime().toString());
-		runtimeAndLogger.getRuntime().add("realInput", realInput);
+		runtimeAndLogger.getRuntime().add(REAL_INPUT, realInput);
 		runtimeAndLogger.getRuntime().add("index", index);
 		if (base64Input == null) {
 			base64Input = NetworkReaderUtility.encode(realInput);
@@ -74,7 +77,7 @@ public class JSEvaluator {
 				"providedInput", providedInput == null ? NetworkReaderUtility.decode(comm.getRequest()) : providedInput);
 		runtimeAndLogger.getRuntime().add(
 				"providedOutput", providedOutput== null ? NetworkReaderUtility.decode(comm.getResponse()) : providedOutput);
-		runtimeAndLogger.getRuntime().add("targetHost", comm.getConnection().getHost());
+		runtimeAndLogger.getRuntime().add(TARGET_HOST, comm.getConnection().getHost());
 		runtimeAndLogger.getRuntime().add("targetPort", comm.getConnection().getPort());
 
 
@@ -82,21 +85,21 @@ public class JSEvaluator {
 			code = comm.getSourceJs();
 		}
 		if (code == null) {
-			return null;
+			return new String[0];
 		}
-		
+
 		InputStream inputStream = JSEvaluator.class
 				.getClassLoader().getResourceAsStream("function.js");
 		String source = null;
-	    try (final Reader reader = new InputStreamReader(inputStream)) {
-	    	source = CharStreams.toString(reader);
-	    }
-		
+		try (final Reader reader = new InputStreamReader(inputStream)) {
+			source = CharStreams.toString(reader);
+		}
+
 		//String embeddedCode = 
 		String globalCode = DaoConfig.getSingleConfig().getGlobalJsFunction();
 		code = code + "\n" + (globalCode != null ? globalCode : "");
 		code = code + "\n" + (source != null ? source : "");
-		
+
 		String output;
 
 		try {
@@ -112,26 +115,25 @@ public class JSEvaluator {
 			SmockerUI.log(Level.SEVERE, ERROR_EVALUATING_SCRIPT, ex);
 			throw new SmockerException(ex);
 		}
-		
+
 		log(runtimeAndLogger.getCallBack());
 		return new String[] {runtimeAndLogger.getCallBack().toString(), output};
 	}
-	
-	
+
+
 
 	private static void registerAnnotedFunction(V8 runtime) {
 		String scannedPackages = Optional.ofNullable(
 				System.getProperty("smockerFunctionPackages")).orElse("");
 		String[] packagesArray = scannedPackages.split(",");
 		List<String> listPackageToScan = new ArrayList<>(Arrays.asList(packagesArray));
-		//add Internal smocker Package
 		listPackageToScan.add("com.jenetics.smocker.jseval.SmockerFunction");
-		
+
 		//us map to avoid performance issues
 		if (mapMethodNameJavaCallBack == null) {
 			mapMethodNameJavaCallBack = new HashMap<>();
 			mapMethodNameJavaVoidCallBack = new HashMap<>();
-			
+
 			for (String packageToScan : listPackageToScan) {
 				Reflections reflections = new Reflections(packageToScan);
 				Set<Class<?>> annotatedRootView = reflections.getTypesAnnotatedWith(SmockerFunctionClass.class);
@@ -153,31 +155,28 @@ public class JSEvaluator {
 				}
 			}
 		}
-		
+
 		for (Map.Entry<String, JavaVoidCallback> entry : mapMethodNameJavaVoidCallBack.entrySet()) {
 			runtime.registerJavaMethod(entry.getValue(), entry.getKey());
 		}
 		for (Map.Entry<String, JavaCallback> entry : mapMethodNameJavaCallBack.entrySet()) {
 			runtime.registerJavaMethod(entry.getValue(), entry.getKey());
 		}
-		
-
 	}
-	
+
 	private static JavaCallback getJavaCallBack(Method method) {
-		JavaCallback callBack = new JavaCallback() {
-			@Override
-			public Object invoke(V8Object receiver, V8Array parameters) {
-				try {
-					return invokeAndReturn(method, parameters);
-				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-					throw new SmockerRuntimeException(e);
-				}
+
+		JavaCallback callBack = (V8Object receiver, V8Array parameters) -> {
+			try {
+				return invokeAndReturn(method, parameters);
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				throw new SmockerRuntimeException(e);
 			}
 		};
+
 		return callBack;
 	}
-	
+
 	private static JavaVoidCallback getJavaVoidCallBack(Method method) {
 		JavaVoidCallback callBack = new JavaVoidCallback() {
 			@Override	
@@ -206,13 +205,13 @@ public class JSEvaluator {
 	}
 
 	public static RuntimeAndLogger getRuntimeAndLogger() {
-			V8 runtime = V8.createV8Runtime();
+		V8 runtime = V8.createV8Runtime();
 
-			LoggerCallBack logger = new LoggerCallBack();
-			runtime.registerJavaMethod(logger, "smockerLog");
-			
-			registerAnnotedFunction(runtime);
-			return new RuntimeAndLogger(runtime, logger);
+		LoggerCallBack logger = new LoggerCallBack();
+		runtime.registerJavaMethod(logger, "smockerLog");
+
+		registerAnnotedFunction(runtime);
+		return new RuntimeAndLogger(runtime, logger);
 	}
 
 	public static boolean filter(String functionName, String input, String output) throws SmockerException {
@@ -222,7 +221,7 @@ public class JSEvaluator {
 
 		RuntimeAndLogger runtimeAndLogger = getRuntimeAndLogger();
 		String script = "var match = " + functionName +  "(realInput, realOutput);\n";
-		runtimeAndLogger.getRuntime().add("realInput", input);
+		runtimeAndLogger.getRuntime().add(REAL_INPUT, input);
 		runtimeAndLogger.getRuntime().add("realOutput", output);
 		Boolean result = false;
 		try {
@@ -236,18 +235,18 @@ public class JSEvaluator {
 		log(runtimeAndLogger.getCallBack());
 		return result;
 	}
-	
+
 	public static void trace(String functionName, String input, String output) 
 			throws SmockerException {
 		String code = DaoConfig.getSingleConfig().getTraceFunctionJsFunction();
 		code = appendGlobalCode(code);
-		
+
 		RuntimeAndLogger runtimeAndLogger = getRuntimeAndLogger();
-		
+
 		String script =  functionName +  "(realInput, realOutput);\n";
-		runtimeAndLogger.getRuntime().add("realInput", input);
+		runtimeAndLogger.getRuntime().add(REAL_INPUT, input);
 		runtimeAndLogger.getRuntime().add("realOutput", output);
-		
+
 		try {
 			runtimeAndLogger.getRuntime().executeVoidScript(script + code);
 		}
@@ -265,7 +264,7 @@ public class JSEvaluator {
 		RuntimeAndLogger runtimeAndLogger = getRuntimeAndLogger();
 
 		String script = "var ret = " + functionName +  "(realInput);\n";
-		runtimeAndLogger.getRuntime().add("realInput", input);
+		runtimeAndLogger.getRuntime().add(REAL_INPUT, input);
 		String output = null;
 		try {
 			runtimeAndLogger.getRuntime().executeVoidScript(script + code);
@@ -324,7 +323,7 @@ public class JSEvaluator {
 		public LoggerCallBack getCallBack() {
 			return callBack;
 		}
-		
+
 		public void reset() {
 			callBack.reset();
 		}

@@ -220,15 +220,6 @@ public class SmockerContainer {
 	private byte[] matchOutput = null;
 	private boolean noMatch = false;
 	
-	private static String bytesToHex(byte[] hashInBytes) {
-
-        StringBuilder sb = new StringBuilder();
-        for (byte b : hashInBytes) {
-            sb.append(String.format("%02x", b));
-        }
-        return sb.toString();
-
-    }
 	
 	public byte[] getMatchMock () throws UnsupportedEncodingException {
 		if (noMatch) {

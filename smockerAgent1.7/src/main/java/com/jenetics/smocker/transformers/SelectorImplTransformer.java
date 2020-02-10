@@ -31,8 +31,6 @@ public class SelectorImplTransformer {
 
 	private void defineNewMethod(CtClass ctClass) throws CannotCompileException, NotFoundException {
 		ctClass.setModifiers(Modifier.PUBLIC);
-		
-		//ctClass.getDeclaredMethod("publicRegister").setModifiers(Modifier.PUBLIC);
 
 		final String publicRegisterBody = "public Object publicRegister (nio.channels.spi.AbstractSelectableChannel channel, int ops, Object attachment) {"
 				+ " try{" 
@@ -50,40 +48,8 @@ public class SelectorImplTransformer {
 		
 		CtMethod newmethod = CtNewMethod.make("public void testPrint() { System.out.println(); }",ctClass);
 		ctClass.addMethod(newmethod);
-		
-//		CtMethod writeMethodInitial = ctClass.getDeclaredMethod("selectNow");
-//		writeMethodInitial.setName("selectNowNew");
-//		writeMethodInitial.setModifiers(Modifier.PUBLIC);
-//		ctClass.setModifiers(Modifier.PUBLIC);
-		
-		
-		final String selectNowBody = "public int selectNowS() {"
-		//+ " try{" 
-		//+ " 	return com.jenetics.smocker.util.TransformerUtility.selectNow($0);"
-		+ " 	return 0;"
-		//+ "} catch (Throwable t) "
-		//+ "{ "
-		//+ "     throw t; "
-		//+ "}" 
-		+ "}";
 
-//		CtMethod selectNowNew = CtNewMethod.make(selectNowBody, ctClass);
-//		ctClass.addMethod(selectNowNew);
-		
-//		ctClass.getDeclaredMethods("register")[0].setModifiers(Modifier.PUBLIC);
 
-//		final String getselectedKeysBody = "public Object getSelectedKeys () {"
-//				+ " try{" 
-//				+ " 	return $0.selectedKeys;"
-//				+ "} catch (Throwable t) "
-//				+ "{ "
-//				+ "     t.printStackTrace(); "
-//				+ "     throw t; "
-//				+ "}" 
-//				+ "}";
-//		
-//		CtMethod getselectedKeys = CtNewMethod.make(getselectedKeysBody, ctClass);
-//		ctClass.addMethod(getselectedKeys);
 	}
 
 	

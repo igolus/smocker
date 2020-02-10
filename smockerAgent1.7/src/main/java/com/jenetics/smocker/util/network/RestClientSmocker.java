@@ -18,6 +18,7 @@ import com.jenetics.smocker.util.TransformerUtility;
 
 public class RestClientSmocker extends RESTClient {
 
+	private static final String DELIMITER = "/";
 	private static final String SMOCKER_REST_PATH = "/smocker/rest";
 	private static final String SMOCKER_JAVAAPP_PATH = "/javaapplications";
 	private static final String SMOCKER_ADDCONN = "/manageJavaApplication/addConnection";
@@ -102,7 +103,7 @@ public class RestClientSmocker extends RESTClient {
 		.append(smockerContainer.getIp())
 		.append("\"")
 		.append("}");
-		String path = SMOCKER_REST_PATH + SMOCKER_ADDCONN + "/" + javaAppId;
+		String path = SMOCKER_REST_PATH + SMOCKER_ADDCONN + DELIMITER + javaAppId;
 		try {
 			return put(buffer.toString(), path, null);
 		} catch (Exception e) {
@@ -152,7 +153,7 @@ public class RestClientSmocker extends RESTClient {
 					.append("\",  \"dateTime\":\"")
 					.append(getCurrentDate())
 					.append("\"}");
-					String path = SMOCKER_REST_PATH + SMOCKER_ADDCOMM + "/" + javaAppId + "/" + idConnection;
+					String path = SMOCKER_REST_PATH + SMOCKER_ADDCOMM + DELIMITER + javaAppId + DELIMITER + idConnection;
 					return put(buffer.toString(), path, headers);
 				} catch (Exception e) {
 					MessageLogger.logThrowable(e, getClass());
@@ -186,7 +187,7 @@ public class RestClientSmocker extends RESTClient {
 				.append("\",  \"callerStack\":\"")
 				.append(encode(smockerContainer.getStackTrace()))
 				.append("\"}");
-				String path = SMOCKER_REST_PATH + SMOCKER_ADDCOMM + "/" + javaAppId + "/" + connectionId;
+				String path = SMOCKER_REST_PATH + SMOCKER_ADDCOMM + DELIMITER + javaAppId + DELIMITER + connectionId;
 				return put(buffer.toString(), path, headers);
 			} catch (Exception e) {
 				MessageLogger.logThrowable(e, getClass());

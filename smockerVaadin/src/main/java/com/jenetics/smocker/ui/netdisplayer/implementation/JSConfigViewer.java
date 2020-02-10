@@ -26,6 +26,8 @@ public class JSConfigViewer implements ComponentWithDisplayChange {
 
 	private String content;
 
+	private String formattedDisplay;
+
 	public JSConfigViewer(String defaultTitle, JsFilterAndDisplay jsDisplayAndFilter, boolean input) {
 		super();
 		this.jsDisplayAndFilter = jsDisplayAndFilter;
@@ -57,6 +59,10 @@ public class JSConfigViewer implements ComponentWithDisplayChange {
 	}
 	
 	private void tabbedChanged(SelectedTabChangeEvent event) {
+		//format the display only once
+		if (formattedDisplay != null) {
+			return;
+		}
 		Component selected = tabsheet.getSelectedTab();
 		if (areaOutputJsDisplay == selected) {
 		String functionDisplay = null;
@@ -67,9 +73,10 @@ public class JSConfigViewer implements ComponentWithDisplayChange {
 				functionDisplay = jsDisplayAndFilter.getFunctionOutputDisplay();
 			}
 			try {
-				String formattedDisplay = JSEvaluator.formatAndDisplay(functionDisplay, content);
+				formattedDisplay = JSEvaluator.formatAndDisplay(functionDisplay, content);
 				areaOutputJsDisplay.setValue(formattedDisplay);
 			} catch (SmockerException e) {
+				//display error in tab
 				areaOutputJsDisplay.setValue(SmockerUtility.getStackTrace(e));
 			}
 		}

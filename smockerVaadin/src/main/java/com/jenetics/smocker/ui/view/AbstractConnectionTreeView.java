@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -29,22 +28,15 @@ import com.vaadin.data.TreeData;
 import com.vaadin.data.provider.TreeDataProvider;
 import com.vaadin.event.selection.SelectionEvent;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.shared.ui.grid.ColumnResizeMode;
-import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Grid.ColumnResizeEvent;
-import com.vaadin.ui.Grid.ItemClick;
-import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
 import com.vaadin.ui.TabSheet.Tab;
-import com.vaadin.ui.components.grid.ColumnResizeListener;
-import com.vaadin.ui.components.grid.ItemClickListener;
-import com.vaadin.ui.components.grid.SingleSelectionModel;
-import com.vaadin.v7.event.ItemClickEvent;
 import com.vaadin.ui.TreeGrid;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.components.grid.SingleSelectionModel;
 
 /**
  * 

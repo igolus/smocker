@@ -68,10 +68,7 @@ public class JavaApplication implements EntityWithId {
 			return false;
 		}
 		JavaApplication other = (JavaApplication) obj;
-		if (id != null && !id.equals(other.id)) {
-			return false;
-		}
-		return true;
+		return (id == null || id.equals(other.id));
 	}
 
 	@Override

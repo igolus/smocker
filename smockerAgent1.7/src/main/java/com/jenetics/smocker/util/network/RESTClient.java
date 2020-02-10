@@ -10,6 +10,8 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Map;
 
+import com.jenetics.smocker.util.MessageLogger;
+
 
 /**
  * @author Riccardo Merolla
@@ -111,18 +113,21 @@ public class RESTClient {
 					wr.close();
 				}
 			} catch (IOException ex) {
+				MessageLogger.logThrowable(ex, this.getClass());
 			}
 			try {
 				if (is != null) {
 					is.close();
 				}
 			} catch (IOException ex) {
+				MessageLogger.logThrowable(ex, this.getClass());
 			}
 			try {
 				if (socket != null) {
 					socket.close();
 				}
 			} catch (IOException ex) {
+				MessageLogger.logThrowable(ex, this.getClass());
 			}
 
 		}

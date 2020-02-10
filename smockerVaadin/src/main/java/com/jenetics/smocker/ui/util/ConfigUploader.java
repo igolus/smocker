@@ -55,23 +55,6 @@ public class ConfigUploader implements Receiver, SucceededListener {
 			SmockerConf newConf = mapper.readValue(content, SmockerConf.class);
 			SmockerConf singleConfig = DaoConfig.getSingleConfig();
 			
-//			String defaultMockFunction = singleConfig.getDefaultMockFunction();
-//			String traceFunctionJsFunction = singleConfig.getTraceFunctionJsFunction();
-//			String filterJsFunction = singleConfig.getFilterJsFunction();
-//			String formatDisplayJsFunction = singleConfig.getFormatDisplayJsFunction();
-//			String globalJsFunction = singleConfig.getGlobalJsFunction();
-//
-//			String mergedDefaultMockFunction = defaultMockFunction == null ? "" : defaultMockFunction
-//					+  newConf.getDefaultMockFunction() == null ? "" : "\n" + newConf.getDefaultMockFunction();
-//			String mergedTraceFunctionJsFunction = traceFunctionJsFunction == null ? "" : traceFunctionJsFunction 
-//					+ newConf.getTraceFunctionJsFunction() == null ? "" : "\n" + newConf.getTraceFunctionJsFunction();
-//			String mergedFilterJsFunction = filterJsFunction == null ? "" : filterJsFunction 
-//					+ newConf.getFilterJsFunction() == null ? "" : "\n" + newConf.getFilterJsFunction();
-//			String mergedFormatDisplayJsFunction = formatDisplayJsFunction == null ? "" : formatDisplayJsFunction 
-//					+ newConf.getFormatDisplayJsFunction() == null ? "" : "\n" + newConf.getFormatDisplayJsFunction();
-//			String mergedGlobalJsFunction = globalJsFunction == null ? "" : globalJsFunction
-//					+ newConf.getGlobalJsFunction() == null ? "" : "\n" + newConf.getGlobalJsFunction();
-			
 			singleConfig.setDefaultMockFunction(newConf.getDefaultMockFunction());
 			singleConfig.setTraceFunctionJsFunction(newConf.getTraceFunctionJsFunction());
 			singleConfig.setFilterJsFunction(newConf.getFilterJsFunction());

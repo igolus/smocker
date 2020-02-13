@@ -14,8 +14,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!--vaadin.version>7.7.7</vaadin.version> <vaadin.plugin.version>7.7.7</vaadin.plugin.version -->
 
-		<vaadin.version>8.3.1</vaadin.version>
-		<vaadin.plugin.version>8.3.1</vaadin.plugin.version>
+		<vaadin.version>8.9.4</vaadin.version>
+		<vaadin.plugin.version>8.9.4</vaadin.plugin.version>
 
 		<eclipselink.version>2.6.4</eclipselink.version>
 		<jetty.plugin.version>9.3.9.v20160517</jetty.plugin.version>
@@ -227,7 +227,7 @@
 		<dependency>
 		   <groupId>org.vaadin.addons</groupId>
 		   <artifactId>easyapp</artifactId>
-		   <version>0.2</version>
+		   <version>0.3</version>
 		</dependency>
 
 

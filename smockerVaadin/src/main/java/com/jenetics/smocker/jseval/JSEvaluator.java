@@ -255,6 +255,29 @@ public class JSEvaluator {
 			throw new SmockerException(ex);
 		}
 	}
+	
+	public static String commName(String functionName, String input) 
+			throws SmockerException {
+		String code = DaoConfig.getSingleConfig().getFormatDisplayJsFunction();
+		code = appendGlobalCode(code);
+
+		RuntimeAndLogger runtimeAndLogger = getRuntimeAndLogger();
+
+		String script =  functionName +  "(realInput);\n";
+		runtimeAndLogger.getRuntime().add(REAL_INPUT, input);
+		
+		try {
+			Object retV8 = runtimeAndLogger.getRuntime().executeScript(script + code);
+			if (retV8 instanceof String) {
+				return (String) retV8;
+			}
+			return null;
+		}
+		catch (Exception ex) {
+			SmockerUI.log(Level.SEVERE, ERROR_EVALUATING_SCRIPT, ex);
+			throw new SmockerException(ex);
+		}
+	}
 
 	public static String formatAndDisplay(String functionName, String input) 
 			throws SmockerException {

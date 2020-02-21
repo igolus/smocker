@@ -185,6 +185,7 @@ public abstract class AbstractConnectionTreeView<T extends EntityWithId, U exten
 		if (isConnectionSelected()) {
 			U conn = treeGrid.getSelectedItems().iterator().next().getConnection();
 			W connectionWithDetail = getConnectionDetailsLayout(conn);
+			
 			selectedDetailView = connectionWithDetail;
 			String connectionKey = getConnectionKey(conn);
 			Tab tabForConnection = tabByConnectionKey.get(connectionKey);

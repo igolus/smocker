@@ -27,7 +27,7 @@ import com.jenetics.smocker.model.event.CommunicationsRemoved;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.component.ConnectionDetailsView;
 import com.jenetics.smocker.ui.dialog.Dialog;
-import com.jenetics.smocker.ui.util.ButtonWithIEntity;
+import com.jenetics.smocker.ui.util.ButtonWithEntity;
 import com.jenetics.smocker.ui.util.RefreshableView;
 import com.jenetics.smocker.ui.util.SearcheableView;
 import com.jenetics.smocker.ui.util.StrandardTreeGridConnectionData;
@@ -37,6 +37,8 @@ import com.jenetics.smocker.util.SmockerException;
 import com.jenetics.smocker.util.SmockerUtility;
 import com.vaadin.annotations.Push;
 import com.vaadin.data.HasValue.ValueChangeEvent;
+import com.vaadin.event.ShortcutAction.KeyCode;
+import com.vaadin.event.ShortcutAction.ModifierKey;
 import com.vaadin.event.selection.SelectionEvent;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.spring.annotation.ViewScope;
@@ -129,7 +131,7 @@ implements RefreshableView, SearcheableView {
 	private Component buildConfigureButton(TreeGridConnectionData<JavaApplication, Connection> item) {
 		if (item.isConnection()) {
 			Connection connection = item.getConnection();
-			ButtonWithIEntity<Connection> filterButton = new ButtonWithIEntity<>(connection);
+			ButtonWithEntity<Connection> filterButton = new ButtonWithEntity<>(connection);
 			filterButton.setHeight("100%");
 			filterButton.setCaption(SmockerUI.getBundleValue(CONFIGURE));
 			filterButton.setDescription(SmockerUI.getBundleValue("Configure_ToolTip"));
@@ -140,7 +142,7 @@ implements RefreshableView, SearcheableView {
 	}
 
 	private Button buildFilterButton(Connection connection) {
-		ButtonWithIEntity<Connection> filterButton = new ButtonWithIEntity<>(connection);
+		ButtonWithEntity<Connection> filterButton = new ButtonWithEntity<>(connection);
 		filterButton.setHeight("100%");
 		filterButton.setCaption(SmockerUI.getBundleValue("Filter_Button"));
 		filterButton.setDescription(SmockerUI.getBundleValue("Filter_ToolTip"));
@@ -149,7 +151,7 @@ implements RefreshableView, SearcheableView {
 	}
 
 	private Button buildFormatInputButton(Connection connection) {
-		ButtonWithIEntity<Connection> formatButton = new ButtonWithIEntity<>(connection);
+		ButtonWithEntity<Connection> formatButton = new ButtonWithEntity<>(connection);
 		formatButton.setCaption(SmockerUI.getBundleValue("Format_Display_Input_Button"));
 		formatButton.setHeight("100%");
 		formatButton.setDescription(SmockerUI.getBundleValue("Format_Display_Input_ToolTip"));
@@ -158,7 +160,7 @@ implements RefreshableView, SearcheableView {
 	}
 
 	private Button buildFormatMockInputButton(Connection connection) {
-		ButtonWithIEntity<Connection> formatButton = new ButtonWithIEntity<>(connection);
+		ButtonWithEntity<Connection> formatButton = new ButtonWithEntity<>(connection);
 		formatButton.setCaption(SmockerUI.getBundleValue("Format_Display_Mock_Input_Button"));
 		formatButton.setHeight("100%");
 		formatButton.setDescription(SmockerUI.getBundleValue("Format_Display_Mock_Input_Button"));
@@ -168,7 +170,7 @@ implements RefreshableView, SearcheableView {
 
 
 	private Button buildFormatOutputButton(Connection connection) {
-		ButtonWithIEntity<Connection> formatButton = new ButtonWithIEntity<>(connection);
+		ButtonWithEntity<Connection> formatButton = new ButtonWithEntity<>(connection);
 		formatButton.setCaption(SmockerUI.getBundleValue("Format_Display_Output_Button"));
 		formatButton.setHeight("100%");
 		formatButton.setDescription(SmockerUI.getBundleValue("Format_Display_Output_ToolTip"));
@@ -177,7 +179,7 @@ implements RefreshableView, SearcheableView {
 	}
 
 	private Button buildFormatMockOutputButton(Connection connection) {
-		ButtonWithIEntity<Connection> formatButton = new ButtonWithIEntity<>(connection);
+		ButtonWithEntity<Connection> formatButton = new ButtonWithEntity<>(connection);
 		formatButton.setCaption(SmockerUI.getBundleValue("Format_Display_Mock_Output_Button"));
 		formatButton.setHeight("100%");
 		formatButton.setDescription(SmockerUI.getBundleValue("Format_Display_Mock_Output_ToolTip"));
@@ -186,16 +188,25 @@ implements RefreshableView, SearcheableView {
 	}
 
 	private Button buildTraceButton(Connection connection) {
-		ButtonWithIEntity<Connection> traceButton = new ButtonWithIEntity<>(connection);
+		ButtonWithEntity<Connection> traceButton = new ButtonWithEntity<>(connection);
 		traceButton.setCaption(SmockerUI.getBundleValue("Trace_Function_Button"));
 		traceButton.setHeight("100%");
 		traceButton.setDescription(SmockerUI.getBundleValue("Trace_Function_ToolTip"));
 		traceButton.addClickListener(this::traceFunctionClicked);
 		return traceButton;
 	}
+	
+	private Button buildCommNaneButton(Connection connection) {
+		ButtonWithEntity<Connection> traceButton = new ButtonWithEntity<>(connection);
+		traceButton.setCaption(SmockerUI.getBundleValue("ComName_Function_Button"));
+		traceButton.setHeight("100%");
+		traceButton.setDescription(SmockerUI.getBundleValue("ComName_Function_ToolTip"));
+		traceButton.addClickListener(this::comNameFunctionClicked);
+		return traceButton;
+	}
 
 	public void filterClicked(ClickEvent event) {
-		ButtonWithIEntity<Connection>  button = (ButtonWithIEntity<Connection>) event.getButton();
+		ButtonWithEntity<Connection>  button = (ButtonWithEntity<Connection>) event.getButton();
 		Connection conn = button.getEntity();
 
 		final JsFilterAndDisplay first = DaoConfig.findJsDisplayAndFilter(conn);
@@ -214,7 +225,7 @@ implements RefreshableView, SearcheableView {
 	}
 
 	public void configureClicked(ClickEvent event) {
-		ButtonWithIEntity<Connection>  button = (ButtonWithIEntity<Connection>) event.getButton();
+		ButtonWithEntity<Connection>  button = (ButtonWithEntity<Connection>) event.getButton();
 		Connection conn = button.getEntity();
 
 		Dialog.displayComponentInVLayoutBox(SmockerUI.getBundleValue(CONFIGURE), 
@@ -224,13 +235,14 @@ implements RefreshableView, SearcheableView {
 				buildFormatOutputButton(conn),
 				buildFormatMockInputButton(conn), 
 				buildFormatMockOutputButton(conn),
+				buildCommNaneButton(conn),
 				buildTraceButton(conn));
 	}
 
 
 
 	public void formatInputClicked(ClickEvent event) {
-		ButtonWithIEntity<Connection>  button = (ButtonWithIEntity<Connection>) event.getButton();
+		ButtonWithEntity<Connection>  button = (ButtonWithEntity<Connection>) event.getButton();
 		Connection conn = button.getEntity();
 		final JsFilterAndDisplay first = DaoConfig.findJsDisplayAndFilter(conn);
 		Dialog.displayCreateStringBox(SmockerUI.getBundleValue("format_function_input_display"), 
@@ -243,13 +255,13 @@ implements RefreshableView, SearcheableView {
 					else {
 						first.setFunctionInputDisplay("");
 						Dialog.warning("Bad Javascript function should be of "
-								+ "function(string) returning boolean " + checkValue);
+								+ "function(string) returning string " + checkValue);
 					}
 				}, first.getFunctionInputDisplay());
 	}
 
 	public void traceFunctionClicked(ClickEvent event) {
-		ButtonWithIEntity<Connection>  button = (ButtonWithIEntity<Connection>) event.getButton();
+		ButtonWithEntity<Connection>  button = (ButtonWithEntity<Connection>) event.getButton();
 		Connection conn = button.getEntity();
 		final JsFilterAndDisplay first = DaoConfig.findJsDisplayAndFilter(conn);
 		Dialog.displayCreateStringBox(SmockerUI.getBundleValue("format_function_output_display"), 
@@ -262,14 +274,34 @@ implements RefreshableView, SearcheableView {
 					else {
 						first.setFunctionOutputDisplay("");
 						Dialog.warning("Bad Javascript function should be of "
-								+ "function(string) returning boolean " + checkValue);
+								+ "function(string) returning void " + checkValue);
+					}
+				}, first.getFunctionTrace());
+	}
+	
+	public void comNameFunctionClicked(ClickEvent event) {
+		ButtonWithEntity<Connection>  button = (ButtonWithEntity<Connection>) event.getButton();
+		Connection conn = button.getEntity();
+		final JsFilterAndDisplay first = DaoConfig.findJsDisplayAndFilter(conn);
+		Dialog.displayCreateStringBox(SmockerUI.getBundleValue("ComName_Function_Button"), 
+				selectedFunction -> {
+					first.setFunctionComName(selectedFunction);
+					boolean checkValue = checkValidComNameFunction(selectedFunction);
+					if (!checkValue) {
+						first.setFunctionOutputDisplay("");
+						Dialog.warning("Bad Javascript function should be of "
+								+ "function(string) returning string " + checkValue);
+						
+					}
+					else {
+						daoManagerJsFilterAndDisplay.update(first);
 					}
 				}, first.getFunctionTrace());
 	}
 
 
 	public void formatOutputClicked(ClickEvent event) {
-		ButtonWithIEntity<Connection>  button = (ButtonWithIEntity<Connection>) event.getButton();
+		ButtonWithEntity<Connection>  button = (ButtonWithEntity<Connection>) event.getButton();
 		Connection conn = button.getEntity();
 		final JsFilterAndDisplay first = DaoConfig.findJsDisplayAndFilter(conn);
 		Dialog.displayCreateStringBox(SmockerUI.getBundleValue("format_function_output_display"), 
@@ -289,7 +321,7 @@ implements RefreshableView, SearcheableView {
 
 
 	public void formatMockInputClicked(ClickEvent event) {
-		ButtonWithIEntity<Connection>  button = (ButtonWithIEntity<Connection>) event.getButton();
+		ButtonWithEntity<Connection>  button = (ButtonWithEntity<Connection>) event.getButton();
 		Connection conn = button.getEntity();
 		final JsFilterAndDisplay first = DaoConfig.findJsDisplayAndFilter(conn);
 		Dialog.displayCreateStringBox(SmockerUI.getBundleValue("format_function_mock_input_display"), 
@@ -308,7 +340,7 @@ implements RefreshableView, SearcheableView {
 	}
 
 	public void formatMockOutputClicked(ClickEvent event) {
-		ButtonWithIEntity<Connection>  button = (ButtonWithIEntity<Connection>) event.getButton();
+		ButtonWithEntity<Connection>  button = (ButtonWithEntity<Connection>) event.getButton();
 		Connection conn = button.getEntity();
 		final JsFilterAndDisplay first = DaoConfig.findJsDisplayAndFilter(conn);
 		Dialog.displayCreateStringBox(SmockerUI.getBundleValue("format_function_mock_output_display"), 
@@ -364,7 +396,19 @@ implements RefreshableView, SearcheableView {
 		}
 		return null;
 	}
-
+	
+	private boolean checkValidComNameFunction(String selectedFunction) {
+		if (StringUtils.isEmpty(selectedFunction)) {
+			return false;
+		}
+		try {
+			JSEvaluator.commName(selectedFunction, "");
+			return true;
+		} catch (SmockerException e) {
+			return false;
+		}
+	}
+	
 
 
 	public void watchButtonClicked(ValueChangeEvent<Boolean> event) {
@@ -405,12 +449,15 @@ implements RefreshableView, SearcheableView {
 	@Override
 	public ActionContainer buildActionContainer() {
 		ActionContainerBuilder builder = new ActionContainerBuilder(SmockerUI.BUNDLE_NAME)
-				.addButton("ViewDetails_Button", VaadinIcons.EYE, "ViewDetails_ToolTip",  this::isConnectionSelected			
-						, this::details, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
-				.addButton("Refresh_Button", VaadinIcons.REFRESH, "Refresh_ToolTip",  this::always			
-						, this::refresh, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
-				.addButton("Clean_Button", VaadinIcons.MINUS, "Clean_ToolTip",  this::isSelected			
-						, this::clean, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER);
+				.addButtonWithShotCut("ViewDetails_Button", VaadinIcons.EYE, "ViewDetails_Button_ToolTip",  this::isConnectionSelected			
+						, this::details, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER, KeyCode.E, 
+						ModifierKey.CTRL)
+				.addButtonWithShotCut("Refresh_Button", VaadinIcons.REFRESH, "Refresh_Button_ToolTip",  this::always			
+						, this::refresh, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER, KeyCode.R, 
+						ModifierKey.CTRL)
+				.addButtonWithShotCut("Clean_Button", VaadinIcons.MINUS, "Clean_Button_ToolTip",  this::isSelected			
+						, this::clean, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER, KeyCode.D, 
+						ModifierKey.CTRL);
 		if (!isMainTabSelected()) {
 			builder.addButton("AddToMock_Button", VaadinIcons.PLUS, "AddToMock_ToolTip",  this::canAddToMock			
 					, this::addToMock, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)

@@ -24,7 +24,6 @@ public class NetDisplayerFactoryInput {
 		if (!StringUtils.isEmpty(functionInputDisplay) ) {
 			return new JSConfigViewer(bundle.getString("Input"), jsDisplayAndFilter, true);
 		}
-		
 		return new DefaultViewer(bundle.getString("Input"));
 	}
 }

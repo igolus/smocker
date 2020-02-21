@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 
 import com.jenetics.smocker.model.Communication;
 import com.jenetics.smocker.ui.SmockerUI;
-import com.jenetics.smocker.ui.util.ButtonWithIEntity;
+import com.jenetics.smocker.ui.util.ButtonWithEntity;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
@@ -31,11 +31,11 @@ public class CommunicationItemsResults extends VerticalLayout {
 		GridLayout grid = new GridLayout(2, 3);
 		grid.setSizeFull();
 		grid.addComponent(new Label("Date : " + comm.getDateTime()), 0, 1);
-		ButtonWithIEntity<Communication> buttonSelect = new ButtonWithIEntity<>(comm);
+		ButtonWithEntity<Communication> buttonSelect = new ButtonWithEntity<>(comm);
 		buttonSelect.setCaption(SmockerUI.getBundleValue("select"));
 		buttonSelect.addClickListener( clickEvent -> {
-			ButtonWithIEntity<Communication> buttonWithComm = 
-					(ButtonWithIEntity<Communication>)clickEvent.getButton();
+			ButtonWithEntity<Communication> buttonWithComm = 
+					(ButtonWithEntity<Communication>)clickEvent.getButton();
 			if (searchWindow != null) {
 				searchWindow.close();
 			}

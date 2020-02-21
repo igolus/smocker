@@ -15,6 +15,7 @@ import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
+import com.vaadin.ui.TabSheet.Tab;
 
 
 @SuppressWarnings("serial")
@@ -32,6 +33,7 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 	private TextPanel selectedResponsePane;
 	private JsTesterPanel jsTesterPanel;
 	private ConnectionMockedManager connectionMockedManager;
+	private boolean unsaved = false;
 
 	public ConnectionMockedDetailsView(ConnectionMocked connectionMocked,  Runnable refreshClickable ) {
 		super();
@@ -80,8 +82,19 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 			selectedResponsePane = addTextAreaToTabSheet(response, "Output", tabSheet);	
 			
 			tabJs = new JsEditor(comm, selectedRequestPane, selectedResponsePane);
+			
 			tabJs.setSizeFull();
+
+			
 			tabSheet.addTab(tabJs, SmockerUI.getBundleValue("NodeEditor"));
+			
+			tabJs.addChangeListener(e -> {
+				if (!unsaved) {
+					unsaved = true;
+					Tab tabEditor = tabSheet.getTab(tabJs);
+					tabEditor.setCaption(tabEditor.getCaption() + " *");
+				}
+			});
 			
 			jsTesterPanel = new JsTesterPanel(request, tabJs, comm);
 			String inputForTest = comm.getInputForTest();
@@ -102,6 +115,12 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 		}
 		refreshClickable();
 	}
+	
+	private void removeUnsavedState() {
+		Tab tabEditor = tabSheet.getTab(tabJs);
+		tabEditor.setCaption(SmockerUI.getBundleValue("NodeEditor"));
+		unsaved = false;
+	} 
 	
 	public void tabChanged(SelectedTabChangeEvent event) {
 		if (refreshClickable != null) {
@@ -126,7 +145,7 @@ public class ConnectionMockedDetailsView extends AbstractConnectionDetails {
 		comm.setRequest(NetworkReaderUtility.encode(selectedRequestPane.getText()));
 		comm.setResponse(NetworkReaderUtility.encode(selectedResponsePane.getText()));
 		comm.setInputForTest(NetworkReaderUtility.encode(jsTesterPanel.getSourceInput()));
-		
+		removeUnsavedState();
 		daoManagerCommunicationMocked.update(comm);
 	}
 	

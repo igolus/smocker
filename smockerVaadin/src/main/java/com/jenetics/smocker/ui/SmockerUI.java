@@ -155,7 +155,6 @@ public class SmockerUI extends UI {
 		
 		easyAppBuilder.withActionContainer(actionContainerBuilder.build());
 		
-		
 		mainViewWithToolBar = easyAppBuilder.build(this);
 		layout.addComponents(mainViewWithToolBar);
 		easyAppMainView = easyAppBuilder.getMainView();
@@ -310,7 +309,12 @@ public class SmockerUI extends UI {
 	}
 	
 	public void enableSearch(boolean value) {
-		actionContainerBuilder.enableSearchButton(value);
+		if (value) {
+			actionContainerBuilder.enableSarch();
+		}
+		else {
+			actionContainerBuilder.disableSarch();
+		}
 	}
 	
 	public void checkEnableSearch() {
@@ -348,6 +352,19 @@ public class SmockerUI extends UI {
 		if (SmockerUI.getInstance().getPage() != null) {
 			notif.show(SmockerUI.getInstance().getPage());
 		}
+		
+	}
+	
+	public static void doInBackGround(Runnable runnable, long sleepTime) {
+		instance.access(() -> {
+			try {
+				Thread.sleep(sleepTime);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				SmockerUI.log(Level.SEVERE, "Unable to wait", e);
+			}
+			runnable.run();
+		});
 		
 	}
 

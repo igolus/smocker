@@ -94,7 +94,7 @@ public class ConnectionMockedManager extends EasyAppLayout {
 		comboBox = new ComboBox<>();
 		comboBox.setTextInputAllowed(false);
 		comboBox.addSelectionListener(this::comboSelected);
-	
+		
 		ActionContainerBuilder builder = new ActionContainerBuilder(null)
 				.withSingleComponent(comboBox);
 		

@@ -6,12 +6,15 @@ import java.util.function.Consumer;
 import org.jboss.logging.Logger;
 
 import com.jenetics.smocker.ui.component.BoxableItem;
+import com.vaadin.event.ShortcutListener;
+import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
 import de.steinwedel.messagebox.ButtonOption;
+import de.steinwedel.messagebox.ButtonType;
 import de.steinwedel.messagebox.MessageBox;
 
 public class Dialog {
@@ -24,7 +27,7 @@ public class Dialog {
 
 
 	public static void ask(String question, String caption, DialogProcess yesProcess, DialogProcess noProcess) {
-		MessageBox.createQuestion().withCaption(caption).withMessage(question).withYesButton(() -> {
+		MessageBox messageBox = MessageBox.createQuestion().withCaption(caption).withMessage(question).withYesButton(() -> {
 			if (yesProcess != null) {
 				try {
 					yesProcess.process();
@@ -40,7 +43,9 @@ public class Dialog {
 					logger.error("Unable to process no", e);
 				}
 			}
-		}).open();
+		});
+		messageBox.getButton(ButtonType.YES).setClickShortcut(KeyCode.ENTER);
+		messageBox.open();
 	}
 	
 	public static void displaySelectableListBox(String caption, List<String> options, Consumer<String> selected) {

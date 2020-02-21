@@ -15,6 +15,7 @@ import com.jenetics.smocker.model.config.SmockerConf;
 import com.jenetics.smocker.ui.component.TextPanel;
 import com.jenetics.smocker.util.SmockerException;
 import com.jenetics.smocker.util.SmockerUtility;
+import com.vaadin.data.HasValue.ValueChangeListener;
 
 @SuppressWarnings("serial")
 public class JsEditor extends EasyAppLayout {
@@ -41,6 +42,7 @@ public class JsEditor extends EasyAppLayout {
 		
 		aceEditor = new AceEditor();
 		setSource(aceEditor, communicationMocked);
+		
 		aceEditor.setMode(AceMode.javascript);
 		aceEditor.setTheme(AceTheme.eclipse);
 		aceEditor.setSizeFull();
@@ -81,7 +83,10 @@ public class JsEditor extends EasyAppLayout {
 	public void setJSSource(String source) {
 		aceEditor.setValue(source);
 	}
-
+	
+	public void addChangeListener(ValueChangeListener listener) {
+		aceEditor.addValueChangeListener(listener);
+	}
 
 }
 

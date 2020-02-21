@@ -221,6 +221,7 @@ public class ConnectionDetailsView extends AbstractConnectionDetails {
 		commDisplayByComm.clear();
 		connection.getCommunications().clear();
 		daoManagerConnection.update(connection);
+		mainLayout.setSecondComponent(null);
 		postDeleteUiUpdate();
 	}
 

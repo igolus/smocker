@@ -41,6 +41,8 @@ import com.jenetics.smocker.ui.util.StrandardTreeGridConnectionMockedData;
 import com.jenetics.smocker.ui.util.StreamResourceJacksonSerializer;
 import com.jenetics.smocker.ui.util.TreeGridConnectionData;
 import com.vaadin.annotations.Push;
+import com.vaadin.event.ShortcutAction.KeyCode;
+import com.vaadin.event.ShortcutAction.ModifierKey;
 import com.vaadin.event.selection.SelectionEvent;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
@@ -130,14 +132,18 @@ implements RefreshableView {
 	@Override
 	public ActionContainer buildActionContainer() {
 		ActionContainerBuilder builder = new ActionContainerBuilder(BUNDLE_NAME)
-				.addButton("Clean_Button", VaadinIcons.MINUS, null,  this::isMainTabSelected			
-						, this::clean, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
-				.addButton("ViewDetails_Button", VaadinIcons.EYE, null,  this::canViewDetails			
-						, this::details, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
-				.addButton("Refresh_Button", VaadinIcons.REFRESH, null,  this::always
-						, this::refresh, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
-				.addButton("Save_Button", VaadinIcons.DISC, null,  this::canSave			
-						, this::save, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
+				.addButtonWithShotCut("Clean_Button", VaadinIcons.MINUS, "CleanToolTip",  this::isMainTabSelected			
+						, this::clean, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER, KeyCode.D, 
+						ModifierKey.CTRL)
+				.addButtonWithShotCut("ViewDetails_Button", VaadinIcons.EYE, "ViewDetails_Button_ToolTip",  this::canViewDetails			
+						, this::details, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER, KeyCode.E, 
+						ModifierKey.CTRL)
+				.addButtonWithShotCut("Refresh_Button", VaadinIcons.REFRESH, "Refresh_Button_ToolTip",  this::always
+						, this::refresh, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER, KeyCode.R, 
+						ModifierKey.CTRL)
+				.addButtonWithShotCut("Save_Button", VaadinIcons.DISC, "Save_Button_ToolTip",  this::canSave			
+						, this::save, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER, KeyCode.S, 
+						ModifierKey.CTRL)
 				.addButton("Export_Button", VaadinIcons.SHARE, "ExportToolTip",  this::canExport			
 						, null, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER);
 

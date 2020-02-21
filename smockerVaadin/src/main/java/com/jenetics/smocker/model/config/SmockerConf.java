@@ -126,7 +126,7 @@ public class SmockerConf implements EntityWithId {
 	public void setTraceFunctionJsFunction(String traceFunctionJsFunction) {
 		this.traceFunctionJsFunction = traceFunctionJsFunction;
 	}
-
+	
 	public Long getId() {
 		return this.id;
 	}

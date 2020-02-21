@@ -28,7 +28,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.jenetics.smocker.dao.DaoConfig;
 import com.jenetics.smocker.dao.IDaoManager;
 import com.jenetics.smocker.jseval.SmockerJsEnv;
-import com.jenetics.smocker.model.Scenario;
 import com.jenetics.smocker.model.config.SmockerConf;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.ui.component.DupHostEditor;
@@ -38,15 +37,16 @@ import com.jenetics.smocker.ui.util.ConfigUploader;
 import com.jenetics.smocker.ui.util.DuplicateHost;
 import com.jenetics.smocker.ui.util.HostAndPortRange;
 import com.jenetics.smocker.ui.util.JsonFileDownloader;
-import com.jenetics.smocker.ui.util.ScenarioUploader;
-import com.jenetics.smocker.ui.util.StreamResourceJacksonSerializer;
 import com.jenetics.smocker.ui.util.JsonFileDownloader.OnDemandStreamResource;
 import com.vaadin.annotations.Push;
 import com.vaadin.data.HasValue.ValueChangeEvent;
 import com.vaadin.data.TreeData;
 import com.vaadin.data.provider.TreeDataProvider;
+import com.vaadin.event.ShortcutAction.KeyCode;
+import com.vaadin.event.ShortcutAction.ModifierKey;
 import com.vaadin.event.selection.SelectionEvent;
 import com.vaadin.icons.VaadinIcons;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
@@ -58,6 +58,7 @@ import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.TabSheet.Tab;
 import com.vaadin.ui.TreeGrid;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
@@ -69,10 +70,10 @@ import de.steinwedel.messagebox.MessageBox;
 @ViewScope
 @ContentView(sortingOrder = 4, viewName = "ConfigView", icon = "icons/Settings-icon.png", homeView = true, rootViewParent = ConnectionsRoot.class)
 public class ConfigView extends EasyAppLayout {
-	
+
 	@Inject
 	private static Logger logger;
-	
+
 	private static final String SEP_IGNORED_HOST = ";";
 	protected transient IDaoManager<SmockerConf> daoManagerSmockerConf = null;
 	private SmockerConf singleConfig;
@@ -82,7 +83,7 @@ public class ConfigView extends EasyAppLayout {
 	private AceEditor aceEditorFormatDisplay = new AceEditor();
 	private AceEditor aceEditorTraceFunction = new AceEditor();
 	private AceEditor aceEditorDefaultMockFunction = new AceEditor();
-	
+
 	private Button removeDupHostHostButton;
 	private transient DuplicateHost selectedDuplicateHost;
 	private TreeData<DuplicateHost> treeDataDupHost;
@@ -95,13 +96,17 @@ public class ConfigView extends EasyAppLayout {
 	private transient HostAndPortRange selectedExcludedHost;
 	private Button removeExcludedHostButton;
 	private TreeData<HostAndPortRange> treeDataExcludedHost;
-	
+
 
 	private transient List<HostAndPortRange> includedHosts = new ArrayList<>();
 	private TreeDataProvider<HostAndPortRange> treeDataProviderIncludedHost;
 	private transient HostAndPortRange selectedIncludedHost;
 	private Button removeIncludedHostButton;
 	private TreeData<HostAndPortRange> treeDataIncludedHost;
+
+
+	private boolean unsaved=false;
+
 
 	public ConfigView() {
 		singleConfig = DaoConfig.getSingleConfig();
@@ -110,7 +115,7 @@ public class ConfigView extends EasyAppLayout {
 		Component globalConfigPane = buildGlobalConfigPane();
 		globalConfigPane.setCaption(SmockerUI.getBundleValue("globalConfigPane"));
 		tabSheet.addTab(globalConfigPane);
-		
+
 		Component traceFunctionPane = buildTraceFunctionPane();
 		traceFunctionPane.setCaption(SmockerUI.getBundleValue("traceFunctionPane"));
 		tabSheet.addTab(traceFunctionPane);
@@ -133,41 +138,61 @@ public class ConfigView extends EasyAppLayout {
 
 		addComponent(tabSheet);
 		setMargin(true);
-
-		setSizeFull();
 	}
 
+	private void changedEditor(Component source) {
+		Tab tabEditor = tabSheet.getTab(source);
+		if (tabEditor != null && tabEditor.getCaption().indexOf(" *") == -1) {
+			tabEditor.setCaption(tabEditor.getCaption() + " *");
+		}
+	}
+
+
+	private void removeUnsavedState() {
+		removedUnsavedStateInTab(aceEditorGlobalFunctions);
+		removedUnsavedStateInTab(aceEditorFilter);
+		removedUnsavedStateInTab(aceEditorFormatDisplay);
+		removedUnsavedStateInTab(aceEditorTraceFunction);
+		removedUnsavedStateInTab(aceEditorDefaultMockFunction);
+	} 
+	
+	private void removedUnsavedStateInTab(Component component) {
+		Tab tabEditor = tabSheet.getTab(component);
+		tabEditor.setCaption(tabEditor.getCaption().substring(0, tabEditor.getCaption().length() - 1));
+	} 
+	
 	@Override
 	public ActionContainer buildActionContainer() {
 		ActionContainerBuilder builder = new ActionContainerBuilder(SmockerUI.BUNDLE_NAME)
-				.addButton("Save_Button", VaadinIcons.DISC, null,  this::canSave			
-						, this::save, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER)
+				.addButtonWithShotCut("Save_Button", VaadinIcons.DISC, "Save_Button_ToolTip",  this::canSave			
+						, this::save, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER, KeyCode.S, 
+						ModifierKey.CTRL)
 				.addButton("Export_Button", VaadinIcons.SHARE, "ExportConfigToolTip",  () -> true			
-								, null, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER);
-		
+						, null, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER);
+
 		ConfigUploader uploader = new ConfigUploader();
 		Upload upload = new Upload(null, uploader);
 		upload.setButtonCaption(SmockerUI.getBundleValue("Import_Button"));
 		upload.setDescription(SmockerUI.getBundleValue("ImportConfigToolTip"));
 		upload.addSucceededListener(uploader);
 		builder.addComponent(upload, Position.LEFT, InsertPosition.AFTER);
-		
-		
+
+
 		builder.addButton("Refresh_Button", VaadinIcons.REFRESH, null,  () -> true
 				, this::refresh, org.vaadin.easyapp.util.ActionContainer.Position.LEFT, InsertPosition.AFTER);
-		
+
 		ActionContainer actionContainer = builder.build(); 
-		
+
 		List<ButtonWithCheck> listButtonWithCheck = actionContainer.getListButtonWithCheck();
 		ButtonWithCheck exportButton = listButtonWithCheck.get(listButtonWithCheck.size() - 2);
-		
+
 		JsonFileDownloader downloader = new JsonFileDownloader(createResource());
-		
+
 		downloader.extend(exportButton);
 		return actionContainer;
 
 	}
-	
+
 	private OnDemandStreamResource createResource() {
 
 		return new OnDemandStreamResource() {
@@ -198,6 +223,7 @@ public class ConfigView extends EasyAppLayout {
 		};
 	}
 
+
 	public void save(ClickEvent event) {
 		singleConfig.setGlobalJsFunction(aceEditorGlobalFunctions.getValue());
 		singleConfig.setFilterJsFunction(aceEditorFilter.getValue());
@@ -205,18 +231,19 @@ public class ConfigView extends EasyAppLayout {
 		singleConfig.setDefaultMockFunction(aceEditorDefaultMockFunction.getValue());
 		singleConfig.setTraceFunctionJsFunction(aceEditorTraceFunction.getValue());
 		DaoConfig.saveConfig();
+		removeUnsavedState();
 	}
-	
+
 	public void refresh(ClickEvent event) {
 		excludedHosts = getListFromDb(DaoConfig.getSingleConfig().getExcludedHosts());
 		includedHosts = getListFromDb(DaoConfig.getSingleConfig().getIncludedHosts());
 		duplicateHosts = DuplicateHost.getListFromDbValue(DaoConfig.getSingleConfig().getDuplicateHosts());
-		
-		
+
+
 		refreshDupHost();
 		refreshHost(excludedHosts, treeDataProviderExcludedHost, treeDataExcludedHost);
 		refreshHost(includedHosts, treeDataProviderIncludedHost, treeDataIncludedHost);
-			
+
 		if (singleConfig.getGlobalJsFunction() != null) {
 			aceEditorGlobalFunctions.setValue(singleConfig.getGlobalJsFunction());
 		}
@@ -239,9 +266,7 @@ public class ConfigView extends EasyAppLayout {
 	}
 
 	private Component buildJSGlobalFunctionsPanel() {
-		aceEditorGlobalFunctions = new AceEditor();
-		aceEditorGlobalFunctions.setMode(AceMode.javascript);
-		aceEditorGlobalFunctions.setTheme(AceTheme.eclipse);
+		customizeAceEditor(aceEditorGlobalFunctions);
 		aceEditorGlobalFunctions.setSizeFull();
 		if (singleConfig.getGlobalJsFunction() != null) {
 			aceEditorGlobalFunctions.setValue(singleConfig.getGlobalJsFunction());
@@ -280,14 +305,15 @@ public class ConfigView extends EasyAppLayout {
 		}
 		return aceEditorTraceFunction;
 	}
-	
+
 	private void customizeAceEditor (AceEditor aceEditor) {
 		aceEditor.setMode(AceMode.javascript);
 		aceEditor.setTheme(AceTheme.eclipse);
+		aceEditor.addValueChangeListener( e -> this.changedEditor(aceEditor));
 		aceEditor.setSizeFull();
 	}
-	
-	
+
+
 	private Component buildGlobalConfigPane() {
 		VerticalLayout layout = new VerticalLayout();
 		layout.setSpacing(false);
@@ -357,15 +383,15 @@ public class ConfigView extends EasyAppLayout {
 		editButton.setEnabled(false);
 		editButton.addClickListener(this::editDupHost);
 		layoutButtons.addComponent(editButton);
-		
+
 		removeDupHostHostButton = new Button(VaadinIcons.MINUS);
 		removeDupHostHostButton.setDescription(SmockerUI.getBundleValue("Remove_Excluded_DupHost_toolTip"));
 		removeDupHostHostButton.setEnabled(false);
 		removeDupHostHostButton.addClickListener(this::removeDuplicateHostList);
 		layoutButtons.addComponent(removeDupHostHostButton);
-		
-		
-		
+
+
+
 		Button addButton = new Button(VaadinIcons.PLUS);
 
 		addButton.setDescription(SmockerUI.getBundleValue("Add_Dup_Host_toolTip"));
@@ -531,7 +557,7 @@ public class ConfigView extends EasyAppLayout {
 		hostAndPortEditor.setBox(displayComponentBox);
 		hostAndPortEditor.setCallBAckAfterCheck(this::excludedHostCreated);
 	}
-	
+
 	private void removeDuplicateHostList(ClickEvent event) {
 		duplicateHosts.remove(selectedDuplicateHost);
 		updateDupHostInDB();
@@ -628,7 +654,12 @@ public class ConfigView extends EasyAppLayout {
 		else {
 			removeDupHostHostButton.setEnabled(false);
 		}
-		
+
+	}
+	
+	@Override
+	public void enterInView(ViewChangeEvent event) {
+		SmockerUI.getInstance().checkEnableSearch();
 	}
 
 	private void gridExcludedHostSelected(SelectionEvent<HostAndPortRange> host) {

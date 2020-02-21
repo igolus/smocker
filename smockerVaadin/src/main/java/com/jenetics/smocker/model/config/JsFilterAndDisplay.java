@@ -45,6 +45,9 @@ public class JsFilterAndDisplay implements EntityWithId {
 	@Column(nullable = true)
 	private String functionTrace;	
 	
+	@Column(nullable = true)
+	private String functionComName;	
+	
 	public String getHost() {
 		return host;
 	}
@@ -99,6 +102,14 @@ public class JsFilterAndDisplay implements EntityWithId {
 
 	public void setFunctionMockInputDisplay(String functionMockInputDisplay) {
 		this.functionMockInputDisplay = functionMockInputDisplay;
+	}
+	
+	public String getFunctionComName() {
+		return functionComName;
+	}
+
+	public void setFunctionComName(String functionComName) {
+		this.functionComName = functionComName;
 	}
 
 	public String getFunctionTrace() {

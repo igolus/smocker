@@ -1,5 +1,7 @@
 package com.jenetics.smocker.ui.netdisplayer.implementation;
 
+import java.util.logging.Level;
+
 import com.jenetics.smocker.jseval.JSEvaluator;
 import com.jenetics.smocker.model.config.JsFilterAndDisplay;
 import com.jenetics.smocker.ui.SmockerUI;
@@ -57,35 +59,46 @@ public class JSConfigViewer implements ComponentWithDisplayChange {
 		tabsheet.setSizeFull();
 		return tabsheet;
 	}
-	
+
 	private void tabbedChanged(SelectedTabChangeEvent event) {
 		//format the display only once
-		if (formattedDisplay != null) {
-			return;
-		}
-		Component selected = tabsheet.getSelectedTab();
-		if (areaOutputJsDisplay == selected) {
-		String functionDisplay = null;
-		   if (input) {
-				functionDisplay = jsDisplayAndFilter.getFunctionInputDisplay();
-			}
-			else {
-				functionDisplay = jsDisplayAndFilter.getFunctionOutputDisplay();
+		SmockerUI.getCurrent().access(() -> {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
 			try {
-				formattedDisplay = JSEvaluator.formatAndDisplay(functionDisplay, content);
-				areaOutputJsDisplay.setValue(formattedDisplay);
-			} catch (SmockerException e) {
+				if (formattedDisplay != null) {
+					return;
+				}
+				Component selected = tabsheet.getSelectedTab();
+				if (areaOutputJsDisplay == selected) {
+					String functionDisplay = null;
+					if (input) {
+						functionDisplay = jsDisplayAndFilter.getFunctionInputDisplay();
+					}
+					else {
+						functionDisplay = jsDisplayAndFilter.getFunctionOutputDisplay();
+					}
+					formattedDisplay = JSEvaluator.formatAndDisplay(functionDisplay, content);
+					areaOutputJsDisplay.setValue(formattedDisplay);
+				}
+			} catch (Throwable e) {
 				//display error in tab
 				areaOutputJsDisplay.setValue(SmockerUtility.getStackTrace(e));
 			}
-		}
+		});
 	}
 
 	@Override
 	public void selectionValue(String content) {
-		this.content = content;
-		areaOutput.setValue(content);
+		SmockerUI.doInBackGround(() -> {
+			this.content = content;
+			areaOutput.setValue(content);
+		}, 
+		100);
 	}
 
 }

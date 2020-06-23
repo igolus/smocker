@@ -1017,10 +1017,6 @@
  */
 
 /**
- *
- */
-
-/**
  * @group window
  */
 
@@ -1081,7 +1077,7 @@
  */
 
 .v-vaadin-version:after {
-	content: "8.3.1";
+	content: "8.9.4";
 }
 
 .v-widget {
@@ -4380,6 +4376,10 @@ div.v-layout.v-horizontal.v-widget {
 	left: 0;
 }
 
+.mytheme .v-grid-body .v-grid-header > .v-grid-row {
+	position: relative;
+}
+
 .mytheme .v-grid-row {
 	display: block;
 }
@@ -4555,6 +4555,8 @@ div.v-layout.v-horizontal.v-widget {
 	-webkit-box-shadow: 1px 0 2px rgba(0, 0, 0, 0.1);
 	box-shadow: 1px 0 2px rgba(0, 0, 0, 0.1);
 	border-right: 1px solid #d4d4d4;
+	position: relative;
+	z-index: 11;
 }
 
 .mytheme .v-grid-cell.frozen  + th, .mytheme .v-grid-cell.frozen  + td {
@@ -6275,7 +6277,12 @@ div.v-layout.v-horizontal.v-widget {
 
 .mytheme .v-datefield-popup td.v-datefield-calendarpanel-month {
 	width: 148px;
+	cursor: default;
 	color: #197de1;
+}
+
+.mytheme .v-datefield-popup td.v-datefield-calendarpanel-month.header-month-year {
+	cursor: pointer;
 }
 
 .mytheme .v-datefield-popup .v-datefield-calendarpanel-year td.v-datefield-calendarpanel-month {
@@ -6460,7 +6467,12 @@ div.v-layout.v-horizontal.v-widget {
 
 .mytheme td.v-datefield-calendarpanel-month {
 	width: 148px;
+	cursor: default;
 	color: #197de1;
+}
+
+.mytheme td.v-datefield-calendarpanel-month.header-month-year {
+	cursor: pointer;
 }
 
 .mytheme .v-datefield-calendarpanel-year td.v-datefield-calendarpanel-month {
@@ -7115,7 +7127,12 @@ div.v-layout.v-horizontal.v-widget {
 
 .mytheme td.v-inline-datefield-calendarpanel-month {
 	width: 148px;
+	cursor: default;
 	color: #197de1;
+}
+
+.mytheme td.v-inline-datefield-calendarpanel-month.header-month-year {
+	cursor: pointer;
 }
 
 .mytheme .v-inline-datefield-calendarpanel-year td.v-inline-datefield-calendarpanel-month {
@@ -9026,6 +9043,10 @@ div.v-layout.v-horizontal.v-widget {
 	left: 0;
 }
 
+.mytheme .v-tree8-body .v-tree8-header > .v-tree8-row {
+	position: relative;
+}
+
 .mytheme .v-tree8-row {
 	display: block;
 }
@@ -9201,6 +9222,8 @@ div.v-layout.v-horizontal.v-widget {
 	-webkit-box-shadow: 1px 0 2px rgba(0, 0, 0, 0.1);
 	box-shadow: 1px 0 2px rgba(0, 0, 0, 0.1);
 	border-right: 1px solid #d4d4d4;
+	position: relative;
+	z-index: 11;
 }
 
 .mytheme .v-tree8-cell.frozen  + th, .mytheme .v-tree8-cell.frozen  + td {
@@ -9917,6 +9940,70 @@ div.v-layout.v-horizontal.v-widget {
 	padding-left: 15em;
 }
 
+.mytheme .v-tree8-node.depth-16 {
+	padding-left: 16em;
+}
+
+.mytheme .v-tree8-node.depth-17 {
+	padding-left: 17em;
+}
+
+.mytheme .v-tree8-node.depth-18 {
+	padding-left: 18em;
+}
+
+.mytheme .v-tree8-node.depth-19 {
+	padding-left: 19em;
+}
+
+.mytheme .v-tree8-node.depth-20 {
+	padding-left: 20em;
+}
+
+.mytheme .v-tree8-node.depth-21 {
+	padding-left: 21em;
+}
+
+.mytheme .v-tree8-node.depth-22 {
+	padding-left: 22em;
+}
+
+.mytheme .v-tree8-node.depth-23 {
+	padding-left: 23em;
+}
+
+.mytheme .v-tree8-node.depth-24 {
+	padding-left: 24em;
+}
+
+.mytheme .v-tree8-node.depth-25 {
+	padding-left: 25em;
+}
+
+.mytheme .v-tree8-node.depth-26 {
+	padding-left: 26em;
+}
+
+.mytheme .v-tree8-node.depth-27 {
+	padding-left: 27em;
+}
+
+.mytheme .v-tree8-node.depth-28 {
+	padding-left: 28em;
+}
+
+.mytheme .v-tree8-node.depth-29 {
+	padding-left: 29em;
+}
+
+.mytheme .v-tree8-node.depth-30 {
+	padding-left: 30em;
+}
+
+.mytheme .v-tree8-node.depth-31 {
+	padding-left: 31em;
+}
+
 .mytheme .v-tree8-cell-content {
 	display: inline-block;
 	vertical-align: middle;
@@ -10102,6 +10189,10 @@ div.v-layout.v-horizontal.v-widget {
 	left: 0;
 }
 
+.mytheme .v-treegrid-body .v-treegrid-header > .v-treegrid-row {
+	position: relative;
+}
+
 .mytheme .v-treegrid-row {
 	display: block;
 }
@@ -10277,6 +10368,8 @@ div.v-layout.v-horizontal.v-widget {
 	-webkit-box-shadow: 1px 0 2px rgba(0, 0, 0, 0.1);
 	box-shadow: 1px 0 2px rgba(0, 0, 0, 0.1);
 	border-right: 1px solid #d4d4d4;
+	position: relative;
+	z-index: 11;
 }
 
 .mytheme .v-treegrid-cell.frozen  + th, .mytheme .v-treegrid-cell.frozen  + td {
@@ -10991,6 +11084,70 @@ div.v-layout.v-horizontal.v-widget {
 
 .mytheme .v-treegrid-node.depth-15 {
 	padding-left: 15em;
+}
+
+.mytheme .v-treegrid-node.depth-16 {
+	padding-left: 16em;
+}
+
+.mytheme .v-treegrid-node.depth-17 {
+	padding-left: 17em;
+}
+
+.mytheme .v-treegrid-node.depth-18 {
+	padding-left: 18em;
+}
+
+.mytheme .v-treegrid-node.depth-19 {
+	padding-left: 19em;
+}
+
+.mytheme .v-treegrid-node.depth-20 {
+	padding-left: 20em;
+}
+
+.mytheme .v-treegrid-node.depth-21 {
+	padding-left: 21em;
+}
+
+.mytheme .v-treegrid-node.depth-22 {
+	padding-left: 22em;
+}
+
+.mytheme .v-treegrid-node.depth-23 {
+	padding-left: 23em;
+}
+
+.mytheme .v-treegrid-node.depth-24 {
+	padding-left: 24em;
+}
+
+.mytheme .v-treegrid-node.depth-25 {
+	padding-left: 25em;
+}
+
+.mytheme .v-treegrid-node.depth-26 {
+	padding-left: 26em;
+}
+
+.mytheme .v-treegrid-node.depth-27 {
+	padding-left: 27em;
+}
+
+.mytheme .v-treegrid-node.depth-28 {
+	padding-left: 28em;
+}
+
+.mytheme .v-treegrid-node.depth-29 {
+	padding-left: 29em;
+}
+
+.mytheme .v-treegrid-node.depth-30 {
+	padding-left: 30em;
+}
+
+.mytheme .v-treegrid-node.depth-31 {
+	padding-left: 31em;
 }
 
 .mytheme .v-treegrid-cell-content {
@@ -12478,6 +12635,14 @@ div.v-layout.v-horizontal.v-widget {
 	text-align: right;
 }
 
+.mytheme .v-tabsheet-right-aligned-tabs .v-tabsheet-spacertd {
+	display: inline-block !important;
+}
+
+.mytheme .v-tabsheet-right-aligned-tabs .v-tabsheet-scroller {
+	padding-left: 9px;
+}
+
 .mytheme .v-tabsheet-padded-tabbar  > .v-tabsheet-tabcontainer .v-tabsheet-tabs {
 	padding: 0 9px;
 }
@@ -12614,6 +12779,7 @@ div.v-layout.v-horizontal.v-widget {
 	width: 100% !important;
 	height: auto !important;
 	padding: 9px;
+	display: inline-flex;
 }
 
 .mytheme .v-colorpicker-preview-textfield {

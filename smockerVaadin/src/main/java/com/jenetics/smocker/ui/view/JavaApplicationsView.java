@@ -296,7 +296,7 @@ implements RefreshableView, SearcheableView {
 					else {
 						daoManagerJsFilterAndDisplay.update(first);
 					}
-				}, first.getFunctionTrace());
+				}, first.getFunctionComName());
 	}
 
 
@@ -399,7 +399,7 @@ implements RefreshableView, SearcheableView {
 	
 	private boolean checkValidComNameFunction(String selectedFunction) {
 		if (StringUtils.isEmpty(selectedFunction)) {
-			return false;
+			return true;
 		}
 		try {
 			JSEvaluator.commName(selectedFunction, "");

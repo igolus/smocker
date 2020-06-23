@@ -635,6 +635,7 @@ public class ConnectionMockedManager extends EasyAppLayout {
 			CommunicationMocked communication = selectedTreeItem.getCommunication();
 			clearCommunicationAndRelatedScenario(communication);
 			treeDataProvider.refreshAll();
+			itemClicked.accept(null);
 		}
 	}
 

@@ -149,6 +149,7 @@ public class TransformerUtility {
             writeSocketChannel(buffer, socketChannel);
             smockerContainer.resetAll();
             smockerContainer.setStreamResent(true);
+            smockerContainer.setReseNextWrite(true);
           }
         }
         int retRead =  readSocketChannel(bytebuffer, socketChannel);

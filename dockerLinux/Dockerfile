@@ -1,4 +1,4 @@
-FROM jboss/wildfly
+FROM igolus/wildflyunbutugcc
 #ENV dbFolder .
 
 RUN /opt/jboss/wildfly/bin/add-user.sh admin Admin#70365 --silent

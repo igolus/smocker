@@ -23,7 +23,8 @@
 	</target>
 	
 	
-	<target name="warLinux">
+	<target name="dockerPrepare">
+		<copy file="${warSmocker}" todir="docker"/>
 		<mkdir dir="dockerLinux/temp"/>
 		<unzip src="${warSmocker}" dest="dockerLinux/temp"/>
 		<delete file="dockerLinux/temp/WEB-INF/lib/j2v8_win32_x86_64-4.6.0.jar"></delete>

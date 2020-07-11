@@ -7,6 +7,9 @@
 	<property name="targetClientJar" value="smockerAgent1.7-1.0-SNAPSHOT.jar"/>
 	<property name="libClientFolder" value="smockerAgent1.7/lib"/>
 	<property name="libClientJar" value="javassist.jar"/>
+	<property name="warSmocker" value="smockerVaadin/target/smocker-1.0-SNAPSHOT.war"/>
+	<property name="warSmockerName" value="smocker-1.0-SNAPSHOT.war"/>
+	<property name="warSmockerLinux" value="dockerLinux"/>
 	
 	<target name="release">
 		<zip destfile="${srcWildFlyNoWar}" update="true">
@@ -17,5 +20,17 @@
 			<zipfileset dir="${targetClientFolder}" includes="${targetClientJar}" prefix="smockerClient"/>
 			<zipfileset dir="${libClientFolder}" includes="${libClientJar}" prefix="smockerClient"/>
 		</zip>
-	  </target>
+	</target>
+	
+	
+	<target name="warLinux">
+		<mkdir dir="dockerLinux/temp"/>
+		<unzip src="${warSmocker}" dest="dockerLinux/temp"/>
+		<delete file="dockerLinux/temp/WEB-INF/lib/j2v8_win32_x86_64-4.6.0.jar"></delete>
+		<copy file="libJ2V8Linux/j2v8_linux_x86_64-4.8.0.jar" todir="dockerLinux/temp/WEB-INF/lib"/>
+		<zip destfile="dockerLinux/${warSmockerName}" basedir="dockerLinux/temp"/>
+		<delete dir="dockerLinux/temp"/>
+	</target>
+	
+	
 </project>

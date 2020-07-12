@@ -17,6 +17,6 @@ COPY standalone.conf /opt/jboss/wildfly/bin
 COPY libj2v8_linux_x86_64.so /opt/jboss/wildfly/bin
 
 
-USER root
-RUN chown jboss:jboss /opt/jboss/wildfly/standalone/deployments/*
-RUN chown jboss:jboss /opt/jboss/wildfly/bin/*
+#USER root
+#RUN chown jboss:jboss /opt/jboss/wildfly/standalone/deployments/*
+#RUN chown jboss:jboss /opt/jboss/wildfly/bin/*

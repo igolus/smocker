@@ -35,10 +35,6 @@ RUN apt-get update \
 	&& mv $HOME/wildfly-$WILDFLY_VERSION/* $JBOSS_HOME/ \
 	&& rm wildfly-$WILDFLY_VERSION.tar.gz \
 	&& mkdir -p $JBOSS_HOME/modules/com/oracle/ojdbc7/main/ \
-	&& mv /tmp/ojdbc7-12.1.0.1.jar $JBOSS_HOME/modules/com/oracle/ojdbc7/main/ojdbc7.jar \
-	&& mv /tmp/module.xml $JBOSS_HOME/modules/com/oracle/ojdbc7/main/ \
-	&& mv /tmp/waitfordeployment.sh /opt/jboss/wildfly/bin/ \
-	&& chmod 777 /opt/jboss/wildfly/bin/waitfordeployment.sh \
 	&& rm -rf /tmp/* \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*

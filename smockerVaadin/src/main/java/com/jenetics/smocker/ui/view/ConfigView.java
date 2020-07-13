@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.jenetics.smocker.dao.DaoConfig;
 import com.jenetics.smocker.dao.IDaoManager;
+import com.jenetics.smocker.jseval.JSEvaluator;
 import com.jenetics.smocker.jseval.SmockerJsEnv;
 import com.jenetics.smocker.model.config.SmockerConf;
 import com.jenetics.smocker.ui.SmockerUI;
@@ -38,6 +39,7 @@ import com.jenetics.smocker.ui.util.DuplicateHost;
 import com.jenetics.smocker.ui.util.HostAndPortRange;
 import com.jenetics.smocker.ui.util.JsonFileDownloader;
 import com.jenetics.smocker.ui.util.JsonFileDownloader.OnDemandStreamResource;
+import com.jenetics.smocker.util.SmockerException;
 import com.vaadin.annotations.Push;
 import com.vaadin.data.HasValue.ValueChangeEvent;
 import com.vaadin.data.TreeData;
@@ -328,10 +330,14 @@ public class ConfigView extends EasyAppLayout {
 		layout.setExpandRatio(gridAutoRefresh, 1.0f);
 
 		Button clearGlobalVar = new Button(SmockerUI.getBundleValue("Clear_Global_Var_Button"));
-
+		Button testJ2 = new Button(SmockerUI.getBundleValue("Test_J2V8_Engine"));
+		testJ2.addClickListener(this::testJ2);
+		
+		
 		clearGlobalVar.addClickListener(this::clearVar);
 		GridLayout gridClearGlobalVar = createInLabelBox(SmockerUI.getBundleValue("Manage_Env"), clearGlobalVar);
 		layout.addComponent(gridClearGlobalVar);
+		layout.addComponent(testJ2);
 		layout.setExpandRatio(gridClearGlobalVar, 1.0f);
 
 
@@ -701,6 +707,19 @@ public class ConfigView extends EasyAppLayout {
 	private void clearVar(ClickEvent event) {
 		SmockerJsEnv.getInstance().clear();
 		SmockerUI.getInstance().displayNotif(SmockerUI.getBundleValue("Global_Var_Cleaned"), 0);
+	}
+	
+	private void testJ2(ClickEvent event) {
+		String res = "NOT WORKING";
+		try {
+			res = JSEvaluator.test();
+		} catch (SmockerException e) {
+			Dialog.warning(res);
+			// TODO Auto-generated catch block
+			return;
+		}
+		Dialog.warning(res);
+		
 	}
 
 	private CheckBox createCheckBoxAutoRefresh() {

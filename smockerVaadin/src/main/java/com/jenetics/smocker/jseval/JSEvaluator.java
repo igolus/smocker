@@ -235,6 +235,22 @@ public class JSEvaluator {
 		log(runtimeAndLogger.getCallBack());
 		return result;
 	}
+	
+	public static String test() throws SmockerException {
+		RuntimeAndLogger runtimeAndLogger = getRuntimeAndLogger();
+		String result = "NOT WORKING";
+		String script = "var test = \"WORKING\";";
+		try {
+			runtimeAndLogger.getRuntime().executeVoidScript(script);
+			result = runtimeAndLogger.getRuntime().getString("test");
+		}
+		catch (Exception ex) {
+			SmockerUI.log(Level.SEVERE, ERROR_EVALUATING_SCRIPT, ex);
+			throw new SmockerException(ex);
+		}
+		return result;
+	}
+	
 
 	public static void trace(String functionName, String input, String output) 
 			throws SmockerException {

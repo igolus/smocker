@@ -9,7 +9,6 @@
 	<property name="libClientJar" value="javassist.jar"/>
 	<property name="warSmocker" value="smockerVaadin/target/smocker-1.0-SNAPSHOT.war"/>
 	<property name="warSmockerName" value="smocker-1.0-SNAPSHOT.war"/>
-	<property name="warSmockerLinux" value="dockerLinux"/>
 	
 	<target name="release">
 		<zip destfile="${srcWildFlyNoWar}" update="true">
@@ -24,13 +23,12 @@
 	
 	
 	<target name="dockerPrepare">
-		<copy file="${warSmocker}" todir="docker"/>
-		<mkdir dir="dockerLinux/temp"/>
-		<unzip src="${warSmocker}" dest="dockerLinux/temp"/>
-		<delete file="dockerLinux/temp/WEB-INF/lib/j2v8_win32_x86_64-4.6.0.jar"></delete>
-		<copy file="libJ2V8Linux/j2v8_linux_x86_64-4.8.0.jar" todir="dockerLinux/temp/WEB-INF/lib"/>
-		<zip destfile="dockerLinux/${warSmockerName}" basedir="dockerLinux/temp"/>
-		<delete dir="dockerLinux/temp"/>
+		<mkdir dir="docker/temp"/>
+		<unzip src="${warSmocker}" dest="docker/temp"/>
+		<delete file="docker/temp/WEB-INF/lib/j2v8_win32_x86_64-4.6.0.jar"></delete>
+		<copy file="libJ2V8Linux/j2v8_linux_x86_64-4.8.0.jar" todir="docker/temp/WEB-INF/lib"/>
+		<zip destfile="docker/${warSmockerName}" basedir="docker/temp"/>
+		<delete dir="docker/temp"/>
 	</target>
 	
 	

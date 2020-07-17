@@ -40,7 +40,7 @@ RUN apt-get update \
 ENV LAUNCH_JBOSS_IN_BACKGROUND true
 
 # Expose the ports we're interested in
-EXPOSE 80
+EXPOSE 8080 80 8787
 RUN mkdir ~/smockerDb
 ENV SMOCKER_DB_DIR="~/smockerDb"
 RUN echo "USING DB DIR $smockerdbdir"
@@ -48,11 +48,11 @@ ENV JAVA_OPTS="-server -Xms64m -Xmx512m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSi
 COPY standalone.sh /opt/jboss/wildfly/bin/
 
 COPY startSmocker.sh /opt/jboss/wildfly/bin/
-
+RUN ["chmod", "+x", "/opt/jboss/wildfly/bin/startSmocker.sh"]
 
 # Set the default command to run on boot
 # This will boot WildFly in the standalone mode and bind to all interfaces
-ENTRYPOINT /opt/jboss/wildfly/bin/startSmocker.sh ${SMOCKER_DB_DIR:-.} -b 0.0.0.0
+ENTRYPOINT /opt/jboss/wildfly/bin/startSmocker.sh ${SMOCKER_DB_DIR:-.} -b 0.0.0.0 --debug
 
 RUN /opt/jboss/wildfly/bin/add-user.sh admin Admin#70365 --silent
 ADD smocker-1.0-SNAPSHOT.war /opt/jboss/wildfly/standalone/deployments/

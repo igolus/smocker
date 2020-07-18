@@ -172,7 +172,7 @@ public class UsefullFunctions {
 	}
 	
 	/**
-	 * remove header content
+	 * get header content
 	 * @param fullConntent
 	 * @return
 	 */
@@ -255,9 +255,6 @@ public class UsefullFunctions {
 			return params.stream().filter(p -> p.getName().equals(paramName)).map(NameValuePair::getValue).findFirst().orElse(null);
 		}
 		return null;
-		
 	}
-	
-	
 	
 }

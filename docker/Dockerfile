@@ -61,8 +61,4 @@ COPY eclipselink-2.7.6.jar /opt/jboss/wildfly/modules/system/layers/base/org/ecl
 COPY module.xml /opt/jboss/wildfly/modules/system/layers/base/org/eclipse/persistence/main
 COPY libj2v8_linux_x86_64.so /opt/jboss/wildfly/bin
 
-RUN chown jboss:jboss /opt/jboss/wildfly/standalone/*
-RUN chown jboss:jboss /opt/jboss/wildfly/bin/*
-
-RUN chmod 755 /opt/jboss/wildfly/standalone/*
-RUN chmod 755 /opt/jboss/wildfly/bin/*
+RUN chmod 755 -R /opt/jboss/wildfly

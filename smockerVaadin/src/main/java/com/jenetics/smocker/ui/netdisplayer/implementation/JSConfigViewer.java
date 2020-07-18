@@ -83,7 +83,14 @@ public class JSConfigViewer implements ComponentWithDisplayChange {
 						functionDisplay = jsDisplayAndFilter.getFunctionOutputDisplay();
 					}
 					formattedDisplay = JSEvaluator.formatAndDisplay(functionDisplay, content);
-					areaOutputJsDisplay.setValue(formattedDisplay);
+					
+					SmockerUI.getCurrent().getSession().lock();
+					try {
+						areaOutputJsDisplay.setValue(formattedDisplay);
+					} finally {
+						SmockerUI.getCurrent().getSession().unlock();
+					}
+					
 				}
 			} catch (Throwable e) {
 				//display error in tab

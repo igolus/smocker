@@ -76,7 +76,7 @@ public class LoggerPanel extends VerticalLayout {
 		}
 		logTextArea.setValue(null);
 		logTextArea.setValue(buffer.toString());
-		SmockerUI.getInstance().push();
+		//SmockerUI.getInstance().push();
 	}
 
 	public void appendMessage(Level level, String message, Exception ex) {

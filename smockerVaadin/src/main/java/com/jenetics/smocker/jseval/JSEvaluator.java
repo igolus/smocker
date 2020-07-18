@@ -29,6 +29,8 @@ import com.eclipsesource.v8.V8Object;
 import com.google.common.io.CharStreams;
 import com.jenetics.smocker.dao.DaoConfig;
 import com.jenetics.smocker.jseval.callBack.LoggerCallBack;
+import com.jenetics.smocker.jseval.callBack.SmockerJSONParse;
+import com.jenetics.smocker.jseval.callBack.SmockerJSONStringify;
 import com.jenetics.smocker.model.CommunicationMocked;
 import com.jenetics.smocker.ui.SmockerUI;
 import com.jenetics.smocker.util.NetworkReaderUtility;
@@ -206,7 +208,13 @@ public class JSEvaluator {
 
 	public static RuntimeAndLogger getRuntimeAndLogger() {
 		V8 runtime = V8.createV8Runtime();
-
+		
+		SmockerJSONParse parse = new SmockerJSONParse();
+		runtime.registerJavaMethod(parse, "smockerJSONParse");
+		
+		SmockerJSONStringify stringify = new SmockerJSONStringify();
+		runtime.registerJavaMethod(stringify, "smockerJSONStringify");
+		
 		LoggerCallBack logger = new LoggerCallBack();
 		runtime.registerJavaMethod(logger, "smockerLog");
 

@@ -15,6 +15,10 @@ RUN         	apt-get update \
 				&& update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 100 \
                 && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 100
 
+
+RUN groupadd -r jboss -g 1000 && useradd -u 1000 -r -g jboss -m -d /opt/jboss -s /sbin/nologin -c "JBoss user" jboss && \
+    chmod 755 /opt/jboss
+
 # Set the WILDFLY_VERSION env variable
 ENV WILDFLY_VERSION 13.0.0.Final
 ENV JBOSS_HOME /opt/jboss/wildfly
@@ -32,9 +36,9 @@ RUN apt-get update \
 	&& mkdir -p $JBOSS_HOME \
 	&& mv $HOME/wildfly-$WILDFLY_VERSION/* $JBOSS_HOME/ \
 	&& rm wildfly-$WILDFLY_VERSION.tar.gz \
-	&& mkdir -p $JBOSS_HOME/modules/com/oracle/ojdbc7/main/ \
-	&& apt-get clean \
-	&& rm -rf /var/lib/apt/lists/*
+	&& chown -R jboss:0 ${JBOSS_HOME} \
+    && chmod -R g+rw ${JBOSS_HOME} \
+	&& apt-get clean 
 
 # Ensure signals are forwarded to the JVM process correctly for graceful shutdown
 ENV LAUNCH_JBOSS_IN_BACKGROUND true
@@ -50,10 +54,6 @@ COPY standalone.sh /opt/jboss/wildfly/bin/
 COPY startSmocker.sh /opt/jboss/wildfly/bin/
 RUN ["chmod", "+x", "/opt/jboss/wildfly/bin/startSmocker.sh"]
 
-# Set the default command to run on boot
-# This will boot WildFly in the standalone mode and bind to all interfaces
-ENTRYPOINT /opt/jboss/wildfly/bin/startSmocker.sh ${SMOCKER_DB_DIR:-.} -b 0.0.0.0 --debug
-
 RUN /opt/jboss/wildfly/bin/add-user.sh admin Admin#70365 --silent
 ADD smocker-1.0-SNAPSHOT.war /opt/jboss/wildfly/standalone/deployments/
 
@@ -61,4 +61,9 @@ COPY eclipselink-2.7.6.jar /opt/jboss/wildfly/modules/system/layers/base/org/ecl
 COPY module.xml /opt/jboss/wildfly/modules/system/layers/base/org/eclipse/persistence/main
 COPY libj2v8_linux_x86_64.so /opt/jboss/wildfly/bin
 
-RUN chmod 755 -R /opt/jboss/wildfly
+USER jboss
+# Set the default command to run on boot
+# This will boot WildFly in the standalone mode and bind to all interfaces
+ENTRYPOINT /opt/jboss/wildfly/bin/startSmocker.sh ${SMOCKER_DB_DIR:-.} -b 0.0.0.0 --debug
+
+#RUN chmod 755 -R /opt/jboss/wildfly

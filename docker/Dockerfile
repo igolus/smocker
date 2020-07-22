@@ -48,7 +48,7 @@ EXPOSE 8080 80 8787
 RUN mkdir ~/smockerDb
 ENV SMOCKER_DB_DIR="~/smockerDb"
 RUN echo "USING DB DIR $smockerdbdir"
-ENV JAVA_OPTS="-server -Xms64m -Xmx512m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m -Djava.net.preferIPv4Stack=true -Djboss.modules.system.pkgs=org.jboss.byteman -Djava.awt.headless=true -Djava.library.path=."
+
 COPY standalone.sh /opt/jboss/wildfly/bin/
 
 COPY startSmocker.sh /opt/jboss/wildfly/bin/
@@ -60,7 +60,7 @@ ADD smocker-1.0-SNAPSHOT.war /opt/jboss/wildfly/standalone/deployments/
 COPY eclipselink-2.7.6.jar /opt/jboss/wildfly/modules/system/layers/base/org/eclipse/persistence/main
 COPY module.xml /opt/jboss/wildfly/modules/system/layers/base/org/eclipse/persistence/main
 COPY libj2v8_linux_x86_64.so /opt/jboss/wildfly/bin
-
+ENV JAVA_OPTS="-server -Xms64m -Xmx512m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m -Djava.net.preferIPv4Stack=true -Djboss.modules.system.pkgs=org.jboss.byteman -Djava.awt.headless=true -Djava.library.path=/opt/jboss/wildfly/bin"
 USER jboss
 # Set the default command to run on boot
 # This will boot WildFly in the standalone mode and bind to all interfaces

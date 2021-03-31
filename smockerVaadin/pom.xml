@@ -29,7 +29,7 @@
 		<jboss-vfs.version>3.1.0.Final</jboss-vfs.version>
 		<javax.ws.rs-api.version>2.0</javax.ws.rs-api.version>
 		<maven-plugin.version>3.0.0</maven-plugin.version>
-		<guava.version>13.0-rc1</guava.version>
+		<guava.version>30.1.0.redhat-00001</guava.version>
 		<javassist.version>3.21.0-GA</javassist.version>
 		<version.jboss.bom.wfk>2.7.0-redhat-1</version.jboss.bom.wfk>
 		<scannotation.version>1.0.3</scannotation.version>
